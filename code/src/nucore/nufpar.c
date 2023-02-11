@@ -6,9 +6,9 @@
 // 0x3b ';'
 
 
-u32 old_line_pos;
+s32 old_line_pos;
 
-char NuGetChar(nufpar_s* fPar)
+char NuGetChar(struct nufpar_s* fPar)
 {
     s32 bufferEndPos = fPar->buffend;
     char ret;
@@ -18,7 +18,7 @@ char NuGetChar(nufpar_s* fPar)
     }
     if (fPar->cpos > fPar->buffend)
     {
-        if (fPar->fileLength > bufferEndPos + 1)
+        if (fPar->size > bufferEndPos + 1)
         {
             s32 size = fPar->size - bufferEndPos;
             if (size > 0x1000)
@@ -41,19 +41,19 @@ char NuGetChar(nufpar_s* fPar)
     else
     {
         ret = fPar->buffer[fPar->cpos - fPar->buffstart];
-        fPar->pos++;
+        fPar->cpos++;
     }
     return ret;
 }
 
-s32 NuFParGetWord(nufpar_s* fPar)
+s32 NuFParGetWord(struct nufpar_s* fPar)
 {
-    u32 currLinePos = old_line_pos = fPar->linePos;
+    u32 currLinePos = old_line_pos = fPar->linepos;
     u32 len = 0;
     u32 inQuotation = 0;
     while (fPar->textBuffer[currLinePos & 0xFF] != 0)
     {
-        char currChar = fPar->textBuffer[fPar->linePos];	//currChar = fPar->textBuffer[old_line_pos & 0xFF];
+        char currChar = fPar->textBuffer[fPar->linepos];	//currChar = fPar->textBuffer[old_line_pos & 0xFF];
         switch (currChar)
         {
         case ' ':
@@ -78,15 +78,15 @@ s32 NuFParGetWord(nufpar_s* fPar)
             len++;
             break;
         }
-        currLinePos = fPar->linePos + 1;
-        fPar->linePos = currLinePos;
+        currLinePos = fPar->linepos + 1;
+        fPar->linepos = currLinePos;
     }
-    fPar->textbuffer[(len & 0xFF) + 1] = 0;
+    fPar->textBuffer[(len & 0xFF) + 1] = 0;
     return len;
 }
 
 
-s32 NuFParGetInt(nufpar_s* fPar)
+s32 NuFParGetInt(struct nufpar_s* fPar)
 {
     NuFParGetWord(fPar);
     s32 ret = 0;
@@ -97,7 +97,7 @@ s32 NuFParGetInt(nufpar_s* fPar)
     return ret;
 }
 
-s32 NuFParPushCom(nufpar_s* fPar, nufpcomjmp_s jmp)
+s32 NuFParPushCom(struct nufpar_s* fPar, struct nufpcomjmp_s* jmp)
 {
     s32 ind = fPar->compos;
     if (ind < 7)
@@ -109,17 +109,17 @@ s32 NuFParPushCom(nufpar_s* fPar, nufpcomjmp_s jmp)
     return -1;
 }
 
-void NuFParClose(nufpar_s* fPar)
+void NuFParClose(struct nufpar_s* fPar)
 {
     NuMemFree(fPar);
 }
 
-nufpar_s* NuFParOpen(fileHandle handle)
+struct nufpar_s* NuFParOpen(fileHandle handle)
 {
-    nufpar_s* fPar = NuMemAlloc(sizeof(FPar));	//size: 0x1244
+    struct nufpar_s* fPar = NuMemAlloc(sizeof(struct nufpar_s));	//size: 0x1244
     if (fPar != NULL)
     {
-        memset(fPar, 0, sizeof(FPar));
+        memset(fPar, 0, sizeof(struct nufpar_s));
         fPar->handle = handle;
         fPar->compos = -1;
         fPar->buffend = -1;
@@ -133,14 +133,14 @@ nufpar_s* NuFParOpen(fileHandle handle)
     return fPar;
 }
 
-void NuFParDestroy(nufpar_s* fPar)
+void NuFParDestroy(struct nufpar_s* fPar)
 {
     fileHandle handle = fPar->handle;
     NuFParClose(fPar);
     NuFileClose(handle);
 }
 
-nufpar_s* NuFParCreate(char* filename)
+struct nufpar_s* NuFParCreate(char* filename)
 {
     fileHandle handle = NuFileOpen(filename, 0); //0= NUFILE_READ
     if (handle != NULL)
@@ -155,7 +155,7 @@ nufpar_s* NuFParCreate(char* filename)
     return NULL;
 }
 
-s32 NuFParGetLine(nufpar_s* fPar) {
+s32 NuFParGetLine(struct nufpar_s* fPar) {
     s32 i;
     char ch;
     char* textBuffer_ptr;
@@ -206,16 +206,16 @@ s32 NuFParGetLine(nufpar_s* fPar) {
 }
 
 // Something like this - I cannot fully confirmed this is 100% correct
-s32 NuFParInterpretWord(FPar* fPar) {
+s32 NuFParInterpretWord(struct nufpar_s* fPar) {
     s32 i = 0;
-    if (fPar->comstack[0].fname != NULL) {
+    if (fPar->comstack[0]->fname != NULL) {
         do {
-            if (strcasecmp(fPar->comstack[i].fname, fPar->wordBuffer + 1) != 0) {
-                fPar->comstack[i].func(fPar);
+            if (strcasecmp(fPar->comstack[i]->fname, fPar->wordBuffer + 1) != 0) {
+                fPar->comstack[i]->func(fPar);
                 return 1;
             }
             i += 1;
-        } while (fPar->comstack[i].fname != NULL);
+        } while (fPar->comstack[i]->fname != NULL);
     }
     return 0;
 }

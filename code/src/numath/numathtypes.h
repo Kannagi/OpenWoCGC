@@ -54,10 +54,10 @@ typedef struct
 	f32 m41, m42, m43, m44;
 } Mtx; // Size: 0x40
 
-typedef struct numtx_s
+typedef struct
 {
 	f32 mtx[4][4];
-};
+}numtx_s;
 
 // Quaternion.
 typedef struct

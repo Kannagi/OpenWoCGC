@@ -17,7 +17,7 @@
 extern s32 blkcnt;
 
 // Block info.
-extern BlockInfo blkinfo[0x400];
+extern struct BlockInfo blkinfo[0x400];
 
 
 // Current file buffer.
@@ -45,15 +45,13 @@ extern s32 thisbytesread;
 extern struct __sFILE* fpointers[MAX_FILES];
 
 // Memory files.
-extern numemfile_s memfiles[MAX_MEM_FILES];
+extern struct numemfile_s memfiles[MAX_MEM_FILES];
 
 // Data files.
-extern nudatfile_s datfiles[MAX_MEM_FILES];
+extern struct nudatfile_s datfiles[MAX_MEM_FILES];
 
 // Loading screen.
 extern s32 loadscreen;
-
-
 
 // Load screen %.
 extern s32 datacounter;

@@ -85,3 +85,57 @@
 1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusoundtypes.h
 	"../types.h"
 
+1676152798 source:d:\documenti\github\engine\openwocgc\code\main.c
+	<stdlib.h>
+	<stdio.h>
+	<elf_systypes.h>
+
+1676145251 source:d:\documenti\github\engine\openwocgc\code\src\nusound\nusound.c
+	"nusound.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound\nusound.h
+	"../types.h"
+	"nusoundtypes.h"
+
+1676148283 d:\documenti\github\engine\openwocgc\code\src\types.h
+	"elf_systypes.h"
+	"numath/numathtypes.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\elf_systypes.h
+	"types.h"
+
+1676147023 d:\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
+	"types.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound\nusoundtypes.h
+	"../types.h"
+
+1676145251 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.c
+	"nuerror.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.h
+	"../types.h"
+	"nucoretypes.h"
+	<stdarg.h>
+
+1676152173 d:\documenti\github\engine\openwocgc\code\src\nucore\nucoretypes.h
+	"types.h"
+
+1676152798 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.c
+	"nufile.h"
+	"nuerror.h"
+
+1676153002 d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.h
+	"types.h"
+	"nucoretypes.h"
+	"numem.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nucore\numem.h
+	"types.h"
+	"nucore/nucoretypes.h"
+
+1676151719 source:d:\documenti\github\engine\openwocgc\code\src\nucore\numem.c
+	"numem.h"
+	"nuerror.h"
+	"nucoretypes.h"
+

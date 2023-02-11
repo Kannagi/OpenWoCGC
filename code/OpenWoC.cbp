@@ -53,9 +53,21 @@
 		<Unit filename="src/nu3dx/nuwater.h" />
 		<Unit filename="src/nucore.h" />
 		<Unit filename="src/nucore/nucoretypes.h" />
+		<Unit filename="src/nucore/nuerror.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nucore/nuerror.h" />
+		<Unit filename="src/nucore/nufile.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nucore/nufile.h" />
+		<Unit filename="src/nucore/nufpar.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nucore/nufpar.h" />
+		<Unit filename="src/nucore/numem.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nucore/numem.h" />
 		<Unit filename="src/numath.h" />
 		<Unit filename="src/numath/nu_asm.h" />

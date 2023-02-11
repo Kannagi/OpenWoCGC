@@ -6,7 +6,7 @@
 
 unsigned char* filebuffer = NULL;
 s32 blkcnt = 1;
-static BlockInfo blkinfo[0x400];
+static struct BlockInfo blkinfo[0x400];
 unsigned char* bpointer;
 s32 badGameDisk = 0;
 fileHandle currentpointer = -1;
@@ -16,8 +16,8 @@ struct __sFILE* fpointers[MAX_FILES] = {
 	NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL
 };
-numemfile_s memfiles[MAX_MEM_FILES];
-nudatfile_s datfiles[MAX_MEM_FILES];
+struct numemfile_s memfiles[MAX_MEM_FILES];
+struct nudatfile_s datfiles[MAX_MEM_FILES];
 s32 loadscreen = -1;
 s32 loadscreenfadedir = 0;
 s32 datacounter = 0;
@@ -35,8 +35,11 @@ void NuFileInitEx(int deviceid, int rebootiop)
 	{
 		filebuffer = malloc_x(0x10000);
 	}
-	memset(memfiles, 0, MAX_MEM_FILES * sizeof(numemfile_s));
-	memset(datfiles, 0, MAX_DAT_FILES * sizeof(nudatfile_s));
+	memset(memfiles, 0 , MAX_MEM_FILES * sizeof(struct numemfile_s));
+	memset(datfiles, 0, MAX_MEM_FILES  * sizeof(struct nudatfile_s));
+
+	printf("memfiles after memset(): %d\n", memfiles);
+	printf("datfiles after memset(): %d\n", datfiles);
 }
 
 s32 NuFileExists(char* filename)
@@ -138,13 +141,13 @@ fileHandle NuMemFileOpen(void* start, u32 size, u32 mode)
 	if (size > 0 && mode == NUFILE_READ)
 	{
 		for (s32 i = 0; i < MAX_MEM_FILES; i++) {
-			numemfile_s* m = &memfiles[i];
+			struct numemfile_s* m = &memfiles[i];
 			if (!m->used)
 			{
 				m->used = 1;
 				m->end = (char*)((s32)start + (size - 1));
 				m->currposition = (char*)start;
-				m->unused = NUFILE_READ;
+				m->mode = NUFILE_READ;
 				m->start = (char*)start;
 				return i + 0x400;
 			}
@@ -176,7 +179,7 @@ void NuMemFileClose(fileHandle handle)
 {
 	if (handle < 0x800)
 	{
-		memfiles[handle - 0x400].open = 0;
+		memfiles[handle - 0x400].used = 0;
 	}
 	else
 	{

@@ -29,10 +29,10 @@ struct memexternal_s
 // Size: 0x10
 struct nudatinfo_s
 {
-	int foffset;
-	int flen;
-	int uplen;
-	int ppack : 1; // Offset: 0xC, Bit Offset: 0, Bit Size: 1
+	s32 foffset;
+	s32 flen;
+	s32 uplen;
+	s32 ppack : 1; // Offset: 0xC, Bit Offset: 0, Bit Size: 1
 };
 
 // Size: 0x8
@@ -47,18 +47,18 @@ struct nudfnode_s
 // Size: 0x30
 struct nudathdr_s
 {
-	int ver;
-	int nfiles;
+	s32 ver;
+	s32 nfiles;
 	struct nudatinfo_s* finfo;
-	int treecnt;
+	s32 treecnt;
 	struct nudfnode_s* filetree;
-	int leafnamesize;
+	s32 leafnamesize;
 	char* leafnames;
-	int dfhandle;
-	int fh;
+	s32 dfhandle;
+	s32 fh;
 	short intalloc;
 	short openmode;
-	int start_lsn;
+	s32 start_lsn;
 	void* memdatptr;
 };
 
@@ -67,30 +67,30 @@ struct nudatfile_s
 {
 	struct nudathdr_s* ndh;
 	int start;
-	int len;
-	int fix;
-	int used;
+	s32 len;
+	s32 fix;
+	s32 used;
 };
 
 // Memory file. // Size: 0x14
-typedef struct
+struct numemfile_s
 {
 	char* start;
 	char* end;
 	char* currposition;
-	enum nufilemode_e open;
-	s32 unused;
-} numemfile_s;
+	enum nufilemode_e mode;
+	s32 used;
+};
 
 struct fileinfo_s
 {
-	int fh;
-	int read_pos;
-	int file_pos;
-	int file_length;
-	int buff_start;
-	int buff_length;
-	int use_buff;
+	s32 fh;
+	s32 read_pos;
+	s32 file_pos;
+	s32 file_length;
+	s32 buff_start;
+	s32 buff_length;
+	s32 use_buff;
 	struct filebuff_s* buff;
 };
 
@@ -99,30 +99,19 @@ struct filebuff_s
 	void* unk;
 };
 
-
-// Size: 0x14
-typedef struct
-{
-	struct nudathdr_s* ndh;
-	int start;
-	int len;
-	int fix;
-	int used;
-} nudatfile_s;
-
 // Size: 0x8
-typedef struct nuiffhdr_s
+struct nuiffhdr_s
 {
-	int blk;
-	int size;
+	s32 blk;
+	s32 size;
 };
 
 // Size: 0xC
-typedef struct
+struct BlockInfo
 {
 	struct nuiffhdr_s hdr;
-	int pos;
-} BlockInfo;
+	s32 pos;
+};
 
 /*OLD
 typedef struct
@@ -162,24 +151,24 @@ struct nufpar_s {
     u8 buffer[4096]; /* fbuff */
     char textBuffer[256]; /* lbuff */
     char wordBuffer[260];
-    int line_num;
-    int linepos;
-    int cpos;
-    int buffstart;
-    int buffend;
+    s32 line_num;
+    s32 linepos;
+    s32 cpos;
+    s32 buffstart;
+    s32 buffend;
     struct nufpcomjmp_s * comstack[8];
-    int compos;
-    int size;
+    s32 compos;
+    s32 size;
 };
 
 typedef struct nufparpos_s nufparpos_s, *Pnufparpos_s;
 
 struct nufparpos_s {
-    int line_num;
-    int line_pos;
-    int cpos;
-    int buffstart;
-    int buffend;
+    s32 line_num;
+    s32 line_pos;
+    s32 cpos;
+    s32 buffstart;
+    s32 buffend;
 };
 
 

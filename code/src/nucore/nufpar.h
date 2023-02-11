@@ -18,23 +18,23 @@ char NuGetChar(nufpar_s* fPar);
 // GetLine.
 
 // Read a word from the text buffer into the word buffer, and return its length.
-s32 NuFParGetWord(FPar* fPar);
+s32 NuFParGetWord(struct nufpar_s* fPar);
 
 // Get an int from a text file.
-s32 NuFParGetInt(FPar* fPar);
+s32 NuFParGetInt(struct nufpar_s* fPar);
 
 // Push a command. Returns the index of the next command.
-s32 NuFParPushCom(FPar* fPar, s32 command);
+s32 NuFParPushCom(struct nufpar_s* fPar, struct nufpcomjmp_s* jmp);
 
 // Close a text file.
-void NuFParClose(FPar* fPar);
+void NuFParClose(struct nufpar_s* fPar);
 
 // Open a text file.
-FPar* NuFParOpen(fileHandle handle);
+struct nufpar_s* NuFParOpen(fileHandle handle);
 
 // Destroy a text file.
-void NuFParDestroy(FPar* fPar);
+void NuFParDestroy(struct nufpar_s* fPar);
 
 // Create a text file from a file.
-FPar* NuFParCreate(char* filename);
+struct nufpar_s* NuFParCreate(char* filename);
 #endif // !NUFPAR_H
