@@ -1,0 +1,87 @@
+# depslib dependency file v1.0
+1676143413 source:/home/samy/Documents/OpenWoCGC-main/git/code/main.c
+	<stdlib.h>
+	<stdio.h>
+
+1676142269 /home/samy/Documents/OpenWoCGC-main/git/code/src/types.h
+	"elf_systypes.h"
+	"numath/numathtypes.h"
+
+1676141914 /home/samy/Documents/OpenWoCGC-main/git/code/src/elf_systypes.h
+	"types.h"
+
+1676141961 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/numathtypes.h
+	"types.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/code/src/nucore/nuerror.c
+	"nuerror.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nucore/nuerror.h
+	"../types.h"
+	"nucoretypes.h"
+	<stdarg.h>
+
+1676142642 /home/samy/Documents/OpenWoCGC-main/git/code/src/nucore/nucoretypes.h
+	"types.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nu_asm.c
+	"nu_asm.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nu_asm.h
+	"../types.h"
+	"numathtypes.h"
+	<numath.h>
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath.h
+	"numath/nu_asm.h"
+	"numath/nufloat.h"
+	"numath/numtx.h"
+	"numath/nuplane.h"
+	"numath/nuquat.h"
+	"numath/nurand.h"
+	"numath/nutrig.h"
+	"numath/nuvec.h"
+	"numath/nuvec4.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nufloat.h
+	"../types.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/numtx.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nuplane.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nuquat.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nurand.h
+	"../types.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nutrig.h
+	"../types.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nuvec.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nuvec4.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/code/src/numath/nufloat.c
+	"nufloat.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusound.c
+	"nusound.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusound.h
+	"../types.h"
+	"nusoundtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusoundtypes.h
+	"../types.h"
+
