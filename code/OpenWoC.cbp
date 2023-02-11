@@ -37,6 +37,9 @@
 		<Unit filename="src/nu3dx.h" />
 		<Unit filename="src/nu3dx/nu3dxtypes.h" />
 		<Unit filename="src/nu3dx/nuanim.h" />
+		<Unit filename="src/nu3dx/nucamera.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nucamera.h" />
 		<Unit filename="src/nu3dx/nucvtskin.h" />
 		<Unit filename="src/nu3dx/nuglass.h" />
@@ -79,6 +82,9 @@
 		</Unit>
 		<Unit filename="src/numath/nufloat.h" />
 		<Unit filename="src/numath/numathtypes.h" />
+		<Unit filename="src/numath/numtx.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/numtx.h" />
 		<Unit filename="src/numath/nuplane.c">
 			<Option compilerVar="CC" />
@@ -96,6 +102,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/numath/nutrig.h" />
+		<Unit filename="src/numath/nuvec.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nuvec.h" />
 		<Unit filename="src/numath/nuvec4.c">
 			<Option compilerVar="CC" />
