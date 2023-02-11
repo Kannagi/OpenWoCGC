@@ -18,68 +18,66 @@
 */
 
 // Global camera.
-extern nucamera_s global_camera;
+extern struct nucamera_s global_camera;
 
 // View matrix.
-extern Mtx* vmtx;
+extern struct numtx_s* vmtx;
 
 // Projection matrix.
-extern Mtx pmtx;
+extern struct numtx_s pmtx;
 
-static Mtx vpmtx;
+static struct numtx_s vpmtx;
 
 // VPCS matrix.
-extern Mtx vpcsmtx;
+extern struct numtx_s vpcsmtx;
 
-static Mtx vpcmtx;
+static struct numtx_s vpcmtx;
 
-static Mtx ivpcsmtx;
+static struct numtx_s ivpcsmtx;
 
 // Camera clipping.
-extern u32 clip_enable;
+extern s32 clip_enable;;
 
 // Camera axes.
-extern Vec cam_axes;
+extern struct Vec cam_axes;
 
 static struct Vec4 frustrumplanes[6];
 
-static Mtx vpc_vport_mtx;
+static struct numtx_s vpc_vport_mtx;
 
-static Mtx cmtx;
+static struct numtx_s cmtx;
 
-static Mtx smtx;
+static struct numtx_s smtx;
 
-static Mtx csmtx;
+static struct numtx_s csmtx;
 
-static Mtx icsmtx;
+static struct numtx_s icsmtx;
 
-static Mtx* glassMtx[256]; 
+static struct numtx_s* glassMtx[256];
 
-static Mtx smtx;
+static struct numtx_s smtx;
 
-static s32 clip_enable; 
-
-static Vec4 frustrumplanes[6];
+static struct Vec4 frustrumplanes[6];
 
 
 // Create a new camera.
-nucamera_s* NuCameraCreate();
+struct nucamera_s* NuCameraCreate();
 
 // NuCameraCalcFrustrumPlanes
 
 // NuCameraSet
 
 // Get the camera matrix.
-Mtx* NuCameraGetMtx();
+struct numtx_s* NuCameraGetMtx();
 
 // Get the view matrix.
-Mtx* NuCameraGetViewMtx();
+struct numtx_s* NuCameraGetViewMtx();
 
 // Get the projection matrix.
-Mtx* NuCameraGetProjectionMtx();
+struct numtx_s* NuCameraGetProjectionMtx();
 
 // Get the VPCS matrix.
-Mtx* NuCameraGetVPCSMtx();
+struct numtx_s* NuCameraGetVPCSMtx();
 
 // NuCameraTransformView
 
@@ -92,15 +90,15 @@ Mtx* NuCameraGetVPCSMtx();
 // NuCameraClipTestPoints
 
 // Get the squared distance from the camera to the point.
-f32 NuCameraDistSqr(Vec* point);
+f32 NuCameraDistSqr(struct Vec* point);
 
 // Fix the axes of a matrix.
-void FixAxes(Mtx* m);
+void FixAxes(struct Mtx* m);
 
 // SetProjectionMatrix
 
 // Enable or disable camera clipping.
-void NuCameraEnableClipping(u32 enable);
+void NuCameraEnableClipping(s32 enable);
 
 // NuCameraTransformScreenClip
 

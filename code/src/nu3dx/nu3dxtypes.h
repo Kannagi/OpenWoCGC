@@ -364,6 +364,15 @@ struct NUNODE_s
 	void* data;
 };
 
+// Size: 0x4
+struct nuinstflags_s
+{
+	int visible : 1; // Offset: 0x0, Bit Offset: 0, Bit Size: 1
+	int onscreen : 1; // Offset: 0x0, Bit Offset: 1, Bit Size: 1
+	int visitest : 1; // Offset: 0x0, Bit Offset: 2, Bit Size: 1
+	int isanimated : 1; // Offset: 0x0, Bit Offset: 3, Bit Size: 1
+};
+
 // Size: 0x50
 struct nuinstance_s
 {
@@ -376,14 +385,6 @@ struct nuinstance_s
 	char pad[1];
 };
 
-// Size: 0x4
-struct nuinstflags_s
-{
-	int visible : 1; // Offset: 0x0, Bit Offset: 0, Bit Size: 1
-	int onscreen : 1; // Offset: 0x0, Bit Offset: 1, Bit Size: 1
-	int visitest : 1; // Offset: 0x0, Bit Offset: 2, Bit Size: 1
-	int isanimated : 1; // Offset: 0x0, Bit Offset: 3, Bit Size: 1
-};
 
 // Size: 0x60
 struct nuinstanim_s
@@ -403,6 +404,15 @@ struct nuinstanim_s
 	char pad[3];
 };
 
+// Size: 0x4
+struct nuspecialflags
+{
+	int ext : 1; // Offset: 0x0, Bit Offset: 0, Bit Size: 1
+	int ext_vis : 1; // Offset: 0x0, Bit Offset: 1, Bit Size: 1
+	int ext_onscreen : 1; // Offset: 0x0, Bit Offset: 2, Bit Size: 1
+};
+
+
 // Size: 0x50
 struct nuspecial_s
 {
@@ -411,14 +421,6 @@ struct nuspecial_s
 	char* name;
 	struct nuspecialflags flags;
 	int pad;
-};
-
-// Size: 0x4
-struct nuspecialflags
-{
-	int ext : 1; // Offset: 0x0, Bit Offset: 0, Bit Size: 1
-	int ext_vis : 1; // Offset: 0x0, Bit Offset: 1, Bit Size: 1
-	int ext_onscreen : 1; // Offset: 0x0, Bit Offset: 2, Bit Size: 1
 };
 
 
@@ -491,8 +493,8 @@ typedef struct rendertargetlist_s rendertargetlist_s, *Prendertargetlist_s;
 struct rendertargetlist_s {
     int next;
     int last;
-    uint width;
-    uint height;
+    u32 width;
+    u32 height;
     struct D3DSurface * pddsRenderTarget;
     struct D3DSurface * pddsZBuffer;
     struct D3DSurface * pddsStencilBuffer;
@@ -521,7 +523,7 @@ struct SplTab {
     short min;
     short max;
     char unk[4];
-    ulonglong levbits; /* unk_type */
+    u64 levbits; /* unk_type */
 };
 
 typedef struct visidata_s visidata_s, *Pvisidata_s;

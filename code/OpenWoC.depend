@@ -85,7 +85,7 @@
 1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusoundtypes.h
 	"../types.h"
 
-1676152798 source:d:\documenti\github\engine\openwocgc\code\main.c
+1676154360 source:d:\documenti\github\engine\openwocgc\code\main.c
 	<stdlib.h>
 	<stdio.h>
 	<elf_systypes.h>
@@ -104,7 +104,7 @@
 1676145251 d:\documenti\github\engine\openwocgc\code\src\elf_systypes.h
 	"types.h"
 
-1676147023 d:\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
+1676156774 d:\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
 	"types.h"
 
 1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound\nusoundtypes.h
@@ -138,4 +138,106 @@
 	"numem.h"
 	"nuerror.h"
 	"nucoretypes.h"
+
+1676153479 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.c
+	"nufpar.h"
+	"nufile.h"
+
+1676153227 d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.h
+	"types.h"
+	"nucore/nucoretypes.h"
+
+1676154274 source:d:\documenti\github\engine\openwocgc\code\src\numath\nutrig.c
+	"nutrig.h"
+	<math.h>
+
+1676155785 d:\documenti\github\engine\openwocgc\code\src\numath\nutrig.h
+	"../types.h"
+
+1676155196 source:d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.c
+	"nu_asm.h"
+
+1676155182 d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.h
+	"../types.h"
+	"numathtypes.h"
+	<numath.h>
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\numath.h
+	"numath/nu_asm.h"
+	"numath/nufloat.h"
+	"numath/numtx.h"
+	"numath/nuplane.h"
+	"numath/nuquat.h"
+	"numath/nurand.h"
+	"numath/nutrig.h"
+	"numath/nuvec.h"
+	"numath/nuvec4.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\numath\nufloat.h
+	"../types.h"
+
+1676156343 d:\documenti\github\engine\openwocgc\code\src\numath\numtx.h
+	"../types.h"
+	"numathtypes.h"
+
+1676154924 d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.h
+	"../types.h"
+	"numathtypes.h"
+
+1676154840 d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.h
+	"../types.h"
+	"numathtypes.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\numath\nurand.h
+	"../types.h"
+
+1676155715 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.h
+	"../types.h"
+	"numathtypes.h"
+
+1676155072 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.h
+	"../types.h"
+	"numathtypes.h"
+
+1676145251 source:d:\documenti\github\engine\openwocgc\code\src\numath\nufloat.c
+	"nufloat.h"
+
+1676155081 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.c
+	"nuplane.h"
+
+1676145251 source:d:\documenti\github\engine\openwocgc\code\src\numath\nurand.c
+	"nurand.h"
+
+1676155219 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.c
+	"nuvec4.h"
+	"numtx.h"
+
+1676155368 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.c
+	"nuquat.h"
+	"nu_asm.h"
+
+1676155860 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.c
+	"nuvec.h"
+	"nu_asm.h"
+	"nutrig.h"
+
+1676156374 source:d:\documenti\github\engine\openwocgc\code\src\numath\numtx.c
+	<nu3dx/nucamera.h>
+	"numtx.h"
+	"nu_asm.h"
+	"nutrig.h"
+	"nuvec.h"
+	"nufloat.h"
+
+1676156982 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"numath.h"
+
+1676156285 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nu3dxtypes.h
+	"types.h"
+
+1676157139 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.c
+	<nucore/numem.h>
+	"nucamera.h"
 

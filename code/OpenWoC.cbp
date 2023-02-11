@@ -70,15 +70,36 @@
 		</Unit>
 		<Unit filename="src/nucore/numem.h" />
 		<Unit filename="src/numath.h" />
+		<Unit filename="src/numath/nu_asm.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nu_asm.h" />
+		<Unit filename="src/numath/nufloat.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nufloat.h" />
 		<Unit filename="src/numath/numathtypes.h" />
 		<Unit filename="src/numath/numtx.h" />
+		<Unit filename="src/numath/nuplane.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nuplane.h" />
+		<Unit filename="src/numath/nuquat.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nuquat.h" />
+		<Unit filename="src/numath/nurand.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nurand.h" />
+		<Unit filename="src/numath/nutrig.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nutrig.h" />
 		<Unit filename="src/numath/nuvec.h" />
+		<Unit filename="src/numath/nuvec4.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/numath/nuvec4.h" />
 		<Unit filename="src/nuraster.h" />
 		<Unit filename="src/nuraster/dxframe.h" />

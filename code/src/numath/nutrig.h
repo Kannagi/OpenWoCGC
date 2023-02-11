@@ -19,7 +19,7 @@
 #define UNIT_CIRCLE_PRECISION 513
 
 #define ANG_SIN(a) NuTrigTable[a]
-#define ANG_COS(a) NuTrigTable[(angle)(a + PIOV2)]
+#define ANG_COS(a) NuTrigTable[(a + PIOV2)]
 
 // Why do expensive trig when we can store it here?
 extern f32 NuTrigTable[NU_TRIG_TABLE_SIZE];

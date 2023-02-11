@@ -144,6 +144,7 @@ void NuTrigInit()
 	{
 		//u32 tmp = i ^ 0x80000000;
 		NuTrigTable[i] = (f32)sin((f64)i * inc);
+		//printf("table: %d\n", NuTrigTable[i]);
 	}
 }
 
