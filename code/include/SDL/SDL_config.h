@@ -77,14 +77,13 @@
 #define HAVE_ICONV_H 1
 #define HAVE_SIGNAL_H 1
 /* #undef HAVE_ALTIVEC_H */
-/* #undef HAVE_SYS_IO_H */
 
 /* C library functions */
 #define HAVE_MALLOC 1
 #define HAVE_CALLOC 1
 #define HAVE_REALLOC 1
 #define HAVE_FREE 1
-#define HAVE_ALLOCA 1
+/* #undef HAVE_ALLOCA */
 #ifndef _WIN32 /* Don't use C runtime versions of these on Windows */
 #define HAVE_GETENV 1
 #define HAVE_PUTENV 1
@@ -96,7 +95,7 @@
 #define HAVE_MEMSET 1
 #define HAVE_MEMCPY 1
 #define HAVE_MEMMOVE 1
-#define HAVE_MEMCMP 1
+/* #undef HAVE_MEMCMP */
 #define HAVE_STRLEN 1
 /* #undef HAVE_STRLCPY */
 /* #undef HAVE_STRLCAT */
@@ -119,9 +118,7 @@
 #define HAVE__UI64TOA 1
 #define HAVE_STRTOLL 1
 #define HAVE_STRTOULL 1
-#define HAVE__STRTOI64 1
-#define HAVE__STRTOUI64 1
-#define HAVE_STRTOD 1
+/* #undef HAVE_STRTOD */
 #define HAVE_ATOI 1
 #define HAVE_ATOF 1
 #define HAVE_STRCMP 1
@@ -136,14 +133,12 @@
 /* #undef HAVE_ICONV */
 /* #undef HAVE_SIGACTION */
 /* #undef HAVE_SA_SIGACTION */
-/* #undef HAVE_SETJMP */
+#define HAVE_SETJMP 1
 #define HAVE_NANOSLEEP 1
 /* #undef HAVE_CLOCK_GETTIME */
 /* #undef HAVE_GETPAGESIZE */
 /* #undef HAVE_MPROTECT */
 /* #undef HAVE_SEM_TIMEDWAIT */
-/* #undef HAVE_GETAUXVAL */
-/* #undef HAVE_ELF_AUX_INFO */
 
 #else
 /* We may need some replacement for stdarg.h here */
@@ -188,7 +183,6 @@
 /* #undef SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H */
 /* #undef SDL_AUDIO_DRIVER_PAUD */
 /* #undef SDL_AUDIO_DRIVER_QNXNTO */
-/* #undef SDL_AUDIO_DRIVER_SNDIO */
 /* #undef SDL_AUDIO_DRIVER_SNDMGR */
 /* #undef SDL_AUDIO_DRIVER_SUNAUDIO */
 #define SDL_AUDIO_DRIVER_WAVEOUT 1
@@ -224,7 +218,7 @@
 /* #undef SDL_JOYSTICK_RISCOS */
 #define SDL_JOYSTICK_WINMM 1
 /* #undef SDL_JOYSTICK_USBHID */
-/* #undef SDL_HAVE_MACHINE_JOYSTICK_H */
+/* #undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H */
 
 /* Enable various shared object loading systems */
 /* #undef SDL_LOADSO_BEOS */
@@ -275,7 +269,6 @@
 /* #undef SDL_VIDEO_DRIVER_GGI */
 /* #undef SDL_VIDEO_DRIVER_IPOD */
 /* #undef SDL_VIDEO_DRIVER_NANOX */
-/* #undef SDL_VIDEO_DRIVER_OS2GROP */
 /* #undef SDL_VIDEO_DRIVER_OS2FS */
 /* #undef SDL_VIDEO_DRIVER_PHOTON */
 /* #undef SDL_VIDEO_DRIVER_PICOGUI */
@@ -290,7 +283,6 @@
 #define SDL_VIDEO_DRIVER_WINDIB 1
 /* #undef SDL_VIDEO_DRIVER_WSCONS */
 /* #undef SDL_VIDEO_DRIVER_X11 */
-/* #undef SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32 */
 /* #undef SDL_VIDEO_DRIVER_X11_DGAMOUSE */
 /* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC */
 /* #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT */
@@ -314,10 +306,8 @@
 #define SDL_VIDEO_DISABLE_SCREENSAVER 1
 
 /* Enable assembly routines */
-/* #undef SDL_ASSEMBLY_ROUTINES */
+#define SDL_ASSEMBLY_ROUTINES 1
 /* #undef SDL_HERMES_BLITTERS */
 /* #undef SDL_ALTIVEC_BLITTERS */
-/* #undef SDL_ARM_SIMD_BLITTERS */
-/* #undef SDL_ARM_NEON_BLITTERS */
 
 #endif /* _SDL_config_h */

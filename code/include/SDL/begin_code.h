@@ -58,11 +58,24 @@
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
 # elif defined(__OS2__)
+#  ifdef __WATCOMC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC	__declspec(dllexport)
 #   else
 #    define DECLSPEC
 #   endif
+#  elif defined (__GNUC__) && __GNUC__ < 4
+#   /* Added support for GCC-EMX <v4.x */
+#   /* this is needed for XFree86/OS2 developement */
+#   /* F. Ambacher(anakor@snafu.de) 05.2008 */
+#   ifdef BUILD_SDL
+#    define DECLSPEC    __declspec(dllexport)
+#   else
+#    define DECLSPEC
+#   endif
+#  else
+#   define DECLSPEC
+#  endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #   define DECLSPEC	__attribute__ ((visibility("default")))
@@ -80,12 +93,16 @@
 # if defined(__WIN32__) && !defined(__GNUC__)
 #  define SDLCALL __cdecl
 # elif defined(__OS2__)
-   /* But on OS/2, we use the _System calling convention */
-   /* to be compatible with every compiler */
-#  if defined (__GNUC__) && !defined(_System)
-#   define _System /* For compatibility with old GCC/EMX */
+#  if defined (__GNUC__) && __GNUC__ < 4
+#   /* Added support for GCC-EMX <v4.x */
+#   /* this is needed for XFree86/OS2 developement */
+#   /* F. Ambacher(anakor@snafu.de) 05.2008 */
+#   define SDLCALL _cdecl
+#  else
+#   /* On other compilers on OS/2, we use the _System calling convention */
+#   /* to be compatible with every compiler */
+#   define SDLCALL _System
 #  endif
-#  define SDLCALL _System
 # else
 #  define SDLCALL
 # endif
