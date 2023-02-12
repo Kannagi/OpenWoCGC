@@ -42,27 +42,26 @@
 /**********************************************************/
 // Prototypes
 /**********************************************************/
+struct numtl_s* NuMtlCreate(s32 mode);
 void NuMtlUVAnimation(struct nugobj_s* gobj);
 /**********************************************************/
 
-struct nuotitem_s otitem[2024];
-struct nuotitem_s* ot[257];
-enum nustencilmode_e stencil_mode;
-struct nustenitem_s stenitem[512];
-struct nufaceonitem_s* faceonmtllist[50];
-struct nuotitem_s dynamic_glass_items[64];
-struct nuwateritem_s wateritem[512];
-extern f32 sinetime.246;
-
-
+// Size: 0x10
+struct _D3DCOLORVALUE
+{
+    f32 r;
+    f32 g;
+    f32 b;
+    f32 a;
+};
 
 // Size: 0x44
 struct _D3DMATERIAL8
 {
-    _D3DCOLORVALUE Diffuse;
-    _D3DCOLORVALUE Ambient;
-    _D3DCOLORVALUE Specular;
-    _D3DCOLORVALUE Emissive;
+    struct _D3DCOLORVALUE Diffuse;
+    struct _D3DCOLORVALUE Ambient;
+    struct _D3DCOLORVALUE Specular;
+    struct _D3DCOLORVALUE Emissive;
     float Power;
 };
 
@@ -86,10 +85,10 @@ struct nuwateritem_s
 // Size: 0x10
 struct nustenitem_s
 {
-    nustenitem_s* next;
-    nurndritem_s* hdr;
-    nusysmtl_s* mtl;
-    int type;
+    struct nustenitem_s* next;
+    struct nurndritem_s* hdr;
+    struct nusysmtl_s* mtl;
+    s32 type;
 };
 
 enum nustencilmode_e
@@ -97,6 +96,17 @@ enum nustencilmode_e
     NUSTENCIL_REPLACE_NODRAW = 1,
     NUSTENCIL_NOSTENCIL = 0
 };
+
+
+
+struct nuotitem_s otitem[2024];
+struct nuotitem_s* ot[257];
+enum nustencilmode_e stencil_mode;
+struct nustenitem_s stenitem[512];
+struct nufaceonitem_s* faceonmtllist[50];
+struct nuotitem_s dynamic_glass_items[64];
+struct nuwateritem_s wateritem[512];
+extern f32 sinetime_246;
 
 
 #endif // !NUMTL_H

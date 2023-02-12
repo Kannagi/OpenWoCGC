@@ -39,31 +39,6 @@ static int alloclight;
 static s32 current_lights_stored;
 static s32 num_stored_lights;
 
-struct nusyslight_s light[3];
-struct nulights_s StoredLights[1000];
-struct nulight_s* currentlight1;
-struct nulight_s* currentlight2;
-struct nulight_s* currentlight3;
-float buglight_distance;
-struct numtl_s* NuLightAddMat;
-s32 NuLgtSeed;
-numtl_s* NuLgtArcMtl;
-float NuLgtArcU0;
-float NuLgtArcV0;
-float NuLgtArcU1;
-float NuLgtArcV1;
-s32 NuLgtArcLaserFrame;
-s32 NuLgtArcLaserOldCnt;
-s32 NuLgtArcLaserCnt;
-
-
-
-extern s32 HazeValue;
-extern f32 NuRndrFogNear;
-extern f32 NuRndrFogFar;
-extern u32 NuRndrFogBlur;
-extern u32 NuRndrFogCol;
-
 // Size: 0x58
 struct nulight_s
 {
@@ -105,29 +80,34 @@ struct NuLgtArcLaserData
     s32 seed;
 };
 
+struct nusyslight_s light[3];
+struct nulights_s StoredLights[1000];
+struct nulight_s* currentlight1;
+struct nulight_s* currentlight2;
+struct nulight_s* currentlight3;
+float buglight_distance;
+struct numtl_s* NuLightAddMat;
+s32 NuLgtSeed;
+struct numtl_s* NuLgtArcMtl;
+float NuLgtArcU0;
+float NuLgtArcV0;
+float NuLgtArcU1;
+float NuLgtArcV1;
+s32 NuLgtArcLaserFrame;
+s32 NuLgtArcLaserOldCnt;
+s32 NuLgtArcLaserCnt;
+
+
+
+extern s32 HazeValue;
+extern f32 NuRndrFogNear;
+extern f32 NuRndrFogFar;
+extern u32 NuRndrFogBlur;
+extern u32 NuRndrFogCol;
 
 /**********************************************************/
 // D3D and GS var
 /**********************************************************/
-
-struct _LIGHTLIST GS_LightList[3];
-
-// Size: 0x6C, DWARF: 0xCBC49B
-struct _LIGHTLIST
-{
-    int EnableLight;
-    struct _D3DLIGHT8 Light;
-};
-
-// Size: 0x10
-struct _D3DCOLORVALUE
-{
-    f32 r;
-    f32 g;
-    f32 b;
-    f32 a;
-};
-
 
 // Size: 0x4
 enum _D3DLIGHTTYPE
@@ -138,12 +118,14 @@ enum _D3DLIGHTTYPE
     D3DLIGHT_POINT = 1
 };
 
+
 struct _D3DVECTOR
 {
     f32 x;
     f32 y;
     f32 z;
 };
+
 
 // Size: 0x68
 struct _D3DLIGHT8
@@ -162,6 +144,18 @@ struct _D3DLIGHT8
     f32 Theta;
     f32 Phi;
 };
+
+
+// Size: 0x6C
+struct _LIGHTLIST
+{
+    int EnableLight;
+    struct _D3DLIGHT8 Light;
+};
+
+struct _LIGHTLIST GS_LightList[3];
+
+
 
 /**********************************************************/
 // END D3D\GS Var

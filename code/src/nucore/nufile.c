@@ -353,8 +353,8 @@ s32 NuFileLoadBuffer(char* fileName, void* dest, s32 maxSize)
 		{
 			printf("filebuffer reading...\n");
 			NuFileRead(handle, &dest, size);
-			/*NuFileClose(handle);
-			return size;*/
+			NuFileClose(handle);
+			return size;
 
 		}
 	}
@@ -382,7 +382,7 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 		datacounter += size;
 		if (size > bytesleft)
 		{
-			memcpy(data, bpointer, bytesleft);      //causes crash
+			//memcpy(data, bpointer, bytesleft);      //causes crash
 			u8* tmp = (u8*)((s32)data + bytesleft);
 			thisbytesread += size;
 			u32 read = size - bytesleft;
@@ -392,14 +392,14 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 				read -= 0x10000;
 				u32 dat = fread(filebuffer, 1, 0x10000, fpointers[f]);
 				size += dat;
-				memcpy(tmp, filebuffer, 0x10000);   //causes crash
+				//memcpy(tmp, filebuffer, 0x10000);   //causes crash
 				tmp = (u8*)((u32)tmp + 0x10000);
 			}
 			bytesleft = 0;
 			if (read > 0)
 			{
 				u32 dat = fread(filebuffer, 1, 0x10000, fpointers[f]);
-				memcpy(tmp, filebuffer, read);  //causes crash
+				//memcpy(tmp, filebuffer, read);  //causes crash
 				size += dat;
 				bytesleft = dat - read;
 				bpointer = ((u32)filebuffer + read);
@@ -407,7 +407,7 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 		}
 		else
 		{
-			memcpy(data, bpointer, size);   //causes crash
+			//memcpy(data, bpointer, size);   //causes crash
 			bpointer = ((u32)bpointer + size);
 			bytesleft -= size;
 			thisbytesread += size;

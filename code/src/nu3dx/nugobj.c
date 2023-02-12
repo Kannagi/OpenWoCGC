@@ -1,8 +1,11 @@
-#include "nugobj.h"
-#include "../nucore/nuerror.h"
-#include <nu.h>
+#include <nu3dx/nugobj.h>
 
 error_func e;
+u32 GS_BufferSize;
+static s32 sysinit;
+s32 Paused;
+s32 _timer;
+u32 BufferTypes[4];
 
 
 void NuGobjInit(void) {
@@ -14,16 +17,16 @@ void NuGobjInit(void) {
     sysinit = 1; //sysinit is a bool
 
 
-    NuLightFog(1.0, 1.0, 0, 0, 0);
+    //NuLightFog(1.0, 1.0, 0, 0, 0);
 
     return;
 }
 
 void NuGobjClose(void) {
-    
+
     struct nugobj_s* nextobj;
 
-    if ((sysinit != 0) && (sysgobj != NULL)) 
+    if ((sysinit != 0) && (sysgobj != NULL))
     {
         do {
             nextobj = sysgobj->sysnext;
@@ -79,8 +82,8 @@ void NuGobjDestroy(struct nugobj_s* obj)
 }
 
 
-
-void NuGobjAddGeom(struct nugobj_s* gobj, struct nugeom_s* geom) {
+void NuGobjAddGeom(struct nugobj_s* gobj, struct nugeom_s* geom)
+{
   if (gobj->geom == NULL) {
     gobj->geom = geom;
     return;
@@ -148,8 +151,8 @@ void NuGobjCalcFaceOnDims(struct nugobj_s* gobj) {
   float fVar4;
   struct nuvec_s *pnt;
   //struct nufaceon_s *faceon;
-  int iVar5;
-  //int iVar6;
+  s32 iVar5;
+  s32 iVar6;
   struct nufaceongeom_s *face1;
   double dVar7;
   float fVar8;
@@ -158,14 +161,14 @@ void NuGobjCalcFaceOnDims(struct nugobj_s* gobj) {
   float fvar10;
   struct nufaceongeom_s* fgeom;
   float pointX;
-  
-  gobj->bounding_box_min.z = FLT_MAX;
-  gobj->bounding_box_max.z = FLT_MIN;
+
+  gobj->bounding_box_min.z = __FLT_MAX__;
+  gobj->bounding_box_max.z = __FLT_MIN__;
   gobj->bounding_rsq_from_origin = 0.0;
-  gobj->bounding_box_min.x = FLT_MAX;
-  gobj->bounding_box_min.y = FLT_MAX;
-  gobj->bounding_box_max.x = FLT_MIN;
-  gobj->bounding_box_max.y = FLT_MIN;
+  gobj->bounding_box_min.x = __FLT_MAX__;
+  gobj->bounding_box_min.y = __FLT_MAX__;
+  gobj->bounding_box_max.x = __FLT_MIN__;
+  gobj->bounding_box_max.y = __FLT_MIN__;
   for (fgeom = gobj->faceon_geom; fgeom != NULL; fgeom = fgeom->next) {
     int count = 0;
     if (fgeom->nfaceons > 0) {
@@ -230,12 +233,12 @@ void NuGobjCalcFaceOnDims(struct nugobj_s* gobj) {
   (gobj->bounding_box_center).y = (fVar1 + fVar4) * 0.5;
   (gobj->bounding_box_center).z = (fVar2 + fVar3) * 0.5;
   gobj->bounding_rsq_from_center = (float)0;
-  for (; face1 != (nufaceongeom_s *)0x0; face1 = face1->next) {
+  for (; face1 != NULL; face1 = face1->next) {
     iVar6 = 0;
     if (0 < face1->nfaceons) {
       iVar5 = 0;
       do {
-        pnt = (nuvec_s *)((int)&(face1->faceons->point).x + iVar5);
+        pnt = (struct nuvec_s *)((int)&(face1->faceons->point).x + iVar5);
         dVar7 = (double)pnt[1].x;
         if ((double)pnt[1].x < (double)pnt[1].y) {
           dVar7 = (double)pnt[1].y;
@@ -516,7 +519,7 @@ struct nufaceongeom_s* NuFaceOnGeomCreate(void)
 void NuGeomDestroy(struct nugeom_s *geom)
 {
   NuGeomDestroyVB(geom);
-  for (struct NuPrim* prim = geom->prim; prim != NULL; prim = prim->next) {
+  for (struct nuprim_s* prim = geom->prim; prim != NULL; prim = prim->next) {
     NuPrimDestroy(prim);
   }
 
@@ -537,12 +540,12 @@ void NuGeomCreateVB(struct nugeom_s* geom, u32 vtxCount, enum nuvtxtype_e vtxTyp
 {
         // Boolean argument is unused
     #pragma unused(dynamic);
-    
+
     u32 vtxSize;
     struct GS_Buffer* vtxBuffer;
-	
+
     switch(vtxType) {
-		
+
 			//determining the vertex buffer size (vertex count * sizeof(buffer_type_element)
     case NUVT_PS:
         vtxSize = vtxCount * 0x10;
@@ -558,24 +561,24 @@ void NuGeomCreateVB(struct nugeom_s* geom, u32 vtxCount, enum nuvtxtype_e vtxTyp
         break;
     case NUVT_SK3TC1:
         vtxSize = vtxCount * 0x38;
-        break;      
+        break;
     default:
         //"NuGeomCreateVB : Unknown vertex type!"
         e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 441);
         e("assert");
     }
-    
+
     if (geom->hVB != 0)
     {
         //NuAssert(geom->vertex_buffer == NULL, "NuGeomCreateVB : geom already has VB");
         e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 448);
         e("assert");
     }
-    
-    
+
+
     // Second argument is some vertex type
     vtxBuffer = GS_CreateBuffer(vtxSize, 1);
-   
+
 
     geom->vtxmax = vtxCount;
     geom->hVB = (int)vtxBuffer;
@@ -597,9 +600,9 @@ void NuGeomDestroyVB(struct nugeom_s *geom)
 // Append prim to geom
 void NuGeomAddPrim(struct nugeom_s* geom, struct nuprim_s* prim)
 {
-    struct NuPrim *head;
-    struct NuPrim *tail;
-    struct NuPrim *iter;
+    struct nuprim_s *head;
+    struct nuprim_s *tail;
+    struct nuprim_s *iter;
 
     head = geom->prim;
     tail = NULL;
@@ -683,10 +686,10 @@ void NuPrimDestroy(struct nuprim_s* prim) {
 	return;
 }
 
-//BufferTypes is int[4], GS_BufferSize is int 
+//BufferTypes is int[4], GS_BufferSize is uint
 void* GS_CreateBuffer (u32 bufsize, s32 bufferType){
     struct GS_Buffer *bufptr;
-	
+
     bufptr = (struct GS_Buffer*)malloc(bufsize + 8);
 	GS_BufferSize = GS_BufferSize + bufsize;
 	BufferTypes[bufferType] = BufferTypes[bufferType] + bufsize;
@@ -721,7 +724,7 @@ int NuVtxStride(enum nuvtxtype_e type)
         return 0x24;
     }
 
-    NuError("NuVtxStride: Unknown vertex type");
+    NuErrorProlog("NuVtxStride: Unknown vertex type", 441);
 }
 
 // UV animation for all gobjs
@@ -739,7 +742,7 @@ void NuAnimUV(void)
             // Animate all gobjs
             for (current = sysgobj; current != NULL; current = current->sysnext)
             {
-                NuMtlUVAnimation(current);
+                //NuMtlUVAnimation(current);
             }
         }
     }

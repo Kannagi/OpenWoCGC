@@ -1,11 +1,11 @@
 #include "nutex.h"
 #include "../system.h"
 
-nusystex_s tinfo[0x400];
+struct nusystex_s tinfo[0x400];
 
-//u32 initialised = 0;
+initialised = 0;
 s32 tpid = 0;
-u32 ntex = 0;
+s32 ntex = 0;
 struct nutex_s tex;
 
 void NuTexInit()
@@ -22,13 +22,13 @@ void NuTexInit()
 	ntex = 0;
 }
 
-void NuTexClose(void) 
+void NuTexClose(void)
 {
     s32 i;
     void* temp_r3;
     void** data;
 
-    NudxFw_DestroyBackBufferCopy();
+    //NudxFw_DestroyBackBufferCopy();   empty function
     i = 0x400;
     data = &tinfo->tex.bits; //data = &tinfo[0].tex.bits;
     do {
@@ -52,11 +52,10 @@ s32 GetTPID()
 }
 
 s32 NuTexCreate(struct nutex_s *nutex)
-
 {
   struct D3DTexture *surface;
-  
-  surface = NudxTx_Create(nutex,(uint)(NUTEX_BB < nutex->type));
+
+  //surface = NudxTx_Create(nutex,(uint)(NUTEX_BB < nutex->type));
   tinfo[tpid].dds = surface;
   tinfo[tpid].tex.bits = NULL;
   tinfo[tpid].tex.type = nutex->type;
@@ -77,15 +76,14 @@ s32 NuTexGetDecalInfo(s32 tid)
   return (s32)tinfo[tid + -1].tex.decal;
 }
 
-s32 NuTexCreateFromSurface(nutex_s *tex,D3DTexture *surface)	//CHECK
-
+s32 NuTexCreateFromSurface(struct nutex_s *tex, struct D3DTexture *surface)	//CHECK
 {
   s32 width;
   s32 cnt;
   s32 *pal;
   s32 height;
   void *bits;
-  
+
   width = tex->width;
   height = tex->height;
   cnt = tex->mmcnt;
@@ -95,7 +93,7 @@ s32 NuTexCreateFromSurface(nutex_s *tex,D3DTexture *surface)	//CHECK
   tinfo[tpid].tex.mmcnt = cnt;
   bits = tex->bits;
   pal = tex->pal;
-  *(undefined4 *)&tinfo[tpid].tex.decal = *(undefined4 *)&tex->decal;
+  //&tinfo[tpid].tex.decal = &tex->decal;
   tinfo[tpid].tex.bits = bits;
   tinfo[tpid].tex.pal = pal;
   tinfo[tpid].tex.bits = NULL;
@@ -108,10 +106,10 @@ void NuTexDestroy(s32 id)
 	id--;
 	if (id > -1)
 	{
-		if (tinfo[id].tex.data != NULL)
+		if (tinfo[id].tex.bits != NULL)
 		{
-			NuMemFree(tinfo[id].tex.data);	//NuMemFree(tinfo[id].tex.bits);
-			tinfo[id].tex.data = NULL;		//tinfo[id].tex.bits = NULL;
+			NuMemFree(tinfo[id].tex.bits);	//NuMemFree(tinfo[id].tex.bits);
+			tinfo[id].tex.bits = NULL;		//tinfo[id].tex.bits = NULL;
 		}
 	}
 }
@@ -173,12 +171,11 @@ s32 NuTexPalSize(enum nutextype_e type)
 }
 
 
-void NuTexSetTextureStates(numtl_s *mtl)
-
+void NuTexSetTextureStates(struct numtl_s *mtl)
 {
-  uint flag_or_float;
-  
-  if (mtl->tid == 0) {
+  u32 flag_or_float;
+
+  /*if (mtl->tid == 0) {
     NuTexSetTexture(0,0);
     NudxFw_SetTextureState(0,D3DTSS_COLOROP,1);
     NudxFw_SetTextureState(0,D3DTSS_ALPHAOP,1);
@@ -222,12 +219,15 @@ void NuTexSetTextureStates(numtl_s *mtl)
     NudxFw_SetTextureState(0,D3DTSS_MINFILTER,2);
     NudxFw_SetTextureState(0,D3DTSS_MIPFILTER,2);
   }
-  return;
+  return;*/
 }
 
 
-s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
-{	
+s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
+{
+    s32 palette[256];
+    s32 imgsize;
+
 	if (fileName == NULL)
 	{
 		error_func e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999);
@@ -247,11 +247,11 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
 	}
 	else
 	{
-		memset(tex, 0, sizeof(nutex_s));
+		memset(tex, 0, sizeof(struct nutex_s));
 		NuFilePos(handle);
-		tagBITMAPFILEHEADER bmpHeader;
+		struct tagBITMAPFILEHEADER bmpHeader;
 		NuFileRead(handle, &bmpHeader.bfType, 14);
-		tagBITMAPINFOHEADER bmi;
+		struct tagBITMAPINFOHEADER bmi;
 		NuFileRead(handle, &bmi, 40);
 		u16 bitsPerPixel = bmi.biBitCount;
 		if (bitsPerPixel == 8)
@@ -282,17 +282,17 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
 		else if (bitsPerPixel == 16) // I don't think this was in here, but makes sense to add it.
 		{
 			tex->type = NUTEX_RGBA16;
-			palette = 0;
+			//palette = 0;
 		}
 		else if (bitsPerPixel == 24)
 		{
 			tex->type = NUTEX_RGB24;
-			palette = 0;
+			//palette = 0;
 		}
 		else if (bitsPerPixel == 32)
 		{
 			tex->type = NUTEX_RGBA32;
-			palette = 0;
+			//palette = 0;
 		}
 		else
 		{
@@ -304,25 +304,25 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
 		tex->width = bmi.biWidth;
 		s32 size = NuTexPixelSize(tex->type);
 		size *= tex->width;
-           
-		   
-		 /********************new part**********************/ 
-		
+
+
+		 /********************new part**********************/
+
 		s32 var1 = size + 7;
 		if(var1 < 0)
 		{
 			var1 = size + 0xe;
 		}
-		
+
 		s32 h = tex->height;
   		s32 ___N = var1 >> 3;
   		var1 = 0;
   		s32 w = tex->width;
-		
+
 		s32 k = 0; //counter
 
 		  do {
-    				s32 imgsize = NuTexImgSize(tex->type,w,h);
+                    imgsize = NuTexImgSize(tex->type,w,h);
     				h = h >> 1;
     				var1 = var1 + imgsize;
     				k = k + -1;
@@ -333,28 +333,29 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
 		void* bits = NuMemAlloc(var1);
   		tex->bits = bits;
 
-		  if (palette == 0 {
+		  if (palette == 0)
+            {
 
-    			tex->pal = (int *)0x0;
+    			tex->pal = NULL;
   			}
-  			
+
 		else {
     				s32 palsize = (int *)NuMemAlloc(palette);
     				tex->pal = palsize;
   			}
   		bits = tex->bits;
-		
+
 		imgsize = NuTexImgSize(tex->type,tex->width,tex->height);
-        NuFileRead(fh,bits,imgsize);
+        NuFileRead(handle,bits,imgsize);
 		union variptr_u dst;
 		dst.voidptr = malloc_x(___N);
 		void * __src = tex->bits;
 		imgsize = NuTexImgSize(tex->type,tex->width,tex->height);
 		bits = (void *)((int)__src + (imgsize - ___N));
-		
-		  if (__src < bits) 
+
+		  if (__src < bits)
 		  {
-			  
+
 			  void* ptr1 = NULL;
 			  void* ptr2 = NULL;
              do{
@@ -367,33 +368,33 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, nutex_s* tex)
 					__src = ptr2;
                } while (ptr2 < ptr1);
 		  }
-		  
+
 		free_x(dst.voidptr);
 		NuTexImgSize(tex->type,tex->width,tex->height);
-		
+
 		if (palette !=0)
 		{
 			memcpy(tex->pal,palette,sizeof(palette));
 		}
-		
+
 	}
 }
 
-void NuTexSetTexture(uint stage,int tid)
+void NuTexSetTexture(u32 stage,int tid)
 
 {
   if (tid < 1) {
-    GS_TexSelect(stage,0);
+    //GS_TexSelect(stage,0);
   }
   else {
-    GS_TexSelect(stage,tid);
+    //GS_TexSelect(stage,tid);
   }
   return;
 }
 
-nutex_s * NuTexReadBitmap(char* fileName)
+struct nutex_s * NuTexReadBitmap(char* fileName)
 {
-	nutex_s* ret = NuMemAlloc(sizeof(NuTexData));
+	struct nutex_s* ret = NuMemAlloc(sizeof(struct nutex_s));
 	if (!NuTexReadBitmapMM(fileName, 0, ret))
 	{
 		NuMemFree(ret);
@@ -402,7 +403,7 @@ nutex_s * NuTexReadBitmap(char* fileName)
 	return ret;
 }
 
-NuSurface* NuTexLoadTextureFromDDSFile(char* fileName)
+struct D3DTexture* NuTexLoadTextureFromDDSFile(char* fileName)
 {
 	return NULL;
 }

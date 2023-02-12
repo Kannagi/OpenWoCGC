@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<types.h>
+#include<nu3dx/nu3dxtypes.h>
 #include<stdbool.h>
 #include<SDL/SDL.h>
 #define GL_BGR 0x80E0
@@ -13,6 +14,11 @@
 #undef main
 #endif
 
+struct nutex_s tex;
+struct numtl_s *mtl;
+struct numtlattrib_s attr;
+s32 iss3cmp;
+s32 texinfo;
 void* pixel_dat;
 union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
@@ -44,11 +50,44 @@ int main()
 
     InitCutScenes();
     */
-    //pixel_dat = malloc_x(0x4000c);
-    //NuFileLoadBuffer("licnin.s3",pixel_dat,0x2000c);
+
 
     printf("NuTrigTable init...\n");
     NuTrigInit();
+    printf("NuTex init...\n");
+    NuTexInit();
+    printf("NuGobj init...\n");
+    NuGobjInit();
+    //printf("NuMtl init...\n");
+    //NuMtlInit();
+    //NuRndrInitEx();
+    //printf("NuLight init...\n");
+    //NuLightInit();
+
+    //from firstscreens function
+    pixel_dat = malloc_x(0x4000c);
+    NuFileLoadBuffer("licnin.s3",pixel_dat,0x2000c);
+    tex.height = 0x200;
+    tex.decal = 0;
+    tex.pal = NULL;
+    tex.width = 0x200;
+    tex.mmcnt = 1;
+    tex.type = NUTEX_RGB24;
+    iss3cmp = 0x20000;
+    tex.bits = pixel_dat;
+    texinfo = NuTexCreate(&tex);
+    iss3cmp = 0;
+    //mtl = NuMtlCreate(1);
+    //attr = mtl->attrib;
+    /*mtl->tid = texinfo;
+    (mtl->diffuse).b = 1.0;
+    mtl->alpha = 0.999;
+    (mtl->diffuse).r = 1.0;
+    (mtl->diffuse).g = 1.0;*/
+    //mtl->attrib = (numtlattrib_s)((uint)attr & 0xcc0cffff | 0x16e8000);   need fix
+    //firstscreenfade(lic,1);
+    //nuvideo_global_vbcnt = 0;
+
 
     test_SDL_openGL();
     return 0;

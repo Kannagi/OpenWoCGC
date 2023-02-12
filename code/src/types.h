@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "elf_systypes.h"
+#include<stdbool.h>
 
 #define NULL 0
 

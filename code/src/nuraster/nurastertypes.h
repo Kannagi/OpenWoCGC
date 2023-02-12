@@ -6,20 +6,20 @@
 // TODO: TYPES!!!
 
 static rendertargetlist_s g_pRTArray[16];
-static D3DSurface* g_pddsStencilBuffer;
+static struct D3DSurface* g_pddsStencilBuffer;
 static unsigned int g_dwRenderHeight;
 static unsigned int g_dwRenderWidth;
-static D3DSurface* g_pddsBackBuffer;
-static D3DSurface* g_pddsZBuffer;
+static struct D3DSurface* g_pddsBackBuffer;
+static struct D3DSurface* g_pddsZBuffer;
 static int g_dwNumRT;
 static int g_dwCurrentRT;
 static int g_dwAllocRT;
 static int g_dwFreeRT;
-static D3DDevice* g_pd3dDevice;
+static struct D3DDevice* g_pd3dDevice;
 int PHYSICAL_SCREEN_X;
-static _GS_VIEWPORT GS_ViewPort;
-static _GXColor GS_BgColour;
-static D3DSurface* g_pddsZBuffer;
+static struct _GS_VIEWPORT GS_ViewPort;
+static struct _GXColor GS_BgColour;
+static struct D3DSurface* g_pddsZBuffer;
 void* volatile hLoadScreenThread;
 
 
@@ -38,7 +38,7 @@ struct _GXColor
 // Size: 0x1
 struct D3DDevice
 {
-    static inline int SetMaterial(const _D3DMATERIAL8* pMaterial);
+    /*static inline int SetMaterial(const _D3DMATERIAL8* pMaterial);
     static inline int SetViewport(const _D3DVIEWPORT8* pViewport);
     static inline int SetPixelShaderConstant(unsigned int Register, const void* pConstantData, unsigned int ConstantCount);
     static inline int CreateTexture(unsigned int Width, unsigned int Height, unsigned int Levels, unsigned int Usage, _D3DFORMAT Format, unsigned int Pool, D3DTexture** ppTexture);
@@ -62,21 +62,9 @@ struct D3DDevice
     static inline int GetBackBuffer(int BackBuffer, unsigned int Type, D3DSurface** ppBackBuffer);
     static inline int GetDepthStencilSurface(D3DSurface** ppZStencilSurface);
     static inline int SetRenderTarget(D3DSurface* pRenderTarget, D3DSurface* pNewZStencil);
-    static inline int SetRenderState(_D3DRENDERSTATETYPE State, unsigned int Value);
+    static inline int SetRenderState(_D3DRENDERSTATETYPE State, unsigned int Value);*/
 };
 
-
-// Size: 0x1C
-struct rendertargetlist_s
-{
-    int next;
-    int last;
-    unsigned int width;
-    unsigned int height;
-    D3DSurface* pddsRenderTarget;
-    D3DSurface* pddsZBuffer;
-    D3DSurface* pddsStencilBuffer;
-};
 
 // Size: 0x18
 struct _D3DVIEWPORT8
