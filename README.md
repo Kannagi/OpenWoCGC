@@ -1,16 +1,31 @@
 # OpenCrashWOC
 An open source, reverse engineered re-implementation of Crash Bandicoot: Wrath Of Cortex.
 
-## Notice
-We love Crash Bandicoot! If you plan to play this, you must legally dump assets from your GameCube disk, and please buy one of the latest Crash games to show your support! OpenCrashWOC is a fan reverse-engineered version of CrashWOC without having any access or knowledge of the original game code. While the functions mostly match in utility, any identicality to the originals are pure coincidence. This is not a decompilation, but rather a complete rewrite from the ground up of the entire game. Not a single asset from the original game is present.
+## todo list
 
-## Other Notice
-This README will be more complete and detailed with instructions to contribute, build, and play once they exist!
+### initialisation project
+- [x] SDL link
+- [x] OpenGL link
+- [ ] SDL Mixer li,k
+- [ ] OpenGL ES 3 or OpenGL 3 link
 
-Special thanks to:
+### nulib compile
+- [ ] nu3dx function (8%)
+- [x] nucore function 
+- [x] numath function 
+- [x] nusound function 
+- [ ] nuraster function 
+- [ ] system function 
+- [ ] gamelib function 
 
-- NeoKesha, BetaM, Smartkin
-- Gota7, nicolasrmerz, ExpHP, kiwi
-- vyuuui
+### nulib test
+- [ ] nu3dx validation test
+- [ ] nucore validation test 
+- [ ] numath validation test 
+- [ ] nusound validation test 
+- [ ] nuraster validation test 
+- [ ] system validation test 
+- [ ] gamelib validation test 
 
-for the immensive help
+### game
+- [ ] gamecode
