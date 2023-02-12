@@ -417,29 +417,29 @@ void NuGobjCalcFaceOnDims(struct NuGobj* gobj) {
 
 
 
-/*void NuGobjCalcDims(struct NuGobj* gobj) {
-  if (gobj->__causes_calc_face_on_dims == 1) {
+void NuGobjCalcDims(struct nugobj_s* gobj)
+{
+  if (gobj->culltype == 1) {
     NuGobjCalcFaceOnDims(gobj);
     return;
   }
-  gobj->bounding_box_min.x = FLT_MAX;
-  gobj->bounding_box_min.y = FLT_MAX;
-  gobj->bounding_box_min.z = FLT_MAX;
-  gobj->bounding_box_max.x = FLT_MIN;
-  gobj->bounding_box_max.y = FLT_MIN;
-  gobj->bounding_box_max.z = FLT_MIN;
-  gobj->bounding_radius_sq = 0.0;
-  for (struct NuGeom* geom = gobj->geom; geom != NULL; geom = geom->next) {
-    int stride = NuVtxStride(geom->vertex_type);
-    char* vertex_raw = geom->vertex_buffer;
+  gobj->bounding_box_min.x = __FLT_MAX__;
+  gobj->bounding_box_min.y = __FLT_MAX__;
+  gobj->bounding_box_min.z = __FLT_MAX__;
+  gobj->bounding_box_max.x = __FLT_MIN__;
+  gobj->bounding_box_max.y = __FLT_MIN__;
+  gobj->bounding_box_max.z = __FLT_MIN__;
+  gobj->bounding_rsq_from_origin = 0.0;
+  for (struct nugeom_s* geom = gobj->geom; geom != NULL; geom = geom->next) {
+    s32 stride = NuVtxStride(geom->vtxtype);
+    s8* vertex_raw = geom->hVB;
     if (vertex_raw == NULL) {
-	   //TBREV
-	    error_func e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x13b);
-		e("NuGobjCalcDims : Lock VB failed!");
+	    //error_func e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x13b);
+		//e("NuGobjCalcDims : Lock VB failed!");
     }
-    char* end = vertex_raw + stride * geom->__count_2__mebbe_count_actually_in_use;
+    s8* end = vertex_raw + stride * geom->vtxcnt;
     for (; vertex_raw < end; vertex_raw += stride) {
-      struct NuVec* vertex = (struct NuVec*)vertex_raw;
+      struct nuvec_s* vertex = (struct nuvec_s*)vertex_raw;
       if (vertex->x < gobj->bounding_box_min.x) {
         gobj->bounding_box_min.x = vertex->x;
       }
@@ -458,41 +458,40 @@ void NuGobjCalcFaceOnDims(struct NuGobj* gobj) {
       if (gobj->bounding_box_max.z < vertex->z) {
         gobj->bounding_box_max.z = vertex->z;
       }
-      float rsq = vertex->z * vertex->z + vertex->x * vertex->x + vertex->y * vertex->y;
+      f32 rsq = vertex->z * vertex->z + vertex->x * vertex->x + vertex->y * vertex->y;
       if (gobj->bounding_rsq_from_origin < rsq) {
         gobj->bounding_rsq_from_origin = rsq;
       }
     }
   }
-  gobj->bounding_radius = (float)sqrt((double)gobj->bounding_rsq_from_origin);
+  gobj->bounding_radius_from_origin = (f32)sqrt((double)gobj->bounding_rsq_from_origin);
 
   gobj->bounding_box_center.x = (gobj->bounding_box_min.x + gobj->bounding_box_max.x) * 0.5;
   gobj->bounding_box_center.y = (gobj->bounding_box_min.y + gobj->bounding_box_max.y) * 0.5;
   gobj->bounding_box_center.z = (gobj->bounding_box_min.z + gobj->bounding_box_max.z) * 0.5;
 
   gobj->bounding_rsq_from_center = 0.0;
-  for (struct NuGeom* geom = gobj->geom; geom != NULL; geom = geom->next) {
-    int stride = NuVtxStride(geom->vertex_type);
-    char* vertex_raw = geom->vertex_buffer;
+  for (struct nugeom_s* geom = gobj->geom; geom != NULL; geom = geom->next) {
+    s32 stride = NuVtxStride(geom->vtxtype);
+    s8* vertex_raw = geom->hVB;
     if (vertex_raw == NULL) {
-      //TBREV
-	  error_func e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x157);
-		e("NuGobjCalcDims : Lock VB failed!");
+	  //error_func e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x157);
+		//e("NuGobjCalcDims : Lock VB failed!");
     }
-    char* end = vertex_raw + stride * geom->__count_2__mebbe_count_actually_in_use;
+    s8* end = vertex_raw + stride * geom->vtxcnt;
     for (; vertex_raw < end; vertex_raw += stride) {
-      struct NuVec* vertex = (struct NuVec*)vertex_raw;
-      struct NuVec diff;
+      struct nuvec_s* vertex = (struct nuvec_s*)vertex_raw;
+      struct nuvec_s diff;
       NuVecSub(&diff, vertex, gobj->bounding_box_center);
-      float rsq = diff.z * diff.z + diff.x * diff.x + diff.y * diff.y;
+      f32 rsq = diff.z * diff.z + diff.x * diff.x + diff.y * diff.y;
       if (gobj->bounding_rsq_from_center < rsq) {
         gobj->bounding_rsq_from_center = rsq;
       }
     }
   }
-  gobj->bounding_radius_from_center = (float)sqrt((double)gobj->bounding_rsq_from_center);
+  gobj->bounding_radius_from_center = (f32)sqrt((double)gobj->bounding_rsq_from_center);
   return;
-}*/
+}
 
 
 

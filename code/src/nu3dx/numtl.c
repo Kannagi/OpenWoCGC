@@ -497,7 +497,7 @@ void NuMtlRender3d(void)
   for (sm = smlist; sm != NULL; sm = sm->next) {
     if (((sm->mtl).L == '\0') && (sm->rndrlist != NULL)) {
       NuTexSetTexture(0,(sm->mtl).tid);
-      //NuMtlSetRenderStates(&sm->mtl);
+      NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       for (ri = sm->rndrlist; ri != NULL; ri = ri->next) {
         //NuRndrItem(ri);
@@ -523,7 +523,7 @@ void NuMtlRenderDynamic2d3d(void)
   for (; sm != NULL; sm = sm->next) {
     if ((sm->geom3d != NULL) && (sm->geom3d->geom->vtxcnt != 0)) {
       NuTexSetTexture(0,(sm->mtl).tid);
-      //NuMtlSetRenderStates(&sm->mtl);
+      NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       item = sm->geom3d;
       //NuRndrItem(&item->hdr);
@@ -534,7 +534,7 @@ void NuMtlRenderDynamic2d3d(void)
     }
     if ((sm->geom2d != NULL) && (sm->geom2d->geom->vtxcnt != 0)) {
       NuTexSetTexture(0,(sm->mtl).tid);
-      //NuMtlSetRenderStates(&sm->mtl);
+      NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       item = sm->geom2d;
       //GS_EnableLighting(0);
@@ -566,13 +566,13 @@ void NuMtlRenderOT(int begin,int end)
         mtl = oti->mtl;
         if ((mtl->mtl).L == '\0') {
           NuTexSetTexture(0,(mtl->mtl).tid);
-          //NuMtlSetRenderStates(&oti->mtl->mtl);
+          NuMtlSetRenderStates(&oti->mtl->mtl);
           NuTexSetTextureStates(&oti->mtl->mtl);
           //NuRndrItem(oti->hdr);
         }
         else {
           NuTexSetTexture(0,(mtl->mtl).tid);
-          //NuMtlSetRenderStates(&oti->mtl->mtl);
+          NuMtlSetRenderStates(&oti->mtl->mtl);
           NuTexSetTextureStates(&oti->mtl->mtl);
           //GS_SetZCompare(1,1,GX_LEQUAL);
           //GS_SetAlphaCompare(3,0xf7);
@@ -616,13 +616,13 @@ void NuMtlRenderFaceOn() {
     sys_mtl = cur_list->mtl;
     if (sys_mtl->mtl.L) {
       NuTexSetTexture(0, sys_mtl->mtl.tid);
-      //NuMtlSetRenderStates(cur_list->mtl);
+      NuMtlSetRenderStates(cur_list->mtl);
       NuTexSetTextureStates(cur_list->mtl);
       //GS_SetZCompare(1, 0, 3);
       //GS_SetAlphaCompare(3, 0xf7);
     } else {
       NuTexSetTexture(0, sys_mtl->mtl.tid);
-      //NuMtlSetRenderStates(cur_list->mtl);
+      NuMtlSetRenderStates(cur_list->mtl);
       NuTexSetTextureStates(cur_list->mtl);
       //GS_SetAlphaCompare(4, 0);
       //GS_SetZCompare(1, 1, 3);
@@ -720,7 +720,7 @@ void NuMtlRenderGlass(void)
       do {
         i = i + 1;
         NuTexSetTexture(0,(oti->mtl->mtl).tid);
-        //NuMtlSetRenderStates(&oti->mtl->mtl);
+        NuMtlSetRenderStates(&oti->mtl->mtl);
         NuTexSetTextureStates(&oti->mtl->mtl);
         //NuRndrItem(oti->hdr);
         oti = oti->next;
@@ -745,7 +745,7 @@ void NuMtlRenderWater(void)
       do {
         i = i + 1;
         NuTexSetTexture(0,(wateri->mtl->mtl).tid);
-        //NuMtlSetRenderStates(&wateri->mtl->mtl);
+        NuMtlSetRenderStates(&wateri->mtl->mtl);
         NuTexSetTextureStates(&wateri->mtl->mtl);
         //NuRndrItem(wateri->hdr);
         wateri = wateri->next;
@@ -807,7 +807,7 @@ void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item)
 
 {
   struct nuotitem_s *tail;
-  _BOOL check;
+  bool check;
   s32 cnt;
 
   if (0x40 < dynamic_glass_item_cnt) {
@@ -847,14 +847,12 @@ void NuMtlRenderUpd(void)
   return;
 }
 
-/*
 
-void NuMtlSetRenderStates(numtl_s *mtl)
-
+void NuMtlSetRenderStates(struct numtl_s *mtl)
 {
-  int ivar2;
-  _D3DMATERIAL8 d3dmtl;
-  uint attrib;
+  s32 ivar2;
+  struct _D3DMATERIAL8 d3dmtl;
+  u32 attrib;
   bool check;
 
   d3dmtl.Diffuse.a = mtl->alpha;
@@ -867,18 +865,19 @@ void NuMtlSetRenderStates(numtl_s *mtl)
   d3dmtl.Emissive.r = d3dmtl.Ambient.r;
   d3dmtl.Emissive.g = d3dmtl.Ambient.g;
   d3dmtl.Emissive.b = d3dmtl.Ambient.b;
-  if (((uint)mtl->attrib >> 0x10 & 3) == 2) {
+  /*if (((u32)mtl->attrib >> 0x10 & 3) == 2)  fix
+  {
     d3dmtl.Emissive.r = d3dmtl.Diffuse.r;
     d3dmtl.Emissive.g = d3dmtl.Diffuse.g;
     d3dmtl.Emissive.b = d3dmtl.Diffuse.b;
-  }
+  }*/
   d3dmtl.Power = mtl->power;
   d3dmtl.Ambient.a = d3dmtl.Diffuse.a;
   d3dmtl.Emissive.a = d3dmtl.Diffuse.a;
-  GS_SetMaterial(&d3dmtl);
-  attrib = (uint)mtl->attrib >> 0x1e;
+  //GS_SetMaterial(&d3dmtl);
+  //attrib = (u32)mtl->attrib >> 0x1e;  fix
   if (attrib == 0) {
-    GS_SetBlendSrc(1,1,0);
+    //GS_SetBlendSrc(1,1,0);
     ivar2 = 7;
   }
   else {
@@ -888,66 +887,65 @@ void NuMtlSetRenderStates(numtl_s *mtl)
     else {
       if (attrib != 2) {
         if (attrib == 3) {
-          GS_SetBlendSrc(1,0,3);
-          GS_SetAlphaCompare(4,0);
+          //GS_SetBlendSrc(1,0,3);
+          //GS_SetAlphaCompare(4,0);
         }
         goto LAB_800b40dc;
       }
       ivar2 = 1;
     }
-    GS_SetBlendSrc(1,4,ivar2);
+    //GS_SetBlendSrc(1,4,ivar2);
     ivar2 = 4;
   }
-  GS_SetAlphaCompare(ivar2,0);
+  //GS_SetAlphaCompare(ivar2,0);
 LAB_800b40dc:
-  GS_SetAlphaCompare(4,0);
-  NudxFw_SetRenderState(0x80,0);
-  if (((uint)mtl->attrib & 0xc0000) == 0) {
-    GS_SetZCompare(1,1,GX_LEQUAL);
+  //GS_SetAlphaCompare(4,0);
+  //NudxFw_SetRenderState(0x80,0);
+  /*if (((u32)mtl->attrib & 0xc0000) == 0)
+  {
+    //GS_SetZCompare(1,1,GX_LEQUAL);
   }
-  if (((uint)mtl->attrib >> 0x12 & 3) == 1) {
-    GS_SetZCompare(1,0,GX_LEQUAL);
+  if (((u32)mtl->attrib >> 0x12 & 3) == 1) {
+    //GS_SetZCompare(1,0,GX_LEQUAL);
   }
-  if (((uint)mtl->attrib >> 0x12 & 3) == 2) {
-    GS_SetZCompare(1,1,GX_ALWAYS);
+  if (((u32)mtl->attrib >> 0x12 & 3) == 2) {
+    //GS_SetZCompare(1,1,GX_ALWAYS);
   }
-  if (((uint)mtl->attrib >> 0x12 & 3) == 3) {
-    GS_SetZCompare(0,0,GX_ALWAYS);
+  if (((u32)mtl->attrib >> 0x12 & 3) == 3) {
+    //GS_SetZCompare(0,0,GX_ALWAYS);
   }
   IsObjLit = 0;
-  check = ((uint)mtl->attrib & 0x30000) == 0;
+  check = ((u32)mtl->attrib & 0x30000) == 0;
   if (check) {
-    GS_EnableLighting(1);
-    GS_EnableSpecular(0);
+    //GS_EnableLighting(1);
+    //GS_EnableSpecular(0);
   }
-  IsObjLit = (uint)check;
-  if (((uint)mtl->attrib >> 0x10 & 3) == 1) {
-    GS_EnableLighting(1);
-    GS_EnableSpecular(1);
+  IsObjLit = (u32)check;
+  if (((u32)mtl->attrib >> 0x10 & 3) == 1) {
+    //GS_EnableLighting(1);
+    //GS_EnableSpecular(1);
     IsObjLit = 2;
   }
-  if (((uint)mtl->attrib >> 0x10 & 3) == 2) {
-    GS_EnableLighting(0);
+  if (((u32)mtl->attrib >> 0x10 & 3) == 2) {
+    //GS_EnableLighting(0);
   }
-  if (((uint)mtl->attrib & 0x8000) == 0) {
-    GS_EnableColorVertex(0);
-    GS_SetMaterialSourceAmbient(0);
-    GS_SetMaterialSourceEmissive(0);
+  if (((u32)mtl->attrib & 0x8000) == 0) {
+    //GS_EnableColorVertex(0);
+    //GS_SetMaterialSourceAmbient(0);
+    //GS_SetMaterialSourceEmissive(0);
   }
-  if (((uint)mtl->attrib & 0x8000) != 0) {
-    GS_EnableColorVertex(1);
-    GS_SetMaterialSourceAmbient(1);
-    if (((uint)mtl->attrib >> 0x10 & 3) == 2) {
-      GS_SetMaterialSourceEmissive(1);
+  if (((u32)mtl->attrib & 0x8000) != 0) {
+    //GS_EnableColorVertex(1);
+    //GS_SetMaterialSourceAmbient(1);
+    if (((u32)mtl->attrib >> 0x10 & 3) == 2) {
+      //GS_SetMaterialSourceEmissive(1);
     }
     else {
-      GS_SetMaterialSourceEmissive(0);
+      //GS_SetMaterialSourceEmissive(0);
     }
-  }
+  }*/
   return;
 }
-
-*/
 
 void NuMtlAnimate(float timestep)
 

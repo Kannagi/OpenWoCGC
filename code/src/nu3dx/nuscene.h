@@ -2,38 +2,33 @@
 #define NUSCENE_H
 
 #include "../types.h"
+#include<nucore/nufile.h>
+#include "nu3dx/nugobj.h"
 #include <stdlib.h>
 #include "nu3dxtypes.h"
 
 
-/**********************************************************/
-
-/****** I don't know what headers these should go in ******/
-\\void GS_ARGBTORGBA(u32* colors, u32 count);
-\\NuAnimData* NuAnimDataRead(fileHandle handle);
-/**********************************************************/
-
-void ReadNuIFFTextureSet(fileHandle handle, NuSceneMtl* mtl);
-void ReadNuIFFMaterialSet(fileHandle handle, NuSceneMtl* mtl);
-void NuSceneMtlUpdate(NuSceneMtl* mtl);
-void ReadNuIFFAnimationLibrary(fileHandle handle, NuScene* scene);
-void ReadNuIFFGSplineSet(fileHandle handle, NuScene* scene);
-void ReadNuIFFGobjSet(fileHandle handle, NuSceneMtl* mtl);
-NuGobj* ReadNuIFFGeom(fileHandle handle, UNKWORD param_2);
-void ReadNuIFFGeomDef(fileHandle handle, NuSceneMtl* mtl);
-void ReadNuIFFGeomVtx(fileHandle handle, NuGeom* geom);
-void ReadNuIFFGeomCntrl(fileHandle handle, NuGeom* geom);
-void ReadNuIFFFaceOnGeom(fileHandle handle, NuFaceOnGeom* face);
-void ReadNuIFFGeomPrim(fileHandle handle, NuGeom* geom);
-void ReadNuIFFGeomTri(fileHandle handle, NuGeom* geom, s32 param_3);
-void ReadNuIFFGeomSkin(fileHandle handle, NuGeom* geom);
-void ReadNuIFFBlendShape(fileHandle handle, NuGeom* geom);
+void ReadNuIFFTextureSet(fileHandle handle, struct nuscene_s *scene);
+void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc);
+void NuSceneMtlUpdate(struct nuscene_s *nus);
+void ReadNuIFFAnimationLibrary(fileHandle handle, struct nugscn_s* scene);
+void ReadNuIFFGSplineSet(fileHandle fh,struct nugscn_s *gsc);
+void ReadNuIFFGobjSet(fileHandle handle, struct nuscene_s* nus);
+struct nugobj_s * ReadNuIFFGeom(fileHandle handle,struct numtl_s **mtls);
+void ReadNuIFFGeomDef(fileHandle handle, struct nuscene_s* nus);
+void ReadNuIFFGeomVtx(fileHandle handle, struct nugeom_s* geom);
+void ReadNuIFFGeomCntrl(fileHandle handle, struct nugeom_s* geom);
+void ReadNuIFFFaceOnGeom(fileHandle handle,struct nufaceongeom_s *face);
+void ReadNuIFFGeomPrim(fileHandle handle, struct nugeom_s* geom);
+void ReadNuIFFGeomTri(fileHandle handle, struct nugeom_s* geom, enum nuprimtype_e type);
+void ReadNuIFFGeomSkin(fileHandle handle,struct nugeom_s *geom);
+void ReadNuIFFBlendShape(fileHandle handle,struct nugeom_s *geom);
 void ReadNuIFFUnknown(fileHandle handle, u32 blockMagic);
-int ReadNuIFFInstSet(fileHandle handle, UNKTYPE* param_2, UNKTYPE* param_3);
-void ReadNuIFFSpecialObjects(fileHandle handle, NuScene* scene);
-void NuSceneCalcCulling(NuScene* scene);
-void ReadNuIFFGScene(fileHandle handle, NuScene* scene);
-NuScene* NuSceneLoad(const char *name);
-size_t ReadNuIFFNameTable(fileHandle handle);
+s32 ReadNuIFFInstSet(fileHandle fh, struct nuinstance_s** instances, struct nuinstanim_s** instanims);
+void ReadNuIFFSpecialObjects(fileHandle fh,struct nugscn_s *gsc);
+void NuSceneCalcCulling(struct nugscn_s *scene);
+void ReadNuIFFGScene(fileHandle handle,struct nugscn_s *gscene);
+struct nuscene_s * NuSceneLoad(s8 *filename);
+s32 ReadNuIFFNameTable(fileHandle handle);
 
 #endif // !NUSCENE_H

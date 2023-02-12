@@ -5,6 +5,9 @@
 #include<stdbool.h>
 
 #define NULL 0
+#define NuError(msg) \
+    error_func e = NuErrorProlog(__FILE__, __LINE__); \
+    e(msg);
 
 // Unsigned byte.
 typedef unsigned char u8;

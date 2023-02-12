@@ -33,6 +33,9 @@
 */
 
 
+struct NuAnimData* NuAnimDataRead(fileHandle handle);
+
+
 // Size: 0x10
 struct nuanimcurveset_s
 {

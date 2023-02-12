@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "nu3dxtypes.h"
+#include "nu3dx/nuscene.h"
 
 /*
   800b06f8 000050 800b06f8  4 NuHGobjCreate 	Global
@@ -55,9 +56,9 @@ struct NUHGOBJ_s
 };
 
 
-HGobj* NuHGobjCreate(void);
-HGobj* NuHGobjLoad(const char* name);
-void ReadNuIFFHGobj(fileHandle handle, HGobj *hgobj);
+struct NUHGOBJ_s* NuHGobjCreate(void);
+struct NUHGOBJ_s* NuHGobjLoad(const char* name);
+void ReadNuIFFHGobj(fileHandle handle, struct NUHGOBJ_s *hgobj);
 
 
 #endif // !NUHGOBJ_H

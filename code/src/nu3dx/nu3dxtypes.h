@@ -2,6 +2,7 @@
 #define NU3DXTYPES_H
 
 #include "types.h"
+#include<string.h>
 
 
 s32 initialised;
@@ -556,7 +557,6 @@ struct nuinstance_s
 	char pad[1];
 };
 
-
 // Size: 0x60
 struct nuinstanim_s
 {
@@ -593,6 +593,72 @@ struct nuspecial_s
 	struct nuspecialflags flags;
 	int pad;
 };
+
+
+struct nufspecial_s {
+    struct numtx_s mtx;
+    int instanceix;
+    int nameix;
+    struct nuspecialflags flags;
+    int pad;
+};
+
+
+struct NULAYERDATA_s {
+    char * name;
+    struct nugobj_s * * gobjs;
+    struct nugobj_s * skin_gobj;
+    struct nugobj_s * * blend_gobjs;
+    struct nugobj_s * blend_skin_gobj;
+};
+
+struct NUPOINTOFINTEREST_s {
+    struct numtx_s offset;
+    char * name;
+    u8 parent_joint_ix;
+    u8 pad[11];
+};
+
+struct NUJOINTDATA_s {
+    struct numtx_s orient;
+    struct nuvec_s locator_offset;
+    char * name;
+    int parent_ix;
+    char flags;
+    char pad[11];
+};
+
+
+struct NUELLIPSOID_s {
+    struct nuvec_s centre;
+    struct nuvec_s y_axis;
+    struct nuvec_s x_axis;
+    struct nuvec_s z_axis;
+};
+
+struct NUCYLINDERS_s {
+    struct nuvec_s centre;
+    struct nuvec_s y_axis;
+    struct Vec4 x_axis;
+    struct Vec4 z_axis;
+    char pad[8];
+};
+
+struct NUSHADOWMESH_s {
+    struct Vec4 * normals;
+    struct Vec4 * verts;
+};
+
+struct NUSHADOWDATA_s {
+    struct NUELLIPSOID_s * ellipsoids;
+    struct NUCYLINDERS_s * cylinders;
+    struct NUSHADOWMESH_s * shadow_meshes;
+    u8 nellipsoids;
+    u8 ncylinders;
+    u8 nshadow_meshes;
+    u8 joint;
+};
+
 
 
 // Size: 0x10

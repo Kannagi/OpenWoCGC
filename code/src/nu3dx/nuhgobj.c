@@ -1,15 +1,15 @@
 #include "nuhgobj.h"
-#include "nufile.h"
+#include <nu.h>
 
 
 struct numtx_s mtx_arrayHGobj[256];
 
 struct NUHGOBJ_s* NuHGobjCreate(void)
 {
-    struct NUHGOBJ_s *hgobj = (NUHGOBJ_s *)NuMemAlloc(sizeof(NUHGOBJ_s));
-    memset(hgobj, 0, sizeof(NUHGOBJ_s));
+    struct NUHGOBJ_s *hgobj = (struct NUHGOBJ_s *)NuMemAlloc(sizeof(struct NUHGOBJ_s));
+    memset(hgobj, 0, sizeof(struct NUHGOBJ_s));
     hgobj->tbrdist = 1.0f;
-    
+
     return hgobj;
 }
 
@@ -17,7 +17,7 @@ struct NUHGOBJ_s* NuHGobjLoad(const char* name)
 {
     struct NUHGOBJ_s *hgobj = NULL;
     fileHandle handle = NuFileOpen(name, NUFILE_READ);
-    
+
     if (handle != 0)
     {
         NuFileBeginBlkRead(handle, 'FOGH');
@@ -30,7 +30,7 @@ struct NUHGOBJ_s* NuHGobjLoad(const char* name)
     {
         strlwr(name);
     }
-    
+
     return hgobj;
 }
 
@@ -60,7 +60,6 @@ void NuHGobjDestroy(struct NUHGOBJ_s* hgobj)
 
 //need clean
 void NuHGobjDestroyDynamic(struct NUHGOBJ_s *hgobj)
-
 {
   struct NULAYERDATA_s *layers;
   u32 nJoints;
@@ -70,9 +69,9 @@ void NuHGobjDestroyDynamic(struct NUHGOBJ_s *hgobj)
   s32 j;
   s32 k;
   struct nugobj_s **gobjs;
-  
+
   if (hgobj->texanims != NULL) {
-    NuTexAnimRemoveList(hgobj->texanims);
+    //NuTexAnimRemoveList(hgobj->texanims);
   }
   layers = hgobj->layers;
   if ((layers != NULL) && (i = 0, hgobj->num_layers != '\0')) {
@@ -136,7 +135,7 @@ void NuHGobjDestroyDynamic(struct NUHGOBJ_s *hgobj)
     }
   }
   if (hgobj->texanims != NULL) {
-    NuTexAnimRemoveList(hgobj->texanims);
+    //NuTexAnimRemoveList(hgobj->texanims);
   }
   return;
 }
@@ -170,28 +169,28 @@ void ReadNuIFFHGobj(fileHandle handle, struct NUHGOBJ_s *hgobj)
     u32 magic;
     struct nuscene_s scene;
     struct nugscn_s gscn;
-    
-    memset(scene, 0, sizeof(struct nuscene_s));
-    memset(gscn, 0, sizeof(struct nugscn_s));
-    
+
+    memset(&scene, 0, sizeof(struct nuscene_s));
+    memset(&gscn, 0, sizeof(struct nugscn_s));
+
     scene.mtls = NULL;
     scene.numtids = 0;
     scene.tids = 0;
     scene.nummtls = 0;
-    
+
     while ((magic = NuFileBeginBlkRead(handle, 0)) != 0)
     {
         switch(magic)
         {
             case '0SAT':
                 gscn.nametable = hgobj->string_table;
-                ReadNuIFFTexAnimSet(handle, &gscn, scene.tids);
+                //ReadNuIFFTexAnimSet(handle, &gscn, scene.tids);
                 hgobj->texanim_tids = gscn.texanim_tids;
                 hgobj->texanims = gscn.texanims;
                 hgobj->numtexanims = gscn.numtexanims;
                 break;
             case '00SM':
-                ReadNuIFFMaterialSet(handle, &scene);
+                //ReadNuIFFMaterialSet(handle, &scene);
                 gscn.mtls = scene.mtls;
                 gscn.nummtl = scene.nummtls;
                 hgobj->mtls = scene.mtls;
@@ -201,12 +200,12 @@ void ReadNuIFFHGobj(fileHandle handle, struct NUHGOBJ_s *hgobj)
                 ReadNuIFFHGobjSet(handle, hgobj);
                 break;
             case '0TST':
-                ReadNuIFFTextureSet(handle, &scene);
+                //ReadNuIFFTextureSet(handle, &scene);
 				hgobj->numtid = scene.numtids;
 				s16 tids = (s16 *)NuMemAlloc(scene.numtids << 2);
 				hgobj->tids = tids;
 				s32 i = 0;
-				if (scene.numtids > 0) 
+				if (scene.numtids > 0)
 				{
 				do {
 						i++;
@@ -215,21 +214,21 @@ void ReadNuIFFHGobj(fileHandle handle, struct NUHGOBJ_s *hgobj)
 				}
                 break;
             case 'LBTN':
-                hgobj->string_table = ReadNuIFFNameTable(handle);
+                //hgobj->string_table = ReadNuIFFNameTable(handle);
                 break;
             default:
-                ReadNuIFFUnknown(handle, magic);
+                //ReadNuIFFUnknown(handle, magic);
                 break;
         }
-        
+
         NuFileEndBlkRead(handle);
     }
-    
-    NuSceneMtlUpdate(&scene);
+
+    //NuSceneMtlUpdate(&scene);
 	return;
 }
 
-void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
+void ReadNuIFFHGobjSet(fileHandle fh, struct NUHGOBJ_s* hgobj) {
     s32 i;
     s32 j;
     s32 str_ix;
@@ -248,7 +247,7 @@ void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
             NuFileRead(fh, &hgobj->T[i], sizeof(struct numtx_s));
             NuFileRead(fh, &hgobj->INV_WT[i], sizeof(struct numtx_s));
             NuFileRead(fh, &hgobj->joints[i].orient, sizeof(struct numtx_s));
-            NuFileRead(fh, &hgobj->joints[i].locator_offset, sizeof(struct NuVec));
+            NuFileRead(fh, &hgobj->joints[i].locator_offset, sizeof(struct nuvec_s));
             hgobj->joints[i].parent_ix = NuFileReadChar(fh);
             str_ix = NuFileReadInt(fh);
             if (str_ix != 0) {
@@ -279,24 +278,24 @@ void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
                     memset(hgobj->layers[i].gobjs, 0, hgobj->num_joints * 4);
                     for (j = 0; j < hgobj->num_joints; j++) {
                         if (NuFileReadChar(fh) != 0) {
-                            hgobj->layers[i].gobjs[j] = ReadNuIFFGeom(fh, hgobj->mtls);
+                            //hgobj->layers[i].gobjs[j] = ReadNuIFFGeom(fh, hgobj->mtls);
                         }
                     }
                 }
                 if (NuFileReadChar(fh) != 0) {
-                    hgobj->layers[i].skin_gobj = ReadNuIFFGeom(fh, hgobj->mtls);
+                    //hgobj->layers[i].skin_gobj = ReadNuIFFGeom(fh, hgobj->mtls);
                 }
                 if (NuFileReadChar(fh) != 0) {
                     hgobj->layers[i].blend_gobjs = NuMemAlloc(hgobj->num_joints * 4);
                     memset(hgobj->layers[i].blend_gobjs, 0, hgobj->num_joints * 4);
                     for (j = 0; j < hgobj->num_joints; j++) {
                         if (NuFileReadChar(fh) != 0) {
-                            hgobj->layers[i].blend_gobjs[j] = ReadNuIFFGeom(fh, hgobj->mtls);
+                            //hgobj->layers[i].blend_gobjs[j] = ReadNuIFFGeom(fh, hgobj->mtls);
                         }
                     }
                 }
                 if (NuFileReadChar(fh) != 0) {
-                    hgobj->layers[i].blend_skin_gobj = ReadNuIFFGeom(fh, hgobj->mtls);
+                    //hgobj->layers[i].blend_skin_gobj = ReadNuIFFGeom(fh, hgobj->mtls);
                 }
             }
         }
@@ -317,7 +316,7 @@ void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
         if (nshadow_data != 0) {
             hgobj->shadow_data = NuMemAlloc((nshadow_data + 1) * sizeof(struct NUSHADOWDATA_s));
             if (hgobj->shadow_data == NULL) {
-                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuhgobj.c", 0x274)("failed to alloc shadow data");           
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuhgobj.c", 0x274)("failed to alloc shadow data");
             }
             memset(hgobj->shadow_data, 0, (nshadow_data + 1) * sizeof(struct NUSHADOWDATA_s));
             hgobj->shadow_data[nshadow_data].joint = 0xFF;
@@ -350,12 +349,12 @@ void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
                     memset(hgobj->shadow_data[i].shadow_meshes, 0, hgobj->shadow_data[i].nshadow_meshes * 8);
                     for (j = 0; j < hgobj->shadow_data[i].nshadow_meshes; j++) {
                         {
-                            s32 bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
+                            s32 bytes = NuFileReadInt(fh) * sizeof(struct Vec4);
                             hgobj->shadow_data[i].shadow_meshes[j].normals = NuMemAlloc(bytes);
                             NuFileRead(fh, &hgobj->shadow_data[i].shadow_meshes[j].normals, bytes);
                         }
                         {
-                            s32 bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
+                            s32 bytes = NuFileReadInt(fh) * sizeof(struct Vec4);
                             hgobj->shadow_data[i].shadow_meshes[j].verts = NuMemAlloc(bytes);
                             NuFileRead(fh, hgobj->shadow_data[i].shadow_meshes[j].verts, bytes);
                         }
@@ -386,11 +385,5 @@ void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
         hgobj->max.z = 1.0;
         hgobj->max.y = 1.0;
     }
-}
-
-void ReadNuIFFGeomCntrl(filehandle handle, NuGeom geom)
-{
-  NuFileReadInt(handle);
-  return;
 }
 
