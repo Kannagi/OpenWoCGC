@@ -7,8 +7,11 @@
 //#include <memory.h>
 
 
+#ifndef FIRST
+    extern struct memexternal_s memext; //extern ?
+#endif
+
 extern struct memexternal_s* memexternal;
-struct memexternal_s memext;
 extern s32 highallocaddr;
 static s32 peakallocaddr;
 static s32 totalloc;

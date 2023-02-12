@@ -1,6 +1,8 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+
+
 #include<elf_systypes.h>
 
 union variptr_u superbuffer_base;
@@ -9,7 +11,7 @@ union variptr_u superbuffer_end;
 int main()
 {
     //DEMOInit(); hdw init
-    // GS_Init(); gamecube video init
+    // GS_Init(); gamecube video init , no PS2 I think
     // SS_Init(); sound init
 
     printf("\nStarting WoC Engine\n");
@@ -32,6 +34,7 @@ int main()
 
     InitCutScenes();
     */
+
     printf("\nNuTrigTable init...\n");
     NuTrigInit();
     return 0;

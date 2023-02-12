@@ -21,8 +21,13 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-O2" />
 			<Add option="-Wall" />
 		</Compiler>
+		<Linker>
+			<Add option="-s" />
+			<Add option="-lm" />
+		</Linker>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

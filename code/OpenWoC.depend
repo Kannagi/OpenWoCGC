@@ -241,3 +241,159 @@
 	<nucore/numem.h>
 	"nucamera.h"
 
+1676190870 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/main.c
+	<stdlib.h>
+	<stdio.h>
+	<elf_systypes.h>
+
+1676190941 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/elf_systypes.h
+	"types.h"
+
+1676142269 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/types.h
+	"elf_systypes.h"
+	"numath/numathtypes.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/numathtypes.h
+	"types.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nu3dx/nucamera.c
+	<nucore/numem.h>
+	"nucamera.h"
+
+1676191405 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/numem.h
+	"types.h"
+	"nucore/nucoretypes.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nucoretypes.h
+	"types.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nu3dx/nucamera.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"numath.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nu3dx/nu3dxtypes.h
+	"types.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath.h
+	"numath/nu_asm.h"
+	"numath/nufloat.h"
+	"numath/numtx.h"
+	"numath/nuplane.h"
+	"numath/nuquat.h"
+	"numath/nurand.h"
+	"numath/nutrig.h"
+	"numath/nuvec.h"
+	"numath/nuvec4.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nu_asm.h
+	"../types.h"
+	"numathtypes.h"
+	<numath.h>
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nufloat.h
+	"../types.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/numtx.h
+	"../types.h"
+	"numathtypes.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuplane.h
+	"../types.h"
+	"numathtypes.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuquat.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nurand.h
+	"../types.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nutrig.h
+	"../types.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuvec.h
+	"../types.h"
+	"numathtypes.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuvec4.h
+	"../types.h"
+	"numathtypes.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nuerror.c
+	"nuerror.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nuerror.h
+	"../types.h"
+	"nucoretypes.h"
+	<stdarg.h>
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.c
+	"nufile.h"
+	"nuerror.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.h
+	"types.h"
+	"nucoretypes.h"
+	"numem.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufpar.c
+	"nufpar.h"
+	"nufile.h"
+
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufpar.h
+	"types.h"
+	"nucore/nucoretypes.h"
+
+1676191257 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/numem.c
+	"numem.h"
+	"nuerror.h"
+	"nucoretypes.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nu_asm.c
+	"nu_asm.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nufloat.c
+	"nufloat.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/numtx.c
+	<nu3dx/nucamera.h>
+	"numtx.h"
+	"nu_asm.h"
+	"nutrig.h"
+	"nuvec.h"
+	"nufloat.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuplane.c
+	"nuplane.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuquat.c
+	"nuquat.h"
+	"nu_asm.h"
+
+1676131306 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nurand.c
+	"nurand.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nutrig.c
+	"nutrig.h"
+	<math.h>
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuvec.c
+	"nuvec.h"
+	"nu_asm.h"
+	"nutrig.h"
+
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/numath/nuvec4.c
+	"nuvec4.h"
+	"numtx.h"
+
+1676143467 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nusound/nusound.c
+	"nusound.h"
+
+1676191298 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nusound/nusound.h
+	"types.h"
+	"nusoundtypes.h"
+
+1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nusound/nusoundtypes.h
+	"../types.h"
+

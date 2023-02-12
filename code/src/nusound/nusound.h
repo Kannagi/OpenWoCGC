@@ -1,7 +1,7 @@
 #ifndef NUSOUND_H
 #define NUSOUND_H
 
-#include "../types.h"
+#include "types.h"
 #include "nusoundtypes.h"
 
 /*

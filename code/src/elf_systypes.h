@@ -23,6 +23,8 @@ struct tm //0x24
     int tm_isdst;
 };
 
+
+/*
 union
 {
     // Size: 0x4C
@@ -41,7 +43,7 @@ union
         unsigned int _nmalloc[30];
     } _unused;
 } _new; //0xF0
-
+*/
 // Size: 0x18
 struct _Bigint
 {

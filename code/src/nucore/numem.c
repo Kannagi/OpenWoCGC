@@ -1,3 +1,5 @@
+#define FIRST 0
+
 #include "numem.h"
 #include "nuerror.h"
 #include "nucoretypes.h";
