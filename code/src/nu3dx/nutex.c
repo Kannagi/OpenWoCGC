@@ -108,8 +108,8 @@ void NuTexDestroy(s32 id)
 	{
 		if (tinfo[id].tex.bits != NULL)
 		{
-			NuMemFree(tinfo[id].tex.bits);	//NuMemFree(tinfo[id].tex.bits);
-			tinfo[id].tex.bits = NULL;		//tinfo[id].tex.bits = NULL;
+			NuMemFree(tinfo[id].tex.bits);
+			tinfo[id].tex.bits = NULL;
 		}
 	}
 }
@@ -175,7 +175,7 @@ void NuTexSetTextureStates(struct numtl_s *mtl)
 {
   u32 flag_or_float;
 
-  /*if (mtl->tid == 0) {
+  if (mtl->tid == 0) {
     NuTexSetTexture(0,0);
     NudxFw_SetTextureState(0,D3DTSS_COLOROP,1);
     NudxFw_SetTextureState(0,D3DTSS_ALPHAOP,1);
@@ -189,37 +189,37 @@ void NuTexSetTextureStates(struct numtl_s *mtl)
     NudxFw_SetTextureState(0,D3DTSS_ALPHAOP,4);
     NudxFw_SetTextureState(0,D3DTSS_TEXCOORDINDEX,0);
     NudxFw_SetTextureState(0,D3DTSS_TEXTURETRANSFORMFLAGS,0);
-    flag_or_float = (uint)mtl->attrib >> 0x18 & 3;
+    //flag_or_float = (u32)mtl->attrib >> 0x18 & 3;     FIX IT
     if (flag_or_float == 0) {
-      GS_TexSetWrapModes(0,1);
+      //GS_TexSetWrapModes(0,1);
     }
     else if (flag_or_float == 2) {
-      GS_TexSetWrapModes(0,2);
+      //GS_TexSetWrapModes(0,2);
     }
     else if (flag_or_float == 3) {
-      GS_TexSetWrapModes(0,0);
+      //GS_TexSetWrapModes(0,0);
     }
     else {
-      GS_TexSetWrapModes(0,0);
+      //GS_TexSetWrapModes(0,0);
     }
-    flag_or_float = (uint)mtl->attrib >> 0x16 & 3;
+    //flag_or_float = (u32)mtl->attrib >> 0x16 & 3;     FIX IT
     if (flag_or_float == 0) {
-      GS_TexSetWrapModet(0,1);
+      //GS_TexSetWrapModet(0,1);
     }
     else if (flag_or_float == 2) {
-      GS_TexSetWrapModet(0,2);
+      //GS_TexSetWrapModet(0,2);
     }
     else if (flag_or_float == 3) {
-      GS_TexSetWrapModet(0,0);
+      //GS_TexSetWrapModet(0,0);
     }
     else {
-      GS_TexSetWrapModet(0,0);
+      //GS_TexSetWrapModet(0,0);
     }
     NudxFw_SetTextureState(0,D3DTSS_MAGFILTER,2);
     NudxFw_SetTextureState(0,D3DTSS_MINFILTER,2);
     NudxFw_SetTextureState(0,D3DTSS_MIPFILTER,2);
   }
-  return;*/
+  return;
 }
 
 

@@ -15,6 +15,7 @@ struct nufaceonitem_s* faceonmtllist[50];
 struct nufaceonitem_s faceonitem[512];
 struct nuotitem_s dynamic_glass_items[64];
 struct nuwateritem_s wateritem[512];
+s32 IsStencil = 0;
 
 enum nustencilmode_e stencil_mode = NUSTENCIL_NOSTENCIL;
 
@@ -220,7 +221,7 @@ void NuMtlSetStencilRender(enum nustencilmode_e mode)
 void NuMtlAddRndrItem(struct nusysmtl_s *mtl,struct nugeomitem_s *item)
 
 {
-  /*struct nustenitem_s *steni;
+  struct nustenitem_s *steni;
   struct nuwateritem_s *wateri;
   float fVar1;
   bool check;
@@ -239,16 +240,16 @@ void NuMtlAddRndrItem(struct nusysmtl_s *mtl,struct nugeomitem_s *item)
     }
     else {
       if ((hShader != 1) && (hShader != 0x1b)) {
-        if (((u32)(mtl->mtl).attrib >> 0x1e == 0) && (item->geom->mtls->fxid != '\x04')) {
+        /*if (((u32)(mtl->mtl).attrib >> 0x1e == 0) && (item->geom->mtls->fxid != '\x04')) {
           (item->hdr).next = mtl->rndrlist;
           mtl->rndrlist = &item->hdr;
           return;
-        }
+        }*/
         cnt = otitem_cnt + -1;
         otitem_cnt = cnt;
         otitem[cnt].mtl = mtl;
         otitem[cnt].hdr = &item->hdr;
-        fVar1 = NuRndrItemDist(&item->hdr);
+        //fVar1 = NuRndrItemDist(&item->hdr);
         otitem[cnt].dist = fVar1;
         NuMtlOTInsert(otitem + cnt);
         return;
@@ -279,7 +280,7 @@ void NuMtlAddRndrItem(struct nusysmtl_s *mtl,struct nugeomitem_s *item)
     }
     stenitem_cnt = stenitem_cnt + 1;
   }
-  return;*/
+  return;
 }
 
 
@@ -656,7 +657,7 @@ void NuMtlRenderFaceOn() {
           NuVecMtxRotate(&faceon_point_rotated, &faceon_list->point, &faceon_geom_xf);
 
           //NEED FIX!
-        //mtx_translation = (struct NuVec*)((struct nugeomitem_s*)cur_list)->mtx->_30;
+        //mtx_translation = (struct nuvec_s*)((struct nugeomitem_s*)cur_list)->mtx->_30;
           NuVecAdd(&faceon_world_pos, &faceon_point_rotated, mtx_translation);
 
 
@@ -715,7 +716,7 @@ void NuMtlRenderGlass(void)
   oti = dynamic_glass_items;
   i = 0;
   if (0 < dynamic_glass_item_cnt) {
-    //NudxFw_MakeBackBufferCopy(force_glass_screencopy_enable);
+    NudxFw_MakeBackBufferCopy(force_glass_screencopy_enable);
     if (0 < dynamic_glass_item_cnt) {
       do {
         i = i + 1;
@@ -740,7 +741,7 @@ void NuMtlRenderWater(void)
   wateri = (struct nustenitem_s *)wateritem;
   if (0 < wateritem_cnt) {
     i = 0;
-    //NudxFw_MakeBackBufferCopy(1);
+    NudxFw_MakeBackBufferCopy(1);
     if (0 < wateritem_cnt) {
       do {
         i = i + 1;
@@ -756,15 +757,14 @@ void NuMtlRenderWater(void)
   return;
 }
 
-/*
-void NuMtlRenderSten(void)
 
+void NuMtlRenderSten(void)
 {
   struct nustenitem_s *steni;
   s32 i;
 
    steni = stenitem;
-  GS_SetAlphaCompare(4,0);
+  //GS_SetAlphaCompare(4,0);
   i = 0;
   NudxFw_SetRenderState(0x7d,1);
   NudxFw_SetRenderState(0x46,0x207);
@@ -777,10 +777,10 @@ void NuMtlRenderSten(void)
   if (0 < stenitem_cnt) {
     do {
       if (steni->type == 1) {
-        GS_EnableLighting(0);
-        GS_SetMaterialSourceEmissive(1);
+        //GS_EnableLighting(0);
+        //GS_SetMaterialSourceEmissive(1);
         NuTexSetTexture(0,0);
-        GS_SetBlendSrc(1,1,0);
+        //GS_SetBlendSrc(1,1,0);
       }
       else {
         NuTexSetTexture(0,(steni->mtl->mtl).tid);
@@ -789,14 +789,14 @@ void NuMtlRenderSten(void)
       }
       if (steni->type == 1) {
         NudxFw_SetRenderState(0x45,0x1e01);
-        NuRndrItem(steni->hdr);
+        //NuRndrItem(steni->hdr);
       }
       i = i + 1;
       steni = steni->next;
     } while (i < stenitem_cnt);
   }
   stenitem_cnt = 0;
-  GS_EnableLighting(1);
+  //GS_EnableLighting(1);
   NudxFw_SetRenderState(0x7d,0);
   IsStencil = 0;
   return;
@@ -811,7 +811,7 @@ void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item)
   s32 cnt;
 
   if (0x40 < dynamic_glass_item_cnt) {
-    error = NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x980);
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x980);
     //(*error)("Too many dynamic glass items");
   }
   cnt = dynamic_glass_item_cnt;
@@ -819,7 +819,7 @@ void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item)
     check = 0 < dynamic_glass_item_cnt;
     tail = dynamic_glass_items + dynamic_glass_item_cnt;
     dynamic_glass_items[dynamic_glass_item_cnt].hdr = item;
-    dynamic_glass_items[cnt].mtl = (nusysmtl_s *)mtl;
+    dynamic_glass_items[cnt].mtl = (struct nusysmtl_s *)mtl;
     dynamic_glass_items[cnt].dist = 0.0;
     if (check) {
       dynamic_glass_items[cnt + -1].next = tail;
@@ -827,7 +827,7 @@ void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item)
     dynamic_glass_item_cnt = dynamic_glass_item_cnt + 1;
   }
   return;
-}*/
+}
 
 void NuMtlClearGlassList(void)
 
@@ -900,7 +900,7 @@ void NuMtlSetRenderStates(struct numtl_s *mtl)
   //GS_SetAlphaCompare(ivar2,0);
 LAB_800b40dc:
   //GS_SetAlphaCompare(4,0);
-  //NudxFw_SetRenderState(0x80,0);
+  NudxFw_SetRenderState(0x80,0);
   /*if (((u32)mtl->attrib & 0xc0000) == 0)
   {
     //GS_SetZCompare(1,1,GX_LEQUAL);
@@ -996,18 +996,18 @@ void NuMtlUVAnimation(struct nugobj_s *gobj)
   }
   do {
     mtls = geoms->mtls;
-    if ((*(uint *)&mtls->K & 0xf0) == 0x20) {
+    if ((*(u32 *)&mtls->K & 0xf0) == 0x20) {
       du = mtls->du;
 LAB_800b4334:
       dv = 0.0;
-      if ((*(uint *)&mtls->K & 0xf) == 2) {
+      if ((*(u32 *)&mtls->K & 0xf) == 2) {
         dv = mtls->dv;
       }
       if ((dv == 0.0) || (du == 0.0)) {
         if ((dv == 0.0) && (du != 0.0)) {
           if (geoms->vertex_type == NUVT_TC1) {
             numvts = geoms->vtxcount;
-            vt1 = (nuvtx_tc1_s *)geoms->hVB;
+            vt1 = (struct nuvtx_tc1_s *)geoms->hVB;
             if (0 < numvts) {
               do {
                 vt1->tc[0] = vt1->tc[0] + du + du;
@@ -1019,7 +1019,7 @@ LAB_800b4334:
         }
         else if (((dv != 0.0) && (du == 0.0)) && (geoms->vertex_type == NUVT_TC1)) {
           numvts = geoms->vtxcount;
-          vt2 = (nuvtx_tc1_s *)geoms->hVB;
+          vt2 = (struct nuvtx_tc1_s *)geoms->hVB;
           if (0 < numvts) {
             do {
               vt2->tc[1] = vt2->tc[1] + dv + dv;
@@ -1031,7 +1031,7 @@ LAB_800b4334:
       }
       else if (geoms->vertex_type == NUVT_TC1) {
         numvts = geoms->vtxcount;
-        vt3 = (nuvtx_tc1_s *)geoms->hVB;
+        vt3 = (struct nuvtx_tc1_s *)geoms->hVB;
         if (0 < numvts) {
           do {
             fVar1 = vt3->tc[1];
@@ -1045,7 +1045,7 @@ LAB_800b4334:
     }
     else {
       du = 0.0;
-      if ((*(uint *)&mtls->K & 0xf) == 2) goto LAB_800b4334;
+      if ((*(u32*)&mtls->K & 0xf) == 2) goto LAB_800b4334;
     }
     geoms = geoms->next;
     if (geoms == NULL) {

@@ -1,5 +1,6 @@
 #include <nucore/numem.h>
 #include "nucamera.h"
+#include "numath/numtx.h"
 
 s32 clip_enable = 1;
 struct Vec cam_axes = { 1.0f, 1.0f, 1.0f };
@@ -10,6 +11,10 @@ struct numtx_s pmtx;
 struct numtx_s vpcsmtx;
 static struct numtx_s vpmtx;
 static struct Vec4 frustrumplanes[6];
+static float zx;
+static float zy;
+static enum nucamfxmode_s camfx;
+static struct nureflect_s global_reflect;
 
 struct nucamera_s * NuCameraCreate(void)
 {
@@ -155,7 +160,7 @@ void NuCameraCalcFrustrumPlanes(void)	//CHECK
   return;
 }
 
-/*void NuCameraSet(struct nucamera_s* camera) //CHECK
+void NuCameraSet(struct nucamera_s* camera) //CHECK
 {
     struct numtx_s sp88;
     struct numtx_s sp48;
@@ -192,7 +197,7 @@ void NuCameraCalcFrustrumPlanes(void)	//CHECK
         glob_cam += 0x18;
     } while (cnt != 0);
     FixAxes(&global_camera.mtx);
-    if ((enum nucamfxmode_s) camfx == NUCAMFX_NONE) {
+    if (camfx == NUCAMFX_NONE) {
         NuMtxInv(&vmtx, &global_camera.mtx);
         NuMtxScale(&vmtx - 0x32BC, &global_camera.scale);
     } else {
@@ -227,14 +232,14 @@ void NuCameraCalcFrustrumPlanes(void)	//CHECK
         NuMtxMul(temp_r3, temp_r3, &sp8);
     }
     SetProjectionMatrix(&pmtx, global_camera.fov, global_camera.aspect, global_camera.nearclip, global_camera.farclip);
-    NuVpGetClippingMtx(&cmtx);
-    NuVpGetScalingMtx(&smtx);
+    //NuVpGetClippingMtx(&cmtx);
+    //NuVpGetScalingMtx(&smtx);
     NuMtxMulH(&vpmtx, &vmtx, &pmtx - 0x327C);
     NuMtxMulH(&vpcmtx,&vpmtx,&cmtx);
     NuMtxMulH(&vpcsmtx,&vpcmtx,&smtx);
     NuMtxMulH(&csmtx,&cmtx,&smtx);
-    NuMtxInvH(&icsmtx, &csmtx);
-    NuMtxInvH(&ivpcsmtx, &vpcsmtx);
+    //NuMtxInvH(&icsmtx, &csmtx);       TODO
+    //NuMtxInvH(&ivpcsmtx, &vpcsmtx);   TODO
     var_r28 = &vpcmtx;
     cnt = 0x30;
     var_r10 = &global_reflect.uvmtx;
@@ -275,10 +280,10 @@ void NuCameraCalcFrustrumPlanes(void)	//CHECK
     var_r8->_03 = var_r11_3->_03;
     zx = (f32) tan(global_camera.fov * 0.5) / global_camera.aspect;
     zy = tan(global_camera.fov * 0.5);
-    GS_SetViewMatrix(&vmtx);
-    GS_SetProjectionMatrix(&pmtx);
+    //GS_SetViewMatrix(&vmtx);
+    //GS_SetProjectionMatrix(&pmtx);
     NuCameraCalcFrustrumPlanes();
-}*/
+}
 
 void NuCameraTransformView(struct nuvec_s *dest,struct nuvec_s *src,int n,struct numtx_s *w)	//CHECK
 
@@ -325,20 +330,19 @@ void NuCameraTransformView(struct nuvec_s *dest,struct nuvec_s *src,int n,struct
 }
 
 
-/*
-void NuCameraTransformClip(nuvec_s *v,nuvec_s *b,int param_3,numtx_s *a)	//TODO
 
+void NuCameraTransformClip(struct nuvec_s *v,struct nuvec_s *b,int param_3,struct numtx_s *a)	//TODO
 {
   float *pfVar1;
   float *pfVar2;
   float *pfVar3;
   int size;
   float *pfVar4;
-  nuvec_s *pnVar5;
-  numtx_s dest;
+  struct nuvec_s *pnVar5;
+  struct numtx_s dest;
 
   pnVar5 = b + param_3;
-  if (a == (numtx_s *)0x0) {
+  if (a == NULL) {
     size = 0x30;
     pfVar1 = (float *)&vpcmtx;
     pfVar2 = (float *)&dest;
@@ -371,14 +375,13 @@ void NuCameraTransformClip(nuvec_s *v,nuvec_s *b,int param_3,numtx_s *a)	//TODO
 }
 
 
-*/
 
 
-/*void NuCameraTransformScreenClip(struct NuVec* dest, struct NuVec* src, s32 n, struct numtx_s* w) {
+void NuCameraTransformScreenClip(struct nuvec_s* dest, struct nuvec_s* src, s32 n, struct numtx_s* w) {
     struct numtx_s m;
     f32 temp_r0;
     s32 cnt;
-    struct NuVec* end;
+    struct nuvec_s* end;
     struct numtx_s* mTmp;
     struct numtx_s* vpcTmp;
 
@@ -415,28 +418,27 @@ loop_6:
         goto loop_6;
     }
     return;
-}*/
-/*
+}
 
-int NuCameraClipTestExtents(nuvec_s *min,nuvec_s *max,numtx_s *wm)		//TODO
+int NuCameraClipTestExtents(struct nuvec_s *min,struct nuvec_s *max,struct numtx_s *wm)		//TODO
 
 {
   int iVar1;
   int iVar2;
   int iVar3;
   int iVar4;
-  nuvec_s *pnVar5;
-  nuvec_s **ppnVar6;
+  struct nuvec_s *pnVar5;
+  struct nuvec_s **ppnVar6;
   int iVar7;
   int iVar8;
-  nuvec_s local_f0 [8];
-  nuvec_s local_90 [8];
-  nuvec_s *local_30 [2];
-  byte local_28 [4];
-  byte local_24;
-  byte local_23;
-  byte local_22;
-  byte local_21;
+  struct nuvec_s local_f0 [8];
+  struct nuvec_s local_90 [8];
+  struct nuvec_s *local_30 [2];
+  char local_28 [4];
+  char local_24;
+  char local_23;
+  char local_22;
+  char local_21;
 
   if (clip_enable == 0) {
     iVar1 = 1;
@@ -498,7 +500,7 @@ int NuCameraClipTestExtents(nuvec_s *min,nuvec_s *max,numtx_s *wm)		//TODO
         local_22 & local_23 & local_24 & local_28[3] & local_28[2] & local_28[0] & local_28[1]) ==  0
        ) {
       iVar1 = 1;
-      if ((byte)(local_21 |
+      if ((char)(local_21 |
                 local_22 |
                 local_23 | local_24 | local_28[3] | local_28[2] | local_28[0] | local_28[1]) != 0)  {
         iVar1 = 2;
@@ -512,13 +514,10 @@ int NuCameraClipTestExtents(nuvec_s *min,nuvec_s *max,numtx_s *wm)		//TODO
 }
 
 
-*/
-
-
-/*int NuCameraClipTestBoundingSphere(struct nuvec_s *gobj_centre,float *radius,struct numtx_s *wm)		//CHECK
+int NuCameraClipTestBoundingSphere(struct nuvec_s *gobj_centre,float *radius,struct numtx_s *wm)		//CHECK
 
 {
-  struct nuvec4_s *frp;
+  struct Vec4 *frp;
   int distanceFromPlane;
   struct nuvec_s world_centre;
 
@@ -543,14 +542,12 @@ int NuCameraClipTestExtents(nuvec_s *min,nuvec_s *max,numtx_s *wm)		//TODO
     } while (distanceFromPlane != 0);
   }
   return 1;
-}*/
+}
 
 
-/*
-
-s32 NuCameraClipTestPoints(struct NuVec* pnts, s32 cnt, struct numtx_s* wm) 	//CHECK
+s32 NuCameraClipTestPoints(struct nuvec_s* pnts, s32 cnt, struct numtx_s* wm) 	//CHECK
 {
-    struct NuVec v;
+    struct nuvec_s v;
     struct numtx_s m;
     f32 temp_f10;
     f32 temp_f13;
@@ -598,7 +595,7 @@ s32 NuCameraClipTestPoints(struct NuVec* pnts, s32 cnt, struct numtx_s* wm) 	//C
                 var_r0 |= 2;
             }
             temp_f10 = -v.z;
-            temp_f13 = (bitwise f32) v;
+            //temp_f13 = (bitwise f32) v;
             if (temp_f13 < (temp_f10 * zx)) {
                 var_r0 |= 4;
             }
@@ -633,11 +630,11 @@ void SetProjectionMatrix(struct numtx_s* mtx, f32 fFOV, f32 fAspect, f32 fNearPl
     dist = fFarPlane - fNearPlane;
     temp_f27 = 0.01;
     if (!(NuFabs(dist) > temp_f27)) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A2)("assert");
+        //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A2)("assert");
     }
     temp_f0 = fFOV * 0.5;
     if (!(NuFabs((f32) sin(temp_f0)) > temp_f27)) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A3)("assert");
+        //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A3)("assert");
     }
     temp_f29_2 = fFarPlane / dist;
     temp_f31 = cos(temp_f0);
@@ -651,7 +648,3 @@ void SetProjectionMatrix(struct numtx_s* mtx, f32 fFOV, f32 fAspect, f32 fNearPl
     mtx->_23 = 1.0;
     mtx->_22 = temp_f29_2;
 }
-
-
-
-*/

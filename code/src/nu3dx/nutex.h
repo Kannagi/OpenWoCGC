@@ -4,6 +4,7 @@
 #include "../types.h"
 #include "../nucore.h"
 #include "nu3dxtypes.h"
+#include "nuraster/nurastertypes.h"
 
 // Texture infos.
 extern struct nusystex_s tinfo[0x400];

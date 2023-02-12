@@ -7,6 +7,14 @@
 
 s32 initialised;
 s32 force_decal;
+s32 force_glass_screencopy_enable;
+
+
+enum nucamfxmode_s
+{
+    NUCAMFX_REFLECT = 1,
+    NUCAMFX_NONE = 0
+};
 
 
 enum gobjtype_s
@@ -117,6 +125,13 @@ struct nucamera_s
 	f32 farclip;
 	f32 portalnearclip;
 	struct nuvec_s scale;
+};
+
+
+struct nureflect_s {
+    float distortion;
+    struct numtx_s mtx;
+    struct numtx_s uvmtx;
 };
 
 typedef struct CamMtx CamMtx, *PCamMtx;
