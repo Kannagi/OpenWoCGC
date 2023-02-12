@@ -4,7 +4,7 @@ An open source, reverse engineered re-implementation of Crash Bandicoot: Wrath O
 ## todo list
 - [x] SDL link
 - [x] OpenGL link
-- [ ] SDL2 link
+- [ ] SDL Mixer li,k
 - [ ] OpenGL ES 3 or OpenGL 3 link
 
 - [ ] nu3dx function (8%)
