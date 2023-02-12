@@ -2,11 +2,12 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<types.h>
+#include<stdbool.h>
+#include<SDL/SDL.h>
 
 #include<elf_systypes.h>
 
 #include <GL/gl.h>
-#include<SDL/SDL.h>
 #ifdef __MINGW32__
 #undef main
 #endif
@@ -42,7 +43,7 @@ int main()
     InitCutScenes();
     */
 
-    printf("\nNuTrigTable init...\n");
+    printf("NuTrigTable init...\n");
     NuTrigInit();
 
     test_SDL_openGL();
@@ -57,6 +58,10 @@ int test_SDL_openGL()
     if ( SDL_Init(SDL_INIT_VIDEO) != 0 ) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
         return 1;
+    }
+    else
+    {
+        printf("\nSDL initialized \n");
     }
 
 
@@ -183,7 +188,22 @@ int test_SDL_openGL()
     SDL_GL_SwapBuffers();
 
     // Wait for 3 seconds to give us a chance to see the image
-    SDL_Delay(3000);
+    //SDL_Delay(3000);
+    bool running = true;
+    while(running)
+    {
+        SDL_Event event;
+        //Start event loop
+        while(SDL_PollEvent(&event))
+        {
+            //Handle each specific event
+            if(event.type == SDL_QUIT)
+            {
+                running = false;
+            }
+        }
+
+    }
 
     // Now we can delete the OpenGL texture and close down SDL
     glDeleteTextures( 1, &texture );
