@@ -3,11 +3,12 @@
 
 // If the backbuffer has been grabbed this frame.
 s32 backbuffer_grabbed_this_frame = 0;
+static struct tagRECT g_rcScreenRect;
+int iss3cmp;
+char DebugText[256];
 
 // Back buffer TID.
-s32 backbuffer_tid = 0x207F;.
-
-struct rendertargetlist_s g_pRTArray[16];
+s32 backbuffer_tid = 0x207F;
 
 void ResetFwGlobals()
 {
@@ -28,7 +29,7 @@ void InitRenderTargets(void)
   int next;
   rendertargetlist_s *tglist;
   int i;
-  
+
   memset(g_pRTArray,0,0x1c0);
   g_pRTArray[0].last = -1;
   g_pRTArray[0].next = 1;
@@ -102,7 +103,7 @@ s32 NudxFw_Init()
 }
 
 
-s32 NudxFw_SetRenderTargetSurface(D3DSurface *RenderTarget,D3DSurface *Zbuffer)
+s32 NudxFw_SetRenderTargetSurface(struct D3DSurface *RenderTarget,struct D3DSurface *Zbuffer)
 
 {
   return 0;
@@ -115,7 +116,7 @@ s32 NudxFw_BeginScene(s32 hRT)
   if ((hRT + -1 != g_dwCurrentRT) || (hRT != -1)) {
     SetRenderTarget(hRT);
   }
-  GS_BeginScene();
+  //GS_BeginScene();
   return 0;
 }
 
@@ -128,7 +129,7 @@ s32 SetRenderTarget(u32 hRT)
 s32 NudxFw_Clear(s32 flags,s32 colour,float depth)
 
 {
-  GS_RenderClear(flags,colour,depth,0);
+  //GS_RenderClear(flags,colour,depth,0);
   return 0;
 }
 
@@ -136,8 +137,8 @@ int NudxFw_FlipScreen(int hRT,int ss)
 
 {
   NudxFw_MakeBackBufferCopy(0);
-  GS_FlipScreen();
-  GS_RenderClear(3,0,1.0,0);
+  //GS_FlipScreen();
+  //GS_RenderClear(3,0,1.0,0);
   if (hLoadScreenThread == NULL) {
     NuAnimUV();
   }
@@ -145,40 +146,37 @@ int NudxFw_FlipScreen(int hRT,int ss)
 }
 
 
-s32 NudxFw_SetRenderState(_D3DRENDERSTATETYPE state, u32 data)
+s32 NudxFw_SetRenderState(enum _D3DRENDERSTATETYPE state, u32 data)
 
 {
-  GS_SetRenderState(state,data);	//Empty function
+  //GS_SetRenderState(state,data);	//Empty function
   return 0;
 }
 
 void GS_SetRenderState(int state,int data)
-
 {
   return;
 }
 
-s32 NudxFw_SetTextureState(u32 stage, _D3DTEXTURESTAGESTATETYPE state, u32 data)
-
+s32 NudxFw_SetTextureState(u32 stage, enum _D3DTEXTURESTAGESTATETYPE state, u32 data)
 {
-  GS_SetTextureStageState(); //Empty function
+  //GS_SetTextureStageState(); //Empty function
   return 0;
 }
 
 void GS_SetTextureStageState(void)
-
 {
   return;
 }
 
-D3DSurface * NudxFw_GetBackBuffer(void)
+struct D3DSurface * NudxFw_GetBackBuffer(void)
 
 {
   return g_pddsBackBuffer;
 }
 
 
-D3DSurface * NudxFw_GetZBuffer(void)
+struct D3DSurface * NudxFw_GetZBuffer(void)
 
 {
   return g_pddsZBuffer;
@@ -186,12 +184,11 @@ D3DSurface * NudxFw_GetZBuffer(void)
 
 
 
-s32 CreateEnvironment(HWND__ *hwnd)
-
+s32 CreateEnvironment(struct HWND__ *hwnd)
 {
   s32 RT;
   s32 next;
-  
+
   next = CreateDirect3D(hwnd);
   if (-1 < next) {
     GetFullscreenBuffers(g_pd3dDevice);
@@ -220,7 +217,7 @@ s32 CreateEnvironment(HWND__ *hwnd)
   return next;
 }
 
-s32 GetFullscreenBuffers(D3DDevice *lpdev)
+s32 GetFullscreenBuffers(struct D3DDevice *lpdev)
 
 {
   g_rcScreenRect.left = 0;
@@ -232,61 +229,60 @@ s32 GetFullscreenBuffers(D3DDevice *lpdev)
   return 0;
 }
 
-s32 CreateDirect3D(HWND__ *hwnd)
+s32 CreateDirect3D(struct HWND__ *hwnd)
 
 {
   struct _GS_VIEWPORT gsvp;
   struct _D3DVIEWPORT8 vp;
-  
-  GS_RenderClear(1,0,1.0,0);
-  GS_RenderClear(2,0,1.0,0);
-  GS_RenderClear(0xf0,0,0.0,0);
-  GS_FlipScreen();
-  GS_RenderClear(0xf0,0,0.0,0);
-  GS_FlipScreen();
+
+  //GS_RenderClear(1,0,1.0,0);
+  //GS_RenderClear(2,0,1.0,0);
+  //GS_RenderClear(0xf0,0,0.0,0);
+  //GS_FlipScreen();
+  //GS_RenderClear(0xf0,0,0.0,0);
+  //GS_FlipScreen();
   memset(&vp,0,0x18);
   vp.Height = 0x1c0;
   vp.Width = PHYSICAL_SCREEN_X;
   vp.MaxZ = 1.0;
   gsvp.X = vp.X;
   gsvp.Y = vp.Y;
-  gsvp.width = PHYSICAL_SCREEN_X;
-  gsvp.height = 0x1c0;
+  gsvp.Width = PHYSICAL_SCREEN_X;
+  gsvp.Height = 0x1c0;
   gsvp.MaxZ = 1.0;
   gsvp.MinZ = vp.MinZ;
-  GS_SetViewport(&gsvp);
+  //GS_SetViewport(&gsvp);
   return 0;
 }
 
 
-D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
+struct D3DTexture * NudxTx_Create(struct nutex_s *texture,int rendertargetflag)		//TODO!!!
 
 {
-  byte *pbVar1;
-  byte *pbVar2;
+  char *pbVar1;
+  char *pbVar2;
   char cVar3;
-  byte bVar4;
+  char bVar4;
   float fVar5;
-  uint uVar6;
+  u32 uVar6;
   short sVar7;
   int tpid;
-  uint *bits_00;
-  NUERRORFUNC *e;
-  uint uVar8;
-  uint *puVar9;
-  uint *puVar10;
-  uint uVar11;
+  u32 *bits_00;
+  u32 uVar8;
+  u32 *puVar9;
+  u32 *puVar10;
+  u32 uVar11;
   int *pal;
-  nutextype_e type;
-  uint uVar12;
+  enum nutextype_e type;
+  u32 uVar12;
   int height;
   void *bits;
   int width;
   int iVar13;
-  uint unaff_r30;
+  u32 unaff_r30;
   int mmcnt;
   int width_00;
-  
+
   type = texture->type;
   width = texture->width;
   height = texture->height;
@@ -295,32 +291,32 @@ D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
   if (iss3cmp != 0) {
     mmcnt = texture->mmcnt;
     tpid = GetTPID();
-    GS_TexCreateNU(type,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return (D3DTexture *)0x0;
+    //GS_TexCreateNU(type,width,height,bits,mmcnt,rendertargetflag,tpid);
+    return NULL;
   }
   if (type == 0x82) {
     mmcnt = texture->mmcnt;
     tpid = GetTPID();
-    GS_TexCreateNU(0x82,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return (D3DTexture *)0x0;
+    //GS_TexCreateNU(0x82,width,height,bits,mmcnt,rendertargetflag,tpid);
+    return NULL;
   }
   if (type == 0x81) {
     mmcnt = texture->mmcnt;
     tpid = GetTPID();
-    GS_TexCreateNU(0x81,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return (D3DTexture *)0x0;
+    //GS_TexCreateNU(0x81,width,height,bits,mmcnt,rendertargetflag,tpid);
+    return NULL;
   }
   if (type == 0x80) {
     mmcnt = texture->mmcnt;
     tpid = GetTPID();
-    GS_TexCreateNU(0x80,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return (D3DTexture *)0x0;
+    //GS_TexCreateNU(0x80,width,height,bits,mmcnt,rendertargetflag,tpid);
+    return NULL;
   }
   tpid = width * height;
   uVar12 = 0;
   uVar11 = 0;
   mmcnt = 0;
-  bits_00 = (uint *)malloc_x(tpid * 4);
+  bits_00 = (u32 *)malloc_x(tpid * 4);
   texture->decal = 0;
   texture->linear = 0;
   if (type == NUTEX_RGB24) {
@@ -335,12 +331,12 @@ D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
         if (0 < width) {
           do {
                     /* WARNING: Load size is inaccurate */
-            bVar4 = *bits;
+            //bVar4 = *bits;
             uVar12 = uVar12 + 1;
-            pbVar1 = (byte *)((int)bits + 1);
-            pbVar2 = (byte *)((int)bits + 2);
+            pbVar1 = (char *)((int)bits + 1);
+            pbVar2 = (char *)((int)bits + 2);
             bits = (void *)((int)bits + 3);
-            *puVar9 = ((uint)bVar4 + (uint)*pbVar1 * 0x100 + (uint)*pbVar2 * 0x10000) - 0x1000000;
+            *puVar9 = ((u32)bVar4 + (u32)*pbVar1 * 0x100 + (u32)*pbVar2 * 0x10000) - 0x1000000;
             cVar3 = *(char *)((int)puVar9 + 3);
             *(char *)((int)puVar9 + 3) = *(char *)((int)puVar9 + 1);
             *(char *)((int)puVar9 + 1) = cVar3;
@@ -364,11 +360,11 @@ D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
         if (0 < width) {
           do {
                     /* WARNING: Load size is inaccurate */
-            uVar8 = (uint)*bits;
+            //uVar8 = (u32)*bits;
             uVar8 = (uVar8 & 0x1f) << 3 | (uVar8 & 0x3e0) << 6 | (uVar8 & 0x7c00) << 9;
-            if ((*bits & 1) != 0) {
+            /*if ((*bits & 1) != 0) {
               uVar8 = uVar8 | 0xff000000;
-            }
+            }*/
             *puVar9 = uVar8;
             bits = (void *)((int)bits + 2);
             cVar3 = *(char *)((int)puVar9 + 3);
@@ -394,9 +390,9 @@ D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
         if (0 < width) {
           do {
                     /* WARNING: Load size is inaccurate */
-            *puVar9 = *bits;
-            fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)((int)puVar9 + 3) ^ 0x800000 00
-                                            ) - 4503601774854144.0) / 255.0;
+            //*puVar9 = *bits;
+            /*fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)((int)puVar9 + 3) ^ 0x800000 00
+                                            ) - 4503601774854144.0) / 255.0;*/
             if (0.063 <= fVar5) {
               if (fVar5 <= 0.9) {
                 uVar11 = uVar11 + 1;
@@ -432,23 +428,23 @@ D3DTexture * NudxTx_Create(nutex_s *texture,int rendertargetflag)		//TODO!!!
       do {
         if (type != NUTEX_PAL4) {
           if (type == NUTEX_PAL8) {
-            uVar6 = (uint)*(byte *)((int)bits + uVar8);
+            //uVar6 = (u32)*(char *)((int)bits + uVar8);
             goto LAB_800cf184;
           }
         }
         else {
           if ((uVar8 & 1) == 0) {
-            uVar6 = *(byte *)((int)bits + (int)uVar8 / 2) & 0xf;
+            //uVar6 = *(char *)((int)bits + (int)uVar8 / 2) & 0xf;
           }
           else {
-            uVar6 = (uint)(*(byte *)((int)bits + (int)uVar8 / 2) >> 4);
+            //uVar6 = (u32)(*(char *)((int)bits + (int)uVar8 / 2) >> 4);
           }
 LAB_800cf184:
           unaff_r30 = pal[uVar6];
         }
         *puVar10 = unaff_r30;
-        fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)puVar10 ^ 0x80000000) -
-                       4503601774854144.0) / 255.0;
+        /*fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)puVar10 ^ 0x80000000) -
+                       4503601774854144.0) / 255.0;*/
         if (0.063 <= fVar5) {
           if (fVar5 <= 0.9) {
             uVar11 = uVar11 + 1;
@@ -466,15 +462,15 @@ LAB_800cf184:
     }
   }
   else {
-    e = NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c",0x187);
-    (*e)("NudxTx_Create:\tUnknown texture type!");
+    //e = NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c",0x187);
+    //(*e)("NudxTx_Create:\tUnknown texture type!");
   }
   if (((uVar12 == 0) || (uVar11 == 0)) || (mmcnt == 0)) {
     sVar7 = 0;
   }
   else {
-    if (0.6 <= (float)((double)CONCAT44(0x43300000,uVar11 ^ 0x80000000) - 4503601774854144.0) /
-               (float)((double)CONCAT44(0x43300000,uVar12 ^ 0x80000000) - 4503601774854144.0))
+   /* if (0.6 <= (float)((double)CONCAT44(0x43300000,uVar11 ^ 0x80000000) - 4503601774854144.0) /
+               (float)((double)CONCAT44(0x43300000,uVar12 ^ 0x80000000) - 4503601774854144.0))*/
     goto LAB_800cf290;
     sVar7 = 1;
   }
@@ -484,8 +480,8 @@ LAB_800cf290:
   width_00 = texture->width;
   iVar13 = texture->height;
   tpid = GetTPID();
-  GS_TexCreateNU(type,width_00,iVar13,bits_00,mmcnt,rendertargetflag,tpid);
+  //GS_TexCreateNU(type,width_00,iVar13,bits_00,mmcnt,rendertargetflag,tpid);
   free_x(bits_00);
   DebugText[0] = '\0';
-  return (D3DTexture *)0x0;
+  return NULL;
 }

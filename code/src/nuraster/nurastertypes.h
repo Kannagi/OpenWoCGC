@@ -2,10 +2,11 @@
 #define NURASTERTYPES_H
 
 #include "types.h"
+#include "nu3dx/nu3dxtypes.h"
 
 // TODO: TYPES!!!
 
-static rendertargetlist_s g_pRTArray[16];
+static struct rendertargetlist_s g_pRTArray[16];
 static struct D3DSurface* g_pddsStencilBuffer;
 static unsigned int g_dwRenderHeight;
 static unsigned int g_dwRenderWidth;
@@ -33,7 +34,12 @@ struct _GXColor
     unsigned char a;
 };
 
-
+struct tagRECT {
+    int left;
+    int top;
+    int right;
+    int bottom;
+};
 
 // Size: 0x1
 struct D3DDevice
@@ -66,6 +72,44 @@ struct D3DDevice
 };
 
 
+typedef enum _D3DTEXTURESTAGESTATETYPE {
+    D3DTSS_ADDRESSU=0,
+    D3DTSS_ADDRESSV=1,
+    D3DTSS_ADDRESSW=2,
+    D3DTSS_MAGFILTER=3,
+    D3DTSS_MINFILTER=4,
+    D3DTSS_MIPFILTER=5,
+    D3DTSS_MIPMAPLODBIAS=6,
+    D3DTSS_MAXMIPLEVEL=7,
+    D3DTSS_MAXANISOTROPY=8,
+    D3DTSS_COLORKEYOP=9,
+    D3DTSS_COLORSIGN=10,
+    D3DTSS_ALPHAKILL=11,
+    D3DTSS_COLOROP=12,
+    D3DTSS_DEFERRED_TEXTURE_STATE_MAX=12,
+    D3DTSS_COLORARG0=13,
+    D3DTSS_COLORARG1=14,
+    D3DTSS_COLORARG2=15,
+    D3DTSS_ALPHAOP=16,
+    D3DTSS_ALPHAARG0=17,
+    D3DTSS_ALPHAARG1=18,
+    D3DTSS_ALPHAARG2=19,
+    D3DTSS_RESULTARG=20,
+    D3DTSS_TEXTURETRANSFORMFLAGS=21,
+    D3DTSS_BUMPENVMAT00=22,
+    D3DTSS_DEFERRED_MAX=22,
+    D3DTSS_BUMPENVMAT01=23,
+    D3DTSS_BUMPENVMAT11=24,
+    D3DTSS_BUMPENVMAT10=25,
+    D3DTSS_BUMPENVLSCALE=26,
+    D3DTSS_BUMPENVLOFFSET=27,
+    D3DTSS_TEXCOORDINDEX=28,
+    D3DTSS_BORDERCOLOR=29,
+    D3DTSS_COLORKEYCOLOR=30,
+    D3DTSS_MAX=31,
+    D3DTSS_FORCE_DWORD=2147483647
+} _D3DTEXTURESTAGESTATETYPE;
+
 // Size: 0x18
 struct _D3DVIEWPORT8
 {
@@ -86,6 +130,11 @@ struct _GS_VIEWPORT
     unsigned long Height;
     float MinZ;
     float MaxZ;
+};
+
+struct HWND__
+{
+    int unused;
 };
 
 
@@ -239,5 +288,8 @@ enum _D3DRENDERSTATETYPE
     D3DRS_PSALPHAINPUTS0 = 0,
     D3DRS_PS_MIN = 0
 };
+
+
+
 
 #endif // !NURASTERTYPES_H
