@@ -5,7 +5,7 @@
 #include "nucoretypes.h"
 #include "numem.h"
 //#include <string.h>
-//#include <stdio.h>
+#include <stdio.h>
 //#include <memory.h>
 
 #define MAX_FILES 10
@@ -42,7 +42,7 @@ extern s32 bytesleft;
 extern s32 thisbytesread;
 
 // File pointers.
-extern struct __sFILE* fpointers[MAX_FILES];
+extern FILE* fpointers[MAX_FILES];
 
 // Memory files.
 extern struct numemfile_s memfiles[MAX_MEM_FILES];

@@ -12,7 +12,7 @@ s32 badGameDisk = 0;
 fileHandle currentpointer = -1;
 s32 bytesleft = 0;
 s32 thisbytesread = 0;
-struct __sFILE* fpointers[MAX_FILES] = {
+FILE* fpointers[MAX_FILES] = {
 	NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL
 };
@@ -45,7 +45,7 @@ void NuFileInitEx(int deviceid, int rebootiop)
 s32 NuFileExists(char* filename)
 {
 	char buf[128];
-	struct __sFILE* filep;
+	FILE* filep;
 
 	memset(buf, 0, sizeof(buf));
 	buf[0] = '.';
@@ -100,13 +100,14 @@ fileHandle NuFileOpen(char* filename, enum nufilemode_e mode)
 		{
 			if (fpointers[i] == NULL)
 			{
-				struct __sFILE* f = fopen(namebuf, mode == NUFILE_READ ? "rb" : "wb");
-				printf("Test");
+				struct FILE* f = fopen(namebuf, mode == NUFILE_READ ? "rb" : "wb");
+				//printf("Test");
 				if (f == NULL)
 				{
+				    printf("file null\n");
 					return NULL;
 				}
-				printf("Test2");
+				//printf("/nreaded");
 				bytesleft = (s32)fpointers[i];
 				fpointers[i] = f;
 
@@ -271,6 +272,7 @@ s32 NuFileSeek(fileHandle handle, s32 offset, s32 origin)
 	{
 		if (origin == NUFILE_SEEK_CURRENT)
 		{
+		    printf("seek curr...\n");
 			offset -= bytesleft;
 		}
 		bytesleft = 0;
@@ -287,16 +289,23 @@ s32 NuFileSize(char* fileName)
 	s32 ret = -1;
 	if (fileName != NULL && *fileName != 0)
 	{
-		if (NuFileExists(fileName))
-		{
-			fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
-			if (handle != NULL)
+	    s32 check = NuFileExists(fileName);
+	    if (check != 0)
+        {
+            printf("file exist...\n");
+            fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
+            if (handle != NULL)
 			{
 				NuFileSeek(handle, 0, NUFILE_SEEK_END);
 				ret = NuFilePos(handle);
 				NuFileClose(handle);
 			}
-		}
+        }
+		else
+        {
+            printf("file non-existent...\n");
+            return 0;
+        }
 	}
 	return ret;
 }
@@ -326,13 +335,13 @@ s32 NuFileLoadBuffer(char* fileName, void* dest, s32 maxSize)
 	s32 size = NuFileSize(fileName);
 	if (size == 0)
 	{
-		printf("%d", size);
+		printf("file size: %d\n", size);
 		error_func e = NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 321);
 		e("File %s does not exist!", fileName);
 	}
 	if (size > maxSize)
 	{
-		printf("%d", size);
+		printf("file size: %d\n", size);
 		error_func e = NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 327);
 		e("Super Buffer out of space!");
 
@@ -342,10 +351,10 @@ s32 NuFileLoadBuffer(char* fileName, void* dest, s32 maxSize)
 		fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
 		if (handle != NULL)
 		{
-			printf("done");
+			printf("filebuffer reading...\n");
 			NuFileRead(handle, &dest, size);
-			NuFileClose(handle);
-			return size;
+			/*NuFileClose(handle);
+			return size;*/
 
 		}
 	}
@@ -373,8 +382,8 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 		datacounter += size;
 		if (size > bytesleft)
 		{
-			memcpy(data, bpointer, bytesleft);
-			u8* tmp = (u8*)((u32)data + bytesleft);
+			memcpy(data, bpointer, bytesleft);      //causes crash
+			u8* tmp = (u8*)((s32)data + bytesleft);
 			thisbytesread += size;
 			u32 read = size - bytesleft;
 			size = bytesleft;
@@ -383,14 +392,14 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 				read -= 0x10000;
 				u32 dat = fread(filebuffer, 1, 0x10000, fpointers[f]);
 				size += dat;
-				memcpy(tmp, filebuffer, 0x10000);
+				memcpy(tmp, filebuffer, 0x10000);   //causes crash
 				tmp = (u8*)((u32)tmp + 0x10000);
 			}
 			bytesleft = 0;
 			if (read > 0)
 			{
 				u32 dat = fread(filebuffer, 1, 0x10000, fpointers[f]);
-				memcpy(tmp, filebuffer, read);
+				memcpy(tmp, filebuffer, read);  //causes crash
 				size += dat;
 				bytesleft = dat - read;
 				bpointer = ((u32)filebuffer + read);
@@ -398,7 +407,7 @@ s32 NuFileRead(fileHandle handle, void* data, s32 size)
 		}
 		else
 		{
-			memcpy(data, bpointer, size);
+			memcpy(data, bpointer, size);   //causes crash
 			bpointer = ((u32)bpointer + size);
 			bytesleft -= size;
 			thisbytesread += size;

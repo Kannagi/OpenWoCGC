@@ -4,6 +4,7 @@
 #include<types.h>
 #include<stdbool.h>
 #include<SDL/SDL.h>
+#define GL_BGR 0x80E0
 
 #include<elf_systypes.h>
 
@@ -12,6 +13,7 @@
 #undef main
 #endif
 
+void* pixel_dat;
 union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
 int test_SDL_openGL();
@@ -42,6 +44,8 @@ int main()
 
     InitCutScenes();
     */
+    //pixel_dat = malloc_x(0x4000c);
+    //NuFileLoadBuffer("licnin.s3",pixel_dat,0x2000c);
 
     printf("NuTrigTable init...\n");
     NuTrigInit();
