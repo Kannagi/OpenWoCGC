@@ -241,13 +241,14 @@
 	<nucore/numem.h>
 	"nucamera.h"
 
-1676205972 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/main.c
+1676216890 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/main.c
 	<stdlib.h>
 	<stdio.h>
 	<types.h>
+	<stdbool.h>
+	<SDL/SDL.h>
 	<elf_systypes.h>
 	<GL/gl.h>
-	<SDL/SDL.h>
 
 1676190941 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/elf_systypes.h
 	"types.h"
@@ -331,14 +332,15 @@
 	"nucoretypes.h"
 	<stdarg.h>
 
-1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.c
+1676216890 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.c
 	"nufile.h"
 	"nuerror.h"
 
-1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.h
+1676216890 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.h
 	"types.h"
 	"nucoretypes.h"
 	"numem.h"
+	<stdio.h>
 
 1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufpar.c
 	"nufpar.h"
