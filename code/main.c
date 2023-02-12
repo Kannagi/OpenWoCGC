@@ -58,8 +58,8 @@ int main()
     NuTexInit();
     printf("NuGobj init...\n");
     NuGobjInit();
-    //printf("NuMtl init...\n");
-    //NuMtlInit();
+    printf("NuMtl init...\n");
+    NuMtlInit();
     //NuRndrInitEx();
     //printf("NuLight init...\n");
     //NuLightInit();
@@ -77,13 +77,13 @@ int main()
     tex.bits = pixel_dat;
     texinfo = NuTexCreate(&tex);
     iss3cmp = 0;
-    //mtl = NuMtlCreate(1);
-    //attr = mtl->attrib;
-    /*mtl->tid = texinfo;
+    mtl = NuMtlCreate(1);
+    attr = mtl->attrib;
+    mtl->tid = texinfo;
     (mtl->diffuse).b = 1.0;
     mtl->alpha = 0.999;
     (mtl->diffuse).r = 1.0;
-    (mtl->diffuse).g = 1.0;*/
+    (mtl->diffuse).g = 1.0;
     //mtl->attrib = (numtlattrib_s)((uint)attr & 0xcc0cffff | 0x16e8000);   need fix
     //firstscreenfade(lic,1);
     //nuvideo_global_vbcnt = 0;

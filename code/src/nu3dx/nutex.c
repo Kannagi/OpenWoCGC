@@ -53,9 +53,9 @@ s32 GetTPID()
 
 s32 NuTexCreate(struct nutex_s *nutex)
 {
-  struct D3DTexture *surface;
+  struct D3DTexture *surface;   //replace with SDL_Surface *surface;
 
-  //surface = NudxTx_Create(nutex,(uint)(NUTEX_BB < nutex->type));
+  //surface = NudxTx_Create(nutex,(uint)(NUTEX_BB < nutex->type));  //look inside this function
   tinfo[tpid].dds = surface;
   tinfo[tpid].tex.bits = NULL;
   tinfo[tpid].tex.type = nutex->type;

@@ -168,12 +168,12 @@ void NuMtlInsert(struct nusysmtl_s *sm)    //need fix
     list = list->next;
   }
   if (last == NULL) {
-    sm->next = smlist;
+    //sm->next = smlist;
     smlist = sm;
   }
   else {
-    sm->last = last;
-    sm->next = last->next;
+    //sm->last = last;
+    //sm->next = last->next;
     last->next = sm;
   }
   if (sm->next == NULL) {

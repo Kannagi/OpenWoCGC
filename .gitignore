@@ -34,3 +34,8 @@ code/OpenWoC.cbp
 code/OpenWoC.depend
 code/OpenWoC.cbp
 code/OpenWoC.depend
+*.o
+*.cbp
+*.depend
+*.layout
+*.exe
