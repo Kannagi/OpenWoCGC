@@ -3,11 +3,10 @@
 
 
 void NuRndrInit(void)
-
 {
   short *timer;
   int lp;
-  
+
   lp = 0x20;
   NuRndrShadowCnt = 0;
   timer = &NuRndrWaterRipDat[0x1f].timer;
@@ -21,10 +20,9 @@ void NuRndrInit(void)
 
 
 int NuRndrBeginScene(int hRT)
-
 {
-  uint bs;
-  
+  u32 bs;
+
   if (rndrmtx_cnt < rndrmtx_cnt_max) {
     rndrmtx_cnt_max = rndrmtx_cnt;
   }
@@ -43,11 +41,11 @@ int NuRndrBeginScene(int hRT)
 void NuRndrEndScene(void)
 
 {
-  if (GS_Parallax != 0) {
+  /*if (GS_Parallax != 0) {
     GS_SetZCompare(0,0,GX_NEVER);
-  }
+  }*/
   NuRndrFlush();
-  GS_EndScene();
+  //GS_EndScene();
   return;
 }
 
@@ -56,7 +54,7 @@ void NuRndrFlush(void)
 
 {
   NuMtlRender();
-  NuLightClearStoredLights();
+  //NuLightClearStoredLights();
   return;
 }
 
@@ -64,7 +62,7 @@ void NuRndrClear(s32 flags,s32 colour,f32 depth)
 
 {
   s32 fwf;
-  
+
     fwf = 0;
   if ((flags & 1U) != 0) {
     fwf = 0xf0;
@@ -83,7 +81,7 @@ void NuRndrSwapScreen(int hRT)
 
 {
   NudxFw_SetBackBufferCopied(1);
-  if (Pad[0] != NULL) {
+  /*if (Pad[0] != NULL) {
     if (Pad[0]->old_paddata == 0) {
       padflag = 1;
     }
@@ -95,7 +93,7 @@ void NuRndrSwapScreen(int hRT)
       NudxFw_FlipScreen(hRT,1);
       return;
     }
-  }
+  }*/
   NudxFw_FlipScreen(hRT,0);
   return;
 }
@@ -137,7 +135,7 @@ int NuRndrGobj(nugobj_s *gobj,numtx_s *wm,float **blendvals)
   nuvec_s bb_min;
   nuvec_s bb_max;
   uint local_4c;
-  
+
   local_4c = (uint)(in_cr0 & 0xf) << 0x1c | (uint)(in_cr1 & 0xf) << 0x18 |
              (uint)(in_cr2 & 0xf) << 0x14 | (uint)(in_cr3 & 0xf) << 0x10 |
              (uint)(unaff_cr4 & 0xf) << 0xc | (uint)(in_cr5 & 0xf) << 8 | (uint)(in_cr6 & 0xf) <<  4
@@ -312,7 +310,7 @@ int NuRndrGrassGobj(nugobj_s *gobj,numtx_s *wm,float **blendvals)
   double dVar16;
   nuvec_s local_70;
   nuvec_s local_60;
-  
+
   iVar13 = -1;
   if (gobj != (nugobj_s *)0x0) {
     dVar16 = 100.0;
@@ -443,7 +441,7 @@ int NuRndrGobjSkin2(nugobj_s *gobj,int nummtx,numtx_s *wm,float **blendvals)
   numtx_s *m;
   nugeom_s *geom;
   nusysmtl_s **sm2;
-  
+
   if (gobj->culltype == 0) {
     cclip = NuCameraClipTestBoundingSphere
                       (&gobj->bounding_box_center,&gobj->bounding_radius_from_center,wm);
@@ -532,35 +530,34 @@ LAB_800b4f6c:
 */
 
 
-int NuRndrTri2d(nuvtx_tltc1_s *vtx,numtl_s *mtl)
+int NuRndrTri2d(struct nuvtx_tltc1_s *vtx,struct numtl_s *mtl)
 
 {
-  NUERRORFUNC *e;
   int stride;
   int buf;
-  nuvtx_tltc1_s *vb;
+  struct nuvtx_tltc1_s *vb;
   int i;
-  nugeom_s *geom;
-  nuprim_s *prim;
+  struct nugeom_s *geom;
+  struct nuprim_s *prim;
   float *tc;
-  
-  NuMtlGet2dBuffer((nusysmtl_s *)mtl,NUPT_NDXTRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
-  if (geom->vtxmax - geom->vtxcount < 3) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c0);
-    (*e)("NuRndrTri2d : Vertex buffer full!");
+
+  NuMtlGet2dBuffer((struct nusysmtl_s *)mtl,NUPT_NDXTRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
+  if (geom->vtxmax - geom->vtxcnt < 3) {
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c0);
+    //(*e)("NuRndrTri2d : Vertex buffer full!");
   }
-  if ((int)((uint)prim->max - (uint)prim->vertexCount) < 3) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c2);
-    (*e)("NuRndrTri2d : Primitive buffer full!");
+  if ((int)((u32)prim->max - (u32)prim->vertexCount) < 3) {
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c2);
+    //(*e)("NuRndrTri2d : Primitive buffer full!");
   }
-  stride = NuVtxStride(geom->vertex_type);
+  stride = NuVtxStride(geom->vtxtype);
   buf = geom->hVB;
   if (buf == 0) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c9);
-    (*e)("NuRndrTri2d : Lock VB failed!");
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c9);
+    //(*e)("NuRndrTri2d : Lock VB failed!");
   }
   i = 3;
-  vb = (nuvtx_tltc1_s *)(buf + stride * geom->vtxcount);
+  vb = (struct nuvtx_tltc1_s *)(buf + stride * geom->vtxcnt);
   do {
     (vb->pnt).x = (vtx->pnt).x;
     (vb->pnt).y = (vtx->pnt).y;
@@ -571,24 +568,23 @@ int NuRndrTri2d(nuvtx_tltc1_s *vtx,numtl_s *mtl)
     tc = vtx->tc;
     vtx = vtx + 1;
     vb->tc[1] = tc[1];
-    vb = (nuvtx_tltc1_s *)((int)vb->tc + stride + -0x14);
-    geom->vtxcount = geom->vtxcount + 1;
+    vb = (struct nuvtx_tltc1_s *)((int)vb->tc + stride + -0x14);
+    geom->vtxcnt = geom->vtxcnt + 1;
     i = i + -1;
   } while (i != 0);
   return 1;
 }
 
-int NuRndrTri3d(nuvtx_tc1_s *vtx,numtl_s *mtl,numtx_s *wm)
+int NuRndrTri3d(struct nuvtx_tc1_s *vtx,struct numtl_s *mtl,struct numtx_s *wm)
 
 {
-  NUERRORFUNC *e;
-  int stride;
+  /*int stride;
   float fVar1;
   float fVar2;
   int iVar3;
   int Hvb;
-  nuvec_s *dest;
-  nuvec_s *v0;
+  struct nuvec_s *dest;
+  struct nuvec_s *v0;
   byte in_cr0;
   byte in_cr1;
   byte in_cr2;
@@ -597,11 +593,11 @@ int NuRndrTri3d(nuvtx_tc1_s *vtx,numtl_s *mtl,numtx_s *wm)
   byte in_cr5;
   byte in_cr6;
   byte in_cr7;
-  nugeom_s *geom;
-  nuprim_s *prim;
-  uint local_20;
-  nuvec_s *v;
-  
+  struct nugeom_s *geom;
+  struct nuprim_s *prim;
+  u32 local_20;
+  struct nuvec_s *v;
+
   local_20 = (uint)(in_cr0 & 0xf) << 0x1c | (uint)(in_cr1 & 0xf) << 0x18 |
              (uint)(in_cr2 & 0xf) << 0x14 | (uint)(in_cr3 & 0xf) << 0x10 |
              (uint)(unaff_cr4 & 0xf) << 0xc | (uint)(in_cr5 & 0xf) << 8 | (uint)(in_cr6 & 0xf) <<  4
@@ -651,18 +647,18 @@ int NuRndrTri3d(nuvtx_tc1_s *vtx,numtl_s *mtl,numtx_s *wm)
     dest = (nuvec_s *)((int)&dest->x + stride);
   } while (iVar3 != 0);
   geom->vtxcount = geom->vtxcount + 3;
-  return 1;
+  return 1;*/
 }
 
-float NuRndrItemDist(nugeomitem_s *item)
+float NuRndrItemDist(struct nugeomitem_s *item)
 
 {
-  nuvec_s pnt;
+  struct nuvec_s pnt;
   float dist;
-  
+
   dist = 0.0;
   if ((item->hdr).type == NURNDRITEM_GEOM3D) {
-    NuCameraTransformClip(&pnt,(nuvec_s *)&item->mtx->_30,1,NULL);
+    NuCameraTransformClip(&pnt,(struct nuvec_s *)&item->mtx->_30,1,NULL);
     dist = pnt.z;
   }
   return dist;
@@ -675,62 +671,62 @@ float NuRndrItemDist(nugeomitem_s *item)
 
 }*/
 
-void NuRndrItem(nurndritem_s *item)
+void NuRndrItem(struct nurndritem_s *item)
 
 {
-  nurndritemtype_s type;
-  
+  enum nurndritemtype_s type;
+
   type = item->type;
   if (type == NURNDRITEM_GEOM2D) {
-    DBTimerStart(0x1e);
-    NuRndr2dItem((nugeomitem_s *)item);
-    DBTimerEnd(0x1e);
+    //DBTimerStart(0x1e);
+    NuRndr2dItem((struct nugeomitem_s *)item);
+    //DBTimerEnd(0x1e);
   }
   else if (type == NURNDRITEM_GEOM3D) {
-    DBTimerStart(0x1f);
-    NuRndrGeomItem((nugeomitem_s *)item);
-    DBTimerEnd(0x1f);
+    //DBTimerStart(0x1f);
+        //NuRndrGeomItem((struct nugeomitem_s *)item);
+    //DBTimerEnd(0x1f);
   }
   else if (type == NURNDRITEM_SKIN3D2) {
-    DBTimerStart(0x20);
-    NuRndrSkinItem2((nugeomitem_s *)item);
-    DBTimerEnd(0x20);
+    //DBTimerStart(0x20);
+        //NuRndrSkinItem2((struct nugeomitem_s *)item);
+    //DBTimerEnd(0x20);
   }
   else if (type == NURNDRITEM_GEOMFACE) {
-    DBTimerStart(0x22);
-    NuRndrFaceItem((nugeomitem_s *)item);
-    DBTimerEnd(0x22);
+    //DBTimerStart(0x22);
+        //NuRndrFaceItem((struct nugeomitem_s *)item);
+    //DBTimerEnd(0x22);
   }
   else {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xbff);
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xbff);
     //(*e)("NuRndrItem : Unknown render item type!");
   }
   return;
 }
 
 
-void NuRndr2dItem(nugeomitem_s *item)
+void NuRndr2dItem(struct nugeomitem_s *item)
 
 {
   int stride;
-  nugeom_s *geom;
+  struct nugeom_s *geom;
   int vtxcnt;
   float *hVB;
-  nuprim_s *prim;
-  
-  if ((_GSMATRIX *)item->mtx == (_GSMATRIX *)0x0) {
-    GS_LoadWorldMatrixIdentity();
+  struct nuprim_s *prim;
+
+  if ((struct _GSMATRIX *)item->mtx == NULL) {
+    //GS_LoadWorldMatrixIdentity();
   }
   else {
-    GS_SetWorldMatrix((_GSMATRIX *)item->mtx);
+    //GS_SetWorldMatrix((_GSMATRIX *)item->mtx);
   }
-  SetupShaders(item);
-  for (prim = item->geom->prim; prim != (nuprim_s *)0x0; prim = prim->next) {
+  //SetupShaders(item);
+  for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
     geom = item->geom;
-    vtxcnt = geom->vtxcount;
+    vtxcnt = geom->vtxcnt;
     hVB = (float *)geom->hVB;
-    stride = NuVtxStride(geom->vertex_type);
-    GS_DrawTriList(vtxcnt,hVB,stride);
+    stride = NuVtxStride(geom->vtxtype);
+    //GS_DrawTriList(vtxcnt,hVB,stride);
   }
   return;
 }
@@ -789,7 +785,7 @@ void NuRndrFaceItem(nugeomitem_s *item)	//TODO
   nuvec_s nStack_128;
   numtx_s nStack_118;
   numtx_s mtx_dest;
-  
+
   DBTimerStart(0x1c);
   SetupShaders(item);
   NuMtxSetIdentity(&nStack_118);
@@ -903,7 +899,7 @@ void NuRndrGeomItem(nugeomitem_s *item)
   float *vertlist;
   short *buff;
   nuprim_s *prim;
-  
+
   DBTimerStart(6);
   if ((_GSMATRIX *)item->mtx == (_GSMATRIX *)0x0) {
     GS_LoadWorldMatrixIdentity();
@@ -970,7 +966,7 @@ void NuRndrSkinItem2(nugeomitem_s *item)
 {
   NUERRORFUNC *e;
   nuprim_s *prim;
-  
+
   if ((item->blendvals == (float **)0x0) || (item->geom->blendgeom == (NUBLENDGEOM_s *)0x0)) {
     DBTimerStart(5);
     SetupShaders(item);
@@ -1011,7 +1007,7 @@ void NuRndrBlendedSkinItem(nugeomitem_s *item)
   int cnt;
   NUBLENDGEOM_s *blendgeom;
   nuprim_s *prim;
-  
+
   blendgeom = item->geom->blendgeom;
   DBTimerStart(4);
   DBTimerStart(0xd);
@@ -1081,7 +1077,7 @@ void NuRndrAnglesZX(nuvec_s *src,nuvec_s *rot)
   double dVar2;
   nuvec_s local_38;
   double local_20;
-  
+
   A2D = NuAtan2D(src->z,src->y);
   dVar2 = 4503601774854144.0;
   local_20 = (double)CONCAT44(0x43300000,A2D ^ 0x80000000);
@@ -1112,7 +1108,7 @@ void NuRndrAddFootPrint(int rot,float sizex,float sizez,int brightness,nuvec_s *
   longlong local_30;
   uint free;
   float trigtab;
-  
+
   trigtab = NuTrigTable[rot & 0xffff];
   fVar1 = *(float *)((int)NuTrigTable + ((rot + 0x4000) * 4 & 0x3fffcU));
   fVar5 = fVar1 * -sizez;
@@ -1196,7 +1192,7 @@ void NuRndrFootPrints(numtl_s *mtl,float *u,float *v)
   undefined4 *local_2c;
   undefined4 *local_28;
   undefined4 *local_24;
-  
+
   iVar15 = 0x40;
   pfVar5 = (float *)&DAT_801bd184;
   pnVar4 = NuRndrFootData[0].pnts + 3;
@@ -1284,12 +1280,12 @@ float * NuRndrCreateBlendShapeDeformerWeightsArray(int nweights)
 
 {
   float *ptr;
-  
+
   rndr_blend_shape_deformer_wt_cnt = rndr_blend_shape_deformer_wt_cnt - nweights;
   if (rndr_blend_shape_deformer_wt_cnt < 0) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4);
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4);
     //(*e)("No free blend shape deformer weights");
-    ptr = (float *)0x0;
+    ptr = NULL;
   }
   else {
     ptr = (float *)(&rndr_blend_shape_deformer_wts + rndr_blend_shape_deformer_wt_cnt * 4);
@@ -1302,12 +1298,12 @@ float ** NuRndrCreateBlendShapeDWAPointers(int size)
 
 {
   float **ptr;
-  
+
   rndr_blend_shape_deformer_wt_ptrs_cnt = rndr_blend_shape_deformer_wt_ptrs_cnt - size;
   if (rndr_blend_shape_deformer_wt_cnt < 0) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206);
-    (*e)("No free blend shape deformer weights");
-    ptr = (float **)0x0;
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206);
+    //(*e)("No free blend shape deformer weights");
+    ptr = NULL;
   }
   else {
     ptr = (float **)(&rndr_blend_shape_deformer_wt_ptrs + rndr_blend_shape_deformer_wt_ptrs_cnt *  4)
@@ -1321,7 +1317,7 @@ void NuRndrInitWorld(void)
 {
   char *timer;
   int lp;
-  
+
   lp = 0x40;
   NuRndrShadMaskCount = 0;
   timer = &NuRndrFootData[0x3f].timer;
@@ -1333,15 +1329,15 @@ void NuRndrInitWorld(void)
   return;
 }
 
-void NuRndrFx(int paused,nuvec_s *playerpos)
+void NuRndrFx(int paused,struct nuvec_s *playerpos)
 
 {
-  NuLgtArcLaserDraw(paused);
+  //NuLgtArcLaserDraw(paused);
   return;
 }
 
 
-void NuRndrTrail(int trailpt,trail *trail,int TRAILCOUNT)
+/*void NuRndrTrail(int trailpt,struct trail *trail,int TRAILCOUNT)
 
 {
   float fVar1;
@@ -1365,7 +1361,7 @@ void NuRndrTrail(int trailpt,trail *trail,int TRAILCOUNT)
   undefined4 *puVar17;
   nuvec_s local_58;
   undefined4 *local_4c;
-  
+
   iVar6 = (trailpt + 1) - TRAILCOUNT;
   iVar8 = 0;
   if (iVar6 < trailpt) {
@@ -1504,212 +1500,170 @@ void NuRndrTrail(int trailpt,trail *trail,int TRAILCOUNT)
     }
   }
   return;
-}
+}*/
 
-void NuRndrWaterRip(numtl_s *mtl)	//TODO
+void NuRndrWaterRip(struct numtl_s *mtl)	//TODO
 {
-  float fVar1;
-  short sVar2;
-  int iVar3;
-  float fVar4;
-  float *pfVar5;
-  float fVar6;
-  short *psVar7;
-  int iVar8;
-  WaterDat *dat;
-  double dVar9;
-  double dVar10;
-  double dVar11;
-  double dVar12;
-  double dVar13;
-  
-  iVar8 = 0;
+  int clip;
+  float z;
+  float *nrmZ;
+  float x;
+  short *indxlList;
+  int ind;
+  struct WaterDat *dat;
+  double dVar1;
+  double dVar2;
+  double dVar3;
+  double dVar4;
+  double dVar5;
+  short i;
+  float size;
+  struct nuvtx_tc1_s* vtx_270[4];
+  struct nuvtx_tc1_s vtx2_271[4];
+
+  ind = 0;
   NuCameraGetMtx();
   NuRndrWaterRipCnt = 0;
   dat = NuRndrWaterRipDat;
   do {
-    if ((dat->timer != 0) &&
-       (iVar3 = NuCameraClipTestPoints(&dat->pos,1,(numtx_s *)0x0), iVar3 == 0)) {
-      indexlist.272[NuRndrWaterRipCnt] = (short)iVar8;
+    if ((dat->timer != 0) && (clip = NuCameraClipTestPoints(&dat->pos,1,NULL), clip == 0 ))
+    {
+      indexlist_272[NuRndrWaterRipCnt] = (short)ind;
       NuRndrWaterRipCnt = NuRndrWaterRipCnt + 1;
     }
-    iVar8 = iVar8 + 1;
+    ind = ind + 1;
     dat = dat + 1;
-  } while (iVar8 < 0x20);
+  } while (ind < 0x20);
   if (NuRndrWaterRipCnt != 0) {
-    iVar8 = 4;
-    pfVar5 = (float *)&DAT_801e112c;
+    ind = 4;
+    nrmZ = &vtx_270[0]->nrm.z;
     do {
-      pfVar5[-2] = 1.0;
-      pfVar5[-1] = 0.0;
-      *pfVar5 = 0.0;
-      pfVar5 = pfVar5 + 9;
-      iVar8 = iVar8 + -1;
-    } while (iVar8 != 0);
-    DAT_801e11b4 = &DAT_801e1184;
-    vtx2.271 = &vtx.270;
-    iVar8 = 0;
-    DAT_801e11ac = &DAT_801e113c;
-    DAT_801e11b0 = &DAT_801e1160;
+      nrmZ[-2] = 1.0;
+      nrmZ[-1] = 0.0;
+      *nrmZ = 0.0;
+      nrmZ = nrmZ + 9;
+      ind = ind + -1;
+    } while (ind != 0);
+/*    vtx2_271[3] = vtx_270 + 3;
+    vtx2_271[0] = vtx_270;
+    ind = 0;
+    vtx2_271[1] = vtx_270 + 1;
+    vtx2_271[2] = vtx_270 + 2;*/
     if (0 < NuRndrWaterRipCnt) {
-      dVar9 = 0.1;
-      dVar10 = 0.75;
-      dVar11 = 0.25;
-      dVar13 = 0.5;
-      dVar12 = 1.0;
-      psVar7 = indexlist.272;
+      dVar1 = 0.1;
+      dVar2 = 0.75;
+      dVar3 = 0.25;
+      dVar5 = 0.5;
+      dVar4 = 1.0;
+      indxlList = indexlist_272;
       do {
-        sVar2 = *psVar7;
-        DAT_801e1134 = (float)dVar10;
-        DAT_801e1138 = (float)dVar11;
-        DAT_801e1158 = (float)dVar12;
-        DAT_801e115c = (float)dVar11;
-        DAT_801e117c = (float)dVar10;
-        iVar8 = iVar8 + 1;
-        DAT_801e1180 = (float)dVar13;
-        psVar7 = psVar7 + 1;
-        fVar6 = NuRndrWaterRipDat[sVar2].pos.x;
-        fVar4 = NuRndrWaterRipDat[sVar2].pos.z;
-        fVar1 = NuRndrWaterRipDat[sVar2].cursize;
-        DAT_801e113c = fVar6 + fVar1;
-        DAT_801e1168 = fVar4 + fVar1;
-        DAT_801e111c = (float)((double)NuRndrWaterRipDat[sVar2].pos.y - dVar9);
-        DAT_801e1130 = NuRndrWaterRipDat[sVar2].curshade + 0x80808080;
-        vtx.270 = fVar6 - fVar1;
-        DAT_801e1120 = fVar4 - fVar1;
-        DAT_801e11a0 = (float)dVar12;
-        DAT_801e11a4 = (float)dVar13;
-        DAT_801e1140 = DAT_801e111c;
-        DAT_801e1144 = DAT_801e1120;
-        DAT_801e1154 = DAT_801e1130;
-        DAT_801e1160 = vtx.270;
-        DAT_801e1164 = DAT_801e111c;
-        DAT_801e1178 = DAT_801e1130;
-        DAT_801e1184 = DAT_801e113c;
-        DAT_801e1188 = DAT_801e111c;
-        DAT_801e118c = DAT_801e1168;
-        DAT_801e119c = DAT_801e1130;
-        NuRndrStrip3d((nuvtx_tc1_s *)&vtx2.271,mtl,0,4);
-      } while (iVar8 < NuRndrWaterRipCnt);
+        i = *indxlList;
+        vtx_270[0]->tc[0] = (float)dVar2;
+        vtx_270[0]->tc[1] = (float)dVar3;
+        vtx_270[1]->tc[0] = (float)dVar4;
+        vtx_270[1]->tc[1] = (float)dVar3;
+        vtx_270[2]->tc[0] = (float)dVar2;
+        ind = ind + 1;
+        vtx_270[2]->tc[1] = (float)dVar5;
+        indxlList = indxlList + 1;
+        x = NuRndrWaterRipDat[i].pos.x;
+        z = NuRndrWaterRipDat[i].pos.z;
+        size = NuRndrWaterRipDat[i].cursize;
+        vtx_270[1]->pnt.x = x + size;
+        vtx_270[2]->pnt.z = z + size;
+        vtx_270[0]->pnt.y = (float)((double)NuRndrWaterRipDat[i].pos.y - dVar1);
+        vtx_270[0]->diffuse = NuRndrWaterRipDat[i].curshade + 0x80808080;
+        vtx_270[0]->pnt.x = x - size;
+        vtx_270[0]->pnt.z = z - size;
+        vtx_270[3]->tc[0] = (float)dVar4;
+        vtx_270[3]->tc[1] = (float)dVar5;
+        vtx_270[1]->pnt.y = vtx_270[0]->pnt.y;
+        vtx_270[1]->pnt.z = vtx_270[0]->pnt.z;
+        vtx_270[1]->diffuse = vtx_270[0]->diffuse;
+        vtx_270[2]->pnt.x = vtx_270[0]->pnt.x;
+        vtx_270[2]->pnt.y = vtx_270[0]->pnt.y;
+        vtx_270[2]->diffuse = vtx_270[0]->diffuse;
+        vtx_270[3]->pnt.x = vtx_270[1]->pnt.x;
+        vtx_270[3]->pnt.y = vtx_270[0]->pnt.y;
+        vtx_270[3]->pnt.z = vtx_270[2]->pnt.z;
+        vtx_270[3]->diffuse = vtx_270[0]->diffuse;
+        //NuRndrStrip3d((struct nuvtx_tc1_s *)vtx2_271,mtl,0,4);
+      } while (ind < NuRndrWaterRipCnt);
     }
   }
   return;
 }
 
-void NuRndrRectUV2di(int x,int y,int w,int h,float tx,float ty,float tw,float th,int col,
-                    numtl_s *mtl)
-
+void NuRndrRectUV2di(int x,int y,int w,int h,float tx,float ty,float tw,float th,int col,struct numtl_s *mtl)
 {
   double dVar1;
   double dVar2;
   double dVar3;
   double dVar4;
-  float local_118;
-  float local_114;
-  undefined4 local_110;
-  undefined4 local_10c;
-  int local_108;
-  float local_104;
-  float local_100;
-  float local_fc;
-  float local_f8;
-  undefined4 local_f4;
-  undefined4 local_f0;
-  int local_ec;
-  float local_e8;
-  float local_e4;
-  float local_e0;
-  float local_dc;
-  undefined4 local_d8;
-  undefined4 local_d4;
-  int local_d0;
-  float local_cc;
-  float local_c8;
-  float local_c4;
-  float local_c0;
-  undefined4 local_bc;
-  undefined4 local_b8;
-  int local_b4;
-  float local_b0;
-  float local_ac;
-  float local_a8;
-  float local_a4;
-  undefined4 local_a0;
-  undefined4 local_9c;
-  int local_98;
-  float local_94;
-  float local_90;
-  float local_8c;
-  float local_88;
-  undefined4 local_84;
-  undefined4 local_80;
-  int local_7c;
-  float local_78;
-  float local_74;
-  undefined4 local_48;
-  uint uStack_44;
-  
+  struct nuvtx_tltc1_s vtx [6];
+
   dVar4 = (double)th;
   dVar3 = (double)tw;
   dVar2 = (double)ty;
   dVar1 = (double)tx;
-  GS_SetOrthMatrix();
-  uStack_44 = (y + h) - 1U ^ 0x80000000;
-  local_118 = (float)((double)CONCAT44(0x43300000,x ^ 0x80000000) - 4503601774854144.0);
-  local_114 = (float)((double)CONCAT44(0x43300000,y ^ 0x80000000) - 4503601774854144.0);
-  local_e8 = (float)(dVar1 + dVar3);
-  local_c8 = (float)(dVar2 + dVar4);
-  local_48 = 0x43300000;
-  local_fc = (float)((double)CONCAT44(0x43300000,(x + w) - 1U ^ 0x80000000) - 4503601774854144.0);
-  local_ac = (float)dVar2;
-  local_dc = (float)((double)CONCAT44(0x43300000,uStack_44) - 4503601774854144.0);
-  local_110 = 0x358637bd;
-  local_10c = 0x3f800000;
-  local_f4 = 0x358637bd;
-  local_f0 = 0x3f800000;
-  local_d8 = 0x358637bd;
-  local_d4 = 0x3f800000;
-  local_bc = 0x358637bd;
-  local_b8 = 0x3f800000;
-  local_104 = (float)dVar1;
-  local_100 = (float)dVar2;
-  local_e4 = (float)dVar2;
-  local_cc = (float)dVar1;
-  local_a0 = 0x358637bd;
-  local_84 = 0x358637bd;
-  local_80 = 0x3f800000;
-  local_78 = (float)dVar1;
-  local_9c = 0x3f800000;
-  local_108 = col;
-  local_f8 = local_114;
-  local_ec = col;
-  local_e0 = local_118;
-  local_d0 = col;
-  local_c4 = local_fc;
-  local_c0 = local_114;
-  local_b4 = col;
-  local_b0 = local_e8;
-  local_a8 = local_fc;
-  local_a4 = local_dc;
-  local_98 = col;
-  local_94 = local_e8;
-  local_90 = local_c8;
-  local_8c = local_118;
-  local_88 = local_dc;
-  local_7c = col;
-  local_74 = local_c8;
-  ResetShaders();
+  //GS_SetOrthMatrix();
+
+  /*vtx[0].pnt.x = (float)((double)CONCAT44(0x43300000,x ^ 0x80000000) - 4503601774854144.0);
+  vtx[0].pnt.y = (float)((double)CONCAT44(0x43300000,y ^ 0x80000000) - 4503601774854144.0);
+  vtx[1].tc[0] = (float)(dVar1 + dVar3);
+  vtx[2].tc[1] = (float)(dVar2 + dVar4);
+  vtx[1].pnt.x = (float)((double)CONCAT44(0x43300000,(x + w) - 1U ^ 0x80000000) - 4503601774854144 .0
+                        );
+  vtx[3].tc[1] = (float)dVar2;
+  vtx[2].pnt.y = (float)((double)CONCAT44(0x43300000,(y + h) - 1U ^ 0x80000000) - 4503601774854144 .0
+                        );*/
+  vtx[0].pnt.z = 1e-06;
+  vtx[0].rhw = 1.0;
+  vtx[1].pnt.z = 1e-06;
+  vtx[1].rhw = 1.0;
+  vtx[2].pnt.z = 1e-06;
+  vtx[2].rhw = 1.0;
+  vtx[3].pnt.z = 1e-06;
+  vtx[3].rhw = 1.0;
+  vtx[0].tc[0] = (float)dVar1;
+  vtx[0].tc[1] = (float)dVar2;
+  vtx[1].tc[1] = (float)dVar2;
+  vtx[2].tc[0] = (float)dVar1;
+  vtx[4].pnt.z = 1e-06;
+  vtx[5].pnt.z = 1e-06;
+  vtx[5].rhw = 1.0;
+  vtx[5].tc[0] = (float)dVar1;
+  vtx[4].rhw = 1.0;
+  vtx[0].diffuse = col;
+  vtx[1].pnt.y = vtx[0].pnt.y;
+  vtx[1].diffuse = col;
+  vtx[2].pnt.x = vtx[0].pnt.x;
+  vtx[2].diffuse = col;
+  vtx[3].pnt.x = vtx[1].pnt.x;
+  vtx[3].pnt.y = vtx[0].pnt.y;
+  vtx[3].diffuse = col;
+  vtx[3].tc[0] = vtx[1].tc[0];
+  vtx[4].pnt.x = vtx[1].pnt.x;
+  vtx[4].pnt.y = vtx[2].pnt.y;
+  vtx[4].diffuse = col;
+  vtx[4].tc[0] = vtx[1].tc[0];
+  vtx[4].tc[1] = vtx[2].tc[1];
+  vtx[5].pnt.x = vtx[0].pnt.x;
+  vtx[5].pnt.y = vtx[2].pnt.y;
+  vtx[5].diffuse = col;
+  vtx[5].tc[1] = vtx[2].tc[1];
+  //ResetShaders();
   NuTexSetTexture(0,0);
   NuMtlSetRenderStates(mtl);
   NuTexSetTextureStates(mtl);
-  SetVertexShader(0x144);
+  //SetVertexShader(0x144);
   NuTexSetTexture(0,mtl->tid);
-  GS_DrawTriListTTL((int)&local_118,6);
+  //GS_DrawTriListTTL(vtx,6);
   return;
 }
 
 
-void NuRndrShadPolys(numtl_s *mtl)
+void NuRndrShadPolys(struct numtl_s *mtl)
 
 {
   float fVar1;
@@ -1717,27 +1671,29 @@ void NuRndrShadPolys(numtl_s *mtl)
   float *pfVar3;
   float fVar4;
   int i;
-  ShadPolDat *dat;
+  struct ShadPolDat *dat;
   double dVar5;
   double dVar6;
   double dVar7;
-  nuvec_s *v;
-  
+  struct nuvec_s *v;
+  struct nuvtx_tc1_s vtx_282[4];
+  struct nuvtx_tc1_s vtx2_283[4];
+
   if (NuRndrShadowCnt != 0) {
     i = 4;
-    pfVar3 = (float *)&DAT_801e120c;
+    pfVar3 = &vtx_282[0].nrm.z;
     do {
-      pfVar3[-2] = 0.0;
+      ((struct nuvec_s *)(pfVar3 + -2))->x = 0.0;
       pfVar3[-1] = 0.0;
       *pfVar3 = 0.0;
       pfVar3 = pfVar3 + 9;
       i = i + -1;
     } while (i != 0);
-    vtx2.283[3] = (nuvec_s *)&DAT_801e1264;
-    vtx2.283[0] = (nuvec_s *)&vtx.282;
+    /*vtx2_283[3] = vtx_282 + 3;
+    vtx2_283[0] = vtx_282;*/
     i = 0;
-    vtx2.283[1] = (nuvec_s *)&DAT_801e121c;
-    vtx2.283[2] = (nuvec_s *)&DAT_801e1240;
+    /*vtx2_283[1] = vtx_282 + 1;
+    vtx2_283[2] = vtx_282 + 2;*/
     if (0 < NuRndrShadowCnt) {
       dVar5 = 0.009999999776482582;
       dVar6 = 0.0;
@@ -1750,31 +1706,31 @@ void NuRndrShadPolys(numtl_s *mtl)
         i = i + 1;
         fVar1 = dat->size;
         dat = dat + 1;
-        DAT_801e121c = fVar2 + fVar1;
-        DAT_801e1248 = fVar4 + fVar1;
-        DAT_801e127c = 0xff000000;
-        DAT_801e11fc = (float)((double)v->y + dVar5);
-        vtx.282 = fVar2 - fVar1;
-        DAT_801e1200 = fVar4 - fVar1;
-        DAT_801e1210 = 0xff000000;
-        DAT_801e1234 = 0xff000000;
-        DAT_801e1258 = 0xff000000;
-        DAT_801e1214 = (float)dVar6;
-        DAT_801e1218 = (float)dVar6;
-        DAT_801e1238 = (float)dVar7;
-        DAT_801e123c = (float)dVar6;
-        DAT_801e125c = (float)dVar6;
-        DAT_801e1260 = (float)dVar7;
-        DAT_801e1280 = (float)dVar7;
-        DAT_801e1284 = (float)dVar7;
-        DAT_801e1220 = DAT_801e11fc;
-        DAT_801e1224 = DAT_801e1200;
-        DAT_801e1240 = vtx.282;
-        DAT_801e1244 = DAT_801e11fc;
-        DAT_801e1264 = DAT_801e121c;
-        DAT_801e1268 = DAT_801e11fc;
-        DAT_801e126c = DAT_801e1248;
-        NuRndrStrip3d((nuvtx_tc1_s *)vtx2.283,mtl,0,4);
+        vtx_282[1].pnt.x = fVar2 + fVar1;
+        vtx_282[2].pnt.z = fVar4 + fVar1;
+        vtx_282[3].diffuse = -0x1000000;
+        vtx_282[0].pnt.y = (float)((double)v->y + dVar5);
+        vtx_282[0].pnt.x = fVar2 - fVar1;
+        vtx_282[0].pnt.z = fVar4 - fVar1;
+        vtx_282[0].diffuse = -0x1000000;
+        vtx_282[1].diffuse = -0x1000000;
+        vtx_282[2].diffuse = -0x1000000;
+        vtx_282[0].tc[0] = (float)dVar6;
+        vtx_282[0].tc[1] = (float)dVar6;
+        vtx_282[1].tc[0] = (float)dVar7;
+        vtx_282[1].tc[1] = (float)dVar6;
+        vtx_282[2].tc[0] = (float)dVar6;
+        vtx_282[2].tc[1] = (float)dVar7;
+        vtx_282[3].tc[0] = (float)dVar7;
+        vtx_282[3].tc[1] = (float)dVar7;
+        vtx_282[1].pnt.y = vtx_282[0].pnt.y;
+        vtx_282[1].pnt.z = vtx_282[0].pnt.z;
+        vtx_282[2].pnt.x = vtx_282[0].pnt.x;
+        vtx_282[2].pnt.y = vtx_282[0].pnt.y;
+        vtx_282[3].pnt.x = vtx_282[1].pnt.x;
+        vtx_282[3].pnt.y = vtx_282[0].pnt.y;
+        vtx_282[3].pnt.z = vtx_282[2].pnt.z;
+        //NuRndrStrip3d((struct nuvtx_tc1_s *)vtx2_283,mtl,0,4);
       } while (i < NuRndrShadowCnt);
     }
     NuRndrShadowCnt = 0;
@@ -1785,58 +1741,57 @@ void NuRndrShadPolys(numtl_s *mtl)
 
 
 void NuRndrWaterRippleUpdate(int count)
-
 {
   float fVar1;
   short sVar2;
-  WaterDat *pWVar3;
-  int iVar4;
-  double dVar5;
+  struct WaterDat *dat;
+  int i;
+  double dVar3;
   double local_8;
-  
-  iVar4 = 0x20;
-  pWVar3 = NuRndrWaterRipDat;
+
+  i = 0x20;
+  dat = NuRndrWaterRipDat;
   do {
-    if (pWVar3->timer != 0) {
-      sVar2 = pWVar3->timer - (short)count;
-      pWVar3->timer = sVar2;
+    if (dat->timer != 0) {
+      sVar2 = dat->timer - (short)count;
+      dat->timer = sVar2;
       if (sVar2 < 1) {
-        pWVar3->timer = 0;
+        dat->timer = 0;
       }
-      else {
+      /*else {
         local_8 = (double)CONCAT44(0x43300000,(int)sVar2 ^ 0x80000000);
-        dVar5 = local_8 - 4503601774854144.0;
-        local_8 = (double)CONCAT44(0x43300000,(int)pWVar3->otimer ^ 0x80000000);
-        fVar1 = (float)dVar5 / (float)(local_8 - 4503601774854144.0);
-        pWVar3->cursize = (pWVar3->size - pWVar3->endsize) * fVar1 + pWVar3->endsize;
+        dVar3 = local_8 - 4503601774854144.0;
+        local_8 = (double)CONCAT44(0x43300000,(int)dat->otimer ^ 0x80000000);
+        fVar1 = (float)dVar3 / (float)(local_8 - 4503601774854144.0);
+        dat->cursize = (dat->size - dat->endsize) * fVar1 + dat->endsize;
         if (fVar1 <= 0.75) {
           fVar1 = fVar1 * 1.333333;
         }
         else {
           fVar1 = (1.0 - fVar1) * 4.0;
         }
-        local_8 = (double)CONCAT44(0x43300000,pWVar3->shade >> 0x18);
-        pWVar3->curshade =
+        local_8 = (double)CONCAT44(0x43300000,dat->shade >> 0x18);
+        dat->curshade =
              (int)((float)(local_8 - 4503599627370496.0) * fVar1) * 0x1000000 +
-             (pWVar3->shade & 0xffffff);
-      }
+             (dat->shade & 0xffffff);
+      }*/
     }
-    pWVar3 = pWVar3 + 1;
-    iVar4 = iVar4 + -1;
-  } while (iVar4 != 0);
+    dat = dat + 1;
+    i = i + -1;
+  } while (i != 0);
   return;
 }
 
 
-void NuRndrAddWaterRipple(nuvec_s *pos,float size,float endsize,int duration,int shade)
+void NuRndrAddWaterRipple(struct nuvec_s *pos,float size,float endsize,int duration,int shade)
 
 {
   float y;
   float x;
-  WaterDat *ripDat;
+  struct WaterDat *ripDat;
   float z;
   int i;
-  
+
   i = 0x20;
   ripDat = NuRndrWaterRipDat;
   do {
@@ -1863,14 +1818,14 @@ void NuRndrAddWaterRipple(nuvec_s *pos,float size,float endsize,int duration,int
   return;
 }
 
-void NuRndrAddShadow(struct NuVec* v, s16 shade, s16 xrot, s16 yrot, s16 zrot, f32 arg8) {
+void NuRndrAddShadow(struct nuvec_s* v, s16 shade, s16 xrot, s16 yrot, s16 zrot, f32 scale) {
 
-    if ((NuCameraClipTestPoints(v, 1, NULL) == 0) && ((s32) NuRndrShadowCnt <= 0x7F)) {
+    if ((NuCameraClipTestPoints(v, 1, NULL) == 0) && ((s32) NuRndrShadowCnt < 0x80)) {
         v->y += 0.01f;
         NuRndrShadPolDat[NuRndrShadowCnt].pos.x = v->x;
         NuRndrShadPolDat[NuRndrShadowCnt].pos.y = v->y;
         NuRndrShadPolDat[NuRndrShadowCnt].pos.z = v->z;
-        *(&NuRndrShadPolDat->size + (NuRndrShadowCnt * 0x18)) = arg8;         //NuRndrShadPolDat[NuRndrShadowCnt].size = arg8;
+        NuRndrShadPolDat[NuRndrShadowCnt].size = scale;
         NuRndrShadPolDat[NuRndrShadowCnt].zrot = zrot;
         NuRndrShadPolDat[NuRndrShadowCnt].shade = shade;
         NuRndrShadPolDat[NuRndrShadowCnt].xrot = xrot;
@@ -1889,31 +1844,31 @@ void NuRndrInitEx(int streambuffersize)
   return;
 }
 
-int NuRndrGScnObj(nugobj_s *gobj,numtx_s *wm)
+int NuRndrGScnObj(struct nugobj_s *gobj,struct numtx_s *wm)
 
 {
-  int ret;
-  
-  ret = NuRndrGobj(gobj,wm,NULL);
+  s32 ret;
+
+  //ret = NuRndrGobj(gobj,wm,NULL);
   return ret;
 }
 
-/*void NuRndrRect2di(int a,int b,int SWIDTH,int SHEIGHT,int fadecol,numtl_s *mtl)
+void NuRndrRect2di(int a,int b,int SWIDTH,int SHEIGHT,int fadecol,struct numtl_s *mtl)
 
 {
-  GS_DrawFade(fadecol);
+  //GS_DrawFade(fadecol);
   return;
 }
 
 
-void NuRndrParticleGroup(rdata_s *data,setup_s *setup,numtl_s *mtl,float time,numtx_s *wm)
+/*void NuRndrParticleGroup(rdata_s *data,setup_s *setup,numtl_s *mtl,float time,numtx_s *wm)
 
 {
   int i;
   _sceDmaTag *data2;
   double dVar1;
   bool check;
-  
+
   dVar1 = (double)time;
   setup->DmaHeader[3] = (int)time;
   check = false;
@@ -1942,79 +1897,78 @@ void NuRndrParticleGroup(rdata_s *data,setup_s *setup,numtl_s *mtl,float time,nu
 */
 
 
-int NuHGobjRndr(NUHGOBJ_s *hgobj,numtx_s *wm,int nlayers,short *layers)
+int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *layers)
 
 {
-  uint uVar1;
-  NULAYERDATA_s *pNVar2;
-  NUERRORFUNC *e;
-  nugobj_s *pnVar3;
+  u32 uVar1;
+  struct NULAYERDATA_s *pNVar2;
+  struct nugobj_s *pnVar3;
   int iVar4;
-  numtx_s *pnVar5;
+  struct numtx_s *pnVar5;
   int iVar6;
   int iVar7;
-  numtx_s *pnVar8;
+  struct numtx_s *pnVar8;
   int iVar9;
   int iVar10;
-  
+
   iVar9 = nlayers + -1;
-  if ((int)(uint)hgobj->num_layers <= iVar9) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x8a8);
-    (*e)("assert");
-  }
-  uVar1 = (uint)hgobj->num_joints;
+  /*if ((int)(u8)hgobj->num_layers <= iVar9) {
+    //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x8a8);
+    //(*e)("assert");
+  }*/
+  //uVar1 = (u32)hgobj->num_joints;
   iVar10 = 0;
   if (uVar1 != 0) {
     iVar6 = 0;
     pnVar5 = mtx_arrayHGobj;
     iVar7 = 0;
     do {
-      iVar4 = *(int *)(hgobj->joints->pad + iVar6 + -5);
-      pnVar8 = (numtx_s *)((int)&hgobj->T->_00 + iVar7);
+      //iVar4 = *(int *)(hgobj->joints->pad + iVar6 + -5);
+      //pnVar8 = (struct numtx_s *)((int)&hgobj->T->_00 + iVar7);
       if (iVar4 == -1) {
         NuMtxMul(pnVar5,pnVar8,wm);
       }
       else {
         NuMtxMul(pnVar5,pnVar8,mtx_arrayHGobj + iVar4);
       }
-      uVar1 = (uint)hgobj->num_joints;
+      //uVar1 = (u32)hgobj->num_joints;
       iVar10 = iVar10 + 1;
       iVar6 = iVar6 + 0x60;
       pnVar5 = pnVar5 + 1;
       iVar7 = iVar7 + 0x40;
     } while (iVar10 < (int)uVar1);
   }
-  pNVar2 = hgobj->layers;
-  if ((pNVar2[iVar9].gobjs != (nugobj_s **)0x0) && (iVar10 = 0, uVar1 != 0)) {
+  //pNVar2 = hgobj->layers;
+  if ((pNVar2[iVar9].gobjs != NULL) && (iVar10 = 0, uVar1 != 0)) {
     iVar6 = 0;
     pnVar5 = mtx_arrayHGobj;
     do {
-      pnVar3 = *(nugobj_s **)(iVar6 + (int)hgobj->layers[iVar9].gobjs);
-      if (pnVar3 != (nugobj_s *)0x0) {
-        NuRndrGobj(pnVar3,pnVar5,(float **)0x0);
+      //pnVar3 = *(struct nugobj_s **)(iVar6 + (int)hgobj->layers[iVar9].gobjs);
+      if (pnVar3 != NULL) {
+        NuRndrGobj(pnVar3,pnVar5,NULL);
       }
-      uVar1 = (uint)hgobj->num_joints;
+      //uVar1 = (u32)hgobj->num_joints;
       iVar10 = iVar10 + 1;
       pnVar5 = pnVar5 + 1;
       iVar6 = iVar6 + 4;
-      pNVar2 = hgobj->layers;
+      //pNVar2 = hgobj->layers;
     } while (iVar10 < (int)uVar1);
   }
-  if ((pNVar2[iVar9].blend_gobjs != (nugobj_s **)0x0) && (iVar10 = 0, uVar1 != 0)) {
+  if ((pNVar2[iVar9].blend_gobjs != NULL) && (iVar10 = 0, uVar1 != 0)) {
     iVar6 = 0;
     pnVar5 = mtx_arrayHGobj;
-    do {
-      pnVar3 = *(nugobj_s **)(iVar6 + (int)hgobj->layers[iVar9].blend_gobjs);
-      if (pnVar3 != (nugobj_s *)0x0) {
-        NuRndrGobj(pnVar3,pnVar5,(float **)0x0);
+    /*do {
+      //pnVar3 = *(struct nugobj_s **)(iVar6 + (int)hgobj->layers[iVar9].blend_gobjs);
+      if (pnVar3 != NULL) {
+        NuRndrGobj(pnVar3,pnVar5,NULL);
       }
       iVar10 = iVar10 + 1;
       pnVar5 = pnVar5 + 1;
       iVar6 = iVar6 + 4;
-    } while (iVar10 < (int)(uint)hgobj->num_joints);
+    } while (iVar10 < (int)(u32)hgobj->num_joints);*/
   }
   iVar10 = 0;
-  if (hgobj->num_joints != '\0') {
+ /* if (hgobj->num_joints != '\0') {
     pnVar8 = mtx_array2HGobj;
     iVar6 = 0;
     pnVar5 = mtx_arrayHGobj;
@@ -2024,36 +1978,36 @@ int NuHGobjRndr(NUHGOBJ_s *hgobj,numtx_s *wm,int nlayers,short *layers)
       pnVar8 = pnVar8 + 1;
       iVar6 = iVar6 + 0x40;
       pnVar5 = pnVar5 + 1;
-    } while (iVar10 < (int)(uint)hgobj->num_joints);
+    } while (iVar10 < (int)(u32)hgobj->num_joints);
+  }*/
+  //pnVar3 = hgobj->layers[iVar9].skin_gobj;
+  if (pnVar3 != NULL) {
+    //NuRndrGobjSkin2(pnVar3,(u32)hgobj->num_joints,mtx_array2HGobj,NULL);
   }
-  pnVar3 = hgobj->layers[iVar9].skin_gobj;
-  if (pnVar3 != (nugobj_s *)0x0) {
-    NuRndrGobjSkin2(pnVar3,(uint)hgobj->num_joints,mtx_array2HGobj,(float **)0x0);
-  }
-  pnVar3 = hgobj->layers[iVar9].blend_skin_gobj;
-  if (pnVar3 != (nugobj_s *)0x0) {
-    NuRndrGobjSkin2(pnVar3,(uint)hgobj->num_joints,mtx_array2HGobj,(float **)0x0);
+  //pnVar3 = hgobj->layers[iVar9].blend_skin_gobj;
+  if (pnVar3 != NULL) {
+    //NuRndrGobjSkin2(pnVar3,(u32)hgobj->num_joints,mtx_array2HGobj,NULL);
   }
   return 1;
 }
 
 
-int NuHGobjRndrMtxDwa(NUHGOBJ_s *hgobj,numtx_s *wm,int nlayers,short *layers,numtx_s *mtx_array,
+int NuHGobjRndrMtxDwa(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *layers,struct numtx_s *mtx_array,
                      float **dwa)
 
 {
-  uint uVar1;
-  nugobj_s *gobj;
+  /*u32 uVar1;
+  struct nugobj_s *gobj;
   int i;
   int j;
-  NULAYERDATA_s *layerdat;
-  uint uVar2;
+  struct NULAYERDATA_s *layerdat;
+  u32 uVar2;
   int iVar3;
   int iVar4;
-  numtx_s *mtx;
-  numtx_s *m_00;
-  numtx_s m;
-  
+  struct numtx_s *mtx;
+  struct numtx_s *m_00;
+  struct numtx_s m;
+
   uVar2 = 0;
   if (hgobj_enabled.231 == 0) {
     uVar2 = 1;
@@ -2066,7 +2020,7 @@ int NuHGobjRndrMtxDwa(NUHGOBJ_s *hgobj,numtx_s *wm,int nlayers,short *layers,num
           nlayers = 1;
           i = 0;
 LAB_800b6930:
-          if ((-1 < i) && (i <= (int)(uint)hgobj->num_layers)) {
+          if ((-1 < i) && (i <= (int)(u32)hgobj->num_layers)) {
             layerdat = hgobj->layers;
             if ((layerdat[i].gobjs != (nugobj_s **)0x0) && (iVar3 = 0, hgobj->num_joints != '\0'))  {
               iVar4 = 0;
@@ -2082,7 +2036,7 @@ LAB_800b6930:
                 mtx = mtx + 1;
                 iVar4 = iVar4 + 4;
                 layerdat = hgobj->layers;
-              } while (iVar3 < (int)(uint)hgobj->num_joints);
+              } while (iVar3 < (int)(u32)hgobj->num_joints);
             }
             if ((layerdat[i].blend_gobjs != (nugobj_s **)0x0) &&
                (iVar3 = 0, hgobj->num_joints != '\0')) {
@@ -2099,7 +2053,7 @@ LAB_800b6930:
                 mtx = mtx + 1;
                 iVar4 = iVar4 + 4;
                 layerdat = hgobj->layers;
-              } while (iVar3 < (int)(uint)hgobj->num_joints);
+              } while (iVar3 < (int)(u32)hgobj->num_joints);
             }
             if ((layerdat[i].skin_gobj != (nugobj_s *)0x0) ||
                (layerdat[i].blend_skin_gobj != (nugobj_s *)0x0)) {
@@ -2114,7 +2068,7 @@ LAB_800b6930:
                   m_00 = m_00 + 1;
                   iVar4 = iVar4 + 0x40;
                   mtx = mtx + 1;
-                } while (iVar3 < (int)(uint)hgobj->num_joints);
+                } while (iVar3 < (int)(u32)hgobj->num_joints);
               }
               iVar3 = 0;
               if (hgobj->num_joints != '\0') {
@@ -2123,17 +2077,17 @@ LAB_800b6930:
                   iVar3 = iVar3 + 1;
                   NuMtxMul(mtx,mtx,wm);
                   mtx = mtx + 1;
-                } while (iVar3 < (int)(uint)hgobj->num_joints);
+                } while (iVar3 < (int)(u32)hgobj->num_joints);
               }
               gobj = hgobj->layers[i].skin_gobj;
               if (gobj != (nugobj_s *)0x0) {
-                uVar1 = NuRndrGobjSkin2(gobj,(uint)hgobj->num_joints,mtx_array2HGobjRndrDwa,
+                uVar1 = NuRndrGobjSkin2(gobj,(u32)hgobj->num_joints,mtx_array2HGobjRndrDwa,
                                         (float **)0x0);
                 uVar2 = uVar2 | uVar1;
               }
               gobj = hgobj->layers[i].blend_skin_gobj;
               if (gobj != (nugobj_s *)0x0) {
-                uVar1 = NuRndrGobjSkin2(gobj,(uint)hgobj->num_joints,mtx_array2HGobjRndrDwa,dwa);
+                uVar1 = NuRndrGobjSkin2(gobj,(u32)hgobj->num_joints,mtx_array2HGobjRndrDwa,dwa);
                 uVar2 = uVar2 | uVar1;
               }
             }
@@ -2141,30 +2095,29 @@ LAB_800b6930:
         }
         else {
           i = (int)layers[j];
-          if ((-1 < i) && (i < (int)(uint)hgobj->num_layers)) goto LAB_800b6930;
+          if ((-1 < i) && (i < (int)(u32)hgobj->num_layers)) goto LAB_800b6930;
         }
         j = j + 1;
       } while (j < nlayers);
     }
   }
-  return uVar2;
+  return uVar2;*/
 }
 
-int NuHGobjRndrMtx(NUHGOBJ_s *hgobj,numtx_s *wm,int nlayers,short *layers,numtx_s *mtx_array)
+int NuHGobjRndrMtx(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *layers,struct numtx_s *mtx_array)
 
 {
   int iVar1;
-  
-  iVar1 = NuHGobjRndrMtxDwa(hgobj,wm,nlayers,layers,mtx_array,(float **)0x0);
+
+  iVar1 = NuHGobjRndrMtxDwa(hgobj,wm,nlayers,layers,mtx_array,NULL);
   return iVar1;
 }
 
 
-void NuHGobjEvalAnim(NUHGOBJ_s *hgobj,nuAnimData_s *animdata,float time,int njanims,
-                    NUJOINTANIM_s *janim,numtx_s *mtx_array)
-
+void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float time,int njanims,
+                    struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
 {
-  numtx_s *pnVar1;
+  /*numtx_s *pnVar1;
   nuanimcurveset_s *animcurveset;
   numtx_s *WT;
   numtx_s *LOCAL_T;
@@ -2177,7 +2130,7 @@ void NuHGobjEvalAnim(NUHGOBJ_s *hgobj,nuAnimData_s *animdata,float time,int njan
   numtx_s T;
   nuanimtime_s atime;
   uint i;
-  
+
   VtxBuffer[255].z = 1.0;
   VtxBuffer[255].x = 1.0;
   VtxBuffer[255].y = 1.0;
@@ -2249,7 +2202,7 @@ void NuHGobjEvalAnim(NUHGOBJ_s *hgobj,nuAnimData_s *animdata,float time,int njan
       i = i + 1 & 0xff;
     } while (i < hgobj->num_joints);
   }
-  return;
+  return;*/
 }
 
 
@@ -2257,11 +2210,11 @@ void NuHGobjEvalAnim(NUHGOBJ_s *hgobj,nuAnimData_s *animdata,float time,int njan
 
 //NUJOINTANIM_s* janim_arrayHGobjEval2[256]; global var
 
-void NuHGobjEvalAnim2(NUHGOBJ_s *hgobj,nuanimdata2_s *animdata,float time,int njanims,
-                     NUJOINTANIM_s *janim,numtx_s *mtx_array)
+void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,float time,int njanims,
+                     struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
 
 {
-  numtx_s *pnVar1;
+  /*numtx_s *pnVar1;
   numtx_s *pnVar2;
   numtx_s *pnVar3;
   numtx_s *pnVar4;
@@ -2272,7 +2225,7 @@ void NuHGobjEvalAnim2(NUHGOBJ_s *hgobj,nuanimdata2_s *animdata,float time,int nj
   numtx_s LOCAL_T;
   nuanimtime_s atime;
   uchar curvesetflags;
-  
+
   scale_arrayHGobjEval2[255].z = 1.0;			//nuvec_s scale_arrayHGobjEval2[256];
   scale_arrayHGobjEval2[255].x = 1.0;
   scale_arrayHGobjEval2[255].y = 1.0;
@@ -2337,17 +2290,17 @@ LAB_800b58ec:
       i = i + 1 & 0xff;
     } while (i < hgobj->num_joints);
   }
-  return;
+  return;*/
 }
 
 
 
 void NuHGobjEvalAnimBlend
-               (NUHGOBJ_s *hgobj,nuAnimData_s *animdata1,float time1,nuAnimData_s *animdata2,
-               float time2,float blend,int njanims,NUJOINTANIM_s *janim,numtx_s *mtx_array)
+               (struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata1,float time1,struct nuanimdata_s *animdata2,
+               float time2,float blend,int njanims,struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
 
 {
-  numtx_s *pnVar1;
+  /*numtx_s *pnVar1;
   nuanimcurveset_s *animcurveset1;
   numtx_s *parent_T;
   numtx_s *T;
@@ -2364,7 +2317,7 @@ void NuHGobjEvalAnimBlend
   numtx_s LOCAL_T;
   nuanimtime_s atime1;
   nuanimtime_s atime2;
-  
+
   dVar4 = (double)blend;
   dVar3 = (double)time2;
   scale_array0.202[255].z = 1.0;
@@ -2435,14 +2388,14 @@ void NuHGobjEvalAnimBlend
       i = i + 1 & 0xff;
     } while (i < hgobj->num_joints);
   }
-  return;
+  return;*/
 }
 
 
-void NuHGobjEval(NUHGOBJ_s *hgobj,int njanims,NUJOINTANIM_s *janim,numtx_s *mtx_array)
+void NuHGobjEval(struct NUHGOBJ_s *hgobj,int njanims,struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
 
 {
-  numtx_s *pnVar1;
+  /*numtx_s *pnVar1;
   numtx_s *pfVar2;
   NUJOINTANIM_s *offset;
   numtx_s *pfVar3;
@@ -2456,7 +2409,7 @@ void NuHGobjEval(NUHGOBJ_s *hgobj,int njanims,NUJOINTANIM_s *janim,numtx_s *mtx_
   numtx_s mtx;
   numtx_s nStack_80;
   nuangvec_s local_38;
-  
+
   uVar6 = 0;
   if (hgobj->num_joints != '\0') {
     dVar7 = 10430.3779296875;
@@ -2530,13 +2483,13 @@ void NuHGobjEval(NUHGOBJ_s *hgobj,int njanims,NUJOINTANIM_s *janim,numtx_s *mtx_
       uVar6 = uVar6 + 1 & 0xff;
     } while (uVar6 < hgobj->num_joints);
   }
-  return;
+  return;*/
 }
 
-float ** NuHGobjEvalDwa(int layer,void *bollox,nuAnimData_s *vtxanim,float vtxtime)
+float ** NuHGobjEvalDwa(int layer,void *bollox,struct nuanimdata_s *vtxanim,float vtxtime)
 
 {
-  nufaceongeom_s *iVar4;
+ /* nufaceongeom_s *iVar4;
   float *dwa;
   nuanimcurve_s *animcurve;
   nuanimcurveset_s *pnVar1;
@@ -2550,7 +2503,7 @@ float ** NuHGobjEvalDwa(int layer,void *bollox,nuAnimData_s *vtxanim,float vtxti
   double dVar9;
   float fVar10;
   nuanimtime_s atimeblendanim;
-  
+
   iVar6 = layer + -1;
   DWAptr = (float **)0x0;
   iVar3 = 0;
@@ -2601,15 +2554,15 @@ float ** NuHGobjEvalDwa(int layer,void *bollox,nuAnimData_s *vtxanim,float vtxti
       }
     }
   }
-  return DWAptr;
+  return DWAptr;*/
 }
 
 
-float ** NuHGobjEvalDwaBlend(int nlayers,short *layers,nuAnimData_s *vtxanim1,float vtxtime1,
-                            nuAnimData_s *vtxanim2,float vtxtime2,float blend)
+float ** NuHGobjEvalDwaBlend(int nlayers,short *layers,struct nuanimdata_s *vtxanim1,float vtxtime1,
+                            struct nuanimdata_s *vtxanim2,float vtxtime2,float blend)
 
 {
-  float *pfVar1;
+  /*float *pfVar1;
   nuanimcurve_s *pnVar2;
   nuanimcurveset_s *pnVar3;
   float **ppfVar4;
@@ -2637,7 +2590,7 @@ float ** NuHGobjEvalDwaBlend(int nlayers,short *layers,nuAnimData_s *vtxanim1,fl
   nuanimtime_s nStack_a0;
   nuanimtime_s anStack_88 [2];
   uint local_58;
-  
+
   dVar13 = (double)blend;
   dVar14 = (double)vtxtime2;
   local_58 = (uint)(in_cr0 & 0xf) << 0x1c | (uint)(in_cr1 & 0xf) << 0x18 |
@@ -2734,15 +2687,15 @@ LAB_800c4018:
       } while (iVar8 < nlayers);
     }
   }
-  return ppfVar4;
+  return ppfVar4;*/
 }
 
 
 
-float ** NuHGobjEvalDwa2(int nlayers,short *layers,nuanimdata2_s *vtxanim,float vtxtime)
+float ** NuHGobjEvalDwa2(int nlayers,short *layers,struct nuanimdata2_s *vtxanim,float vtxtime)
 
 {
-  char *pcVar1;
+  /*char *pcVar1;
   float *pfVar2;
   float **ppfVar3;
   int nweights;
@@ -2763,7 +2716,7 @@ float ** NuHGobjEvalDwa2(int nlayers,short *layers,nuanimdata2_s *vtxanim,float 
   float fVar9;
   nuanimtime_s nStack_60;
   uint local_3c;
-  
+
   local_3c = (uint)(in_cr0 & 0xf) << 0x1c | (uint)(in_cr1 & 0xf) << 0x18 |
              (uint)(in_cr2 & 0xf) << 0x14 | (uint)(in_cr3 & 0xf) << 0x10 |
              (uint)(unaff_cr4 & 0xf) << 0xc | (uint)(in_cr5 & 0xf) << 8 | (uint)(in_cr6 & 0xf) <<  4
@@ -2813,5 +2766,5 @@ LAB_800c429c:
       } while (iVar5 < nlayers);
     }
   }
-  return ppfVar3;
+  return ppfVar3;*/
 }

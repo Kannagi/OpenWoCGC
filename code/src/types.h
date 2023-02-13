@@ -51,5 +51,9 @@ typedef void(*error_func)(char[0x60], ...);
 // File handle.
 typedef s32 fileHandle;
 
+union variptr_u superbuffer_ptr;
+union variptr_u superbuffer_base;
+union variptr_u superbuffer_end;
+
 #include "numath/numathtypes.h"
 #endif // !TYPES_H

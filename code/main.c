@@ -20,8 +20,6 @@ struct numtlattrib_s attr;
 s32 iss3cmp;
 s32 texinfo;
 void* pixel_dat;
-union variptr_u superbuffer_base;
-union variptr_u superbuffer_end;
 int test_SDL_openGL();
 
 int main()
@@ -60,7 +58,8 @@ int main()
     NuGobjInit();
     printf("NuMtl init...\n");
     NuMtlInit();
-    //NuRndrInitEx();
+    printf("NuRndr init...\n");
+    NuRndrInitEx();
     //printf("NuLight init...\n");
     //NuLightInit();
 

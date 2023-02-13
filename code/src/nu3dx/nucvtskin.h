@@ -21,14 +21,67 @@
 
 struct primdef_s* primdefs_sorted;
 struct primdef_s* primdefs;
-external s32 stritot;
-external s32 totaldupes;
-external s32 totalpts;
-external s32 tritot;
+extern s32 stritot;
+extern s32 totaldupes;
+extern s32 totalpts;
+extern s32 tritot;
 union variptr_u skinbuffer_free;
-external s32 stats[15];
+extern s32 stats[15];
 
-external struct numtx_s mtxused[4];
+extern struct numtx_s mtxused[4];
+
+// Size: 0x18
+struct nuvtx_lc1_s
+{
+    struct nuvec_s pnt;
+    int diffuse;
+    float tc[2];
+};
+
+
+// Size: 0x10
+struct nuvtx_ps_s
+{
+    struct nuvec_s pnt;
+    int diffuse;
+};
+
+// Size: 0x38
+struct nuvtx_sk3tc1_s
+{
+    struct nuvec_s pnt;
+    float weights[2];
+    float indexes[3];
+    struct nuvec_s nrm;
+    int diffuse;
+    float tc[2];
+};
+
+// Size: 0x24
+struct nuvtx_tc1_s
+{
+    struct nuvec_s pnt;
+    struct nuvec_s nrm;
+    int diffuse;
+    float tc[2];
+};
+
+// Size: 0x1C
+struct nuvtx_tltc1_s
+{
+    struct nuvec_s pnt;
+    float rhw;
+    int diffuse;
+    float tc[2];
+};
+
+// Size: 0x18
+struct nuvtx_ts_s
+{
+    struct nuvec_s vTangent;
+    struct nuvec_s vNormal;
+};
+
 
 // Size: 0x174
 struct primdef_s
@@ -40,57 +93,6 @@ struct primdef_s
     int nummtx;
     int sorted;
     int baseid;
-};
-
-// Size: 0x18
-struct nuvtx_lc1_s
-{
-    struct nuvec_s pnt;
-    int diffuse;
-    float tc[2];
-};
-
-// Size: 0x10
-struct nuvtx_ps_s
-{
-    nuvec_s pnt;
-    int diffuse;
-};
-
-// Size: 0x38
-struct nuvtx_sk3tc1_s
-{
-    nuvec_s pnt;
-    float weights[2];
-    float indexes[3];
-    nuvec_s nrm;
-    int diffuse;
-    float tc[2];
-};
-
-// Size: 0x24
-struct nuvtx_tc1_s
-{
-    nuvec_s pnt;
-    nuvec_s nrm;
-    int diffuse;
-    float tc[2];
-};
-
-// Size: 0x1C
-struct nuvtx_tltc1_s
-{
-    nuvec_s pnt;
-    float rhw;
-    int diffuse;
-    float tc[2];
-};
-
-// Size: 0x18
-struct nuvtx_ts_s
-{
-    nuvec_s vTangent;
-    nuvec_s vNormal;
 };
 
 #endif // !NUCVTSKN_H
