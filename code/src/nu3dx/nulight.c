@@ -1,10 +1,10 @@
 #include "nulight.h"
 
-u32 initialised = 0;
-u32 maxlights = 3;
-u32 numlights = 0;
-s32 freelight = -1;
-s32 alloclight = -1;
+//s32 initialised = 0;
+s32 maxlights = 3;
+s32 numlights = 0;
+static s32 freelight = -1;
+static s32 alloclight = -1;
 static s32 current_lights_stored = 0;
 f32 buglight_distance;
 
@@ -38,10 +38,10 @@ void NuLightFog(float pnear, float pfar, u32 colour, int blur, int haze)
     NuRndrFogNear = pnear;
     NuRndrFogFar = pfar;
     if (pfar == pnear) {
-        GS_SetupFog(0, 0.0, 0.0, 0);
+        //GS_SetupFog(0, 0.0, 0.0, 0);
     }
     else {
-        GS_SetupFog(1, pnear, pfar, NuRndrFogCol);
+        //GS_SetupFog(1, pnear, pfar, NuRndrFogCol);
     }
     return;
 }
@@ -112,39 +112,39 @@ void NuLightUpdate(struct nulight_s* l)	//Need Fix
     int Index;
     struct _D3DLIGHT8 d3dlight;
 
-    d3dlight.Direction.z = -(l->mtx).mtx[2][2];
-    d3dlight.Diffuse.r = (l->diffuse).b;
-    d3dlight.Diffuse.g = (l->diffuse).g;
-    d3dlight.Direction.x = -(l->mtx).mtx[2][0];
-    d3dlight.Diffuse.b = (l->diffuse).r;
-    d3dlight.Direction.y = -(l->mtx).mtx[2][1];
-    d3dlight.Ambient.r = (l->ambient).b;
-    d3dlight.Ambient.g = (l->ambient).g;
-    d3dlight.Ambient.b = (l->ambient).r;
-    d3dlight.Position.x = (l->mtx).mtx[3][0];
-    d3dlight.Position.y = (l->mtx).mtx[3][1];
-    d3dlight.Position.z = (l->mtx).mtx[3][2];
-    Index = (int)(l + 0x1741a7c) * -0x3d70a3d7 >> 2;	//?
-    d3dlight.Type = D3DLIGHT_DIRECTIONAL;
-    d3dlight.Diffuse.a = 1.0;
-    d3dlight.Specular.r = 0.0;
-    d3dlight.Specular.g = 0.0;
-    d3dlight.Specular.b = 0.0;
-    d3dlight.Specular.a = 1.0;
-    d3dlight.Ambient.a = 1.0;
-    d3dlight.range = 1000.0;
-    d3dlight.Phi = 0.0;
-    d3dlight.falloff = 0.0;
-    d3dlight.attenuation0 = 1.0;
-    d3dlight.attenuation1 = 0.0;
-    d3dlight.attenuation2 = 0.0;
-    d3dlight.Theta = 0.0;
-    if (((d3dlight.Direction.x == 0.0) && (d3dlight.Direction.y == 0.0)) &&
-        (d3dlight.Direction.z == 0.0)) {
-        d3dlight.Direction.x = 1.0;
-    }
-    GS_SetLight(Index, &d3dlight);
-    GS_LightEnable(Index, 1);
+      d3dlight.Direction.z = -(l->mtx)._22;
+  d3dlight.Diffuse.r = (l->diffuse).b;
+  d3dlight.Diffuse.g = (l->diffuse).g;
+  d3dlight.Direction.x = -(l->mtx)._20;
+  d3dlight.Diffuse.b = (l->diffuse).r;
+  d3dlight.Direction.y = -(l->mtx)._21;
+  d3dlight.Ambient.r = (l->ambient).b;
+  d3dlight.Ambient.g = (l->ambient).g;
+  d3dlight.Ambient.b = (l->ambient).r;
+  d3dlight.Position.x = (l->mtx)._30;
+  d3dlight.Position.y = (l->mtx)._31;
+  d3dlight.Position.z = (l->mtx)._32;
+  Index = (int)(l + 0x1741a7c) * -0x3d70a3d7 >> 2;  //?
+  d3dlight.Type = D3DLIGHT_DIRECTIONAL;
+  d3dlight.Diffuse.a = 1.0;
+  d3dlight.Specular.r = 0.0;
+  d3dlight.Specular.g = 0.0;
+  d3dlight.Specular.b = 0.0;
+  d3dlight.Specular.a = 1.0;
+  d3dlight.Ambient.a = 1.0;
+  d3dlight.range = 1000.0;
+  d3dlight.Phi = 0.0;
+  d3dlight.falloff = 0.0;
+  d3dlight.attenuation0 = 1.0;
+  d3dlight.attenuation1 = 0.0;
+  d3dlight.attenuation2 = 0.0;
+  d3dlight.Theta = 0.0;
+  if (((d3dlight.Direction.x == 0.0) && (d3dlight.Direction.y == 0.0)) &&
+     (d3dlight.Direction.z == 0.0)) {
+    d3dlight.Direction.x = 1.0;
+  }
+    //GS_SetLight(Index, &d3dlight);
+    //GS_LightEnable(Index, 1);
     return;
 }
 
@@ -252,7 +252,7 @@ void NuLightSetDirectionalLights(struct nuvec_s* d0, struct nucolour3_s* c0, str
 
     currentlight3 = NuLightCreate();
 
-    if ((currentlight3 == NULL) && (currentlight3 == NULL)) 
+    if ((currentlight3 == NULL) && (currentlight3 == NULL))
     {
         current_lights_stored = 0;
             return;
@@ -347,12 +347,11 @@ void NuLightSetStoredLights(s32 index)		//TODO
 {
     struct nulight_s* pnVar1;
     struct nulight_s* pnVar2;
-    struct numtx_s* pnVar3;
-    struct numtx_s* pnVar4;
+    struct nulight_s* pnVar3;
+    struct nulight_s* pnVar4;
     struct nulight_s* pnVar5;
     s32 iVar6;
     struct nulight_s* pnVar7;
-    struct nulight_s* pnVar8;
 
     if (currentlight1 == NULL) {
         currentlight1 = NuLightCreate();
@@ -363,82 +362,72 @@ void NuLightSetStoredLights(s32 index)		//TODO
     if (currentlight3 == NULL) {
         currentlight3 = NuLightCreate();
     }
-    iVar6 = 0x48;
-    pnVar4 = (struct numtx_s*)(StoredLights + index);
+  iVar6 = 0x48;
+  pnVar2 = (struct nulight_s *)(StoredLights + index);
+  pnVar3 = currentlight1;
+  do {
+    pnVar5 = pnVar3;
+    pnVar4 = pnVar2;
+    iVar6 = iVar6 + -0x18;
+    (pnVar5->ambient).r = (pnVar4->ambient).r;
+    (pnVar5->ambient).g = (pnVar4->ambient).g;
+    (pnVar5->ambient).b = (pnVar4->ambient).b;
+    (pnVar5->diffuse).r = (pnVar4->diffuse).r;
+    (pnVar5->diffuse).g = (pnVar4->diffuse).g;
+    (pnVar5->diffuse).b = (pnVar4->diffuse).b;
     pnVar1 = currentlight1;
-    do {
-        pnVar8 = pnVar1;
-        pnVar3 = pnVar4;
-        iVar6 = iVar6 + -0x18;
-        (pnVar8->ambient).r = (((struct nulight_s*)pnVar3->mtx)->ambient).r;
-        (pnVar8->ambient).g = (((struct nulight_s*)pnVar3->mtx)->ambient).g;
-        (pnVar8->ambient).b = (((struct nulight_s*)pnVar3->mtx)->ambient).b;
-        (pnVar8->diffuse).r = (((struct nulight_s*)pnVar3->mtx)->diffuse).r;
-        (pnVar8->diffuse).g = (((struct nulight_s*)pnVar3->mtx)->diffuse).g;
-        pnVar4 = &((struct nulight_s*)pnVar3->mtx)->mtx;
-        (pnVar8->diffuse).b = (((struct nulight_s*)pnVar3->mtx)->diffuse).b;
-        pnVar2 = currentlight1;
-        pnVar1 = (struct nulight_s*)&pnVar8->mtx;
-    } while (iVar6 != 0);
-    
-    //NEED CORRECTION
-    /*
-    (pnVar8->mtx).mtx[0] = pnVar4->mtx[0];
-    (pnVar8->mtx).mtx[1] = pnVar3->mtx[1][3];
-    (pnVar8->mtx).mtx[2] = pnVar3->mtx[2][0];
-    (pnVar8->mtx).mtx[3] = pnVar3->mtx[2][1];*/
-    NuLightUpdate(pnVar2);
-    iVar6 = 0x48;
-    pnVar1 = StoredLights[index].light + 1;
-    pnVar2 = currentlight2;
-    do {
-        pnVar7 = pnVar2;
-        pnVar5 = pnVar1;
-        iVar6 = iVar6 + -0x18;
-        (pnVar7->ambient).r = (pnVar5->ambient).r;
-        (pnVar7->ambient).g = (pnVar5->ambient).g;
-        (pnVar7->ambient).b = (pnVar5->ambient).b;
-        (pnVar7->diffuse).r = (pnVar5->diffuse).r;
-        (pnVar7->diffuse).g = (pnVar5->diffuse).g;
-        (pnVar7->diffuse).b = (pnVar5->diffuse).b;
-        pnVar8 = currentlight2;
-        pnVar1 = (struct nulight_s*)&pnVar5->mtx;
-        pnVar2 = (struct nulight_s*)&pnVar7->mtx;
-    } while (iVar6 != 0);
-
-    //NEED CORRECTION
-    /*(pnVar7->mtx).mtx[0] = (pnVar5->mtx).mtx[0];
-    (pnVar7->mtx).mtx[1] = (pnVar5->mtx).mtx[1];
-    (pnVar7->mtx).mtx[2] = (pnVar5->mtx).mtx[2];
-    (pnVar7->mtx).mtx[3] = (pnVar5->mtx).mtx[3];
-    */
-    NuLightUpdate(pnVar8);
-    iVar6 = 0x48;
-    pnVar1 = StoredLights[index].light + 2;
-    pnVar2 = currentlight3;
-    do {
-        pnVar7 = pnVar2;
-        pnVar5 = pnVar1;
-        iVar6 = iVar6 + -0x18;
-        (pnVar7->ambient).r = (pnVar5->ambient).r;
-        (pnVar7->ambient).g = (pnVar5->ambient).g;
-        (pnVar7->ambient).b = (pnVar5->ambient).b;
-        (pnVar7->diffuse).r = (pnVar5->diffuse).r;
-        (pnVar7->diffuse).g = (pnVar5->diffuse).g;
-        (pnVar7->diffuse).b = (pnVar5->diffuse).b;
-        pnVar8 = currentlight3;
-        pnVar1 = (struct nulight_s*)&pnVar5->mtx;
-        pnVar2 = (struct nulight_s*)&pnVar7->mtx;
-    } while (iVar6 != 0);
-
-    //NEED CORRECTION
-    /*(pnVar7->mtx).mtx[0] = (pnVar5->mtx).mtx[0];
-    (pnVar7->mtx).mtx[1] = (pnVar5->mtx).mtx[1];
-    (pnVar7->mtx).mtx[2] = (pnVar5->mtx).mtx[2];
-    (pnVar7->mtx).mtx[3] = (pnVar5->mtx).mtx[3];
-    */
-    NuLightUpdate(pnVar8);
-    return;
+    pnVar2 = (struct nulight_s *)&pnVar4->mtx;
+    pnVar3 = (struct nulight_s *)&pnVar5->mtx;
+  } while (iVar6 != 0);
+  (pnVar5->mtx)._00 = (pnVar4->mtx)._00;
+  (pnVar5->mtx)._01 = (pnVar4->mtx)._01;
+  (pnVar5->mtx)._02 = (pnVar4->mtx)._02;
+  (pnVar5->mtx)._03 = (pnVar4->mtx)._03;
+  NuLightUpdate(pnVar1);
+  iVar6 = 0x48;
+  pnVar2 = StoredLights[index].light + 1;
+  pnVar3 = currentlight2;
+  do {
+    pnVar7 = pnVar3;
+    pnVar5 = pnVar2;
+    iVar6 = iVar6 + -0x18;
+    (pnVar7->ambient).r = (pnVar5->ambient).r;
+    (pnVar7->ambient).g = (pnVar5->ambient).g;
+    (pnVar7->ambient).b = (pnVar5->ambient).b;
+    (pnVar7->diffuse).r = (pnVar5->diffuse).r;
+    (pnVar7->diffuse).g = (pnVar5->diffuse).g;
+    (pnVar7->diffuse).b = (pnVar5->diffuse).b;
+    pnVar1 = currentlight2;
+    pnVar2 = (struct nulight_s *)&pnVar5->mtx;
+    pnVar3 = (struct nulight_s *)&pnVar7->mtx;
+  } while (iVar6 != 0);
+  (pnVar7->mtx)._00 = (pnVar5->mtx)._00;
+  (pnVar7->mtx)._01 = (pnVar5->mtx)._01;
+  (pnVar7->mtx)._02 = (pnVar5->mtx)._02;
+  (pnVar7->mtx)._03 = (pnVar5->mtx)._03;
+  NuLightUpdate(pnVar1);
+  iVar6 = 0x48;
+  pnVar2 = StoredLights[index].light + 2;
+  pnVar3 = currentlight3;
+  do {
+    pnVar7 = pnVar3;
+    pnVar5 = pnVar2;
+    iVar6 = iVar6 + -0x18;
+    (pnVar7->ambient).r = (pnVar5->ambient).r;
+    (pnVar7->ambient).g = (pnVar5->ambient).g;
+    (pnVar7->ambient).b = (pnVar5->ambient).b;
+    (pnVar7->diffuse).r = (pnVar5->diffuse).r;
+    (pnVar7->diffuse).g = (pnVar5->diffuse).g;
+    (pnVar7->diffuse).b = (pnVar5->diffuse).b;
+    pnVar1 = currentlight3;
+    pnVar2 = (struct nulight_s *)&pnVar5->mtx;
+    pnVar3 = (struct nulight_s *)&pnVar7->mtx;
+  } while (iVar6 != 0);
+  (pnVar7->mtx)._00 = (pnVar5->mtx)._00;
+  (pnVar7->mtx)._01 = (pnVar5->mtx)._01;
+  (pnVar7->mtx)._02 = (pnVar5->mtx)._02;
+  (pnVar7->mtx)._03 = (pnVar5->mtx)._03;
+  NuLightUpdate(pnVar1);
 }
 
 void NuLightClearStoredLights(void)
@@ -460,10 +449,10 @@ void NuLightMatInit(void)
 
 {
     struct numtl_s* pnVar1;
-    struct numtlattrib_s nVar2;
+    //struct numtlattrib_s nVar2;
 
     pnVar1 = NuMtlCreate(1);
-    nVar2 = pnVar1->attrib;
+    //nVar2 = pnVar1->attrib;
     NuLightAddMat = pnVar1;
     (pnVar1->diffuse).b = 1.0;
     pnVar1->alpha = 0.999;
@@ -471,19 +460,19 @@ void NuLightMatInit(void)
     pnVar1->alpha_sort = 0x100;
     (pnVar1->diffuse).r = 1.0;
     (pnVar1->diffuse).g = 1.0;
-    pnVar1->attrib = (struct numtlattrib_s)((u32)nVar2 & 0x3c00fff9 | 0x81660002);	//fix!
-    NuMtlUpdate();
+    //pnVar1->attrib = (struct numtlattrib_s)((u32)nVar2 & 0x3c00fff9 | 0x81660002);	//fix!
+    //NuMtlUpdate();
     return;
 }
 
 int NuLgtRand(void)
 
 {
-  NuLgtSeed = NuLgtSeed * 0x24cd + 1U & 0xffff;
+  //NuLgtSeed = NuLgtSeed * 0x24cd + 1U & 0xffff;
   return NuLgtSeed;
 }
 
-void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct nuvec_s *lasdir,f32 sizew,f32 size l,
+void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct nuvec_s *lasdir,f32 sizew,f32 sizel,
                   f32 sizewob,f32 arcsize,s32 col)
 
 {
@@ -493,10 +482,10 @@ void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct 
   u32 uVar3;
   f32 fVar4;
   s32 laserframe;
-  
+
   laserframe = NuLgtArcLaserFrame;
   seed = NuLgtArcLaserCnt;
-  uVar3 = (uint)col >> 0x17 & 0x1fe;
+  uVar3 = (u32)col >> 0x17 & 0x1fe;
   if (0xff < uVar3) {
     uVar3 = 0xff;
   }
@@ -505,7 +494,7 @@ void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct 
     uVar1 = 0xff;
   }
   if (NuLgtArcLaserCnt < 0x10) {
-    NuLgtArcLaserData[NuLgtArcLaserCnt].type = (uchar)type;
+    NuLgtArcLaserData[NuLgtArcLaserCnt].type = (u8)type;
     fVar4 = start->z;
     fVar2 = start->y;
     NuLgtArcLaserData[seed].start.x = start->x;
@@ -599,7 +588,7 @@ s32 GS_LightEnable(s32 Index, s32 Enable)
   float v1;
   Nearest_Light_s light;
   double local_b0;
-  
+
   v0 = NuLgtArcV0;
   v1 = NuLgtArcV1;
   v0_2 = NuLgtArcV0;

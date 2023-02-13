@@ -24,11 +24,12 @@ int test_SDL_openGL();
 
 int main()
 {
-    //DEMOInit(); hdw init
-    // GS_Init(); gamecube video init , no PS2 I think
-    // SS_Init(); sound init
 
     printf("\nStarting WoC Engine\n");
+        //DEMOInit(); hdw init
+        GS_Init(); //gamecube video init , no PS2 I think
+        printf("\GS initialized..\n");
+        // SS_Init(); sound init
     NuFileInitEx(0,0);
     printf("\nNuFile initialized..\n");
 
@@ -60,8 +61,8 @@ int main()
     NuMtlInit();
     printf("NuRndr init...\n");
     NuRndrInitEx();
-    //printf("NuLight init...\n");
-    //NuLightInit();
+    printf("NuLight init...\n");
+    NuLightInit();
 
     //from firstscreens function
     pixel_dat = malloc_x(0x4000c);

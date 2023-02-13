@@ -34,6 +34,76 @@ struct _GXColor
     unsigned char a;
 };
 
+
+struct _GS_TEXTURE {
+    int Flags;
+    enum gs_texturetype_e Format;
+    u32 Width;
+    u32 Height;
+    u32 TexBits;
+    u32 PalBits;
+    u32 NUID;
+    u32 Pad;
+    //struct _GXTexObj Tex;
+    //struct _GXTlutObj Tlut;
+};
+
+struct _GS_VECTOR3 {
+    float x;
+    float y;
+    float z;
+};
+
+struct _GS_VECTOR4 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct _GS_VIEWPORT {
+    u64 X;
+    u64 Y;
+    u64 width;
+    u64 height;
+    float MinZ;
+    float MaxZ;
+};
+
+struct _GSMATRIX {
+    float _00;
+    float _01;
+    float _02;
+    float _03;
+    float _10;
+    float _11;
+    float _12;
+    float _13;
+    float _20;
+    float _21;
+    float _22;
+    float _23;
+    float _30;
+    float _31;
+    float _32;
+    float _33;
+};
+
+struct _GSMATRIX33 {
+    float _11;
+    float _12;
+    float _13;
+    float _14;
+    float _21;
+    float _22;
+    float _23;
+    float _24;
+    float _31;
+    float _32;
+    float _33;
+    float _34;
+};
+
 struct tagRECT {
     int left;
     int top;
@@ -117,17 +187,6 @@ struct _D3DVIEWPORT8
     unsigned int Y;
     unsigned int Width;
     unsigned int Height;
-    float MinZ;
-    float MaxZ;
-};
-
-// Size: 0x18
-struct _GS_VIEWPORT
-{
-    unsigned long X;
-    unsigned long Y;
-    unsigned long Width;
-    unsigned long Height;
     float MinZ;
     float MaxZ;
 };

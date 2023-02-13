@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "nu3dxtypes.h"
+#include "nu3dx/numtl.h"
 
 /*
   800b14dc 0000cc 800b14dc  4 NuLightInit 	Global
@@ -27,14 +28,14 @@
 //extern u32 initialised;
 
 // Maximum amount of lights allowed.
-extern u32 maxlights;
+extern s32 maxlights;
 
 // Number of lights currently.
-extern u32 numlights;
+extern s32 numlights;
 
-static int freelight;
+static s32 freelight;
 
-static int alloclight;
+static s32 alloclight;
 
 static s32 current_lights_stored;
 static s32 num_stored_lights;
@@ -63,7 +64,7 @@ struct nulights_s
 };
 
 // Size: 0x40
-struct NuLgtArcLaserData
+struct LgtArcLaserData
 {
     struct nuvec_s start;
     struct nuvec_s target;
@@ -96,6 +97,7 @@ float NuLgtArcV1;
 s32 NuLgtArcLaserFrame;
 s32 NuLgtArcLaserOldCnt;
 s32 NuLgtArcLaserCnt;
+struct LgtArcLaserData NuLgtArcLaserData[16];
 
 
 

@@ -153,11 +153,6 @@ s32 NudxFw_SetRenderState(enum _D3DRENDERSTATETYPE state, u32 data)
   return 0;
 }
 
-void GS_SetRenderState(int state,int data)
-{
-  return;
-}
-
 s32 NudxFw_SetTextureState(u32 stage, enum _D3DTEXTURESTAGESTATETYPE state, u32 data)
 {
   //GS_SetTextureStageState(); //Empty function
@@ -247,8 +242,8 @@ s32 CreateDirect3D(struct HWND__ *hwnd)
   vp.MaxZ = 1.0;
   gsvp.X = vp.X;
   gsvp.Y = vp.Y;
-  gsvp.Width = PHYSICAL_SCREEN_X;
-  gsvp.Height = 0x1c0;
+  gsvp.width = PHYSICAL_SCREEN_X;
+  gsvp.height = 0x1c0;
   gsvp.MaxZ = 1.0;
   gsvp.MinZ = vp.MinZ;
   //GS_SetViewport(&gsvp);
