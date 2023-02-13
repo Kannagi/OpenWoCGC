@@ -789,19 +789,19 @@ struct visidata_s {
     int curknot;
 };
 
-/* // Size: 0x4C
+ // Size: 0x4C
 struct _GS_TEXTURE
 {
-	unsigned int Flags;
-	enum gs_texturetype_e Format;
-	unsigned int Width;
-	unsigned int Height;
-	unsigned int TexBits;
-	unsigned int PalBits;
-	unsigned int NUID;
-	unsigned int Pad;
-	struct _GXTexObj Tex;
-	struct _GXTlutObj Tlut;
-};*/
+    s32 Flags;
+    enum gs_texturetype_e Format;
+    u32 Width;
+    u32 Height;
+    u32 TexBits;
+    u32 PalBits;
+    u32 NUID;
+    u32 Pad;
+	//struct _GXTexObj Tex;     Gamecube SDK
+	//struct _GXTlutObj Tlut;   Gamecube SDK
+};
 
 #endif // !NU3DXTYPES_H

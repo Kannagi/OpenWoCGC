@@ -38,10 +38,10 @@ void NuLightFog(float pnear, float pfar, u32 colour, int blur, int haze)
     NuRndrFogNear = pnear;
     NuRndrFogFar = pfar;
     if (pfar == pnear) {
-        //GS_SetupFog(0, 0.0, 0.0, 0);
+        GS_SetupFog(0, 0.0, 0.0, 0);
     }
     else {
-        //GS_SetupFog(1, pnear, pfar, NuRndrFogCol);
+        GS_SetupFog(1, pnear, pfar, NuRndrFogCol);
     }
     return;
 }

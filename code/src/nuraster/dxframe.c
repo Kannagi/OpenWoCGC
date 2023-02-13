@@ -159,11 +159,6 @@ s32 NudxFw_SetTextureState(u32 stage, enum _D3DTEXTURESTAGESTATETYPE state, u32 
   return 0;
 }
 
-void GS_SetTextureStageState(void)
-{
-  return;
-}
-
 struct D3DSurface * NudxFw_GetBackBuffer(void)
 
 {

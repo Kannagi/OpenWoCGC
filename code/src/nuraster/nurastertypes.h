@@ -34,20 +34,6 @@ struct _GXColor
     unsigned char a;
 };
 
-
-struct _GS_TEXTURE {
-    int Flags;
-    enum gs_texturetype_e Format;
-    u32 Width;
-    u32 Height;
-    u32 TexBits;
-    u32 PalBits;
-    u32 NUID;
-    u32 Pad;
-    //struct _GXTexObj Tex;
-    //struct _GXTlutObj Tlut;
-};
-
 struct _GS_VECTOR3 {
     float x;
     float y;
