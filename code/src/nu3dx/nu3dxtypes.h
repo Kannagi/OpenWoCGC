@@ -219,8 +219,9 @@ struct nusystex_s
 
 
 // Size: 0x4
-struct numtlattrib_s
+union numtlattrib_s
 {
+    struct {
 	unsigned int alpha : 2; // Offset: 0x0, Bit Offset: 0, Bit Size: 2
 	unsigned int filter : 2; // Offset: 0x0, Bit Offset: 2, Bit Size: 2
 	unsigned int fx : 2; // Offset: 0x0, Bit Offset: 4, Bit Size: 2
@@ -235,6 +236,8 @@ struct numtlattrib_s
 	unsigned int aref : 8; // Offset: 0x0, Bit Offset: 21, Bit Size: 8
 	unsigned int afail : 2; // Offset: 0x0, Bit Offset: 29, Bit Size: 2
 	unsigned int uvmode : 1; // Offset: 0x0, Bit Offset: 31, Bit Size: 1
+    } _bitfld;
+    u32 _word;
 };
 
 // Size: 0x4
@@ -417,7 +420,7 @@ struct nuplane_s
 struct numtl_s
 {
 	struct numtl_s* next;
-	struct numtlattrib_s attrib;
+	union numtlattrib_s attrib;
 	struct nucolour3_s ambient;
 	struct nucolour3_s diffuse;
 	union nufx_u fx1;

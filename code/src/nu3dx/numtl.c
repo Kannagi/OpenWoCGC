@@ -27,7 +27,8 @@ void NuMtlCreateDefault(void) {
     numtl_white = mtl;
     mtl->L = 0;
     mtl->alpha = 1.0;
-    //mtl->attrib = (s32) (((mtl->attrib & 0x3fc3ffff | 0x200000); NEED CORRECTION
+    //mtl->attrib._word = (union numtlattribs)((u32)mtl->attrib & 0x3fc3ffff | 0x200000);
+    mtl->attrib._word = (0x3fc3ffff | 0x200000);    //should work this way
     mtl->K = 0;
     mtl->diffuse.r = 1.0;
     mtl->diffuse.g = 1.0;
@@ -82,6 +83,7 @@ struct numtl_s* NuMtlCreate(s32 mode)
       memset(ret,0,0x6c);
       (ret->mtl).alpha = i;
       //(ret->mtl).attrib = (struct numtlattrib_s)((u32)(ret->mtl).attrib & 0xcfffffff | 0x20000000);
+      (ret->mtl).attrib._word = (0xcfffffff | 0x20000000);
       NuMtlInsert(ret);
       mode = mode + -1;
       (ret->mtl).next = &sm->mtl;

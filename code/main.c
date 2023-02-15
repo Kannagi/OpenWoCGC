@@ -16,7 +16,7 @@
 
 struct nutex_s tex;
 struct numtl_s *mtl;
-struct numtlattrib_s attr;
+union numtlattrib_s attr;
 s32 iss3cmp;
 s32 texinfo;
 void* pixel_dat;
@@ -84,7 +84,8 @@ int main()
     mtl->alpha = 0.999;
     (mtl->diffuse).r = 1.0;
     (mtl->diffuse).g = 1.0;
-    //mtl->attrib = (numtlattrib_s)((uint)attr & 0xcc0cffff | 0x16e8000);   need fix
+    mtl->attrib._word = (0xcc0cffff | 0x16e8000);
+    //printf("attrib: %s\n", mtl->attrib._word);
     //firstscreenfade(lic,1);
     //nuvideo_global_vbcnt = 0;
 

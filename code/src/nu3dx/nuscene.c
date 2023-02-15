@@ -69,7 +69,7 @@ void ReadNuIFFTextureSet(fileHandle handle,struct nuscene_s *scene)
 
 void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)
 {
-  struct numtlattrib_s attr;
+  union numtlattrib_s attr;
   s32 nmtl;
   struct numtl_s **mtl;
   struct numtl_s *mtlR;
