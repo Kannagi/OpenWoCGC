@@ -16,7 +16,7 @@
 
 struct nutex_s tex;
 struct numtl_s *mtl;
-union numtlattrib_s attr;
+u32 attr;
 s32 iss3cmp;
 s32 texinfo;
 void* pixel_dat;
@@ -78,17 +78,38 @@ int main()
     texinfo = NuTexCreate(&tex);
     iss3cmp = 0;
     mtl = NuMtlCreate(1);
-    attr = mtl->attrib;
+    attr = mtl->attrib._word;
     mtl->tid = texinfo;
     (mtl->diffuse).b = 1.0;
     mtl->alpha = 0.999;
     (mtl->diffuse).r = 1.0;
     (mtl->diffuse).g = 1.0;
-    mtl->attrib._word = (0xcc0cffff | 0x16e8000);
-    //printf("attrib: %s\n", mtl->attrib._word);
+    mtl->attrib._word = attr & (0xcc0cffff | 0x16e8000);
+    printf("attrib: %d\n", attr);
     //firstscreenfade(lic,1);
     //nuvideo_global_vbcnt = 0;
+/*
+  do {
+    texinfo = NuRndrBeginScene(1);
+    if (texinfo != 0) {
+      NuRndrClear(0xb,0,1.0);
+      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,lic);
+      NuRndrEndScene();
+      NuRndrSwapScreen(1);
+    }
+    Reseter();
+    GC_DiskErrorPoll();
+  } while (nuvideo_global_vbcnt < 0x78);
 
+  nuvideo_global_vbcnt = 0;
+  firstscreenfade(lic,-1);
+  NuRndrClear(0xb,0,1.0);
+  NuRndrSwapScreen(1);
+  if (lic->tid != 0) {
+    NuTexDestroy(lic->tid);
+  }
+
+*/
 
     test_SDL_openGL();
     return 0;

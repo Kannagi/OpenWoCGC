@@ -291,7 +291,7 @@ struct nugobj_s * ReadNuIFFGeom(fileHandle handle,struct numtl_s **mtls)
         } while (count != 0);
       }
       i = i + 1;
-      //NuPs2CreateSkin(gobject);   finish cvtskin file
+      NuPs2CreateSkin(gobject);   //finish cvtskin file
       NuGobjCalcDims(gobject);
       for (geom = gobject->geom; geom != NULL; geom = geom->next) {
       }

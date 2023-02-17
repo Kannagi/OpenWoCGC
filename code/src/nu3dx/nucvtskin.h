@@ -28,7 +28,7 @@ extern s32 tritot;
 union variptr_u skinbuffer_free;
 extern s32 stats[15];
 
-extern struct numtx_s mtxused[4];
+static char mtxused[256];
 
 // Size: 0x18
 struct nuvtx_lc1_s
