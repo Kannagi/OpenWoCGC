@@ -260,6 +260,33 @@ LAB_800cbc0c:
   return;
 }
 
+/*
+
+typedef unsigned int u32;
+typedef signed int s32;
+
+void DCFlushRange(s32 arg0, u32 arg1) {
+    u32 var_ctr;
+    u32 var_r4;
+
+    var_r4 = arg1;
+    if (var_r4 > 0U) {
+        if (arg0 & 0x1F) {
+            var_r4 += 0x20;
+        }
+        var_ctr = (u32) (var_r4 + 0x1F) >> 5U;
+        do {
+            __dcbz((void*)var_r4, 0);   //dataCacheBlockFlush
+            var_ctr -= 1;
+        } while (var_ctr != 0);
+    }
+    asm {
+        sc
+    }
+}
+
+*/
+
 
 void GS_ChangeTextureStates(int id)
 

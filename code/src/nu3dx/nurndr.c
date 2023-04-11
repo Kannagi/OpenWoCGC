@@ -51,7 +51,6 @@ void NuRndrEndScene(void)
 
 
 void NuRndrFlush(void)
-
 {
   NuMtlRender();
   //NuLightClearStoredLights();
@@ -59,7 +58,6 @@ void NuRndrFlush(void)
 }
 
 void NuRndrClear(s32 flags,s32 colour,f32 depth)
-
 {
   s32 fwf;
 
@@ -77,23 +75,23 @@ void NuRndrClear(s32 flags,s32 colour,f32 depth)
   return;
 }
 
-void NuRndrSwapScreen(int hRT)
 
+void NuRndrSwapScreen(int hRT)
 {
   NudxFw_SetBackBufferCopied(1);
-  /*if (Pad[0] != NULL) {
-    if (Pad[0]->old_paddata == 0) {
+  if (Pad[0] != NULL) {
+    if (Pad[0]->oldpaddata == 0) {
       padflag = 1;
     }
     if (padflag != 0) {
-      if ((Pad[0]->old_paddata & 1) != 0) {
+      if ((Pad[0]->oldpaddata & 1) != 0) {
         NudxFw_FlipScreen(hRT,1);
         return;
       }
       NudxFw_FlipScreen(hRT,1);
       return;
     }
-  }*/
+  }
   NudxFw_FlipScreen(hRT,0);
   return;
 }
@@ -684,12 +682,12 @@ void NuRndrItem(struct nurndritem_s *item)
   }
   else if (type == NURNDRITEM_GEOM3D) {
     //DBTimerStart(0x1f);
-        //NuRndrGeomItem((struct nugeomitem_s *)item);
+        NuRndrGeomItem((struct nugeomitem_s *)item);
     //DBTimerEnd(0x1f);
   }
   else if (type == NURNDRITEM_SKIN3D2) {
     //DBTimerStart(0x20);
-        //NuRndrSkinItem2((struct nugeomitem_s *)item);
+        NuRndrSkinItem2((struct nugeomitem_s *)item);
     //DBTimerEnd(0x20);
   }
   else if (type == NURNDRITEM_GEOMFACE) {
@@ -884,51 +882,51 @@ void NuRndrFaceItem(nugeomitem_s *item)	//TODO
   DBTimerStart(0x1c);
   return;
 }
+*/
 
 
-
-void NuRndrGeomItem(nugeomitem_s *item)
+void NuRndrGeomItem(struct nugeomitem_s *item)
 
 {
-  ushort uVar1;
-  nuprimtype_e ptype;
+  u16 uVar1;
+  enum nuprimtype_e ptype;
   int stride;
-  nugeom_s *geom;
+  struct nugeom_s *geom;
   int vtxcnt;
-  uint nverts;
+  u32 nverts;
   float *vertlist;
   short *buff;
-  nuprim_s *prim;
+  struct nuprim_s *prim;
 
-  DBTimerStart(6);
-  if ((_GSMATRIX *)item->mtx == (_GSMATRIX *)0x0) {
-    GS_LoadWorldMatrixIdentity();
+  //DBTimerStart(6);
+  if ((struct _GSMATRIX *)item->mtx == NULL) {
+    //GS_LoadWorldMatrixIdentity();
   }
   else {
-    GS_SetWorldMatrix((_GSMATRIX *)item->mtx);
+    //GS_SetWorldMatrix((struct _GSMATRIX *)item->mtx);
   }
-  SetupShaders(item);
-  for (prim = item->geom->prim; prim != (nuprim_s *)0x0; prim = prim->next) {
+  //SetupShaders(item);
+  for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
     ptype = prim->type;
     if (ptype == NUPT_TRISTRIP) {
       geom = item->geom;
-      vtxcnt = geom->vtxcount;
+      vtxcnt = geom->vtxcnt;
       vertlist = (float *)geom->hVB;
-      stride = NuVtxStride(geom->vertex_type);
-      GS_DrawTriStrip(vtxcnt,vertlist,stride);
+      stride = NuVtxStride(geom->vtxtype);
+      //GS_DrawTriStrip(vtxcnt,vertlist,stride);
     }
     else if (ptype < NUPT_NDXLINE) {
       if (ptype != NUPT_LINE) {
         if (ptype < NUPT_TRI) {
-          NuVtxStride(item->geom->vertex_type);
-          GS_DrawPointList();
+          NuVtxStride(item->geom->vtxtype);
+          //GS_DrawPointList();
         }
         else {
           geom = item->geom;
-          vtxcnt = geom->vtxcount;
+          vtxcnt = geom->vtxcnt;
           vertlist = (float *)geom->hVB;
-          stride = NuVtxStride(geom->vertex_type);
-          GS_DrawTriList(vtxcnt,vertlist,stride);
+          stride = NuVtxStride(geom->vtxtype);
+          //GS_DrawTriList(vtxcnt,vertlist,stride);
         }
       }
     }
@@ -936,53 +934,51 @@ void NuRndrGeomItem(nugeomitem_s *item)
       uVar1 = prim->vertexCount;
       buff = (short *)prim->idxbuff;
       vertlist = (float *)item->geom->hVB;
-      stride = NuVtxStride(item->geom->vertex_type);
-      GS_DrawIndexedTriStrip((uint)uVar1,buff,vertlist,stride);
+      stride = NuVtxStride(item->geom->vtxtype);
+      //GS_DrawIndexedTriStrip((u32)uVar1,buff,vertlist,stride);
     }
     else if (ptype < NUPT_BEZPATCH) {
       if (ptype == NUPT_NDXTRI) {
         uVar1 = prim->vertexCount;
         buff = (short *)prim->idxbuff;
         vertlist = (float *)item->geom->hVB;
-        stride = NuVtxStride(item->geom->vertex_type);
-        GS_DrawIndexedTriList((uint)uVar1,buff,vertlist,stride);
+        stride = NuVtxStride(item->geom->vtxtype);
+        //GS_DrawIndexedTriList((u32)uVar1,buff,vertlist,stride);
       }
     }
     else if (ptype == NUPT_QUADLIST) {
       geom = item->geom;
-      nverts = geom->vtxcount;
+      nverts = geom->vtxcnt;
       vertlist = (float *)geom->hVB;
-      stride = NuVtxStride(geom->vertex_type);
-      GS_DrawQuadList(nverts,vertlist,stride);
+      stride = NuVtxStride(geom->vtxtype);
+      //GS_DrawQuadList(nverts,vertlist,stride);
     }
   }
-  DBTimerEnd(6);
+  //DBTimerEnd(6);
   return;
 }
 
 
-void NuRndrSkinItem2(nugeomitem_s *item)
-
+void NuRndrSkinItem2(struct nugeomitem_s *item)
 {
-  NUERRORFUNC *e;
-  nuprim_s *prim;
+  struct nuprim_s *prim;
 
-  if ((item->blendvals == (float **)0x0) || (item->geom->blendgeom == (NUBLENDGEOM_s *)0x0)) {
-    DBTimerStart(5);
-    SetupShaders(item);
-    GS_LoadWorldMatrixIdentity();
-    GS_SetVertexSource((float *)item->geom->hVB);
-    for (prim = item->geom->prim; prim != (nuprim_s *)0x0; prim = prim->next) {
-      NuShaderSetSkinningConstants(item,prim);
+  if ((item->blendvals == NULL) || (item->geom->blendgeom == NULL)) {
+    //DBTimerStart(5);
+    //SetupShaders(item);
+    //GS_LoadWorldMatrixIdentity();
+    //GS_SetVertexSource((float *)item->geom->hVB);
+    for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
+      //NuShaderSetSkinningConstants(item,prim);
       if (prim->type == NUPT_NDXTRI) {
-        SkinnedShader((uint)prim->vertexCount,(short *)prim->idxbuff);
+        //SkinnedShader((u32)prim->vertexCount,(short *)prim->idxbuff);
       }
       else if (prim->type != NUPT_NDXTRISTRIP) {
-        e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xf4e);
-        (*e)("NuRndrGeomItem : Unknown primitive type!");
+        //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xf4e);
+        //(*e)("NuRndrGeomItem : Unknown primitive type!");
       }
     }
-    DBTimerEnd(5);
+    //DBTimerEnd(5);
   }
   else {
     NuRndrBlendedSkinItem(item);
@@ -1596,19 +1592,22 @@ void NuRndrWaterRip(struct numtl_s *mtl)	//TODO
 
 void NuRndrRectUV2di(int x,int y,int w,int h,float tx,float ty,float tw,float th,int col,struct numtl_s *mtl)
 {
-  double dVar1;
-  double dVar2;
-  double dVar3;
-  double dVar4;
   struct nuvtx_tltc1_s vtx [6];
 
-  dVar4 = (double)th;
-  dVar3 = (double)tw;
-  dVar2 = (double)ty;
-  dVar1 = (double)tx;
+
   //GS_SetOrthMatrix();
 
-  /*vtx[0].pnt.x = (float)((double)CONCAT44(0x43300000,x ^ 0x80000000) - 4503601774854144.0);
+   vtx[0].pnt.x = (float)x;
+   vtx[0].pnt.y = (float)y;
+   vtx[1].tc[0] = tx + tw;
+   vtx[2].tc[1] = ty + th;
+   vtx[1].pnt.x = (float)((x + w) - 1U );
+   vtx[3].tc[1] = ty;
+   vtx[2].pnt.y = (float)((y + h) - 1U );
+
+  /*
+  GHIDRA OUTPUT
+  vtx[0].pnt.x = (float)((double)CONCAT44(0x43300000,x ^ 0x80000000) - 4503601774854144.0);
   vtx[0].pnt.y = (float)((double)CONCAT44(0x43300000,y ^ 0x80000000) - 4503601774854144.0);
   vtx[1].tc[0] = (float)(dVar1 + dVar3);
   vtx[2].tc[1] = (float)(dVar2 + dVar4);
@@ -1617,22 +1616,23 @@ void NuRndrRectUV2di(int x,int y,int w,int h,float tx,float ty,float tw,float th
   vtx[3].tc[1] = (float)dVar2;
   vtx[2].pnt.y = (float)((double)CONCAT44(0x43300000,(y + h) - 1U ^ 0x80000000) - 4503601774854144 .0
                         );*/
-  vtx[0].pnt.z = 1e-06;
+
+  vtx[0].pnt.z = 0.000001;
   vtx[0].rhw = 1.0;
-  vtx[1].pnt.z = 1e-06;
+  vtx[1].pnt.z = 0.000001;
   vtx[1].rhw = 1.0;
-  vtx[2].pnt.z = 1e-06;
+  vtx[2].pnt.z = 0.000001;
   vtx[2].rhw = 1.0;
-  vtx[3].pnt.z = 1e-06;
+  vtx[3].pnt.z = 0.000001;
   vtx[3].rhw = 1.0;
-  vtx[0].tc[0] = (float)dVar1;
-  vtx[0].tc[1] = (float)dVar2;
-  vtx[1].tc[1] = (float)dVar2;
-  vtx[2].tc[0] = (float)dVar1;
-  vtx[4].pnt.z = 1e-06;
-  vtx[5].pnt.z = 1e-06;
+  vtx[0].tc[0] = tx;
+  vtx[0].tc[1] = ty;
+  vtx[1].tc[1] = ty;
+  vtx[2].tc[0] = tx;
+  vtx[4].pnt.z = 0.000001;
+  vtx[5].pnt.z = 0.000001;
   vtx[5].rhw = 1.0;
-  vtx[5].tc[0] = (float)dVar1;
+  vtx[5].tc[0] = tx;
   vtx[4].rhw = 1.0;
   vtx[0].diffuse = col;
   vtx[1].pnt.y = vtx[0].pnt.y;

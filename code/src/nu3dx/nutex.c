@@ -190,6 +190,7 @@ void NuTexSetTextureStates(struct numtl_s *mtl)
     NudxFw_SetTextureState(0,D3DTSS_TEXCOORDINDEX,0);
     NudxFw_SetTextureState(0,D3DTSS_TEXTURETRANSFORMFLAGS,0);
     //flag_or_float = (u32)mtl->attrib >> 0x18 & 3;     FIX IT
+    flag_or_float = (mtl->attrib)._word >> 0x18 & 3;
     if (flag_or_float == 0) {
       //GS_TexSetWrapModes(0,1);
     }
@@ -203,6 +204,7 @@ void NuTexSetTextureStates(struct numtl_s *mtl)
       //GS_TexSetWrapModes(0,0);
     }
     //flag_or_float = (u32)mtl->attrib >> 0x16 & 3;     FIX IT
+    flag_or_float = (mtl->attrib)._word >> 0x16 & 3;
     if (flag_or_float == 0) {
       //GS_TexSetWrapModet(0,1);
     }

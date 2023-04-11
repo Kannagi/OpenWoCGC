@@ -14,6 +14,8 @@
 #undef main
 #endif
 
+s32 PHYSICAL_SCREEN_X = 640;
+s32 PHYSICAL_SCREEN_Y = 480;
 struct nutex_s tex;
 struct numtl_s *mtl;
 u32 attr;
@@ -21,6 +23,7 @@ s32 iss3cmp;
 s32 texinfo;
 void* pixel_dat;
 int test_SDL_openGL();
+s32 nuvideo_global_vbcnt;
 
 int main()
 {
@@ -86,27 +89,27 @@ int main()
     (mtl->diffuse).g = 1.0;
     mtl->attrib._word = attr & (0xcc0cffff | 0x16e8000);
     printf("attrib: %d\n", attr);
-    //firstscreenfade(lic,1);
-    //nuvideo_global_vbcnt = 0;
-/*
+    firstscreenfade(mtl,1);
+    nuvideo_global_vbcnt = 0;
   do {
     texinfo = NuRndrBeginScene(1);
     if (texinfo != 0) {
       NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,lic);
+      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,mtl);
       NuRndrEndScene();
       NuRndrSwapScreen(1);
     }
-    Reseter();
-    GC_DiskErrorPoll();
+    //Reseter();
+    //GC_DiskErrorPoll();
   } while (nuvideo_global_vbcnt < 0x78);
 
+/*
   nuvideo_global_vbcnt = 0;
-  firstscreenfade(lic,-1);
+  firstscreenfade(mtl,-1);
   NuRndrClear(0xb,0,1.0);
   NuRndrSwapScreen(1);
-  if (lic->tid != 0) {
-    NuTexDestroy(lic->tid);
+  if (mtl->tid != 0) {
+    NuTexDestroy(mtl->tid);
   }
 
 */
@@ -277,3 +280,117 @@ int test_SDL_openGL()
 
 	return 0;
 }
+
+
+
+void firstscreenfade(struct numtl_s *mat,int dir)
+{
+  int texinfo;
+  int iVar1;
+  int cnt;
+  u32 uVar2;
+  u32 uVar3;
+  u32 uVar4;
+  u32 col;
+
+  if (dir < 1) {
+    uVar2 = 0xff;
+    iVar1 = -0x10;
+  }
+  else {
+    uVar2 = 0;
+    iVar1 = 0x10;
+  }
+  cnt = 0xe;
+  uVar3 = uVar2 << 8;
+  uVar4 = uVar2 << 0x10;
+  do {
+    col = uVar3 | 0xff000000;
+    uVar3 = uVar3 + iVar1 * 0x100;
+    col = uVar4 | col | uVar2;
+    uVar4 = uVar4 + iVar1 * 0x10000;
+    texinfo = NuRndrBeginScene(1);
+    uVar2 = uVar2 + iVar1;
+    if (texinfo != 0) {
+      NuRndrClear(0xb,0,1.0);
+      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,col,mat);
+      NuRndrEndScene();
+      NuRndrSwapScreen(1);
+    }
+    cnt = cnt + -1;
+  } while (cnt != 0);
+  return;
+}
+
+s32 ShaderHasNormals;
+s32 shaderselected;
+s32 xytype;
+
+void SetVertexShader(u32 Handle)
+{
+  if (Handle == 0x5d) {
+    xytype = 0;
+    shaderselected = 4;
+    ShaderHasNormals = 1;
+    return;
+  }
+  if (Handle < 0x5e) {
+    if (Handle != 0x53) {
+      if (Handle < 0x54) {
+        if (Handle == 0x11) {
+          xytype = 2;
+          shaderselected = 5;
+          ShaderHasNormals = 0;
+          return;
+        }
+      }
+      else if (Handle == 0x59) {
+        xytype = 0;
+        shaderselected = 2;
+        ShaderHasNormals = 1;
+        return;
+      }
+LAB_800d0f80:
+      /*DisplayErrorAndLockup
+                ("C:/source/crashwoc/code/system/port.c",0x70,"D3DDevice_SetVertexShader");*/
+      return;
+    }
+  }
+  else if (Handle != 0x144) {
+    if (Handle < 0x145) {
+      if (Handle == 0x142) {
+        xytype = 0;
+        shaderselected = 3;
+        ShaderHasNormals = 0;
+        return;
+      }
+    }
+    else if (Handle == 0x152) {
+      xytype = 0;
+      shaderselected = 2;
+      ShaderHasNormals = 1;
+      return;
+    }
+    goto LAB_800d0f80;
+  }
+  ShaderHasNormals = 0;
+  shaderselected = 1;
+  xytype = 1;
+  return;
+}
+
+
+/* TODO firstscreens
+GS_RenderClear
+
+NuRndrRectUV2di
+
+GS_SetOrthMatrix
+GS_DrawTriListTTL
+GS_BeginScene
+
+GS_SetZCompare
+GS_EndScene
+
+GS_FlipScreen
+*/

@@ -8,7 +8,7 @@ void GS_DrawTriStrip(int nverts,float *vertlist,int stride)
   bool bVar1;
   int iVar2;
   uint uVar3;
-  
+
   if (stride == 0x1c) {
     if (GS_CurrentVertDesc != 0x81) {
       GS_CurrentVertDesc = 0x81;
@@ -69,7 +69,7 @@ void GS_DrawTriList(int nverts,float *vertlist,int stride)
 
 {
   _GSMATRIX GSmtx;
-  
+
   DBTimerStart(0x15);
   if (stride == 0x1c) {
     C_MTXOrtho(0.0,448.0,0.0,640.0,0.0,-1.0,&GSmtx);
@@ -121,7 +121,7 @@ void GS_DrawQuadList(uint nverts,float *vertlist,int stride)
 
 {
   uint i;
-  
+
   if (GS_CurrentVertDesc != 0x82) {
     GS_CurrentVertDesc = 0x82;
     GXClearVtxDesc();
@@ -164,7 +164,7 @@ void GS_DrawIndexedTriStrip(uint VertexCount,short *pIndexData,float *vertlist,i
 
 {
   int iVar1;
-  
+
   DBTimerStart(0x19);
   if (GS_CurrentVertDesc != 0x82) {
     GS_CurrentVertDesc = 0x82;
@@ -195,7 +195,7 @@ void GS_DrawIndexedTriList(uint nverts,short *indexlist,float *vertlist,int stri
 {
   short sVar1;
   uint uVar2;
-  
+
   DBTimerStart(0x18);
   if (GS_CurrentVertDesc != 0x82) {
     GS_CurrentVertDesc = 0x82;
@@ -224,7 +224,7 @@ void TTLLights(void)
 
 {
   _GXColor GXCol [2];
-  
+
   GXCol[0] = GXWhite;
   GXSetChanAmbColor(GX_COLOR0A0,GXCol);
   GXCol[0] = GXWhite;
@@ -257,12 +257,15 @@ void GS_DrawTriStripTTL(_GS_VERTEXTL *vertlist,int nverts)
   return;
 }
 
-
-void GS_DrawTriListTTL(nuvtx_tltc1_s *vtx,int nverts)	//Check
+void GS_DrawTriListTTL(nuvtx_tltc1_s *vtx,int nverts)
 
 {
-  if (GS_CurrentVertDesc != 0x81) {
-    GS_CurrentVertDesc = 0x81;
+  uint uVar1;
+  int unaff_r13;
+  int iVar2;
+
+  if (GS_CurrentVertDesc != 1) {
+    GS_CurrentVertDesc = 1; //0x81
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
     GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
@@ -271,12 +274,23 @@ void GS_DrawTriListTTL(nuvtx_tltc1_s *vtx,int nverts)	//Check
   TTLLights();
   GXBegin(GX_TRIANGLES,GX_VTXFMT1,(ushort)nverts);
   if (0 < nverts) {
+    iVar2 = 0;
     do {
-      _DAT_cc008000 = vtx->tc[1];
-      vtx = vtx + 1;
+      GXPosition3f32(*(float *)((int)vtx->tc + iVar2 + -0x14),
+                     *(float *)((int)vtx->tc + iVar2 + -0x10),
+                     *(float *)((int)vtx->tc + iVar2 + -0xc));
+      uVar1 = *(uint *)((int)vtx->tc + iVar2 + -4);
+      GXColor4u8(uVar1 >> 0x10 != 0,uVar1 >> 8 != 0,uVar1 != 0,uVar1 >> 0x18 != 0);
+      GXTexCoord2f32(*(float *)((int)vtx->tc + iVar2),*(float *)((int)vtx->tc + iVar2 + 4));
       nverts = nverts + -1;
+      iVar2 = iVar2 + 0x1c;
     } while (nverts != 0);
   }
+  if (*(char *)(unaff_r13 + -0x5ef8) == '\0') {
+    OSPanic("C:/DolphinSDK1.0/include/dolphin/gx/GXGeometry.h",0x6d,
+            "GXEnd: called without a GXBegin");
+  }
+  *(undefined *)(unaff_r13 + -0x5ef8) = 0;
   return;
 }
 
@@ -284,7 +298,7 @@ void GS_DrawQuadListBeginBlock(int nverts)
 
 {
   int in_r4;
-  
+
   if (in_r4 == 0) {
     TTLLights();
   }
@@ -325,7 +339,7 @@ void GS_DrawTriListTSkin(undefined4 param_1,int param_2,int param_3,int param_4)
 {
   short *psVar1;
   int iVar2;
-  
+
   DBTimerStart(0x1a);
   if (GS_EnableLightingFlag == 0) {
     if (GS_CurrentVertDesc != 0x80) {
