@@ -807,4 +807,18 @@ struct _GS_TEXTURE
 	//struct _GXTlutObj Tlut;   Gamecube SDK
 };
 
+// Size: 0x24
+struct _GS_VERTEX
+{
+    float x; // Offset: 0x0
+    float y; // Offset: 0x4
+    float z; // Offset: 0x8
+    float nx; // Offset: 0xC
+    float ny; // Offset: 0x10
+    float nz; // Offset: 0x14
+    u32 diffuse; // Offset: 0x18
+    float u; // Offset: 0x1C
+    float v; // Offset: 0x20
+};
+
 #endif // !NU3DXTYPES_H

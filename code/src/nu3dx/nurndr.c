@@ -729,160 +729,127 @@ void NuRndr2dItem(struct nugeomitem_s *item)
   return;
 }
 
-
-/*
-
-void NuRndrFaceItem(nugeomitem_s *item)	//TODO
-
+void NuRndrFaceItem(struct nugeomitem_s* item) //TODO
 {
-  float *pfVar1;
-  float *pfVar2;
-  numtx_s *pnVar3;
-  int iVar4;
-  float *pfVar5;
-  float *pfVar6;
-  nugeom_s *pnVar7;
-  float fVar8;
-  nuvec_s *v0;
+
+  struct numtx_s *pnVar1;
+  struct numtx_s *pnVar2;
+  int iVar3;
+  struct numtx_s *pnVar4;
+  struct numtx_s *pnVar5;
+  struct nugeom_s *pnVar6;
+  float *a;
+  float fVar7;
+  struct nuvec_s *v0;
+  double dVar8;
   double dVar9;
   double dVar10;
   double dVar11;
   double dVar12;
   double dVar13;
   double dVar14;
-  double dVar15;
-  _GS_VERTEX GSVtx;
-  nuvec_s nStack_234;
-  float local_228;
-  float local_224;
-  float local_220;
-  float local_21c;
-  float local_218;
-  float local_214;
-  nuvec_s nStack_210;
-  float local_204;
-  float local_200;
-  float local_1fc;
-  float local_1f8;
-  float local_1f4;
-  float local_1f0;
-  nuvec_s nStack_1ec;
-  float local_1e0;
-  float local_1dc;
-  float local_1d8;
-  float local_1d4;
-  float local_1d0;
-  float local_1cc;
-  nuvec_s vec_a;
-  nuvec_s local_1b8;
-  numtx_s nStack_1a8;
-  float local_168 [12];
-  undefined4 local_138;
-  undefined4 local_134;
-  undefined4 local_130;
-  nuvec_s nStack_128;
-  numtx_s nStack_118;
-  numtx_s mtx_dest;
+  struct _GS_VERTEX GSVtx;
+  struct nuvtx_tc1_s vertices [4];
+  struct numtx_s local_168;
+  struct nuvec_s nStack_128;
+  struct numtx_s nStack_118;
+  struct numtx_s mtx_dest;
 
-  DBTimerStart(0x1c);
-  SetupShaders(item);
+  //DBTimerStart(0x1c);
+  //SetupShaders(item);
   NuMtxSetIdentity(&nStack_118);
-  NuMtxSetIdentity(&nStack_1a8);
-  pnVar3 = item->mtx;
-  nStack_1a8.mtx[3][0] = pnVar3->mtx[3][0];
-  nStack_1a8.mtx[3][1] = pnVar3->mtx[3][1];
-  nStack_1a8.mtx[3][2] = pnVar3->mtx[3][2];
-  GS_LoadWorldMatrixIdentity();
-  iVar4 = 0x30;
-  pfVar1 = (float *)item->mtx;
-  pfVar2 = local_168;
+  NuMtxSetIdentity((struct numtx_s *)(vertices[3].tc + 1));
+  //GS_LoadWorldMatrixIdentity();
+  iVar3 = 0x30;
+  pnVar1 = item->mtx;
+  pnVar2 = &local_168;
   do {
-    pfVar6 = pfVar2;
-    pfVar5 = pfVar1;
-    iVar4 = iVar4 + -0x18;
-    *pfVar6 = *pfVar5;
-    pfVar6[1] = pfVar5[1];
-    pfVar6[2] = pfVar5[2];
-    pfVar6[3] = pfVar5[3];
-    (*(float (*) [4])(pfVar6 + 4))[0] = (*(float (*) [4])(pfVar5 + 4))[0];
-    pfVar6[5] = pfVar5[5];
-    pfVar1 = pfVar5 + 6;
-    pfVar2 = pfVar6 + 6;
-  } while (iVar4 != 0);
-  pfVar6[6] = pfVar5[6];
-  pnVar7 = item->geom;
-  pfVar6[7] = pfVar5[7];
-  pfVar6[8] = pfVar5[8];
-  pfVar6[9] = pfVar5[9];
-  local_130 = 0;
-  local_138 = 0;
-  local_134 = 0;
-  for (; pnVar7 != (nugeom_s *)0x0; pnVar7 = pnVar7->next) {
-    iVar4 = pnVar7->vtxmax;
-    v0 = (nuvec_s *)pnVar7->vtxcount;
-    if (0 < iVar4) {
-      dVar9 = 0.5;
-      dVar11 = 0.0;
-      dVar10 = 1.0;
+    pnVar5 = pnVar2;
+    pnVar4 = pnVar1;
+    iVar3 = iVar3 + -0x18;
+    pnVar5->_00 = pnVar4->_00;
+    pnVar5->_01 = pnVar4->_01;
+    pnVar5->_02 = pnVar4->_02;
+    pnVar5->_03 = pnVar4->_03;
+    pnVar5->_10 = pnVar4->_10;
+    pnVar5->_11 = pnVar4->_11;
+    pnVar1 = (struct numtx_s *)&pnVar4->_12;
+    pnVar2 = (struct numtx_s *)&pnVar5->_12;
+  } while (iVar3 != 0);
+  pnVar5->_12 = pnVar4->_12;
+  pnVar6 = item->geom;
+  pnVar5->_13 = pnVar4->_13;
+  pnVar5->_20 = pnVar4->_20;
+  pnVar5->_21 = pnVar4->_21;
+  local_168._32 = 0.0;
+  local_168._30 = 0.0;
+  local_168._31 = 0.0;
+  for (; pnVar6 != NULL; pnVar6 = pnVar6->next) {
+    iVar3 = pnVar6->vtxmax;
+    v0 = (struct nuvec_s *)pnVar6->vtxcnt;
+    if (0 < iVar3) {
+      dVar8 = 0.5;
+      dVar10 = 0.0;
+      dVar9 = 1.0;
+      a = &vertices[3].nrm.y;
       do {
-        fVar8 = v0[1].z;
-        dVar14 = (double)(float)((double)v0[1].x * dVar9);
-        dVar15 = (double)(float)((double)v0[1].y * dVar9);
-        NuVecMtxRotate(&nStack_128,v0,(numtx_s *)local_168);
+        fVar7 = v0[1].z;
+        dVar13 = (double)(float)((double)v0[1].x * dVar8);
+        dVar14 = (double)(float)((double)v0[1].y * dVar8);
+        NuVecMtxRotate(&nStack_128,v0,&local_168);
+        dVar11 = -dVar13;
         dVar12 = -dVar14;
-        dVar13 = -dVar15;
         v0 = v0 + 2;
-        NuVecAdd(&vec_a,&nStack_128,(nuvec_s *)item->mtx->mtx[3]);
-        NuMtxCalcCheapFaceOn(&mtx_dest,&vec_a);
-        local_1b8.x = (float)dVar12;
-        local_1b8.y = (float)dVar15;
-        local_1b8.z = (float)dVar11;
-        NuVecMtxTransform((nuvec_s *)&GSVtx,&local_1b8,&mtx_dest);
-        GSVtx.u = (float)dVar11;
-        GSVtx.v = (float)dVar11;
-        GSVtx.nx = (float)dVar10;
-        GSVtx.ny = (float)dVar11;
-        GSVtx.nz = (float)dVar11;
-        local_1b8.x = (float)dVar14;
-        local_1b8.y = (float)dVar15;
-        local_1b8.z = (float)dVar11;
-        GSVtx.diffuse = (uint)fVar8;
-        NuVecMtxTransform(&nStack_234,&local_1b8,&mtx_dest);
-        local_1b8.x = (float)dVar14;
-        local_218 = (float)dVar10;
-        local_214 = (float)dVar11;
-        local_228 = (float)dVar10;
-        local_224 = (float)dVar11;
-        local_220 = (float)dVar11;
-        local_1b8.y = (float)dVar13;
-        local_1b8.z = (float)dVar11;
-        local_21c = fVar8;
-        NuVecMtxTransform(&nStack_210,&local_1b8,&mtx_dest);
-        local_1b8.x = (float)dVar12;
-        local_1b8.y = (float)dVar13;
-        local_1f4 = (float)dVar10;
-        local_1f0 = (float)dVar10;
-        local_204 = (float)dVar10;
-        local_200 = (float)dVar11;
-        local_1fc = (float)dVar11;
-        local_1b8.z = (float)dVar11;
-        local_1f8 = fVar8;
-        NuVecMtxTransform(&nStack_1ec,&local_1b8,&mtx_dest);
-        local_1d0 = (float)dVar11;
-        local_1cc = (float)dVar10;
-        local_1e0 = (float)dVar10;
-        local_1dc = (float)dVar11;
-        local_1d8 = (float)dVar11;
-        local_1d4 = fVar8;
-        GS_DrawPrimitiveQuad(&GSVtx);
-        iVar4 = iVar4 + -1;
-      } while (iVar4 != 0);
+        NuVecAdd(&vertices[3].pnt,&nStack_128,(struct nuvec_s *)&item->mtx->_30);
+        NuMtxCalcCheapFaceOn(&mtx_dest,&vertices[3].pnt);
+        vertices[3].nrm.y = (float)dVar11;
+        vertices[3].nrm.z = (float)dVar14;
+        vertices[3].diffuse = (int)(float)dVar10;
+        NuVecMtxTransform((struct nuvec_s *)&GSVtx,(struct nuvec_s *)a,&mtx_dest);
+        GSVtx.u = (float)dVar10;
+        GSVtx.v = (float)dVar10;
+        GSVtx.nx = (float)dVar9;
+        GSVtx.ny = (float)dVar10;
+        GSVtx.nz = (float)dVar10;
+        vertices[3].nrm.y = (float)dVar13;
+        vertices[3].nrm.z = (float)dVar14;
+        vertices[3].diffuse = (int)(float)dVar10;
+        GSVtx.diffuse = (u32)fVar7;
+        NuVecMtxTransform(&vertices[0].pnt,(struct nuvec_s *)a,&mtx_dest);
+        vertices[3].nrm.y = (float)dVar13;
+        vertices[0].tc[0] = (float)dVar9;
+        vertices[0].tc[1] = (float)dVar10;
+        vertices[0].nrm.x = (float)dVar9;
+        vertices[0].nrm.y = (float)dVar10;
+        vertices[0].nrm.z = (float)dVar10;
+        vertices[3].nrm.z = (float)dVar12;
+        vertices[3].diffuse = (int)(float)dVar10;
+        vertices[0].diffuse = (int)fVar7;
+        NuVecMtxTransform(&vertices[1].pnt,(struct nuvec_s *)a,&mtx_dest);
+        vertices[3].nrm.y = (float)dVar11;
+        vertices[3].nrm.z = (float)dVar12;
+        vertices[1].tc[0] = (float)dVar9;
+        vertices[1].tc[1] = (float)dVar9;
+        vertices[1].nrm.x = (float)dVar9;
+        vertices[1].nrm.y = (float)dVar10;
+        vertices[1].nrm.z = (float)dVar10;
+        vertices[3].diffuse = (int)(float)dVar10;
+        vertices[1].diffuse = (int)fVar7;
+        NuVecMtxTransform(&vertices[2].pnt,(struct nuvec_s *)a,&mtx_dest);
+        vertices[2].tc[0] = (float)dVar10;
+        vertices[2].tc[1] = (float)dVar9;
+        vertices[2].nrm.x = (float)dVar9;
+        vertices[2].nrm.y = (float)dVar10;
+        vertices[2].nrm.z = (float)dVar10;
+        vertices[2].diffuse = (int)fVar7;
+        //GS_DrawPrimitiveQuad(&GSVtx);
+        iVar3 = iVar3 + -1;
+      } while (iVar3 != 0);
     }
   }
-  DBTimerStart(0x1c);
+  //DBTimerStart(0x1c);
   return;
 }
-*/
 
 
 void NuRndrGeomItem(struct nugeomitem_s *item)
@@ -981,7 +948,7 @@ void NuRndrSkinItem2(struct nugeomitem_s *item)
     //DBTimerEnd(5);
   }
   else {
-    NuRndrBlendedSkinItem(item);
+    //NuRndrBlendedSkinItem(item);
   }
   return;
 }
