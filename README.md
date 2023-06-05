@@ -14,7 +14,7 @@ An open source, reverse engineered re-implementation of Crash Bandicoot: Wrath O
 - [x] nucore function 
 - [x] numath function 
 - [x] nusound function 
-- [ ] nuraster function 
+- [x] nuraster function 
 - [ ] system function 
 - [ ] gamelib function 
 
