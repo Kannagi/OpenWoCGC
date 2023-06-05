@@ -639,9 +639,17 @@ typedef enum _GXTexMtx {
 
 typedef struct _GXTexObj _GXTexObj, *P_GXTexObj;
 
-struct _GXTexObj {
-    ulong dummy[8];
-};
+// Size: 0x20
+typedef struct _GXTexObj
+{
+	UNKWORD mFlags; // at 0x0
+	char UNK_0x4[0x4];
+	UNKWORD mDimensions; // at 0x8 (Height/width are split between these bits)
+	char UNK_0xC[0x4];
+	UNKWORD mUserData; // at 0x10
+	enum _GXTexFmt mFormat; // at 0x14
+	UNKWORD mTLUT; // at 0x18
+} GXTexObj;
 
 typedef struct _GXTlutObj _GXTlutObj, *P_GXTlutObj;
 

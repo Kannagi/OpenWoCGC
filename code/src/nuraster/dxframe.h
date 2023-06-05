@@ -2,7 +2,7 @@
 #define DXFRAME_H
 
 #include "../types.h"
-#include "nurastertypes.h"
+#include "nuraster/nurastertypes.h"
 //#include <d3d11.h>
 
 /*
@@ -55,7 +55,7 @@ s32 NudxFw_Init();
 
 // Create the graphics environment.
 //s32 CreateEnvironment(HWND* hwnd); // TODO: IMPLEMENT THIS!!!
-s32 CreateEnvironment(struct HWND__ *hwnd);
+//s32 CreateEnvironment(struct HWND__ *hwnd);
 
 // TODO FUNCTIONS!!!
 

@@ -263,7 +263,7 @@ LAB_800c9244:
   //fps = TimerGetFPS();
   //avfps = (avfps + (float)fps) * 0.5;
   GS_IsNewFrame = 1;
-  //nuvideo_global_vbcnt = nuvideo_global_vbcnt + 1;
+  nuvideo_global_vbcnt = nuvideo_global_vbcnt + 1;
   GS_WorldMatIsIdentity = 0;
   GS_CurrentTexture = -1;
   //cufps = (float)fps;

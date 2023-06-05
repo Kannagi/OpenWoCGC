@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include<string.h>
+#include"system/gxtype.h"
 
 
 s32 initialised;
@@ -743,10 +744,8 @@ struct Rail {
     char circuit;
 };
 
-typedef struct rendertargetlist_s rendertargetlist_s, *Prendertargetlist_s;
-
 // Size: 0x1C
-struct rendertargetlist_s {
+typedef struct {
     int next;
     int last;
     u32 width;
@@ -754,7 +753,9 @@ struct rendertargetlist_s {
     struct D3DSurface * pddsRenderTarget;
     struct D3DSurface * pddsZBuffer;
     struct D3DSurface * pddsStencilBuffer;
-};
+} rendertargetlist_s;
+
+static rendertargetlist_s g_pRTArray[16];
 
 typedef struct scene_inst_s scene_inst_s, *Pscene_inst_s;
 
@@ -792,6 +793,7 @@ struct visidata_s {
     int curknot;
 };
 
+
  // Size: 0x4C
 struct _GS_TEXTURE
 {
@@ -803,8 +805,8 @@ struct _GS_TEXTURE
     u32 PalBits;
     u32 NUID;
     u32 Pad;
-	//struct _GXTexObj Tex;     Gamecube SDK
-	//struct _GXTlutObj Tlut;   Gamecube SDK
+    struct _GXTexObj Tex;
+	//struct _GXTlutObj Tlut;   //Gamecube SDK
 };
 
 // Size: 0x24

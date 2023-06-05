@@ -9,6 +9,9 @@
     error_func e = NuErrorProlog(__FILE__, __LINE__); \
     e(msg);
 
+typedef int UNKWORD;
+typedef void UNKTYPE;
+
 // Unsigned byte.
 typedef unsigned char u8;
 
@@ -133,6 +136,7 @@ struct nupad_s
 };
 
 struct nupad_s* Pad[2];
+s32 nuvideo_global_vbcnt;
 
 #include "numath/numathtypes.h"
 #endif // !TYPES_H

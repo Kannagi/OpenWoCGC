@@ -3,7 +3,6 @@
 
 // If the backbuffer has been grabbed this frame.
 s32 backbuffer_grabbed_this_frame = 0;
-static struct tagRECT g_rcScreenRect;
 int iss3cmp;
 char DebugText[256];
 
@@ -137,8 +136,8 @@ int NudxFw_FlipScreen(int hRT,int ss)
 
 {
   NudxFw_MakeBackBufferCopy(0);
-  //GS_FlipScreen();
-  //GS_RenderClear(3,0,1.0,0);
+  GS_FlipScreen();
+  GS_RenderClear(3,0,1.0,0);
   if (hLoadScreenThread == NULL) {
     NuAnimUV();
   }
@@ -228,9 +227,9 @@ s32 CreateDirect3D(struct HWND__ *hwnd)
   //GS_RenderClear(1,0,1.0,0);
   //GS_RenderClear(2,0,1.0,0);
   //GS_RenderClear(0xf0,0,0.0,0);
-  //GS_FlipScreen();
+  GS_FlipScreen();
   //GS_RenderClear(0xf0,0,0.0,0);
-  //GS_FlipScreen();
+  GS_FlipScreen();
   memset(&vp,0,0x18);
   vp.Height = 0x1c0;
   vp.Width = PHYSICAL_SCREEN_X;

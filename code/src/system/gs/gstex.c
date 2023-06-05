@@ -1,5 +1,6 @@
 #include "gstex.h"
 
+
 static unsigned int GS_TexInitFlag;
 unsigned int GS_TexAllocs;
 static struct _GS_TEXTURE* GS_TexList;
@@ -140,10 +141,10 @@ s32 iss3cmp;
 void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mmcnt,int rendertargetflag, int tpid)
 {
   void *mmalloc;
-  //_GXTexObj *obj;
-  //GXTexFmt format;
+  struct _GXTexObj *obj;
+  enum _GXTexFmt format;
   int i;
-  struct _GS_TEXTURE *texlist;
+  struct _GS_TEXTURE* texlist;
   size_t size;
 
   texlist = GS_TexList;
@@ -152,16 +153,16 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
       mmalloc = malloc(mmcnt);
       GS_TexAllocs = GS_TexAllocs + mmcnt;
       memcpy(mmalloc,bits,mmcnt);
-      //DCFlushRange(mmalloc,mmcnt);
+      DCFlushRange(mmalloc,mmcnt);
       for (i = 0; i < 0x400; i = i + 1) {
         if (texlist->Flags == 0) {
           texlist->Pad = 0xe;
-          //obj = &texlist->Tex;
+          obj = &texlist->Tex;
           texlist->Format = 0x80;
           texlist->NUID = tpid;
           texlist->Width = width;
           texlist->Height = height;
-          //format = GX_CTF_RA8;
+          format = GX_CTF_RA8;
           goto LAB_800cbc0c;
         }
         texlist = texlist + 1;
@@ -171,18 +172,18 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
       size = width * height * 2;
       mmalloc = malloc(size);
       GS_TexAllocs = GS_TexAllocs + size;
-      //DCFlushRange(bits,size);
+      DCFlushRange(bits,size);
       memcpy(mmalloc,bits,size);
-      //DCFlushRange(mmalloc,size);
+      DCFlushRange(mmalloc,size);
       for (i = 0; i < 0x400; i = i + 1) {
         if (texlist->Flags == 0) {
           texlist->Pad = 5;
-          //obj = &texlist->Tex;
+          obj = &texlist->Tex;
           texlist->Format = 0x81;
           texlist->NUID = tpid;
           texlist->Width = width;
           texlist->Height = height;
-          //format = GX_TF_RGB565;
+          format = GX_TF_RGB565;
           goto LAB_800cbc0c;
         }
         texlist = texlist + 1;
@@ -192,18 +193,18 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
       size = width * height * 4;
       mmalloc = malloc(size);
       GS_TexAllocs = GS_TexAllocs + size;
-      //DCFlushRange(bits,size);
+      DCFlushRange(bits,size);
       memcpy(mmalloc,bits,size);
-      //DCFlushRange(mmalloc,size);
+      DCFlushRange(mmalloc,size);
       for (i = 0; i < 0x400; i = i + 1) {
         if (texlist->Flags == 0) {
           texlist->Pad = 6;
-          //obj = &texlist->Tex;
+          obj = &texlist->Tex;
           texlist->Format = 0x82;
           texlist->NUID = tpid;
           texlist->Width = width;
           texlist->Height = height;
-          //format = GX_TF_RGB5A3;
+          format = GX_TF_RGB5A3;
           goto LAB_800cbc0c;
         }
         texlist = texlist + 1;
@@ -213,9 +214,9 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
       size = width * height * 2;
       mmalloc = malloc(size);
       GS_TexAllocs = GS_TexAllocs + size;
-      //DCFlushRange(bits,width * height * 4);
+      DCFlushRange(bits,width * height * 4);
       GS_TexSwizzleRGB5A3(width,height,bits,mmalloc);
-      //DCFlushRange(mmalloc,size);
+      DCFlushRange(mmalloc,size);
       for (i = 0; i < 0x400; i = i + 1) {
         if (texlist->Flags == 0) {
           texlist->Pad = 5;
@@ -225,8 +226,7 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
           texlist->Height = height;
           texlist->TexBits = (u32)mmalloc;
           texlist->Flags = -1;
-          //GXInitTexObj(&texlist->Tex,mmalloc,width & 0xffff,height & 0xffff,GX_TF_RGB565,GX_CLAMP,
-                      // GX_CLAMP,'\0');
+          GXInitTexObj(&texlist->Tex,mmalloc,width & 0xffff,height & 0xffff,GX_TF_RGB565,GX_CLAMP, GX_CLAMP,'\0');
           break;
         }
         texlist = texlist + 1;
@@ -237,20 +237,20 @@ void GS_TexCreateNU(enum nutextype_e type,int width,int height,void *bits,int mm
     mmalloc = malloc(iss3cmp);
     GS_TexAllocs = GS_TexAllocs + iss3cmp;
     memcpy(mmalloc,(void *)((int)bits + 0xc),iss3cmp);
-    //DCFlushRange(mmalloc,iss3cmp);
+    DCFlushRange(mmalloc,iss3cmp);
     for (i = 0; i < 0x400; i = i + 1) {
       if (texlist->Flags == 0) {
         texlist->Pad = 0xe;
-        //obj = &texlist->Tex;
+        obj = &texlist->Tex;
         texlist->Format = type;
         texlist->NUID = tpid;
         texlist->Width = width;
         texlist->Height = height;
-        //format = GX_CTF_RA8;
+        format = GX_CTF_RA8;
 LAB_800cbc0c:
         texlist->TexBits = (u32)mmalloc;
         texlist->Flags = -1;
-        //GXInitTexObj(obj,mmalloc,width & 0xffff,height & 0xffff,format,GX_CLAMP,GX_CLAMP,'\0');
+        GXInitTexObj(obj,mmalloc,width & 0xffff,height & 0xffff,format,GX_CLAMP,GX_CLAMP,'\0');
         break;
       }
       texlist = texlist + 1;
@@ -258,6 +258,11 @@ LAB_800cbc0c:
   }
   GS_NumTextures = GS_NumTextures + 1;
   return;
+}
+
+void DCFlushRange (void* arg0, u32 arg1)
+{
+    return;
 }
 
 /*
@@ -286,6 +291,89 @@ void DCFlushRange(s32 arg0, u32 arg1) {
 }
 
 */
+
+
+UNKTYPE GXInitTexObj(struct _GXTexObj * obj, UNKTYPE *image, u16 width, u32 height, enum _GXTexFmt texFormat, enum GXTexWrapMode wrapModeS, enum GXTexWrapMode wrapModeT, char mipmap) //correct?
+{
+   return;
+   /*
+     int iVar1;
+  int iVar2;
+
+  memset(obj,0,0x20);
+  obj->mFlags = obj->mFlags & 0xfffffffc | wrap_s;
+  obj->mFlags = obj->mFlags & 0xfffffff3 | wrap_t << 2;
+  obj->mFlags = obj->mFlags & 0xffffffef | 0x10;
+  if (mipmap == '\0') {
+    obj->mFlags = obj->mFlags & 0xffffff1f | 0x80;
+  }
+  else {
+    *(byte *)((int)&obj->unk_0x1c + 3) = *(byte *)((int)&obj->unk_0x1c + 3) | 1;
+    if (format + 0xfffffff8 < 3) {
+      obj->mFlags = obj->mFlags & 0xffffff1f | 0xa0;
+    }
+    else {
+      obj->mFlags = obj->mFlags & 0xffffff1f | 0xc0;
+    }
+    if ((height & 0xffff) < (uint)width) {
+      iVar1 = countLeadingZeros((uint)width);
+    }
+    else {
+      iVar1 = countLeadingZeros(height & 0xffff);
+    }
+    *(uint *)obj->UNK_0x4 =
+         ((int)(@164 * (float)((double)CONCAT44(0x43300000,0x1f - iVar1) - @166)) & 0xffU) << 8 |
+         *(uint *)obj->UNK_0x4 & 0xffff00ff;
+  }
+  obj->mFormat = format;
+  obj->mDimensions = obj->mDimensions & 0xfffffc00 | width - 1;
+  obj->mDimensions = obj->mDimensions & 0xfff003ff | ((height & 0xffff) - 1) * 0x400;
+  obj->mDimensions = (format & 0xf) << 0x14 | obj->mDimensions & 0xff0fffff;
+  *(uint *)obj->UNK_0xC = *(uint *)obj->UNK_0xC & 0xffe00000 | (uint)image_ptr >> 5 & 0x1ffffff;
+  switch(format & 0xf) {
+  case GX_TF_I4:
+  case 8:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 1;
+    iVar1 = 3;
+    iVar2 = 3;
+    break;
+  case GX_TF_I8:
+  case GX_TF_IA4:
+  case 9:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
+    iVar1 = 3;
+    iVar2 = 2;
+    break;
+  case GX_TF_IA8:
+  case GX_TF_RGB565:
+  case GX_TF_RGB5A3:
+  case 10:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
+    iVar1 = 2;
+    iVar2 = 2;
+    break;
+  case GX_TF_RGBA8:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 3;
+    iVar1 = 2;
+    iVar2 = 2;
+    break;
+  default:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
+    iVar1 = 2;
+    iVar2 = 2;
+    break;
+  case GX_TF_CMPR:
+    *(undefined *)((int)&obj->unk_0x1c + 2) = 0;
+    iVar1 = 3;
+    iVar2 = 3;
+  }
+  *(ushort *)&obj->unk_0x1c =
+       (short)((int)((uint)width + (1 << iVar1) + -1) >> iVar1) *
+       (short)((int)((height & 0xffff) + (1 << iVar2) + -1) >> iVar2) & 0x7fff;
+  *(byte *)((int)&obj->unk_0x1c + 3) = *(byte *)((int)&obj->unk_0x1c + 3) | 2;
+  return;
+   */
+}
 
 
 void GS_ChangeTextureStates(int id)

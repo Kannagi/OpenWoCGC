@@ -23,7 +23,6 @@ s32 iss3cmp;
 s32 texinfo;
 void* pixel_dat;
 int test_SDL_openGL();
-s32 nuvideo_global_vbcnt;
 
 int main()
 {
@@ -88,7 +87,7 @@ int main()
     (mtl->diffuse).r = 1.0;
     (mtl->diffuse).g = 1.0;
     mtl->attrib._word = attr & (0xcc0cffff | 0x16e8000);
-    printf("attrib: %d\n", attr);
+    //printf("attrib: %d\n", attr);
     firstscreenfade(mtl,1);
     nuvideo_global_vbcnt = 0;
   do {

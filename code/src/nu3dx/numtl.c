@@ -158,32 +158,45 @@ void NuMtlInsert(struct nusysmtl_s *sm)    //need fix
   bool check;
   short lsid;
 
+
   list = smlist;
   lsid = (sm->mtl).alpha_sort;
   sid = (sm->mtl).tid;
-  check = smlist == NULL;
-  //sm->next = NULL;
-  //sm->last = NULL;
+  if(smlist != NULL)
+  {
+  sm->next = NULL;
+  sm->last = NULL;
   last = NULL;
-  while ((!check && (lsid * 0x10000 + sid < (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid)))  {
-    check = list->next == NULL;
+  while ((list->next != NULL && (lsid * 0x10000 + sid < (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid)))  {
+    check =
     last = list;
     list = list->next;
   }
   if (last == NULL) {
-    //sm->next = smlist;
+    sm->next = smlist;
     smlist = sm;
   }
   else {
-    //sm->last = last;
-    //sm->next = last->next;
+    sm->last = last;
+    sm->next = last->next;
     last->next = sm;
   }
   if (sm->next == NULL) {
+      printf("sm next is null\n");
     return;
   }
   sm->next->last = sm;
-  return;
+
+  printf("smlist not null\n");
+    return;
+  }
+
+  else
+
+  {
+    printf("smlist is empty\n");
+
+  }
 }
 
 

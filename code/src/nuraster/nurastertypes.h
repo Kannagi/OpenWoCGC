@@ -1,12 +1,13 @@
 #ifndef NURASTERTYPES_H
 #define NURASTERTYPES_H
 
-#include "types.h"
 #include "nu3dx/nu3dxtypes.h"
+#include "types.h"
 
 // TODO: TYPES!!!
 
-static struct rendertargetlist_s g_pRTArray[16];
+
+//static struct rendertargetlist_s g_pRTArray[16];
 static struct D3DSurface* g_pddsStencilBuffer;
 static unsigned int g_dwRenderHeight;
 static unsigned int g_dwRenderWidth;
@@ -90,12 +91,14 @@ struct _GSMATRIX33 {
     float _34;
 };
 
-struct tagRECT {
+struct tagRECT1{
     int left;
     int top;
     int right;
     int bottom;
 };
+
+static struct tagRECT1 g_rcScreenRect;
 
 // Size: 0x1
 struct D3DDevice
@@ -177,10 +180,10 @@ struct _D3DVIEWPORT8
     float MaxZ;
 };
 
-struct HWND__
+/*struct HWND__
 {
     int unused;
-};
+};*/
 
 
 enum _D3DRENDERSTATETYPE
