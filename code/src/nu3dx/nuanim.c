@@ -1,196 +1,153 @@
 #include "nuanim.h"
 #include "../system.h"
 
+#define ASSIGN_IF_SET(a, b) a = (a == NULL) ? NULL : b
 
-void buildBitCountTable(void) //check asm
+void buildBitCountTable(void) //check NGC asm	//PS2
 {
-    s32 k;
-    s32 j;
+     	for(i = 0; i < 256; i++){        
+            	BitCountTable[i] = 0;
+            	for(j = 0; j < 8; j++) {
+                	if (((i >> j) & 1) != 0) {
+                    	BitCountTable[i]++;
+                	}
+            	}
+        	}
+        	isBitCountTable = 1;
+	}
+}
+
+struct nuanimdata_s * NuAnimDataLoadBuff(char *file,union variptr_u *buff,union variptr_u *endbuff)
+{
+  s32 addroff;
+  s32 tmp;
+  struct nuanimdata_s *data;
+  void *mem;
+  struct NUANIMDATAHDR_s *dathdr;
+  
+  mem = (((s32)buff->voidptr + 0xf) & 0xfffffff0);
+  buff->voidptr = mem;
+  addroff = NuFileLoadBuffer(file,mem,(s32)endbuff->voidptr - (s32)mem);
+  if (addroff == 0) {
+    NuErrorProlog("..\\nu2.ps2\\nu3d\\nuanim.c",0x2f1)("Could not read from <%s>, either file is not there or the buffer may be full",file);
+  }
+  dathdr = (struct NUANIMDATAHDR_s *)buff->voidptr;
+  buff->voidptr = (void *)((s32)&dathdr->version + addroff);
+  tmp = (s32)dathdr - dathdr->address_offset;
+  dathdr->address_offset = tmp;
+  data = NuAnimDataFixPtrs(dathdr->animdata,tmp);
+  dathdr->animdata = data;
+  return data;
+}
+
+
+struct nuanimdata_s * NuAnimDataFixPtrs(struct nuanimdata_s *animdata,s32 address_offset)
+{
     s32 i;
-
-    i = 0;
-    do {
-        BitCountTable[i] = 0;
-        k = 8;
-        j = 0;
-loop_2:
-        if ((i >> (j + 1)) & 1) {
-            BitCountTable[i] += 1;
-        }
-        j += 1;
-        k -= 1;
-        if (k != 0) {
-            goto loop_2;
-        }
-        i += 1;
-    } while (i <= 0xFF);    // i < 0x100
-    isBitCountTable = 1;
-}
-
-struct nuanimdata_s* NuAnimDataLoadBuff(s8* file, struct variptr_u* buff, struct variptr_u* endbuff) {
-    s32 temp_r0;
-    s32 temp_r3_2;
-    u32 mem;
-    struct nuanimdata_s* data;
-    void* temp_r30;
-
-    mem = (buff->voidptr + 0xF) & 0xFFFFFFF0;
-    buff->intaddr = mem;
-    temp_r3_2 = NuFileLoadBuffer(file, (void* ) mem, endbuff->voidptr - mem);
-    if (temp_r3_2 == 0) {
-        //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuanim.c", 0xB6E)
-        //(""Could not read from <%s>, either file is not there or the buffer may be full"", file);
+    s32 j;
+    s32 iNodes;
+    s32 iChunks;
+    s32 iCurves;
+    struct nuanimcurve_s *curve;
+    struct nuanimcurveset_s *curveset;
+    struct nuanimdatachunk_s *datachunk;
+    
+    if (isBitCountTable == 0) {
+	buildBitCountTable();
     }
-    temp_r30 = buff->voidptr;
-    buff->voidptr = temp_r30 + temp_r3_2;
-    temp_r0 = temp_r30 - temp_r30->unk4;
-    temp_r30->unk4 = temp_r0;
-    data = NuAnimDataFixPtrs(temp_r30->unk8, temp_r0);
-    temp_r30->unk8 = data;
-    return data;
-}
 
-struct nuanimdata_s* NuAnimDataFixPtrs(struct nuanimdata_s* animdata, s32 address_offset) {
-    s32 temp_r0_2;
-    s32 temp_r0_3;
-    s32 temp_r0_4;
-    s32 temp_r0_5;
-    s32 temp_r0_6;
-    s32 temp_r0_7;
-    s32 temp_r0_8;
-    s32 temp_r11;
-    s32 temp_r11_2;
-    s32 temp_r9_3;
-    s32 temp_r9_4;
-    s32 var_r10;
-    s32 var_r10_2;
-    s32 var_r11_2;
-    s32 var_r11_3;
-    s32 var_r11_4;
-    s32 var_r7;
-    s32 var_r8;
-    s32 var_r8_2;
-    s32 var_r8_3;
-    s32 var_r9;
-    s32 var_r9_2;
-    s8* temp_r0;
-    s8* var_r11;
-    struct nuanimdata_s* var_r3;
-    struct nuanimdatachunk_s** temp_r9;
-    struct nuanimdatachunk_s** temp_r9_2;
-    struct nuanimdatachunk_s** var_r0;
-    void* temp_r10;
-    void* temp_r6;
-    void* temp_r9_5;
+    ASSIGN_IF_SET(animdata, (struct nuanimdata_s *)((s32)animdata + address_offset));
+    ASSIGN_IF_SET(animdata->node_name, animdata->node_name + address_offset);
+    ASSIGN_IF_SET(animdata->chunks, ((s32)animdata->chunks + address_offset));
+    
+    if (animdata->chunks != NULL) {
+        for (iChunks = 0; iChunks < animdata->nchunks; iChunks++)
+        {
+            ASSIGN_IF_SET(animdata->chunks[iChunks], (struct nuanimdatachunk_s *)((s32)animdata->chunks[iChunks] + address_offset));
+            datachunk = animdata->chunks[iChunks];
+            if (datachunk == NULL) {
+                continue;
+            }
 
-    if ((s32) isBitCountTable == 0) {
-        buildBitCountTable();
-    }
-    var_r3 = NULL;
-    if (animdata != NULL) {
-        var_r3 = animdata + address_offset;
-    }
-    temp_r0 = var_r3->node_name;
-    var_r11 = NULL;
-    if (temp_r0 != NULL) {
-        var_r11 = temp_r0 + address_offset;
-    }
-    temp_r9 = var_r3->chunks;
-    var_r0 = NULL;
-    var_r3->node_name = var_r11;
-    if (temp_r9 != NULL) {
-        var_r0 = temp_r9 + address_offset;
-    }
-    var_r3->chunks = var_r0;
-    if (var_r0 != NULL) {
-        var_r10 = 0;
-        if ((s32) var_r3->nchunks > 0) {
-            do {
-                temp_r9_2 = var_r3->chunks;
-                temp_r11 = var_r10 * 4;
-                var_r8 = 0;
-                temp_r0_2 = *(temp_r11 + temp_r9_2);
-                if (temp_r0_2 != 0) {
-                    var_r8 = temp_r0_2 + address_offset;
+            ASSIGN_IF_SET(datachunk->animcurvesets, (struct nuanimcurveset_s **)((s32)datachunk->animcurvesets + address_offset));
+            if (datachunk->animcurvesets == NULL) {
+                continue;
+            }
+            
+            for (iNodes = 0; iNodes < datachunk->numnodes; iNodes++)
+            {
+                ASSIGN_IF_SET(datachunk->animcurvesets[iNodes], (struct nuanimcurveset_s *)((s32)datachunk->animcurvesets[iNodes] + address_offset));
+                curveset = datachunk->animcurvesets[iNodes];
+                if (curveset == NULL) {
+                    continue;
                 }
-                *(temp_r11 + temp_r9_2) = var_r8;
-                temp_r6 = *(temp_r11 + var_r3->chunks);
-                if (temp_r6 != NULL) {
-                    temp_r0_3 = temp_r6->unk8;
-                    var_r9 = 0;
-                    if (temp_r0_3 != 0) {
-                        var_r9 = temp_r0_3 + address_offset;
-                    }
-                    temp_r6->unk8 = var_r9;
-                    if (var_r9 != 0) {
-                        var_r8_2 = 0;
-                        if ((s32) temp_r6->unk0 > 0) {
-                            do {
-                                temp_r9_3 = temp_r6->unk8;
-                                temp_r11_2 = var_r8_2 * 4;
-                                var_r10_2 = 0;
-                                temp_r0_4 = *(temp_r11_2 + temp_r9_3);
-                                if (temp_r0_4 != 0) {
-                                    var_r10_2 = temp_r0_4 + address_offset;
-                                }
-                                *(temp_r11_2 + temp_r9_3) = var_r10_2;
-                                temp_r10 = *(temp_r11_2 + temp_r6->unk8);
-                                if (temp_r10 != NULL) {
-                                    temp_r0_5 = temp_r10->unk4;
-                                    var_r11_2 = 0;
-                                    if (temp_r0_5 != 0) {
-                                        var_r11_2 = temp_r0_5 + address_offset;
-                                    }
-                                    temp_r0_6 = temp_r10->unk8;
-                                    var_r9_2 = 0;
-                                    temp_r10->unk4 = var_r11_2;
-                                    if (temp_r0_6 != 0) {
-                                        var_r9_2 = temp_r0_6 + address_offset;
-                                    }
-                                    temp_r10->unk8 = var_r9_2;
-                                    if (var_r9_2 != 0) {
-                                        var_r7 = 0;
-                                        if ((s8) temp_r10->unkC > 0) {
-                                            var_r8_3 = 0;
-                                            do {
-                                                temp_r9_4 = temp_r10->unk8;
-                                                var_r11_3 = 0;
-                                                temp_r0_7 = *(var_r8_3 + temp_r9_4);
-                                                if (temp_r0_7 != 0) {
-                                                    var_r11_3 = temp_r0_7 + address_offset;
-                                                }
-                                                *(var_r8_3 + temp_r9_4) = var_r11_3;
-                                                temp_r9_5 = *(var_r8_3 + temp_r10->unk8);
-                                                if (temp_r9_5 != NULL) {
-                                                    temp_r0_8 = temp_r9_5->unk4;
-                                                    var_r11_4 = 0;
-                                                    if (temp_r0_8 != 0) {
-                                                        var_r11_4 = temp_r0_8 + address_offset;
-                                                    }
-                                                    temp_r9_5->unk4 = var_r11_4;
-                                                }
-                                                var_r7 += 1;
-                                                var_r8_3 += 4;
-                                            } while (var_r7 < (s8) temp_r10->unkC);
-                                        }
-                                    }
-                                }
-                                var_r8_2 += 1;
-                            } while (var_r8_2 < (s32) temp_r6->unk0);
-                        }
+                
+                ASSIGN_IF_SET(curveset->constants, (float *)((s32)curveset->constants + address_offset));
+                ASSIGN_IF_SET(curveset->set, (struct nuanimcurve_s **)((s32)curveset->set + address_offset));
+                if (curveset->set == NULL) {
+                    continue;
+                }
+                
+                for(iCurves = 0; iCurves < curveset->ncurves; iCurves++)
+                {
+                    ASSIGN_IF_SET(curveset->set[iCurves], (struct nuanimcurve_s *)((s32)curveset->set[iCurves] + address_offset));
+                    curve = curveset->set[iCurves];
+                    if (curve != NULL) {
+                        ASSIGN_IF_SET(curve->animkeys, (struct nuanimkey_s *)((s32)curve->animkeys + address_offset));
                     }
                 }
-                var_r10 += 1;
-            } while (var_r10 < (s32) var_r3->nchunks);
+            }
         }
     }
-    return var_r3;
+    return animdata;
 }
 
+/*
+struct nuanimdatachunk_s * NuAnimDataChunkCreate(s32 numnodes)
+{
+  struct nuanimdatachunk_s *chunk;
+  struct nuanimcurveset_s **curveset;
+  
+  if (numnodes < 1) {
+    //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuanim.c",0x253)("assert");
+  }
+  chunk = (struct nuanimdatachunk_s *)NuMemAlloc(0x14);
+  memset(chunk,0,0x14);
+  chunk->numnodes = numnodes;
+  curveset = (struct nuanimcurveset_s **)NuMemAlloc(numnodes << 2);
+  chunk->animcurveset = curveset;
+  memset(curveset,0,numnodes << 2);
+  return chunk;
+}
+
+
+struct nuanimcurveset_s * NuAnimCurveSetCreate(s32 ncurves)
+{
+  nuanimcurve_s **curveset;
+  float *constants;
+  nuanimcurveset_s *data;
+  s32 nbytes;
+  
+  data = NULL;
+  if (ncurves != 0) {
+    nbytes = ncurves << 2;
+    data = (struct nuanimcurveset_s *)NuMemAlloc(0x10);
+    memset(data,0,0x10);
+    data->ncurves = (char)ncurves;
+    curveset = (struct nuanimcurve_s **)NuMemAlloc(nbytes);
+    data->set = curveset;
+    memset(curveset,0,nbytes);
+    constants = (float *)NuMemAlloc(nbytes);
+    data->constants = constants;
+    memset(constants,0,nbytes);
+  }
+  return data;
+}
+
+*/
 
 
 nuAnimData_s * NuAnimDataRead(filehandle handle)		//WIP
-
 {
   int nChunks;
   char *data;
@@ -288,7 +245,8 @@ nuAnimData_s * NuAnimDataRead(filehandle handle)		//WIP
              (j = 0, '\0' < ptrCset[nChunks]->ncurves)) {
             flags = 0;
             do {
-              if (*(float *)(flags + (int)ptrCset[nChunks]->constants) == 3.402823e+38) {
+              if (*(float *)(flags + (int)ptrCset[nChunks]->constants) == 3.402823e+38) //3.402823e+38 --> ff ff 7f 7f
+		{
                 *(nuanimcurve_s **)(ptrCset[nChunks]->set->pad + flags + -0xd) = curves;
                 chunk->num_valid_animcurvesets = chunk->num_valid_animcurvesets + 1;
                 curves->animkeys = keys;
@@ -349,6 +307,47 @@ void NuAnimDataDestroy(nuAnimData_s *animdata)
     }
   }
   return;
+}
+
+//PS2 96%
+void NuAnimDataCalcTime(struct nuanimdata_s *animdata,float time,struct nuanimtime_s *atime)
+{
+    s32 iVar1;
+    s32 dVar2;
+    s32 iVar3;
+    
+    if (animdata->time <= time) {
+        if (animdata->time == 1.0f) {
+          atime->time = 1.0f;
+          atime->time_byte = 0;
+          atime->time_mask = 1;
+          atime->chunk = 0;
+          return;
+        }
+        atime->time = animdata->time - 0.01f;
+    }
+    else if (time < 1.0f) {
+        atime->time = 1.0f;
+    }
+    else {
+        atime->time = time;
+    }
+
+    atime->chunk = floor((atime->time - 1.0) / 32.0);
+    if (atime->chunk < animdata->nchunks) {
+        // ??????
+    }
+    else {
+        atime->chunk = animdata->nchunks - 1;
+    }
+    
+    atime->time_offset = atime->time - atime->chunk * 32;
+    iVar1 = floor(atime->time_offset);
+    iVar1--;
+    
+    atime->time_byte = (u8)(iVar1 / 8);
+    atime->time_mask = (u8)((1 << (iVar1 + (iVar1 / 8) * -8 + 1)) - 1);
+return;
 }
 
 
@@ -498,5 +497,489 @@ LAB_800aae24:
   T->_20 = -T->_20;
   T->_21 = -T->_21;
   T->_23 = -T->_23;
+  return;
+}
+
+
+//PS2 MATCH 87,26%
+float NuAnimCurveCalcVal2(struct nuanimcurve_s *animcurve,struct nuanimtime_s *atime)
+{
+    struct nuanimkey_s *key;
+    float time;
+    float fVar2;
+    float fVar3;
+    float fVar4;
+    float fVar5;
+    s32 tbyte;
+    s32 tbyte2;
+    u8* test;
+
+    test = (u8*)&animcurve->mask; // ???
+    switch (atime->time_byte) {
+        case 0:
+            tbyte =  BitCountTable[test[0] & atime->time_mask];
+            break;
+        case 1:
+            tbyte =  BitCountTable[test[0]];
+            tbyte += BitCountTable[test[1] & atime->time_mask];
+            break;
+        case 2:
+            tbyte =  BitCountTable[test[0]];
+            tbyte += BitCountTable[test[1]];
+            tbyte += BitCountTable[test[2] & atime->time_mask];
+            break;
+        case 3:
+            tbyte =  BitCountTable[test[0]];
+            tbyte += BitCountTable[test[1]];
+            tbyte += BitCountTable[test[2]];
+            tbyte += BitCountTable[test[3] & atime->time_mask];
+            break;
+    }   
+    key = animcurve->animkeys;
+    time = key[tbyte-1].time;
+    if ((animcurve->flags & 1) == 0) {
+        time -= key[tbyte].time;
+        
+        fVar2 = key[tbyte - 1].d - key[tbyte].d;
+        fVar3 = key[tbyte - 1].c * time;
+        time = key[tbyte].c * time;
+        fVar4 = (atime->time - key[tbyte - 1].time) * key[tbyte - 1].dtime;
+        return fVar4 * (fVar4 * (((fVar4 * (fVar2 + fVar2 + fVar3 + time) + fVar2 * -3.0f) -
+                               (fVar3 + fVar3)) - time) + fVar3) + key[tbyte - 1].d;
+    } else {
+        return key[tbyte-1].d;
+    }
+}
+
+
+
+//PS2 Version
+void NuAnimCurveSetApplyToJointBasic (struct nuanimcurveset_s *animcurveset, struct nuanimtime_s *atime,  
+struct NUJOINTDATA_s *jointdata, struct NuVec *scale,struct NuVec *parentscale, 
+struct numtx_s *T, struct NUJOINTANIM_s *offset)
+{
+  //UNKTYPE *puVar1;
+  //unsigned long *puVar2;
+  //unsigned long uVar3;
+  char procanim_flags;
+  //float fVar4;
+  //u32 uVar5;
+  //float fVar6;
+  //float fVar7;
+  //u32 uvar;
+  //u32 uVar1;
+  struct NuVec r;
+  struct nuangvec_s rf;
+  //float fVar2;
+  
+  if (offset != NULL) {
+    procanim_flags = offset->flags;
+  }
+  else {
+    procanim_flags = '\0';
+  }
+  if (animcurveset->set[3] != NULL) {
+      r.x = NuAnimCurveCalcVal2(animcurveset->set[3],atime);
+  }
+  else {
+    r.x = animcurveset->constants[3];
+  }
+  if (animcurveset->set[4] != NULL) {
+    r.y = NuAnimCurveCalcVal2(animcurveset->set[4],atime);
+  }
+  else {
+      r.y = animcurveset->constants[4];
+  }
+  if (animcurveset->set[5] != NULL) {
+    r.z = NuAnimCurveCalcVal2(animcurveset->set[5],atime);
+  }
+  else {
+    r.z = animcurveset->constants[5];
+  }
+  if ((procanim_flags & 1) != 0)  {
+    r.x += offset->rx;
+    r.y += offset->ry;
+    r.z += offset->rz;
+      rf.x = (int)(r.x * 10430.378f);
+      rf.y = (int)(r.y * 10430.378f);
+      rf.z = (int)(r.z * 10430.378f);
+      
+    if ((procanim_flags & 8) != 0) {
+        rf.x &= 0xFFFF;
+      if (0x7fff < rf.x) {
+        rf.x -= 0x10000;
+      }
+      if (offset->max_rx < rf.x) {
+        rf.x = offset->max_rx;
+      }
+      else {
+        //uvar = rf.x;
+        if (rf.x < offset->min_rx) {
+          rf.x = offset->min_rx;
+        }
+      }
+    }
+    //rf.x = uvar;
+    //rf.y._0_2_ = (u16)uVar5;
+    if ((procanim_flags & 0x10) != 0) {
+      rf.y &= 0xffff;
+      if (0x7fff < rf.y) {
+        rf.y -= 0x10000;
+      }
+      if (offset->max_ry < rf.y) {
+        rf.y = offset->max_ry;
+      }
+      else {
+        //rf.y = rf.y;
+        if (rf.y < offset->min_ry) {
+          rf.y = offset->min_ry;
+        }
+      }
+    }
+    //rf.y = uVar5;
+    if ((procanim_flags & 0x20) != 0) {
+    //uvar = rf.z & 0xffff;
+      rf.z &= 0xFFFF;
+      if (0x7fff < rf.z) {
+        rf.z -= 0x10000;
+      }
+      if ((long)offset->max_rz < (long)rf.z) {
+        rf.z = (int)offset->max_rz;
+      }
+      else if ((long)rf.z < (long)offset->min_rz) {
+        rf.z = (int)offset->min_rz;
+      }
+    }
+  }
+  else {                                        //if ((procanim_flags & 1) == 0)
+    rf.x = (int)(r.x * 10430.378f);
+    rf.y = (int)(r.y * 10430.378f);
+    rf.z = (int)(r.z * 10430.378f);
+  }
+  NuMtxSetRotateXYZ(T,&rf);
+  if ((animcurveset->flags & 0x20U) != 0) {
+    NuMtxMulR(T,T,&jointdata->orient);
+  }
+  T->_30 = animcurveset->constants[0];
+  T->_31 = animcurveset->constants[1];
+  T->_32 = animcurveset->constants[2];
+  if ((procanim_flags & 2) != 0) {
+    T->_30 += offset->tx;
+    T->_31 += offset->ty;
+    T->_32 += offset->tz;
+  }
+    //memcpy
+  *scale = *parentscale;    //or -->  memcpy ( parentscale, scale, sizeof(struct NuVec) );
+  T->_02 = -T->_02;
+  T->_12 = -T->_12;
+  T->_20 = -T->_20;
+  T->_21 = -T->_21;
+  T->_23 = -T->_23;
+  T->_32 = -T->_32;
+  return;
+}
+
+//PS2 99,45% match
+void NuAnimCurveSetApplyToJoint2
+               (struct nuanimcurveset_s *animcurveset,struct nuanimtime_s *atime, 
+                struct NUJOINTDATA_s *jointdata,struct NuVec *scale ,
+               struct NuVec *parentscale,struct numtx_s *T, struct NUJOINTANIM_s *offset)
+
+{
+    struct nuanimcurve_s **ppNVar3;
+    char procanim_flags;
+    struct NuVec local_e0;
+    struct NuVec r;
+    struct NuVec lo;
+    struct nuangvec_s rf;
+    struct NuVec local_a0;
+    
+    if (offset != NULL) {
+        procanim_flags = offset->flags;
+    }
+    else {
+        procanim_flags = 0x00;
+    }
+
+    if ((animcurveset->flags & 1) == 0)
+    {
+        if((procanim_flags & 1) == 0) {
+            goto procanim_alt1;
+        }
+        goto procanim_zero1;
+    } else {
+        if (animcurveset->set[3] != NULL) {
+            r.x = NuAnimCurveCalcVal2(animcurveset->set[3], atime);
+        }
+        else {
+            r.x = animcurveset->constants[3];
+        }
+        
+        if (animcurveset->set[4] != NULL) {
+            r.y = NuAnimCurveCalcVal2(animcurveset->set[4], atime);
+        }
+        else {
+            r.y = animcurveset->constants[4];
+        }
+        
+        if (animcurveset->set[5] != NULL) {
+            r.z = NuAnimCurveCalcVal2(animcurveset->set[5], atime);
+        }
+        else {
+            r.z = animcurveset->constants[5];
+        }
+        goto procanim_body1;
+    }
+    
+    if(procanim_flags & 1) {
+        procanim_zero1:
+        r.x = r.y = r.z = 0.0f;
+        procanim_body1:
+        if(procanim_flags & 1) {
+            r.x += offset->rx;
+            r.y += offset->ry;
+            r.z += offset->rz;
+            rf.x = (int)(r.x * 10430.378f);
+            rf.y = (int)(r.y * 10430.378f);
+            rf.z = (int)(r.z * 10430.378f);
+            
+            if ((procanim_flags & 8U) != 0) {
+                rf.x &= 0xFFFF;
+                if (0x7fff < rf.x) {
+                    rf.x -= 0x10000;
+                }
+                if (offset->max_rx < rf.x) {
+                    rf.x = (int)offset->max_rx;
+                }
+                else if (rf.x < offset->min_rx) {
+                    rf.x = (int)offset->min_rx;
+                }
+            }
+            
+            if ((procanim_flags & 0x10) != 0) {
+                rf.y &= 0xFFFF;
+                if (0x7fff < rf.y) {
+                    rf.y -= 0x10000;
+                }
+                if (offset->max_ry < rf.y) {
+                    rf.y = (int)offset->max_ry;
+                }
+                else if (rf.y < offset->min_ry) {
+                    rf.y = (int)offset->min_ry;
+                }
+            }
+            
+            if ((procanim_flags & 0x20) != 0) {
+                rf.z &= 0xFFFF;
+                if (0x7fff < rf.z) {
+                    rf.z -= 0x10000;
+                }
+                if (offset->max_rz < rf.z) {
+                    rf.z = (int)offset->max_rz;
+                }
+                else if (rf.z < offset->min_rz) {
+                    rf.z = (int)offset->min_rz;
+                }
+            }
+        } else {
+            rf.x = (int)(r.x * 10430.378f);
+            rf.y = (int)(r.y * 10430.378f);
+            rf.z = (int)(r.z * 10430.378f);
+        }
+        NuMtxSetRotateXYZVU0(T, &rf);
+    } else {
+        procanim_alt1:
+        NuMtxSetIdentity(T);
+    }
+
+    if ((animcurveset->flags & 0x20) != 0) {
+        NuMtxMulRVU0(T, T, &jointdata->orient);
+    }
+    
+    if ((animcurveset->flags & 8U) == 0) {
+        if((procanim_flags & 4) == 0) {
+            goto procanim_alt2;
+        }
+        goto procanim_zero2;
+    } else {
+        if (animcurveset->set[6] != NULL) {
+            scale->x = NuAnimCurveCalcVal2(animcurveset->set[6], atime);
+        }
+        else {
+            scale->x = animcurveset->constants[6];
+        }
+        if (animcurveset->set[7] != NULL) {
+            scale->y = NuAnimCurveCalcVal2(animcurveset->set[7], atime);
+        }
+        else {
+            scale->y = animcurveset->constants[7];
+        }
+        if (animcurveset->set[8] != NULL) {
+            scale->z = NuAnimCurveCalcVal2(animcurveset->set[8], atime);
+        }
+        else {
+            scale->z = animcurveset->constants[8];
+        }
+        goto procanim_body2;
+    }
+
+
+    if ((procanim_flags & 4)) {
+        procanim_zero2:
+        scale->x = scale->y = scale->z = 0.0f;
+        procanim_body2:
+        if ((procanim_flags & 4)) {
+            scale->x += offset->sx;
+            scale->y += offset->sy;
+            scale->z += offset->sz;
+        }
+        NuMtxPreScaleVU0(T, scale);
+        scale->x *= parentscale->x;
+        scale->y *= parentscale->y;
+        scale->z *= parentscale->z;
+    }
+    else {
+        procanim_alt2:
+        *scale = *parentscale;
+    }
+    
+    if ((animcurveset->flags & 0x10U)  && (parentscale != 0)) {
+        local_a0.x = 1.0f / parentscale->x;
+        local_a0.y = 1.0f / parentscale->y;
+        local_a0.z = 1.0f / parentscale->z;
+        NuMtxScaleVU0(T, &local_a0);
+        scale->x *= local_a0.x;
+        scale->y *= local_a0.y;
+        scale->z *= local_a0.z;
+    }
+
+    if (animcurveset->set[0] != NULL) {
+        local_e0.x = NuAnimCurveCalcVal2(animcurveset->set[0], atime);
+    }
+    else {
+        local_e0.x = animcurveset->constants[0];
+    }
+    if (animcurveset->set[1] != NULL) {
+        local_e0.y = NuAnimCurveCalcVal2(animcurveset->set[1], atime);
+    }
+    else {
+        local_e0.y = animcurveset->constants[1];
+    }
+    if (animcurveset->set[2] != NULL) {
+        local_e0.z = NuAnimCurveCalcVal2(animcurveset->set[2], atime);
+    }
+    else {
+        local_e0.z = animcurveset->constants[2];
+    }
+    
+    if ((procanim_flags & 2) != 0) {
+        local_e0.x = local_e0.x + offset->tx;
+        local_e0.y = local_e0.y + offset->ty;
+        local_e0.z = local_e0.z + offset->tz;
+    }
+    
+    NuMtxTranslate(T, &local_e0);
+    if ((jointdata->flags & 8) != 0) {
+        NuMtxPreTranslate(T, &jointdata->locator_offset);
+        lo.x = -(jointdata->locator_offset).x;
+        lo.y = -(jointdata->locator_offset).y;
+        lo.z = -(jointdata->locator_offset).z;
+        NuMtxTranslate(T,&lo);
+    }
+    T->_02 = -T->_02;
+    T->_12 = -T->_12;
+    T->_20 = -T->_20;
+    T->_21 = -T->_21;
+    T->_23 = -T->_23;
+    T->_32 = -T->_32;
+    return;
+}
+
+
+//PS2 Match
+void NuAnimCurveSetApplyToMatrix (struct nuanimcurveset_s *animcurveset,struct nuanimtime_s *atime,struct numtx_s *T)
+{
+  s32 uVar1;
+  struct NuVec local_80;
+  struct NuVec local_70;
+  struct nuangvec_s rf;
+  struct NuVec local_50;
+  
+
+  if ((animcurveset->flags & 1U) != 0)  {
+    if (animcurveset->set[3] != NULL) {
+      local_70.x = NuAnimCurveCalcVal2(animcurveset->set[3],atime);
+    }
+    else {
+        local_70.x = animcurveset->constants[3];
+    }
+    if (animcurveset->set[4] != NULL) {
+      local_70.y = NuAnimCurveCalcVal2(animcurveset->set[4],atime);
+    }
+    else {
+      local_70.y = animcurveset->constants[4];
+    }
+    if (animcurveset->set[5] != NULL) {
+      local_70.z = NuAnimCurveCalcVal2(animcurveset->set[5],atime);
+    }
+    else {
+      local_70.z = animcurveset->constants[5];
+    }
+    rf.x = (int)(local_70.x * 10430.378f);
+    rf.y = (int)(local_70.y * 10430.378f);
+    rf.z = (int)(local_70.z * 10430.378f);
+    NuMtxSetRotateXYZ(T,&rf);
+    procanim_alt1:
+  }
+  else{
+    NuMtxSetIdentity(T);
+  }
+
+  if ((animcurveset->flags & 8) != 0) {
+    if (animcurveset->set[6] != NULL) {
+      local_50.x = NuAnimCurveCalcVal2(animcurveset->set[6],atime);
+    }
+    else {
+      local_50.x = animcurveset->constants[6];
+    }
+    if (animcurveset->set[7] != NULL) {
+      local_50.y = NuAnimCurveCalcVal2(animcurveset->set[7],atime);
+    }
+    else {
+      local_50.y = animcurveset->constants[7];
+    }
+    if (animcurveset->set[8] != NULL) {
+      local_50.z = NuAnimCurveCalcVal2(animcurveset->set[8],atime);
+    }
+    else {
+      local_50.z = animcurveset->constants[8];
+    }
+    NuMtxPreScale(T,&local_50);
+  }
+  if (*animcurveset->set != NULL) {
+    local_80.x = NuAnimCurveCalcVal2(*animcurveset->set,atime);
+  }
+  else {
+    local_80.x = *animcurveset->constants;
+  }
+  if (animcurveset->set[1] != NULL) {
+    local_80.y = NuAnimCurveCalcVal2(animcurveset->set[1],atime);
+  }
+  else {
+    local_80.y = animcurveset->constants[1];
+  }
+  if (animcurveset->set[2] != NULL) {
+    local_80.z = NuAnimCurveCalcVal2(animcurveset->set[2],atime);
+  }
+  else {
+    local_80.z = animcurveset->constants[2];
+  }
+  NuMtxTranslate(T,&local_80);
+  T->_02 = -T->_02;
+  T->_12 = -T->_12;
+  T->_20 = -T->_20;
+  T->_21 = -T->_21;
+  T->_23 = -T->_23;
+  T->_32 = -T->_32;
   return;
 }

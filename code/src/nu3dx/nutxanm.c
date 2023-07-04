@@ -1040,16 +1040,14 @@ int EvalVars(int cc,int v0,int v1)
       return 1;
     }
   }
-  e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x17e);
-  //(*error)("unknown condition code %d",cc);
+  NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x17e)("unknown condition code %d",cc);
   return 0;
 }
 
 
-int ParGetCC(nufpar_s *pf)
-
+s32 ParGetCC(struct nufpar_s *pf)
 {
-  int cc;
+  s32 cc;
   char Wbuf;
   
   NuFParGetWord(pf);
@@ -1079,19 +1077,17 @@ LAB_800ba56c:
         return 4;
       }
     }
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1ac);
-    //(*error)("unknown condition \'%s\' at line %d",pf->wordBuffer + 1,pf->line_num);
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1ac)("unknown condition \'%s\' at line %d",pf->wordBuffer + 1,pf->line_num);
   }
   return cc;
 }
 
-int LabTabFind(char *txt)
-
+s32 LabTabFind(char *txt)
 {
-  uint len;
-  int cmp;
+  u32 len;
+  s32 cmp;
   char (*tab) [64];
-  int i;
+  s32 i;
   
   len = strlen(txt);
   if (0x14 < len) {
@@ -1110,8 +1106,7 @@ int LabTabFind(char *txt)
     } while (i < labtabcnt);
   }
   if (0x3f < labtabcnt) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1c9);
-    (*e)("Tex Anim Assembler Fatal Error: too many labels");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1c9)("Tex Anim Assembler Fatal Error: too many labels");
   }
   i = labtabcnt * 0x15;
   labtabcnt = labtabcnt + 1;
@@ -1120,13 +1115,12 @@ int LabTabFind(char *txt)
 }
 
 
-int XDefLabTabFind(char *txt)
-
+s32 XDefLabTabFind(char *txt)
 {
   size_t lenght;
-  int cmp;
+  s32 cmp;
   char *tab;
-  int i;
+  s32 i;
   
   lenght = strlen(txt);
   if (0x14 < lenght) {
@@ -1145,8 +1139,7 @@ int XDefLabTabFind(char *txt)
     } while (i < xdeflabtabcnt);
   }
   if (0xff < xdeflabtabcnt) {
-    e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1de);
-    (*e)("Tex Anim Assembler Fatal Error: too many global labels");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1de)("Tex Anim Assembler Fatal Error: too many global labels");
   }
   i = xdeflabtabcnt * 0x15;
   xdeflabtabcnt = xdeflabtabcnt + 1;

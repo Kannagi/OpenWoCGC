@@ -745,3 +745,12 @@ void NuMtxCalcDebrisFaceOn(struct Mtx* m)
   m->m34 = 0.0;
   m->m24 = 0.0;
 }
+
+
+/*
+void NuMtxInvH(void) //TODO
+{
+
+}
+
+*/

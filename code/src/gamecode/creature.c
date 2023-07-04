@@ -534,27 +534,37 @@ LAB_80017f48:
 float ModelAnimDuration(int character,int action,float start,float end)
 
 {
-  float fVar1;
-  float *pfVar2;
-  int iVar3;
+  char cVar1;
+  float fVar2;
+  struct nuanimdata_s *anmdat;
   
-  if ((((uint)character < 0xbf) && ((uint)action < 0x76)) && (CRemap[character] != -1)) {
-    iVar3 = CRemap[character] * 0x7ac;
-    pfVar2 = *(float **)(iVar3 + -0x7fdac120 + action * 4);
-    if (pfVar2 != (float *)0x0) {
-      fVar1 = *pfVar2;
-      if ((start < 1.0) || (fVar1 <= start)) {
-        if ((1.0 <= end) && ((end < fVar1 && (start < end)))) {
-          fVar1 = end - 1.0;
+  if ((((uint)character < 0xbf) && ((uint)action < 0x76)) &&
+     (cVar1 = CRemap[character], cVar1 != -1)) {
+    anmdat = CModel[cVar1].anmdata[action];
+    if (anmdat != NULL) {
+      fVar2 = anmdat->time;
+      if ((start < 1.0) || (fVar2 <= start)) {
+        if (((1.0 <= end) && (end < fVar2)) && (start < end)) {
+          fVar2 = end - 1.0;
         }
       }
-      else if (((end < 1.0) || (fVar1 <= end)) || (end <= start)) {
-        fVar1 = fVar1 - start;
+      else if (1.0 <= end) {
+        if (end < fVar2) {
+          if (start < end) {
+            fVar2 = end - start;
+          }
+          else {
+            fVar2 = fVar2 - start;
+          }
+        }
+        else {
+          fVar2 = fVar2 - start;
+        }
       }
       else {
-        fVar1 = end - start;
+        fVar2 = fVar2 - start;
       }
-      return fVar1 * (1.0 / *(float *)(*(int *)(iVar3 + -0x7fdabf48 + action * 4) + 8)) * 0.033333 34
+      return fVar2 * (1.0 / (float)CModel[cVar1].fanmdata[action + -0x10]->nchunks) * FLOAT_00643f 74
       ;
     }
   }

@@ -2740,3 +2740,46 @@ LAB_800346ac:
   }
   return;
 }
+
+//PS2 100% match
+int StartHGobjAnim(struct nuhspecial_s *obj)
+{
+  struct nuinstance_s *pNVar1;
+  struct nuinstanim_s *iVar2;
+  
+  if (((obj->special != NULL) &&
+      (pNVar1 = obj->special->instance, pNVar1 != NULL)) &&
+     (iVar2 = pNVar1->anim, iVar2 != NULL)) {
+    iVar2->playing = iVar2->playing | 1;
+    return 1;
+  }
+  return 0;
+}
+
+
+//vehsupp.c
+void GetLocatorMtx(struct CharacterModel *Model,struct numtx_s *LocMtx,f32 YAngOff3)
+{
+  /*
+struct NUPOINTOFINTEREST_s *ptr;
+  s32 i;
+  struct NUPOINTOFINTEREST_s **pLoc;
+  
+  if (Model != NULL) {
+    i = 0;
+    pLoc = Model->pLOCATOR;
+    NuMtxSetRotationY(&BaseMat,(s32)(YAngOff3 * 182.0444f));
+    NuHGobjEval(Model->hobj,0,0,tmtx);
+    do {
+      ptr = *pLoc;
+      pLoc = pLoc + 1;
+      if (ptr != NULL) {
+        NuHGobjPOIMtx(Model->hobj,(u8)i,&BaseMat,tmtx,LocMtx);
+      }
+      i = i + 1;
+      LocMtx = LocMtx + 1;
+    } while (i < 0x10);
+  }
+  return;
+*/
+}
