@@ -983,3 +983,43 @@ void NuAnimCurveSetApplyToMatrix (struct nuanimcurveset_s *animcurveset,struct n
   T->_32 = -T->_32;
   return;
 }
+
+//PS2 Match
+void NuAnimCurve2SetApplyToMatrix (struct nuanimcurve2_s *animcurveset,char *curveflags,char curvesetflags,
+struct nuanimtime_s *atime, struct numtx_s *T)
+{
+  struct NuVec local_a0;
+  struct NuVec local_90;
+  struct nuangvec_s rf;
+  struct NuVec local_70;
+    
+  if ((curvesetflags & 1U) != 0) {
+    local_90.x = NuAnimCurve2CalcVal(animcurveset + 3,atime,(int)curveflags[3]);
+    local_90.y = NuAnimCurve2CalcVal(animcurveset + 4,atime,(int)curveflags[4]);
+    local_90.z = NuAnimCurve2CalcVal(animcurveset + 5,atime,(int)curveflags[5]);
+    rf.z = (s32)(local_90.z * 10430.378f);
+    rf.x = (s32)(local_90.x * 10430.378f);
+    rf.y = (s32)(local_90.y * 10430.378f);
+    NuMtxSetRotateXYZ(T,&rf);
+  }
+  else {
+      NuMtxSetIdentity(T);
+  }
+  if ((curvesetflags & 8U) != 0) {
+    local_70.x = NuAnimCurve2CalcVal(animcurveset + 6,atime,(int)curveflags[6]);
+    local_70.y = NuAnimCurve2CalcVal(animcurveset + 7,atime,(int)curveflags[7]);
+    local_70.z = NuAnimCurve2CalcVal(animcurveset + 8,atime,(int)curveflags[8]);
+    NuMtxPreScale(T,&local_70);
+  }
+  local_a0.x = NuAnimCurve2CalcVal(animcurveset,atime,(int)*curveflags);
+  local_a0.y = NuAnimCurve2CalcVal(animcurveset + 1,atime,(int)curveflags[1]);
+  local_a0.z = NuAnimCurve2CalcVal(animcurveset + 2,atime,(int)curveflags[2]);
+  NuMtxTranslate(T,&local_a0);
+  T->_02 = -T->_02;
+  T->_12 = -T->_12;
+  T->_20 = -T->_20;
+  T->_21 = -T->_21;
+  T->_23 = -T->_23;
+  T->_32 = -T->_32;
+  return;
+}
