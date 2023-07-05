@@ -2263,97 +2263,102 @@ LAB_800b58ec:
 
 
 void NuHGobjEvalAnimBlend
-               (struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata1,float time1,struct nuanimdata_s *animdata2,
-               float time2,float blend,int njanims,struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
+               (struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata1, float time1,struct nuanimdata_s *animdata2,float time2
+               ,float blend,s32 njanims,struct NUJOINTANIM_s *janim,struct numtx_s *mtx_array)
 
 {
-  /*numtx_s *pnVar1;
-  nuanimcurveset_s *animcurveset1;
-  numtx_s *parent_T;
-  numtx_s *T;
-  numtx_s *WT;
-  nuanimcurveset_s *animcurveset2;
-  uint joint_ix;
-  int iVar2;
-  NUJOINTANIM_s *offset;
-  nuanimdatachunk_s *chunk1;
-  nuanimdatachunk_s *chunk2;
-  uint i;
-  double dVar3;
-  double dVar4;
-  numtx_s LOCAL_T;
-  nuanimtime_s atime1;
-  nuanimtime_s atime2;
+/* DWARF
 
-  dVar4 = (double)blend;
-  dVar3 = (double)time2;
-  scale_array0.202[255].z = 1.0;
-  scale_array0.202[255].x = 1.0;
-  scale_array0.202[255].y = 1.0;
+    unsigned char i;
+    unsigned char joint_ix; 
+    numtx_s* parent_T;
+    numtx_s* WT;
+    numtx_s* T;
+    numtx_s LOCAL_T;
+    nuvec_s scale_array0[256];
+    nuanimtime_s atime1;
+    nuanimtime_s atime2;
+    nuanimdatachunk_s* chunk1;
+    nuanimdatachunk_s* chunk2;
+    NUJOINTANIM_s* offset;
+    NUJOINTANIM_s* janim_array[256];
+    unsigned char cindex;
+
+*/
+
+  /*s32 iVar6;
+  struct numtx_s *T;
+  struct NUJOINTANIM_s *offset;
+  struct NUJOINTDATA_s *jdat;
+  struct nuanimcurveset_s **ppNVar11;
+  u8 uVar12;
+  struct numtx_s *m;
+  struct numtx_s LOC_T;
+  struct NuVec scale_array0 [256];
+  struct nuanimtime_s atime1;
+  struct nuanimtime_s atime2;
+  struct NUJOINTANIM_s *janim_array [256];
+  struct nuanimdatachunk_s *chunk1;
+  struct nuanimdatachunk_s *chunk2;
+  
+  memset(janim_array,0,0x400);
+  scale_array0[255].x = 1.0f;
+  scale_array0[255].y = 1.0f;
+  scale_array0[255].z = 1.0f;
   NuAnimDataCalcTime(animdata1,time1,&atime1);
   chunk1 = animdata1->chunks[atime1.chunk];
-  NuAnimDataCalcTime(animdata2,(float)dVar3,&atime2);
+  NuAnimDataCalcTime(animdata2,time2,&atime2);
   chunk2 = animdata2->chunks[atime2.chunk];
-  if ((njanims != 0) && (i = 0, 0 < njanims)) {
+  if ((njanims != 0) && (uVar12 = 0, 0 < njanims)) {
+    iVar6 = 0;
     do {
-      joint_ix = (uint)janim[i].joint_id;
-      if ((joint_ix < hgobj->num_joint_ixs) && (hgobj->joint_ixs[joint_ix] != 0xff)) {
-        janim_array.203[hgobj->joint_ixs[joint_ix]] = janim + i;
+      offset = &janim[iVar6];
+      if ((offset->joint_id < hgobj->num_joint_ixs) && (hgobj->joint_ixs[offset->joint_id] != 0xff)) {
+        janim_array[hgobj->joint_ixs[offset->joint_id]] = offset;
       }
-      i = i + 1 & 0xff;
-    } while ((int)i < njanims);
+      uVar12 = uVar12 + 1 & 0xff;
+      iVar6 = uVar12 * 0x34;
+    } while ((int)uVar12 < njanims);
   }
-  i = 0;
+  uVar12 = 0;
   if (hgobj->num_joints != '\0') {
+    iVar6 = 0;
     do {
-      if ((njanims == 0) || (hgobj->joint_ixs[janim->joint_id] != i)) {
-        offset = (NUJOINTANIM_s *)0x0;
+      m = (struct numtx_s *)((int)&mtx_array + iVar6);
+      if (njanims != 0) {
+        offset = janim_array[uVar12];
       }
       else {
-        njanims = njanims + -1;
-        offset = janim;
-        janim = janim + 1;
+        offset = NULL;
       }
-      animcurveset1 = chunk1->animcurveset[i];
-      if ((animcurveset1 == (nuanimcurveset_s *)0x0) ||
-         (animcurveset2 = chunk2->animcurveset[i], animcurveset2 == (nuanimcurveset_s *)0x0)) {
-        T = hgobj->T + i;
-      }
-      else {
+      if (chunk1->animcurvesets[uVar12] != NULL) {
+        ppNVar11 = (struct nuanimcurveset_s  **)(chunk2->animcurvesets + uVar12);
+        if (*ppNVar11 == NULL) {
+          T = hgobj->T;
+          goto LAB_00126f58;
+        }
         NuAnimCurveSetApplyBlendToJoint2
-                  (animcurveset1,&atime1,animcurveset2,&atime2,(float)dVar4,hgobj->joints + i,
-                   scale_array0.202 + i,
-                   scale_array0.202 + *(byte *)((int)&hgobj->joints[i].parent_ix + 3),&LOCAL_T,
-                   offset);
-        T = &LOCAL_T;
-      }
-      joint_ix = hgobj->joints[i].parent_ix;
-      if ((joint_ix & 0xff) == 0xff) {
-        iVar2 = 0x30;
-        pnVar1 = mtx_array + i;
-        do {
-          WT = T;
-          parent_T = pnVar1;
-          iVar2 = iVar2 + -0x18;
-          parent_T->_00 = WT->_00;
-          parent_T->_01 = WT->_01;
-          parent_T->_02 = WT->_02;
-          parent_T->_03 = WT->_03;
-          parent_T->_10 = WT->_10;
-          parent_T->_11 = WT->_11;
-          pnVar1 = (numtx_s *)&parent_T->_12;
-          T = (numtx_s *)&WT->_12;
-        } while (iVar2 != 0);
-        parent_T->_12 = WT->_12;
-        parent_T->_13 = WT->_13;
-        parent_T->_20 = WT->_20;
-        parent_T->_21 = WT->_21;
+                  (chunk1->animcurvesets[uVar12],&atime1,*ppNVar11,&atime2,
+                   blend,hgobj->joints + uVar12,(&scale_array0[uVar12]),
+                   (&scale_array0[hgobj->joints[uVar12].parent_ix]),&LOC_T,offset);
+        T = &LOC_T;
+
       }
       else {
-        NuMtxMul(mtx_array + i,T,mtx_array + joint_ix);
+        T = hgobj->T;
+        LAB_00126f58:
+        T = (struct numtx_s *)((int)&T + iVar6);
       }
-      i = i + 1 & 0xff;
-    } while (i < hgobj->num_joints);
+      jdat = hgobj->joints + uVar12;
+      if (jdat->parent_ix == 0xff) {
+          *mtx_array=*T;
+      }
+      else {
+        NuMtxMulVU0(m,T,&mtx_array[jdat->parent_ix]);
+      }
+      uVar12 = uVar12 + 1 & 0xff;
+      iVar6 = uVar12 << 6;
+    } while (uVar12 < hgobj->num_joints);
   }
   return;*/
 }

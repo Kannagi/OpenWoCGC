@@ -1023,3 +1023,102 @@ struct nuanimtime_s *atime, struct numtx_s *T)
   T->_32 = -T->_32;
   return;
 }
+
+
+//PS2 Match
+void NuAnimCurve2SetApplyToJointBasic(struct nuanimcurve2_s *animcurveset, char* curveflags, char curvesetflags, 
+struct nuanimtime_s *atime, struct NUJOINTDATA_s *jointdata, struct NuVec *scale, 
+struct NuVec *parentscale, struct numtx_s* T, struct NUJOINTANIM_s* offset) 
+{
+  char procanim_flags;
+  struct NuVec r;
+  float tmp;
+  float tmp2;
+  float tmp3;
+  struct nuangvec_s rf;
+  
+
+  if (offset != NULL) {
+    procanim_flags = offset->flags;
+  }
+  else {
+        procanim_flags = 0;
+    }
+  r.x = NuAnimCurve2CalcVal(animcurveset + 3,atime,(int)curveflags[3]);
+  r.y = NuAnimCurve2CalcVal(animcurveset + 4,atime,(int)curveflags[4]);
+  r.z = NuAnimCurve2CalcVal(animcurveset + 5,atime,(int)curveflags[5]);
+  if (procanim_flags & 1U) {
+    r.x += offset->rx;
+    r.y += offset->ry;
+    r.z += offset->rz;
+    rf.x = (int)(r.x * 10430.378f);
+    rf.y = (int)(r.y * 10430.378f);
+    rf.z = (int)(r.z * 10430.378f);
+    if ((procanim_flags & 8U) != 0) {
+        rf.x &= 0xFFFF;
+        if (0x7fff < rf.x) {
+            rf.x -= 0x10000;
+        }
+        if (offset->max_rx < rf.x) {
+            rf.x = (int)offset->max_rx;
+        }
+        else if (rf.x < offset->min_rx) {
+            rf.x = (int)offset->min_rx;
+        }
+    }
+    if ((procanim_flags & 0x10) != 0) {
+        rf.y &= 0xFFFF;
+        if (0x7fff < rf.y) {
+            rf.y -= 0x10000;
+        }
+        if (offset->max_ry < rf.y) {
+            rf.y = (int)offset->max_ry;
+        }
+        else if (rf.y < offset->min_ry) {
+            rf.y = (int)offset->min_ry;
+        }
+    }
+    if ((procanim_flags & 0x20U) != 0) {
+      rf.z &= 0xFFFF;
+      if (0x7fff < rf.z) {
+        rf.z -= 0x10000;
+      }
+      if (offset->max_rz < rf.z) {
+        rf.z = (int)offset->max_rz;
+      }
+        else if (rf.z < offset->min_rz) {
+          rf.z = (int)offset->min_rz;
+        }
+    }
+  }
+   else {
+    rf.x = (int)(r.x * 10430.378f);
+    rf.y = (int)(r.y * 10430.378f);
+    rf.z = (int)(r.z * 10430.378f);
+  }
+  NuMtxSetRotateXYZVU0(T,&rf);
+  if ((curvesetflags & 0x20U) != 0) {
+    NuMtxMulRVU0(T,T,&jointdata->orient);
+  }
+  tmp = (animcurveset->data).constant;
+  T->_30 = tmp;
+    tmp2 = (animcurveset + 1)->data.constant;
+  T->_31 = tmp2;
+    tmp3 = (animcurveset + 2)->data.constant;
+  T->_32 = tmp3;
+  if ((procanim_flags & 2U) != 0) {
+    T->_30 = tmp + offset->tx;
+    T->_31 = tmp2 + offset->ty;
+    T->_32 = tmp3 + offset->tz;
+  }
+    //memcpy
+  *scale = *parentscale;
+    
+  T->_02 = -T->_02;
+  T->_12 = -T->_12;
+  T->_20 = -T->_20;
+  T->_21 = -T->_21;
+  T->_23 = -T->_23;
+  T->_32 = -T->_32;
+  return;
+}
