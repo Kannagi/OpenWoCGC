@@ -3,6 +3,10 @@
 
 #define ASSIGN_IF_SET(a, b) a = (a == NULL) ? NULL : b
 
+#define PI 3.1415927f
+#define TAU 6.2831855f
+#define FLOAT_MAX 3.4028235e38f
+
 void buildBitCountTable(void) //check NGC asm	//PS2
 {
      	for(i = 0; i < 256; i++){        
@@ -17,6 +21,7 @@ void buildBitCountTable(void) //check NGC asm	//PS2
 	}
 }
 
+//PS2 Match
 struct nuanimdata_s * NuAnimDataLoadBuff(char *file,union variptr_u *buff,union variptr_u *endbuff)
 {
   s32 addroff;
@@ -31,6 +36,7 @@ struct nuanimdata_s * NuAnimDataLoadBuff(char *file,union variptr_u *buff,union 
   if (addroff == 0) {
     NuErrorProlog("..\\nu2.ps2\\nu3d\\nuanim.c",0x2f1)("Could not read from <%s>, either file is not there or the buffer may be full",file);
   }
+
   dathdr = (struct NUANIMDATAHDR_s *)buff->voidptr;
   buff->voidptr = (void *)((s32)&dathdr->version + addroff);
   tmp = (s32)dathdr - dathdr->address_offset;
@@ -40,7 +46,7 @@ struct nuanimdata_s * NuAnimDataLoadBuff(char *file,union variptr_u *buff,union 
   return data;
 }
 
-
+//PS2 Match
 struct nuanimdata_s * NuAnimDataFixPtrs(struct nuanimdata_s *animdata,s32 address_offset)
 {
     s32 i;
@@ -146,127 +152,104 @@ struct nuanimcurveset_s * NuAnimCurveSetCreate(s32 ncurves)
 
 */
 
-
-nuAnimData_s * NuAnimDataRead(filehandle handle)		//WIP
-{
-  int nChunks;
-  char *data;
-  nuAnimData_s *ADat;
-  nuanimdatachunk_s *chunk;
-  nuanimkey_s *keys;
-  nuanimcurve_s *curves;
-  char nCurves;
-  nuanimcurveset_s *crvset;
-  int flags;
-  nuanimcurveset_s **ptrCset;
-  int j;
-  int N;
-  int i;
-  int k;
-  double time;
-  float fVar1;
-  uint *nKeys;
+//PS2 Match
+struct nuanimdata_s* NuAnimDataRead(s32 fh)
+{ 
+    s32 numnodes;
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 nKeys;
+    s32 nCurves;
+    s32 bytes;
+    s32 nChunks;
+    struct nuanimdata_s *animdata;
+    struct nuanimkey_s *keyptr;
+    struct nuanimcurve_s *curveptr;
+    s32 length;
+    char *node_name;
+    struct nuanimdatachunk_s *chunk;
+    float time;
   
-  if (isBitCountTable == 0) {
-    buildBitCountTable();
-  }
-  nChunks = NuFileReadInt(handle);
-  if (nChunks == 0) {
-    data = (char *)0x0;
-  }
-  else {
-    data = (char *)NuMemAlloc(nChunks);
-    NuFileRead(handle,data,nChunks);
-  }
-  i = 0;
-  fVar1 = NuFileReadFloat(handle);
-  time = (double)fVar1;
-  nChunks = NuFileReadInt(handle);
-  ADat = NuAnimDataCreate(nChunks);
-  ADat->time = (float)time;
-  ADat->node_name = data;
-  if (0 < ADat->nchunks) {
-    do {
-      nChunks = NuFileReadInt(handle);
-      chunk = NuAnimDataChunkCreate(nChunks);
-      ADat->chunks[i] = chunk;
-      chunk->numnodes = nChunks;
-      N = NuFileReadInt(handle);
-      if (N == 0) {
-        chunk->keys = (nuanimkey_s *)0x0;
-      }
-      else {
-        keys = (nuanimkey_s *)NuMemAlloc(N << 4);
-        chunk->keys = keys;
-        NuFileRead(handle,keys,N << 4);
-      }
-      keys = chunk->keys;
-      N = NuFileReadInt(handle);
-      if (N == 0) {
-        chunk->curves = (nuanimcurve_s *)0x0;
-      }
-      else {
-        curves = (nuanimcurve_s *)NuMemAlloc(N << 4);
-        chunk->curves = curves;
-        NuFileRead(handle,curves,N << 4);
-      }
-      i = i + 1;
-      N = 0;
-      if (0 < nChunks) {
-        do {
-          j = N + 1;
-          nCurves = NuFileReadChar(handle);
-          if (nCurves != 0) {
-            crvset = NuAnimCurveSetCreate((int)nCurves);
-            k = 0;
-            chunk->animcurveset[N] = crvset;
-            flags = NuFileReadInt(handle);
-            chunk->animcurveset[N]->flags = flags;
-            if ('\0' < chunk->animcurveset[N]->ncurves) {
-              flags = 0;
-              do {
-                k = k + 1;
-                fVar1 = NuFileReadFloat(handle);
-                *(float *)(flags + (int)chunk->animcurveset[N]->constants) = fVar1;
-                flags = flags + 4;
-              } while (k < chunk->animcurveset[N]->ncurves);
+    if (isBitCountTable == 0) {
+         for(i = 0; i < 256; i++){        
+            BitCountTable[i] = 0;
+            for(j = 0; j < 8; j++) {
+                if (((i >> j) & 1) != 0) {
+                    BitCountTable[i]++;
+                }
             }
-          }
-          N = j;
-        } while (j < nChunks);
-      }
-      nChunks = 0;
-      curves = chunk->curves;
-      if (0 < chunk->numnodes) {
-        do {
-          ptrCset = chunk->animcurveset;
-          N = nChunks + 1;
-          if ((ptrCset[nChunks] != (nuanimcurveset_s *)0x0) &&
-             (j = 0, '\0' < ptrCset[nChunks]->ncurves)) {
-            flags = 0;
-            do {
-              if (*(float *)(flags + (int)ptrCset[nChunks]->constants) == 3.402823e+38) //3.402823e+38 --> ff ff 7f 7f
-		{
-                *(nuanimcurve_s **)(ptrCset[nChunks]->set->pad + flags + -0xd) = curves;
-                chunk->num_valid_animcurvesets = chunk->num_valid_animcurvesets + 1;
-                curves->animkeys = keys;
-                nKeys = &curves->numkeys;
-                curves = curves + 1;
-                keys = keys + *nKeys;
-              }
-              ptrCset = chunk->animcurveset;
-              j = j + 1;
-              flags = flags + 4;
-            } while (j < ptrCset[nChunks]->ncurves);
-          }
-          nChunks = N;
-        } while (N < chunk->numnodes);
-      }
-    } while (i < ADat->nchunks);
-  }
-  return ADat;
-}
+        }
+        isBitCountTable = 1;
+    }
+    
+    k = NuFileReadInt(fh);
+    if (k != 0) {
+        node_name = (char *)NuMemAlloc(k);	//node_name = (char *)NuMemAllocFn(k, "..\\nu2.ps2\\nu3d\\nuanim.c", 0x184);
+        NuFileRead(fh, node_name, k);
+    }
+    else {
+        node_name = NULL;
+    }
+    
+    time = NuFileReadFloat(fh);
+    animdata = NuAnimDataCreate(NuFileReadInt(fh));
+    animdata->time = time;
+    animdata->node_name = node_name;
 
+    for (nChunks = 0; nChunks < animdata->nchunks; nChunks++) {
+        numnodes = NuFileReadInt(fh);
+        chunk = NuAnimDataChunkCreate(numnodes);
+        animdata->chunks[nChunks] = chunk;
+        chunk->numnodes = numnodes;
+        bytes = NuFileReadInt(fh);
+        if (bytes != 0) {
+            chunk->keys = (struct nuanimkey_s *)NuMemAlloc(bytes << 4);		//chunk->keys = (struct nuanimkey_s *)NuMemAllocFn(bytes << 4, "..\\nu2.ps2\\nu3d\\nuanim.c", 0x19E);
+            NuFileRead(fh, chunk->keys, bytes << 4);
+        }
+        else {
+            chunk->keys = NULL;
+        }
+        keyptr = chunk->keys;
+        bytes = NuFileReadInt(fh);
+        if (bytes != 0) {
+            chunk->curves = (struct nuanimcurve_s *)NuMemAlloc(bytes << 4)	//chunk->curves = (struct nuanimcurve_s *)NuMemAllocFn(bytes << 4, "..\\nu2.ps2\\nu3d\\nuanim.c", 0x1AB);
+            NuFileRead(fh, chunk->curves, bytes << 4);
+        }
+        else {
+            chunk->curves = NULL;
+        }
+        
+        for (nKeys = 0; nKeys < numnodes; nKeys++) {
+            length = NuFileReadChar(fh);
+            if (length != 0) {
+                chunk->animcurvesets[nKeys] = NuAnimCurveSetCreate(length);
+                chunk->animcurvesets[nKeys]->flags = NuFileReadInt(fh);
+                for (nCurves = 0; nCurves < chunk->animcurvesets[nKeys]->ncurves; nCurves++) {
+                    chunk->animcurvesets[nKeys]->constants[nCurves] = NuFileReadFloat(fh);
+                }
+            }
+        } 
+        
+        curveptr = chunk->curves;
+        for(nKeys = 0; nKeys < chunk->numnodes; nKeys++) {
+            if (chunk->animcurvesets[nKeys] == NULL) {
+                continue;
+            }
+            
+            for (nCurves = 0; nCurves < chunk->animcurvesets[nKeys]->ncurves; nCurves++) {
+                if (chunk->animcurvesets[nKeys]->constants[nCurves] == FLOAT_MAX) {
+                    chunk->animcurvesets[nKeys]->set[nCurves] = curveptr;
+                    chunk->num_valid_animcurvesets++;
+                    curveptr->animkeys = keyptr;
+                    keyptr += *&curveptr->numkeys;
+                    curveptr++;
+                }
+            }
+        }
+    }
+    return animdata;
+}
 
 void NuAnimCurveSetDestroy(struct nuanimcurveset_s* animcurveset, s32 destroy_curves) //CHECK
 {
@@ -895,6 +878,222 @@ void NuAnimCurveSetApplyToJoint2
     return;
 }
 
+
+//PS2 Match
+
+void NuAnimCurveSetApplyBlendToJoint2
+               (struct nuanimcurveset_s *animcurveset1,struct nuanimtime_s *atime1,
+                struct nuanimcurveset_s *animcurveset2,
+               struct nuanimtime_s *atime2,float blend,struct NUJOINTDATA_s *jointdata,struct NuVec *scale,
+               struct NuVec *parentscale,struct numtx_s *T,struct NUJOINTANIM_s *offset)
+
+{
+    struct NuVec lo;
+    struct nuangvec_s rf;
+    float r[3];
+    float r1[3];
+    float r2[3];
+    float s1[3];
+    float s2[3];
+    float t[3];
+    float omblend;
+    s32 i;
+    char procanim_flags;
+    struct NuVec inv_scale;
+
+    
+    omblend = 1.0f - blend;
+    if (offset != NULL) {
+        procanim_flags = offset->flags;
+    }
+    else {
+        procanim_flags = 0;
+    }
+    
+    if ((((animcurveset1->flags & 1) == 0) && ((animcurveset2->flags & 1) == 0)) && ((procanim_flags & 1) == 0))
+    {
+        
+    }
+    else 
+    {
+        for (i = 3; i < 6; i++) {
+            
+            if (animcurveset1->set[i] != NULL) {
+                r1[i - 3] = NuAnimCurveCalcVal2(animcurveset1->set[i], atime1);
+            }
+            else {
+                r1[i - 3] = animcurveset1->constants[i];
+            }
+            
+            if (animcurveset2->set[i] != NULL) {
+                r2[i - 3] = NuAnimCurveCalcVal2(animcurveset2->set[i], atime2);
+            }
+            else {
+                r2[i - 3] = animcurveset2->constants[i];
+            }
+        }
+        
+        r1[0] -= (r1[0] - r2[0] > PI) ? TAU : 0.0f;
+        r2[0] -= (r2[0] - r1[0] > PI) ? TAU : 0.0f;
+        r1[1] -= (r1[1] - r2[1] > PI) ? TAU : 0.0f;
+        r2[1] -= (r2[1] - r1[1] > PI) ? TAU : 0.0f;
+        r1[2] -= (r1[2] - r2[2] > PI) ? TAU : 0.0f;
+        r2[2] -= (r2[2] - r1[2] > PI) ? TAU : 0.0f;
+        
+        r[0] = (r1[0] * omblend) + (r2[0] * blend);
+        r[1] = (r1[1] * omblend) + (r2[1] * blend);
+        r[2] = (r1[2] * omblend) + (r2[2] * blend);
+        if ((procanim_flags & 1) != 0) {
+            r[0] += offset->rx;
+            r[1] += offset->ry;
+            r[2] += offset->rz;
+            rf.x = (s32)(r[0] * 10430.378f);
+            rf.y = (s32)(r[1] * 10430.378f);
+            rf.z = (s32)(r[2] * 10430.378f);
+            if ((procanim_flags & 8U) != 0) {
+                rf.x &= 0xFFFF;
+                if (0x7fff < rf.x) {
+                    rf.x -= 0x10000;
+                }
+                if (offset->max_rx < rf.x) {
+                      rf.x = offset->max_rx;
+                }
+                else if (rf.x < offset->min_rx) {
+                      rf.x = offset->min_rx;
+                }
+            }
+            
+            if ((procanim_flags & 0x10U) != 0) {
+                rf.y &= 0xffff;
+                if (0x7fff < rf.y) {
+                    rf.y -= 0x10000;
+                }
+                if (offset->max_ry < rf.y) {
+                    rf.y = offset->max_ry;
+                }
+                else if (rf.y < offset->min_ry) {
+                    rf.y = offset->min_ry;
+                }
+            }
+            
+            if ((procanim_flags & 0x20U) != 0) {
+                rf.z &= 0xFFFF;
+                if (0x7fff < rf.z) {
+                    rf.z -= 0x10000;
+                }
+                if (offset->max_rz < rf.z) {
+                    rf.z = offset->max_rz;
+                }
+                else if (rf.z < offset->min_rz) {
+                    rf.z = offset->min_rz;
+                }
+            }
+        }
+        else {
+            rf.x = (s32)(r[0] * 10430.378f);
+            rf.y = (s32)(r[1] * 10430.378f);
+            rf.z = (s32)(r[2] * 10430.378f);
+        }
+        
+        NuMtxSetRotateXYZVU0(T, &rf);
+        goto lbl;
+   }
+    NuMtxSetIdentity(T);
+
+    lbl:
+    if (((animcurveset1->flags & 0x20) == 0) && ((animcurveset2->flags & 0x20) == 0)) {
+        // ?????????????
+    } else {
+        NuMtxMulRVU0(T, T, &jointdata->orient);
+    }
+    
+    if ((((animcurveset1->flags & 8) == 0) && ((animcurveset2->flags & 8) == 0)) && ((procanim_flags & 4) == 0)) {        
+        
+    }
+    else {
+        for (i = 6; i < 9; i++) {
+            
+            if (animcurveset1->set[i] != NULL) {
+                s1[i - 6] = NuAnimCurveCalcVal2(animcurveset1->set[i], atime1);
+            }
+            else {
+                s1[i - 6] = animcurveset1->constants[i];
+            }
+            
+            if (animcurveset2->set[i] != NULL) {
+                s2[i - 6] = NuAnimCurveCalcVal2(animcurveset2->set[i], atime2);
+            }
+            else {
+                s2[i - 6] = animcurveset2->constants[i];
+            }
+        }
+        
+        scale->x = (s1[0] * blend) + (s2[0] * omblend);
+        scale->y = (s1[1] * blend) + (s2[1] * omblend);
+        scale->z = (s1[2] * blend) + (s2[2] * omblend);
+        
+        if ((procanim_flags & 4) != 0) {
+            scale->x += offset->sx;
+            scale->y += offset->sy;
+            scale->z += offset->sz;
+        }
+        NuMtxPreScaleVU0(T,scale);
+        scale->x *= parentscale->x;
+        scale->y *= parentscale->y;
+        scale->z *= parentscale->z;
+        goto lbl_memcpy;
+    }
+    *scale = *parentscale;
+    
+    lbl_memcpy:
+    if (((animcurveset1->flags | animcurveset2->flags) & 0x10) != 0) {
+        inv_scale.x = 1.0f / parentscale->x;
+        inv_scale.y = 1.0f / parentscale->y;
+        inv_scale.z = 1.0f / parentscale->z;
+        NuMtxScaleVU0(T, &inv_scale);
+        scale->x *= inv_scale.x;
+        scale->y *= inv_scale.y;
+        scale->z *= inv_scale.z;
+    }
+    
+    for (i = 0; i < 3; i++) {
+        if (animcurveset1->set[i] != NULL) {
+            t[i] = omblend * NuAnimCurveCalcVal2(animcurveset1->set[i], atime1);
+        }
+        else {
+            t[i] = omblend * animcurveset1->constants[i];
+        }
+        if (animcurveset2->set[i] != NULL) {
+            t[i] += blend * NuAnimCurveCalcVal2(animcurveset2->set[i], atime2);
+        }
+        else {
+            t[i] += blend * animcurveset2->constants[i];
+        }
+    }
+    
+    if ((procanim_flags & 2) != 0) {
+        t[0] += offset->tx;
+        t[1] += offset->ty;
+        t[2] += offset->tz;
+    }
+    
+    NuMtxTranslate(T, &t);
+    if ((jointdata->flags & 8) != 0) {
+        NuMtxPreTranslate(T, &jointdata->locator_offset);
+        lo.x = -(jointdata->locator_offset).x;
+        lo.y = -(jointdata->locator_offset).y;
+        lo.z = -(jointdata->locator_offset).z;
+        NuMtxTranslate(T, &lo);
+    }
+    
+    T->_02 = -T->_02;
+    T->_12 = -T->_12;
+    T->_20 = -T->_20;
+    T->_21 = -T->_21;
+    T->_23 = -T->_23;
+    T->_32 = -T->_32;
+    return;
+}
 
 //PS2 Match
 void NuAnimCurveSetApplyToMatrix (struct nuanimcurveset_s *animcurveset,struct nuanimtime_s *atime,struct numtx_s *T)
