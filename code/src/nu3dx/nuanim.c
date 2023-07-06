@@ -108,49 +108,73 @@ struct nuanimdata_s * NuAnimDataFixPtrs(struct nuanimdata_s *animdata,s32 addres
     return animdata;
 }
 
-/*
-struct nuanimdatachunk_s * NuAnimDataChunkCreate(s32 numnodes)
-{
-  struct nuanimdatachunk_s *chunk;
-  struct nuanimcurveset_s **curveset;
-  
-  if (numnodes < 1) {
-    //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuanim.c",0x253)("assert");
-  }
-  chunk = (struct nuanimdatachunk_s *)NuMemAlloc(0x14);
-  memset(chunk,0,0x14);
-  chunk->numnodes = numnodes;
-  curveset = (struct nuanimcurveset_s **)NuMemAlloc(numnodes << 2);
-  chunk->animcurveset = curveset;
-  memset(curveset,0,numnodes << 2);
-  return chunk;
-}
 
-
+//PS2 Match
 struct nuanimcurveset_s * NuAnimCurveSetCreate(s32 ncurves)
 {
-  nuanimcurve_s **curveset;
-  float *constants;
-  nuanimcurveset_s *data;
+  struct nuanimcurveset_s *animcurveset;
   s32 nbytes;
   
-  data = NULL;
+  animcurveset = NULL;
   if (ncurves != 0) {
     nbytes = ncurves << 2;
-    data = (struct nuanimcurveset_s *)NuMemAlloc(0x10);
-    memset(data,0,0x10);
-    data->ncurves = (char)ncurves;
-    curveset = (struct nuanimcurve_s **)NuMemAlloc(nbytes);
-    data->set = curveset;
-    memset(curveset,0,nbytes);
-    constants = (float *)NuMemAlloc(nbytes);
-    data->constants = constants;
-    memset(constants,0,nbytes);
+    animcurveset = (struct nuanimcurveset_s *)NuMemAlloc(0x10)		//animcurveset = (struct nuanimcurveset_s *)NuMemAllocFn(0x10,"..\\nu2.ps2\\nu3d\\nuanim.c",0x531);
+    memset(animcurveset,0,0x10);
+    animcurveset->ncurves = (char)ncurves;
+    animcurveset->set = (struct nuanimcurve_s **)NuMemAlloc(nbytes); 	//animcurveset->set = (struct nuanimcurve_s **)NuMemAllocFn(nbytes,"..\\nu2.ps2\\nu3d\\nuanim.c",0x538);
+    memset(animcurveset->set,0,nbytes);
+    animcurveset->constants = (float *)NuMemAlloc(nbytes);		//animcurveset->constants = (float *)NuMemAllocFn(nbytes,"..\\nu2.ps2\\nu3d\\nuanim.c",0x53d);
+    memset(animcurveset->constants,0,nbytes);
   }
-  return data;
+  return animcurveset;
 }
 
-*/
+//PS2 Match
+struct nuanimdatachunk_s * NuAnimDataChunkCreate (s32 numnodes) {
+  struct nuanimdatachunk_s *animdata;
+  
+  if (numnodes < 1) {
+    NuErrorProlog("..\\nu2.ps2\\nu3d\\nuanim.c",0x275)("assert");
+  }
+  animdata = (struct nuanimdatachunk_s *)NuMemAlloc(0x14);	//animdata = (struct nuanimdatachunk_s *)NuMemAllocFn(0x14,"..\\nu2.ps2\\nu3d\\nuanim.c",0x276);
+    
+  memset(animdata,0,0x14);
+  animdata->numnodes = numnodes;
+  animdata->animcurvesets = (struct nuanimcurveset_s **)NuMemAlloc(numnodes << 2);
+  
+//animdata->animcurvesets = (struct nuanimcurveset_s **)NuMemAllocFn(numnodes << 2,"..\\nu2.ps2\\nu3d\\nuanim.c",0x27a);
+
+  memset(animdata->animcurvesets,0,(long)(numnodes << 2));
+  return animdata;
+}
+
+struct nuanimdata_s * NuAnimDataCreate(s32 nchunks)
+{
+  struct nuanimdata_s *animdata;
+  
+  animdata = (struct nuanimdata_s *)NuMemAlloc(0x10);
+  memset(animdata,0,0x10);
+  animdata->chunks = (struct nuanimdatachunk_s **)NuMemAlloc(nchunks << 2);
+  memset(animdata->chunks,0,nchunks << 2);
+  animdata->nchunks = nchunks;
+  return animdata;
+}
+
+//PS2 Match
+struct nuanimcurve_s * NuAnimCurveCreate(s32 numkeys)
+{
+  struct nuanimcurve_s *animcurve;
+  
+  if (numkeys < 1) {
+     NuErrorProlog("..\\nu2.ps2\\nu3d\\nuanim.c",0x438)("assert");
+  }
+  animcurve = (struct nuanimcurve_s *)NuMemAlloc(0x10);		//animcurve = (struct nuanimcurve_s *)NuMemAllocFn(0x10,"..\\nu2.ps2\\nu3d\\nuanim.c",0x43a);
+  memset(animcurve,0,0x10);
+  animcurve->numkeys = numkeys; 
+  animcurve->animkeys = (struct nuanimkey_s *)NuMemAlloc(numkeys << 4);      //animcurve->animkeys = (struct nuanimkey_s *)NuMemAllocFn(numkeys << 4,"..\\nu2.ps2\\nu3d\\nuanim.c",0x43e);
+  memset(animcurve->animkeys,0,(numkeys << 4));
+  return animcurve;
+}
 
 //PS2 Match
 struct nuanimdata_s* NuAnimDataRead(s32 fh)
@@ -251,6 +275,16 @@ struct nuanimdata_s* NuAnimDataRead(s32 fh)
     return animdata;
 }
 
+
+void NuAnimCurveDestroy(struct nuanimcurve_s *curve)
+{
+  if (curve->animkeys != NULL) {
+    NuMemFree(curve->animkeys);
+  }
+  NuMemFree(curve);
+  return;
+}
+
 void NuAnimCurveSetDestroy(struct nuanimcurveset_s* animcurveset, s32 destroy_curves) //CHECK
 {
     s32 var_r29;
@@ -262,7 +296,7 @@ void NuAnimCurveSetDestroy(struct nuanimcurveset_s* animcurveset, s32 destroy_cu
         if ((s8) (u8) animcurveset->ncurves > 0) {
             var_r29 = 0;
             do {
-                curve = *(var_r29 + animcurveset->set); //could be? curve = (animcurveset->set[var_r29]);
+                curve = *(animcurveset->set[var_r29]);
                 if (curve != NULL) {
                     NuAnimCurveDestroy(curve);
                 }
@@ -271,16 +305,16 @@ void NuAnimCurveSetDestroy(struct nuanimcurveset_s* animcurveset, s32 destroy_cu
             } while (i < (s8) (u8) animcurveset->ncurves);
         }
     }
+}
 
-
-void NuAnimDataDestroy(nuAnimData_s *animdata)
+void NuAnimDataDestroy(struct nuanimdata_s *animdata)
 
 {
-  nuanimdatachunk_s **chunk;
-  int i;
+  struct nuanimdatachunk_s **chunk;
+  s32 i;
   
-  if (((animdata != (nuAnimData_s *)0x0) &&
-      (chunk = animdata->chunks, chunk != (nuanimdatachunk_s **)0x0)) &&
+  if (((animdata != NULL) &&
+      (chunk = animdata->chunks, chunk != NULL)) &&
      (i = 0, 0 < animdata->nchunks)) {
     while( true ) {
       NuAnimDataChunkDestroy(chunk[i]);
@@ -288,6 +322,35 @@ void NuAnimDataDestroy(nuAnimData_s *animdata)
       chunk = animdata->chunks;
       i = i + 1;
     }
+  }
+  return;
+}
+
+void NuAnimDataChunkDestroy(struct nuanimdatachunk_s *animdata)
+{
+  struct nuanimcurve_s *destroycurves;
+  struct nuanimcurveset_s *animcurveset;
+  s32 nnodes;
+  s32 i;
+  
+  destroycurves = animdata->curves;
+  nnodes = animdata->numnodes;
+  if (0 < nnodes) {
+    do {
+      i = 0;
+      if (0 < nnodes) {
+        nnodes = 0;
+        do {
+          animcurveset = *(struct nuanimcurveset_s **)(nnodes + (int)animdata->animcurveset);
+          if (animcurveset != NULL) {
+            NuAnimCurveSetDestroy(animcurveset,(u32)(destroycurves == NULL));
+          }
+          i = i + 1;
+          nnodes = nnodes + 4;
+        } while (i < animdata->numnodes);
+      }
+      nnodes = animdata->numnodes;
+    } while (i + 1 < nnodes);
   }
   return;
 }
@@ -317,11 +380,8 @@ void NuAnimDataCalcTime(struct nuanimdata_s *animdata,float time,struct nuanimti
     }
 
     atime->chunk = floor((atime->time - 1.0) / 32.0);
-    if (atime->chunk < animdata->nchunks) {
-        // ??????
-    }
-    else {
-        atime->chunk = animdata->nchunks - 1;
+    if (animdata->nchunks <= atime->chunk) {
+        atime->chunk = animdata->nchunks - 1;   
     }
     
     atime->time_offset = atime->time - atime->chunk * 32;
@@ -330,7 +390,7 @@ void NuAnimDataCalcTime(struct nuanimdata_s *animdata,float time,struct nuanimti
     
     atime->time_byte = (u8)(iVar1 / 8);
     atime->time_mask = (u8)((1 << (iVar1 + (iVar1 / 8) * -8 + 1)) - 1);
-return;
+    return;
 }
 
 
