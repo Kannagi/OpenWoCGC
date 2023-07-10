@@ -6,6 +6,8 @@
 #define PI 3.1415927f
 #define TAU 6.2831855f
 #define FLOAT_MAX 3.4028235e38f
+#define MAX_FIXED_POINT 65536
+#define DEG_TO_FIXED_POINT (MAX_FIXED_POINT * (1 / (2 * PI)))
 
 void buildBitCountTable(void) //check NGC asm	//PS2
 {
@@ -940,7 +942,6 @@ void NuAnimCurveSetApplyToJoint2
 
 
 //PS2 Match
-
 void NuAnimCurveSetApplyBlendToJoint2
                (struct nuanimcurveset_s *animcurveset1,struct nuanimtime_s *atime1,
                 struct nuanimcurveset_s *animcurveset2,
@@ -1007,9 +1008,9 @@ void NuAnimCurveSetApplyBlendToJoint2
             r[0] += offset->rx;
             r[1] += offset->ry;
             r[2] += offset->rz;
-            rf.x = (s32)(r[0] * 10430.378f);
-            rf.y = (s32)(r[1] * 10430.378f);
-            rf.z = (s32)(r[2] * 10430.378f);
+            rf.x = (s32)(r[0] * DEG_TO_FIXED_POINT);
+            rf.y = (s32)(r[1] * DEG_TO_FIXED_POINT);
+            rf.z = (s32)(r[2] * DEG_TO_FIXED_POINT);
             if ((procanim_flags & 8U) != 0) {
                 rf.x &= 0xFFFF;
                 if (0x7fff < rf.x) {
@@ -1050,9 +1051,9 @@ void NuAnimCurveSetApplyBlendToJoint2
             }
         }
         else {
-            rf.x = (s32)(r[0] * 10430.378f);
-            rf.y = (s32)(r[1] * 10430.378f);
-            rf.z = (s32)(r[2] * 10430.378f);
+            rf.x = (s32)(r[0] * DEG_TO_FIXED_POINT);
+            rf.y = (s32)(r[1] * DEG_TO_FIXED_POINT);
+            rf.z = (s32)(r[2] * DEG_TO_FIXED_POINT);
         }
         
         NuMtxSetRotateXYZVU0(T, &rf);
@@ -1154,6 +1155,7 @@ void NuAnimCurveSetApplyBlendToJoint2
     T->_32 = -T->_32;
     return;
 }
+
 
 //PS2 Match
 void NuAnimCurveSetApplyToMatrix (struct nuanimcurveset_s *animcurveset,struct nuanimtime_s *atime,struct numtx_s *T)
