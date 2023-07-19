@@ -1,6 +1,12 @@
 #include "nutxanm.h"
 #include "../system.h"
 
+#define CONDITION_CODE_EQUAL 0
+#define CONDITION_CODE_LESS_THAN 1
+#define CONDITION_CODE_GREATER_THAN 2
+#define CONDITION_CODE_LESS_THAN_OR_EQUAL 3
+#define CONDITION_CODE_GREATER_THAN_OR_EQUAL 4
+#define CONDITION_CODE_NOT_EQUAL 5
 
 s32 nta_labels[64];
 static struct nutexanimprog_s* parprog; 
@@ -303,582 +309,6 @@ struct nutexanimprog_s * NuTexAnimProgReadScript(union variptr_u *buff,char *fna
   return rv;
 }
 
-
-
-void NuTexAnimXCall(int lid,nutexanimenv_s *ignore)
-
-{
-  short *psVar1;
-  s32 iVar2;	//xdef_cnt?
-  nutexanim_s *nta;
-  s32 n;
-  short *xdef_addrs;
-  short *addrs;
-  nutexanimprog_s *p;
-  nutexanimenv_s *e;
-  nutexanimlist_s *rv;
-  short pc;
-  
-  rv = ntal_first;
-  if (ntal_first == NULL) {
-    return;
-  }
-  do {
-    for (nta = rv->nta; nta != NULL; nta = nta->succ) {
-      e = nta->env;
-      if ((((e != NULL) && (e != ignore)) &&
-          (p = e->prog, p != NULL)) && (iVar2 = p->xdef_cnt, iVar2 != 0)) {
-        n = 0;
-        if (0 < iVar2) {
-          xdef_addrs = p->xdef_addrs;
-          if (p->xdef_ids[0] == lid) {
-            pc = p->xdef_addrs[0];
-          }
-          else {
-            do {
-              n = n + 1;
-              addrs = xdef_addrs + 1;
-              if (iVar2 <= n) goto LAB_800bb11c;
-              psVar1 = xdef_addrs + -0x1f;
-              xdef_addrs = addrs;
-            } while (*psVar1 != lid);
-            pc = *addrs;
-          }
-          e->rep_ix = 0;
-          e->pc = (int)pc;
-          e->pause_cnt = 0;
-          e->ra_ix = 0;
-        }
-      }
-LAB_800bb11c:
-    }
-    rv = rv->succ;
-    if (rv == NULL) {
-      return;
-    }
-  } while( true );
-}
-
-
-/*		//DECOMP 2
-
-
-void NuTexAnimXCall(s32 lid, struct nutexanimenv_s* ignore) {
-    s16 var_r0;
-    s16* var_r9;
-    s32 temp_r0;
-    s32 var_r6;
-    struct nutexanim_s* var_r5;
-    struct nutexanimenv_s* temp_r11;
-    struct nutexanimlist_s* var_r12;
-    struct nutexanimprog_s* temp_r10;
-
-    var_r12 = ntal_first;
-    if (var_r12 != NULL) {
-        do {
-            var_r5 = var_r12->nta;
-            if (var_r5 != NULL) {
-                do {
-                    temp_r11 = var_r5->env;
-                    if ((temp_r11 != NULL) && (temp_r11 != ignore)) {
-                        temp_r10 = temp_r11->prog;
-                        if (temp_r10 != NULL) {
-                            temp_r0 = temp_r10->xdef_cnt;
-                            if (temp_r0 != 0) {
-                                var_r6 = 0;
-                                var_r9 = temp_r10->xdef_addrs;
-                                if (temp_r0 > 0) {
-                                    if ((s16) var_r9->unk-40 == lid) {
-                                        var_r0 = temp_r10->xdef_addrs[0];
-                                        goto block_12;
-                                    }
-loop_9:
-                                    var_r6 += 1;
-                                    var_r9 += 2;
-                                    if (var_r6 < temp_r0) {
-                                        if ((s16) var_r9->unk-40 == lid) {
-                                            var_r0 = var_r9->unk0;
-block_12:
-                                            temp_r11->rep_ix = 0;
-                                            temp_r11->pc = (s32) var_r0;
-                                            temp_r11->pause_cnt = 0;
-                                            temp_r11->ra_ix = 0;
-                                        } else {
-                                            goto loop_9;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    var_r5 = var_r5->succ;
-                } while (var_r5 != NULL);
-            }
-            var_r12 = var_r12->succ;
-        } while (var_r12 != NULL);
-    }
-}
-
-*/
-
-
-void NuTexAnimEnvProc(struct nutexanimenv_s *e)	//CHECK
-
-{
-  short sVar1;
-  int iVar2;
-  long rand;
-  nutexanimprog_s *p;
-  uint off;
-  int n;
-  int *sig;
-  int pause_r;
-  bool check;
-  
-  check = false;
-  p = e->prog;
-  if (p != NULL) {
-    off = p->off_mask;
-    if ((nta_sig_off & off) != 0) {
-      n = 0;
-      sig = p->off_sig;
-      if ((nta_sig_off & 1 & off) == 0) {
-        do {
-          n = n + 1;
-          sig = sig + 1;
-          if (0x1f < n) goto LAB_800bb1dc;
-        } while ((nta_sig_off & 1 << n & off) == 0);
-        n = *sig;
-        e->rep_ix = 0;
-        e->pc = n;
-        e->pause_cnt = 0;
-        e->ra_ix = 0;
-      }
-      else {
-        n = p->off_sig[0];
-        e->pause_cnt = 0;
-        e->pc = n;
-        e->ra_ix = 0;
-        e->rep_ix = 0;
-      }
-    }
-LAB_800bb1dc:
-    off = p->on_mask;
-    if ((nta_sig_on & off) != 0) {
-      n = 0;
-      sig = p->on_sig;
-      if ((nta_sig_on & 1 & off) == 0) {
-        do {
-          n = n + 1;
-          sig = sig + 1;
-          if (0x1f < n) goto LAB_800bb24c;
-        } while ((nta_sig_on & 1 << n & off) == 0);
-        n = *sig;
-      }
-      else {
-        n = p->on_sig[0];
-      }
-      e->rep_ix = 0;
-      e->pc = n;
-      e->pause_cnt = 0;
-      e->ra_ix = 0;
-    }
-LAB_800bb24c:
-    if (e->pause_cnt == 0) {
-      do {
-        n = e->pc;
-        sVar1 = p->code[n];
-        if (sVar1 == 9) {
-          n = EvalVars((int)p->code[n + 1],e->tex_ix,(int)*(short *)(p[1].name + n * 2 + -8));
-          if (n != 0) {
-            n = e->pc + 3;
-LAB_800bb510:
-            e->pc = (int)p->code[n];
-            goto LAB_800bb770;
-          }
-          n = e->pc + 4;
-LAB_800bb76c:
-          e->pc = n;
-        }
-        else if (sVar1 < 10) {
-          if (sVar1 == 2) {
-            e->pause_cnt = (int)p->code[n + 1];
-            if (*(short *)(p[1].name + n * 2 + -8) != 0) {
-              rand = NuRand(0);
-              e->pause_cnt = e->pause_cnt +
-                             (rand - (rand / (int)*(short *)(p[1].name + e->pc * 2 + -8)) *
-                                     (int)*(short *)(p[1].name + e->pc * 2 + -8));
-            }
-            check = true;
-            n = e->pc + 3;
-            goto LAB_800bb76c;
-          }
-          if (sVar1 < 3) {
-            if (sVar1 == 0) {
-              sVar1 = p->code[n + 1];
-              e->tex_ix = (int)sVar1;
-              e->mtl->tid = (int)e->tids[sVar1];
-              n = e->pause;
-              pause_r = e->pause_r;
-              iVar2 = e->pc + 2;
-            }
-            else {
-              if (sVar1 != 1) goto LAB_800bb770;
-              iVar2 = e->tex_ix + (int)p->code[n + 1];
-              if (iVar2 < *(short *)(p[1].name + n * 2 + -8)) {
-                iVar2 = (int)*(short *)(p[1].name + n * 2 + -8);
-              }
-              if (*(short *)(p[1].name + n * 2 + -6) < iVar2) {
-                iVar2 = (int)*(short *)(p[1].name + n * 2 + -6);
-              }
-              e->tex_ix = iVar2;
-              e->mtl->tid = (int)e->tids[iVar2];
-              n = e->pause;
-              pause_r = e->pause_r;
-              iVar2 = e->pc + 4;
-            }
-            e->pc = iVar2;
-            e->pause_cnt = n;
-            if (pause_r != 0) {
-              rand = NuRand((nunrand_s *)0x0);
-              e->pause_cnt = e->pause_cnt + (rand - (rand / e->pause_r) * e->pause_r);
-            }
-LAB_800bb748:
-            check = true;
-          }
-          else {
-            if (sVar1 == 7) {
-              n = (int)p->code[n + 1];
-              goto LAB_800bb76c;
-            }
-            if (7 < sVar1) {
-              if (0xf < e->ra_ix) {
-                err = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x388);
-                //(*error)("TexAnim Processor Alert: Call Stack Overflow at (%d)",e->pc);
-              }
-              n = e->ra_ix;
-              e->ra[n] = e->pc + 2;
-              e->ra_ix = n + 1;
-              n = e->pc + 1;
-              goto LAB_800bb510;
-            }
-            if (sVar1 == 5) {
-              e->pause = (int)p->code[n + 1];
-              sVar1 = *(short *)(p[1].name + n * 2 + -8);
-              e->pc = n + 3;
-              e->pause_r = (int)sVar1;
-            }
-          }
-        }
-        else if (sVar1 == 0xc) {
-          if (e->rep_ix == 0) {
-            err = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x3a2);
-            //(*error)("TexAnim Processor Alert: REPEND without REPEAT at (%d)",e->pc);
-          }
-          n = e->rep_ix;
-          if (e->rep_count[n + -1] == 0) {
-            e->rep_ix = n + -1;
-            n = e->pc + 1;
-            goto LAB_800bb76c;
-          }
-LAB_800bb730:
-          e->pc = e->rep_start[n + -1];
-          e->rep_count[n + -1] = e->rep_count[n + -1] + -1;
-        }
-        else if (sVar1 < 0xd) {
-          if (sVar1 == 10) {
-            if (e->ra_ix == 0) {
-              err = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x390);
-              //(*error)("TexAnim Processor Alert: Call Stack Underflow at (%d)",e->pc);
-            }
-            n = e->ra_ix;
-            e->ra_ix = n + -1;
-            e->pc = e->ra[n + -1];
-          }
-          else if (sVar1 == 0xb) {
-            if (0xf < e->rep_ix) {
-              err = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x398);
-              //(*error)("TexAnim Processor Alert: Too Many Nested Repeat Loops at (%d)",e->pc);
-            }
-            e->rep_count[e->rep_ix] = (int)p->code[e->pc + 1];
-            if (*(short *)(p[1].name + e->pc * 2 + -8) != 0) {
-              rand = NuRand(0);
-              e->rep_count[e->rep_ix] =
-                   e->rep_count[e->rep_ix] +
-                   (rand - (rand / (int)*(short *)(p[1].name + e->pc * 2 + -8)) *
-                           (int)*(short *)(p[1].name + e->pc * 2 + -8));
-            }
-            iVar2 = e->rep_ix;
-            n = e->pc + 3;
-            e->pc = n;
-            e->rep_start[iVar2] = n;
-            e->rep_ix = iVar2 + 1;
-          }
-        }
-        else {
-          if (sVar1 == 0xe) goto LAB_800bb748;
-          if (sVar1 < 0xe) {
-            if (e->rep_ix == 0) {
-              err = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x3b0);
-              //(*error)("TexAnim Processor Alert: UNTILTEX without REPEAT at (%d)",e->pc);
-            }
-            n = EvalVars((int)p->code[e->pc + 1],e->tex_ix,
-                         (int)*(short *)(p[1].name + e->pc * 2 + -8));
-            if ((n == 0) && (n = e->rep_ix, e->rep_count[n + -1] != 0)) goto LAB_800bb730;
-            e->pc = e->pc + 3;
-            e->rep_ix = e->rep_ix + -1;
-          }
-          else if (sVar1 == 0xf) {
-            NuTexAnimXCall((int)p->code[n + 1],e);
-            n = e->pc + 2;
-            goto LAB_800bb76c;
-          }
-        }
-LAB_800bb770:
-      } while (!check);
-    }
-    else {
-      e->pause_cnt = e->pause_cnt + -1;
-    }
-  }
-  return;
-}
-
-/*
-
-//DECOMP 2
-
-
-void NuTexAnimEnvProc(struct nutexanimenv_s* e) {
-    s16 temp_r0;
-    s16 temp_r8;
-    s16 temp_r9_4;
-    s16 temp_r9_5;
-    s16 var_r0_2;
-    s16 var_r9_4;
-    s16* temp_r29;
-    s32 temp_r10;
-    s32 temp_r11;
-    s32 temp_r11_2;
-    s32 temp_r8_2;
-    s32 temp_r8_3;
-    s32 temp_r9_3;
-    s32 temp_r9_6;
-    s32 temp_r9_7;
-    s32 temp_r9_8;
-    s32 temp_r9_9;
-    s32 var_r0;
-    s32 var_r11_3;
-    s32 var_r28;
-    s32 var_r9;
-    s32 var_r9_2;
-    s32 var_r9_3;
-    s32 var_r9_5;
-    s32* temp_r25;
-    s32* temp_r26;
-    s32* temp_r30;
-    s32* var_r11;
-    s32* var_r11_2;
-    struct nutexanimprog_s* temp_r6;
-    u32 temp_r9;
-    u32 temp_r9_2;
-
-    var_r28 = 0;
-    temp_r6 = e->prog;
-    if (temp_r6 != NULL) {
-        temp_r9 = temp_r6->off_mask;
-        if (nta_sig_off & temp_r9) {
-            var_r9 = 0;
-            var_r11 = temp_r6->off_sig;
-            if (nta_sig_off & 1 & temp_r9) {
-                e->pause_cnt = 0;
-                e->pc = temp_r6->off_sig[0];
-                e->ra_ix = 0;
-                e->rep_ix = 0;
-            } else {
-loop_4:
-                var_r9 += 1;
-                var_r11 += 4;
-                if (var_r9 <= 0x1F) {
-                    if (nta_sig_off & (1 << var_r9) & temp_r9) {
-                        e->rep_ix = 0;
-                        e->pc = *var_r11;
-                        e->pause_cnt = 0;
-                        e->ra_ix = 0;
-                    } else {
-                        goto loop_4;
-                    }
-                }
-            }
-        }
-        temp_r9_2 = temp_r6->on_mask;
-        if (nta_sig_on & temp_r9_2) {
-            var_r9_2 = 0;
-            var_r11_2 = temp_r6->on_sig;
-            if (nta_sig_on & 1 & temp_r9_2) {
-                var_r0 = temp_r6->on_sig[0];
-                goto block_13;
-            }
-loop_10:
-            var_r9_2 += 1;
-            var_r11_2 += 4;
-            if (var_r9_2 <= 0x1F) {
-                if (nta_sig_on & (1 << var_r9_2) & temp_r9_2) {
-                    var_r0 = *var_r11_2;
-block_13:
-                    e->rep_ix = 0;
-                    e->pc = var_r0;
-                    e->pause_cnt = 0;
-                    e->ra_ix = 0;
-                } else {
-                    goto loop_10;
-                }
-            }
-        }
-        temp_r9_3 = e->pause_cnt;
-        if (temp_r9_3 != 0) {
-            e->pause_cnt = temp_r9_3 - 1;
-            return;
-        }
-        temp_r29 = temp_r6->code;
-        temp_r25 = e->ra;
-        temp_r26 = e->rep_start;
-        do {
-            temp_r10 = e->pc;
-            temp_r0 = temp_r29[temp_r10];
-            switch (temp_r0) {                      /* irregular */
-            case 0:
-                temp_r9_4 = temp_r29[temp_r10 + 1];
-                e->tex_ix = (s32) temp_r9_4;
-                e->mtl->tid = (s32) e->tids[temp_r9_4];
-                var_r9_3 = e->pc + 2;
-block_43:
-                e->pc = var_r9_3;
-                e->pause_cnt = e->pause;
-                if (e->pause_r != 0) {
-                    e->pause_cnt += NuRand(NULL) % e->pause_r;
-                }
-            case 14:
-                var_r28 = 1;
-                break;
-            case 1:
-                temp_r8 = temp_r29[temp_r10 + 2];
-                temp_r9_5 = temp_r29[temp_r10 + 3];
-                var_r0_2 = e->tex_ix + temp_r29[temp_r10 + 1];
-                if (var_r0_2 < temp_r8) {
-                    var_r0_2 = temp_r8;
-                }
-                if (var_r0_2 > temp_r9_5) {
-                    var_r0_2 = temp_r9_5;
-                }
-                e->tex_ix = (s32) var_r0_2;
-                e->mtl->tid = (s32) e->tids[var_r0_2];
-                var_r9_3 = e->pc + 4;
-                goto block_43;
-            case 2:
-                e->pause_cnt = (s32) temp_r29[temp_r10 + 1];
-                if ((s16) temp_r29[temp_r10 + 2] != 0) {
-                    e->pause_cnt += NuRand(NULL) % temp_r29[e->pc + 2];
-                }
-                var_r28 = 1;
-                var_r9_4 = e->pc + 3;
-block_77:
-                e->pc = (s32) var_r9_4;
-                break;
-            case 5:
-                e->pause = (s32) temp_r29[temp_r10 + 1];
-                e->pc = temp_r10 + 3;
-                e->pause_r = (s32) temp_r29[temp_r10 + 2];
-                break;
-            case 7:
-                var_r9_4 = temp_r29[temp_r10 + 1];
-                goto block_77;
-            case 9:
-                if (EvalVars((s32) temp_r29[temp_r10 + 1], e->tex_ix, (s32) temp_r29[temp_r10 + 2]) != 0) {
-                    var_r9_5 = e->pc + 3;
-block_56:
-                    e->pc = (s32) temp_r29[var_r9_5];
-                } else {
-                    var_r9_4 = e->pc + 4;
-                    goto block_77;
-                }
-                break;
-            case 8:
-                if ((s32) e->ra_ix > 0xF) {
-                    //NuErrorProlog(0x8011E754, 0x388)(&lbl_8011E8AC, e->pc);
-                }
-                temp_r11 = e->ra_ix;
-                temp_r25[temp_r11] = e->pc + 2;
-                e->ra_ix = temp_r11 + 1;
-                var_r9_5 = e->pc + 1;
-                goto block_56;
-            case 10:
-                if ((s32) e->ra_ix == 0) {
-                    //NuErrorProlog(0x8011E754, 0x390)(&lbl_8011E8E4, e->pc);
-                }
-                temp_r9_6 = e->ra_ix - 1;
-                e->ra_ix = temp_r9_6;
-                e->pc = temp_r25[temp_r9_6];
-                break;
-            case 11:
-                if ((s32) e->rep_ix > 0xF) {
-                    //NuErrorProlog(0x8011E754, 0x398)(&lbl_8011E91C, e->pc);
-                }
-                temp_r30 = e->rep_count;
-                temp_r30[e->rep_ix] = (s32) temp_r29[e->pc + 1];
-                if ((s16) temp_r29[e->pc + 2] != 0) {
-                    temp_r8_2 = e->rep_ix;
-                    temp_r30[temp_r8_2] += NuRand(NULL) % temp_r29[e->pc + 2];
-                }
-                temp_r11_2 = e->rep_ix;
-                temp_r9_7 = e->pc + 3;
-                e->pc = temp_r9_7;
-                temp_r26[temp_r11_2] = temp_r9_7;
-                e->rep_ix = temp_r11_2 + 1;
-                break;
-            case 12:
-                if ((s32) e->rep_ix == 0) {
-                    //NuErrorProlog(0x8011E754, 0x3A2)(&lbl_8011E95C, e->pc);
-                }
-                temp_r8_3 = e->rep_ix - 1;
-                var_r11_3 = temp_r8_3 * 4;
-                if ((s32) e->rep_count[temp_r8_3] == 0) {
-                    e->rep_ix = temp_r8_3;
-                    var_r9_4 = e->pc + 1;
-                    goto block_77;
-                }
-block_74:
-                e->pc = *(temp_r26 + var_r11_3);
-                *(e->rep_count + var_r11_3) = *(e->rep_count + var_r11_3) - 1;
-                break;
-            case 13:
-                if ((s32) e->rep_ix == 0) {
-                    //NuErrorProlog(0x8011E754, 0x3B0)(&lbl_8011E994, e->pc);
-                }
-                temp_r9_8 = e->pc;
-                if ((EvalVars((s32) temp_r29[temp_r9_8 + 1], e->tex_ix, (s32) temp_r29[temp_r9_8 + 2]) != 0) || (temp_r9_9 = e->rep_ix - 1, var_r11_3 = temp_r9_9 * 4, (((s32) e->rep_count[temp_r9_9] == 0) != 0))) {
-                    e->pc += 3;
-                    e->rep_ix -= 1;
-                } else {
-                    goto block_74;
-                }
-                break;
-            case 15:
-                NuTexAnimXCall((s32) temp_r29[temp_r10 + 1], e);
-                var_r9_4 = e->pc + 2;
-                goto block_77;
-            }
-        } while (var_r28 == 0);
-    }
-}
-
-
-
-
-
-*/
-
-
 void NuTexAnimSetSignals(u32 sig)
 {
   nta_sig_old = sig;
@@ -975,52 +405,244 @@ void NuTexAnimProcess(void)
 }
 
 
-int EvalVars(int cc,int v0,int v1)
+//PS2
+inline static int EvalVars (int cc, int v0, int v1)
+{   
+    switch(cc) {
+        case CONDITION_CODE_EQUAL:
+            if (v0 == v1) {
+                return 1;
+            }
+            break;
+        case CONDITION_CODE_LESS_THAN:
+            if (v0 < v1) {
+                return 1;
+            }
+            break;
+        case CONDITION_CODE_GREATER_THAN:
+            if (v0 > v1) {
+                return 1;
+            }
+            break;
+        case CONDITION_CODE_LESS_THAN_OR_EQUAL:
+            if (v0 <= v1) {
+                return 1;
+            }
+            break;
+        case CONDITION_CODE_GREATER_THAN_OR_EQUAL:
+            if (v0 >= v1) {
+                return 1;
+            }
+            break;
+        case CONDITION_CODE_NOT_EQUAL:
+            if (v0 != v1) {
+                return 1;
+            }
+            break;
+        default:
+            NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x1bb)("unknown condition code %d", cc);
+            break;
+    }
+    return 0;
+}
 
+//PS2
+inline static void NuTexAnimXCall (s32 lid, struct nutexanimenv_s * ignore)
 {
+    struct nutexanimlist_s* rv;
+    struct nutexanim_s* nta;
+    struct nutexanimenv_s *e;
+    struct nutexanimprog_s *p;
+    s32 n;
+
+    
+    for (rv = ntal_first; rv != NULL; rv = rv->succ) {
+        for (nta = rv->nta; nta != NULL; nta = nta->succ) {
+            e = nta->env;
+            if ((e == NULL) || (e == ignore)) {
+                continue;
+            }
+            
+            p = e->prog;
+            if ((p == NULL) || (p->xdef_cnt == 0)) {
+                continue;
+            }
+            
+            for (n = 0; n < p->xdef_cnt; n++) {
+                if (p->xdef_ids[n] == lid) {
+                    e->pc = p->xdef_addrs[n];
+                    e->pause_cnt = 0;
+                    e->ra_ix = 0;
+                    e->rep_ix = 0;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+//PS2
+void NuTexAnimEnvProc(struct nutexanimenv_s *e)
+{
+/*
+DWARF
+    nutexanimprog_s* p; //
+    int done; //
+    int n;
+*/
+    struct nutexanimprog_s *p;
+    s32 done;
+    s32 n;
+    s32 lVar14;
+    s16 *cod;
   
-  if (cc == 2) {
-    if (v0 <= v1) {
-      return 0;
+    p = e->prog;
+    done = 0;
+    if (p == NULL) {
+        return;
     }
-    return 1;
-  }
-  if (cc < 3) {
-    if (cc == 0) {
-      if (v0 != v1) {
-        return 0;
-      }
-      return 1;
+    
+    if ((nta_sig_off & p->off_mask) != 0) {
+        for (n = 0; n < 0x20; n++) {
+            if ((nta_sig_off & 1 << n & p->off_mask) != 0) {
+                e->pc = p->off_sig[n];
+                e->pause_cnt = 0;
+                e->ra_ix = 0;
+                e->rep_ix = 0;
+                break;
+            }
+        }
     }
-    if (cc == 1) {
-      if (v1 <= v0) {
-        return 0;
-      }
-      return 1;
+
+    if ((nta_sig_on & p->on_mask) != 0) {
+        for (n = 0; n < 0x20; n++) {
+            if ((nta_sig_on & 1 << n & p->on_mask) != 0) {
+                e->pc = p->on_sig[n];
+                e->pause_cnt = 0;
+                e->ra_ix = 0;
+                e->rep_ix = 0;
+                break;
+            }
+        }
     }
-  }
-  else {
-    if (cc == 4) {
-      if (v0 < v1) {
-        return 0;
-      }
-      return 1;
+   
+    if (e->pause_cnt != 0) {
+        e->pause_cnt--;
+        return;
     }
-    if (cc < 4) {
-      if (v1 < v0) {
-        return 0;
-      }
-      return 1;
+    cod = p->code;
+    while (!done) {
+        switch(cod[e->pc]) {
+            case 0:
+                e->tex_ix = p->code[e->pc + 1];
+                e->mtl->tid = e->tids[e->tex_ix];
+                e->pc += 2;
+                e->pause_cnt = e->pause;
+                if (e->pause_r != 0) {
+                    e->pause_cnt += (long)NuRand(0) % e->pause_r;
+                }
+                break;
+            case 1:
+                lVar14 = e->tex_ix + p->code[e->pc + 1];
+                if (lVar14 < p->code[e->pc+2]) {
+                    lVar14 = p->code[e->pc+2];
+                }
+                if (p->code[e->pc+3] < lVar14) {
+                    lVar14 = p->code[e->pc+3];
+                }
+                e->tex_ix = lVar14;
+                e->mtl->tid = e->tids[e->tex_ix];
+                e->pc += 4;
+                e->pause_cnt = e->pause;
+                if (e->pause_r != 0) {
+                    e->pause_cnt += (long)NuRand(0) % e->pause_r;
+                }
+                break;
+            case 2:
+                e->pause_cnt = p->code[e->pc + 1];
+                if (p->code[e->pc + 2] != 0) {
+                    e->pause_cnt += (long)NuRand(0) % p->code[e->pc + 2];
+                }
+                done = 1;
+                e->pc += 3;
+                break;
+            case 5:
+                e->pause = p->code[e->pc + 1];
+                e->pause_r = p->code[e->pc + 2];
+                e->pc += 3;
+                break;
+            case 7:
+                e->pc = p->code[e->pc + 1];
+                break;
+            case 9:
+                if (EvalVars(p->code[e->pc + 1], e->tex_ix, p->code[e->pc + 2])) {
+                    e->pc = p->code[e->pc + 3];
+                } else {
+                    e->pc += 4;
+                }
+                break;
+            case 8:
+                if (e->ra_ix >= 0x10) {
+                    NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x3c5)("TexAnim Processor Alert: Call Stack Overflow at (%d)", e->pc);
+                }
+                e->ra[e->ra_ix++] = e->pc + 2;
+                e->pc = p->code[e->pc + 1];
+                break;
+            case 10:
+                if (e->ra_ix == 0) {
+                    NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x3cd)("TexAnim Processor Alert: Call Stack Underflow at (%d)", e->pc);
+                }
+                e->ra_ix--;
+                e->pc = e->ra[e->ra_ix];
+                break;
+            case 0xb:
+                if (e->rep_ix >= 0x10) {
+                    NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x3d5)("TexAnim Processor Alert: Too Many Nested Repeat Loops at (%d)", e->pc);
+                }
+                e->rep_count[e->rep_ix] = p->code[e->pc + 1];
+                if (p->code[e->pc + 2] != 0) {
+                    e->rep_count[e->rep_ix] += (long)NuRand(0) % p->code[e->pc + 2];
+                }
+                e->pc += 3;
+                e->rep_start[e->rep_ix++] = e->pc;
+                break;
+            case 0xc:
+                if (e->rep_ix == 0) {
+                    NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x3df)("TexAnim Processor Alert: REPEND without REPEAT at (%d)", e->pc);
+                }
+                
+                if (e->rep_count[e->rep_ix - 1] == 0) {
+                    e->rep_ix--;
+                    e->pc++;
+                    break;
+                }
+                e->pc = e->rep_start[e->rep_ix - 1];
+                e->rep_count[e->rep_ix - 1]--;
+                break;
+            case 0xd:
+                if (e->rep_ix == 0) {
+                    NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x3ed)("TexAnim Processor Alert: UNTILTEX without REPEAT at (%d)", e->pc);
+                }
+                
+                if (EvalVars(p->code[e->pc + 1], e->tex_ix, p->code[e->pc + 2]) || (e->rep_count[e->rep_ix - 1] == 0)) {
+                    e->pc += 3;
+                    e->rep_ix--;
+                } else{
+                    e->pc = e->rep_start[e->rep_ix - 1];
+                    e->rep_count[e->rep_ix - 1]--;
+                }
+                break;
+            case 0xe:
+                done = 1;
+                break;
+            case 0xf:
+                NuTexAnimXCall(p->code[e->pc + 1], e);
+                e->pc += 2;
+                break;
+        }
     }
-    if (cc == 5) {
-      if (v0 == v1) {
-        return 0;
-      }
-      return 1;
-    }
-  }
-  NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x17e)("unknown condition code %d",cc);
-  return 0;
+    
+    return;
 }
 
 

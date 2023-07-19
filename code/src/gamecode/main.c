@@ -915,30 +915,37 @@ LAB_80052b3c:
 }
 
 
+//static struct txanmlist texanimscripts[24];
 
-void InitTexAnimScripts(void)
-
+void InitTexAnimScripts(void)	//PS2
 {
-  nudathdr_s *dfanim;
-  txanmlist *list;
-  variptr_u ptr;
-  
-  NuTexAnimProgSysInit();
-  list = (txanmlist *)texanimscripts;
-  NuDatSet(0);
-  ptr.voidptr = texanimbuff;
-  memset(texanimbuff,0,0x8000);
-  dfanim = (nudathdr_s *)texanimscripts[0].path;
-  while (dfanim != (nudathdr_s *)0x0) {
-    if ((*(uint *)&list->levbits & LBIT._0_4_ | *(uint *)((int)&list->levbits + 4) & LBIT._4_4_) ! =
-        0) {
-      NuTexAnimProgReadScript(&ptr,list->path);
+    struct nutexanimprog_s *prog;
+    struct nudathdr_s* dfanim;
+    struct txanmlist *list;
+    union variptr_u ptr;
+    
+    list = texanimscripts;
+    NuTexAnimProgSysInit();
+    //dfanim = NuDatOpen("ats.dat", 0, 0);
+    NuDatSet(0);  //NuDatSet(dfanim);
+    ptr.voidptr = texanimbuff;
+    memset(texanimbuff, 0, sizeof(texanimbuff));
+    
+    while( list->path != NULL ) {
+        if ((list->levbits & LBIT) != 0){ 
+            prog = NuTexAnimProgReadScript(&ptr, list->path);
+            if (prog == NULL) {
+                NuDebugMsgProlog(".\\main.c", 0x4ed)("", list->path);
+            }
+        }
+        list = list + 1;
     }
-    list = list + 1;
-    dfanim = (nudathdr_s *)list->path;
-  }
-  NuDatSet(0);
-  return;
+    
+    NuDatSet(0);
+    /*if (dfanim != 0) {
+        NuDatClose(dfanim);
+    }*/
+    return;
 }
 
 void SetTexAnimSignals(void)

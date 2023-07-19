@@ -2741,16 +2741,37 @@ LAB_800346ac:
   return;
 }
 
-//PS2 100% match
-int StartHGobjAnim(struct nuhspecial_s *obj)
+//PS2 match
+s32 StartHGobjAnim(struct nuhspecial_s *obj)
 {
-  struct nuinstance_s *pNVar1;
-  struct nuinstanim_s *iVar2;
   
+  if (((obj->special != NULL) && (obj->special->instance != NULL)) &&
+     ((obj->special->instance->anim) != NULL)) 
+  {
+    (obj->special->instance->anim)->playing = (obj->special->instance->anim)->playing | 1;
+    return 1;
+  }
+  return 0;
+}
+
+//PS2 Match
+s32 ResetHGobjAnim(struct nuhspecial_s *obj)
+{ 
+  if (((obj->special != NULL && (obj->special->instance != NULL)) &&
+     ((obj->special->instance->anim) != NULL))) {
+    (obj->special->instance->anim)->playing = (obj->special->instance->anim)->playing & 0xfffffffe;
+    obj->special->instance->anim->ltime = 1.0;
+    return 1;
+  }
+  return 0;
+}
+
+s32 FinishHGobjAnim(nuhspecial_s *obj)
+{
   if (((obj->special != NULL) &&
-      (pNVar1 = obj->special->instance, pNVar1 != NULL)) &&
-     (iVar2 = pNVar1->anim, iVar2 != NULL)) {
-    iVar2->playing = iVar2->playing | 1;
+      (obj->special->instance != NULL)) && (obj->special->instance->anim != NULL)) {
+    (obj->special->instance->anim)->playing = (obj->special->instance->anim)->playing & 0x7fffffff;
+    obj->special->instance->anim->ltime = world_scene[0]->instanimdata[obj->special->instance->anim->anim_ix]->time;
     return 1;
   }
   return 0;

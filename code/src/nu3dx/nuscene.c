@@ -67,9 +67,9 @@ void ReadNuIFFTextureSet(fileHandle handle,struct nuscene_s *scene)
   return;
 }
 
-void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)
+void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)	//CHECK
 {
-  union numtlattrib_s attr;
+  struct numtl_s* attr;
   s32 nmtl;
   struct numtl_s **mtl;
   struct numtl_s *mtlR;
@@ -78,8 +78,7 @@ void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)
   s32 j;
 
   i = 0;
-  //er = NuDebugMsgProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0xe6);
-  //(*er)("Reading IFF Material set...");
+  NuDebugMsgProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0xe6)("Reading IFF Material set...");
   nmtl = NuFileReadInt(fh);
   mtl = (struct numtl_s **)NuMemAlloc(nmtl << 2);
   sc->nummtls = nmtl;
@@ -89,10 +88,10 @@ void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)
       mtlR = (struct numtl_s *)NuMtlRead(fh);
       j = i + 1;
       sc->mtls[i] = mtlR;
-      attr = sc->mtls[i]->attrib;
-      /*if ((uint)attr >> 0x1e != 0) {
-        sc->mtls[i]->attrib = (numtlattrib_s)((uint)attr & 0xfff3ffff | 0x40000);	//could be? --> sc->mtls[i]->attrib).aref = 0xffffffff
-      }*/
+      attr = sc->mtls[i];
+      if ((attr->attrib)._word >> 0x1e != 0) {
+        (attr->attrib)._word = (attr->attrib)._word & 0xfff3ffff | 0x40000;	//could be? --> sc->mtls[i]->attrib).aref = 0xffffffff
+      }
       i = j;
     } while (j < nmtl);
   }
@@ -129,7 +128,7 @@ void NuSceneMtlUpdate(struct nuscene_s *nus)
       mtl = nus->mtls[i];
       if (mtl->tid == -1) {
         mtl->tid = 0;
-        nus->mtls[i]->L = '\0';
+        mtl->L = '\0';
       }
       else {
         mtl->tid = (s32)nus->tids[mtl->tid];
@@ -164,7 +163,7 @@ void ReadNuIFFAnimationLibrary(fileHandle handle, struct nugscn_s* scene)
         {
             if (NuFileReadChar(handle) != 0)
             {
-                //scene->instanimdata[i] = NuAnimDataRead(handle);  finish NuAnim lib
+                scene->instanimdata[i] = NuAnimDataRead(handle);
             }
         }
     }
@@ -642,9 +641,9 @@ void ReadNuIFFSpecialObjects(fileHandle fh,struct nugscn_s *gsc)
   struct nuspecial_s *pnVar1;
   s32 cnt;
   s32 i;
-  struct nuinstance_s *inst;
+  //struct nuinstance_s *inst;
   struct nuinstance_s *pnVar2;
-  struct nuspecial_s *spec;
+  //struct nuspecial_s *spec;
 
   numspec = NuFileReadInt(fh);
   gsc->numspecial = numspec;
@@ -660,9 +659,11 @@ void ReadNuIFFSpecialObjects(fileHandle fh,struct nugscn_s *gsc)
       gsc->specials[numspec].instance = gsc->instances + file_specials[numspec].instanceix;
       pnVar2 = gsc->specials[numspec].instance;
       pnVar1 = gsc->specials + numspec;
-      do {
-        spec = pnVar1;
-        inst = pnVar2;
+
+      pnVar1->mtx = pnVar2->mtx;
+      /*do {
+        spec = gsc->specials + numspec;
+        inst = gsc->specials[numspec].instance;
         i = i + -0x18;
         (spec->mtx)._00 = (inst->mtx)._00;
         (spec->mtx)._01 = (inst->mtx)._01;
@@ -676,7 +677,7 @@ void ReadNuIFFSpecialObjects(fileHandle fh,struct nugscn_s *gsc)
       *(f32 *)pnVar1 = *(f32 *)pnVar2;
       (spec->mtx)._13 = (inst->mtx)._13;
       (spec->mtx)._20 = (inst->mtx)._20;
-      (spec->mtx)._21 = (inst->mtx)._21;
+      (spec->mtx)._21 = (inst->mtx)._21;*/
       gsc->specials[numspec].name = gsc->nametable + file_specials[numspec].nameix;
       (gsc->specials[numspec].instance)->special_flag = '\x01';
       numspec = cnt;

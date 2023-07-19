@@ -62,13 +62,7 @@ struct NUCUTSCENECAMERA_s {
     struct nucamera_s * camera;
 };
 
-typedef struct NuCutSceneCharacterCreateData NuCutSceneCharacterCreateData, *PNuCutSceneCharacterCreateData;
-
-struct NuCutSceneCharacterCreateData {
-    struct NUGCUTCHAR_s * field0_0x0;
-    struct instNUGCUTCHAR_s * field1_0x4;
-    union variptr_u * field2_0x8;
-};
+typedef void(*NuCutSceneCharacterCreateData)(struct NUGCUTCHAR_s*, struct instNUGCUTCHAR_s*, union variptr_u*);
 
 
 #endif // !NUGCUT_H
