@@ -200,7 +200,7 @@ void instNuGCutSceneDestroy(instNUGCUTSCENE_s *icutscene)
 }
 
 //PS2
-void instNuGCutSceneStart(struct instNUGCUTSCENE_s *icutscene)
+inline static void instNuGCutSceneStart(struct instNUGCUTSCENE_s* icutscene)
 {
     icutscene->cframe = 1.0f;
     
@@ -225,15 +225,32 @@ void instNuGCutSceneStart(struct instNUGCUTSCENE_s *icutscene)
     return;
 }
 
-void instNuGCutSceneEnd(instNUGCUTSCENE_s *icutscene)
-
+//PS2
+inline static void instNuGCutSceneEnd(struct instNUGCUTSCENE_s *icutscene)
 {
-  float nframes;
-  
-  nframes = icutscene->cutscene->nframes;
-  *(uint *)&icutscene->field_0x6c = *(uint *)&icutscene->field_0x6c & 0xbfffffff;
-  icutscene->cframe = nframes + 1.0;
-  return;
+    struct NUGCUTSCENE_s* cutscene;
+    float nframes;
+    
+    cutscene = icutscene->cutscene;
+    nframes = cutscene->nframes;
+    
+    icutscene->is_playing = 0;
+    icutscene->cframe = nframes + 1.0f;
+
+//PS2 part
+   /* if ( cutscene->rigids != NULL) {
+        instNuGCutRigidSysEnd(icutscene->cframe , icutscene);
+    }
+    
+    if (icutscene->ichars != NULL) {
+        instNuGCutCharSysEnd(icutscene->cframe, icutscene);
+    }
+    
+    if (icutscene->ilocators != NULL) {
+        instNuGCutLocatorSysEnd(icutscene->cframe, icutscene->ilocators, cutscene->locators);
+    }*/
+    
+    return;
 }
 
 
@@ -245,125 +262,147 @@ void instNuGCutSceneSetEndCallback(struct instNUGCUTSCENE_s *icutscene,void(*fn)
 }
 
 
-void instNuGCutSceneClipTest(instNUGCUTSCENE_s *icutscene)
-
+inline static void instNuGCutSceneClipTest(struct instNUGCUTSCENE_s *icutscene)
 {
-  uint uVar1;
-  NUGCUTBBOX_s *bbox;
-  int iVar2;
-  numtx_s *wm;
-  NUGCUTSCENE_s *cutscene;
-  float fVar3;
-  
-  uVar1 = *(uint *)&icutscene->field_0x6c;
-  cutscene = icutscene->cutscene;
-  *(uint *)&icutscene->field_0x6c = uVar1 | 0x1000000;
-  if (cutscene->bbox == (NUGCUTBBOX_s *)0x0) {
+    struct NUGCUTBBOX_s *bbox; //temp
+    struct numtx_s *wm; //temp
+    
+    struct NUGCUTSCENE_s *cutscene;
+    float distsqr;
+    int r;
+
+    cutscene = icutscene->cutscene;
+    icutscene->is_visible = 1;
+    
+    if (cutscene->bbox == NULL) {
+        return;
+    }
+
+    if ((icutscene->checkmaxdist)) {
+        if((NuCameraDistSqr(&icutscene->centre) > icutscene->maxdistsqr)) {
+            icutscene->is_visible = 0;
+            return;
+        }
+    }
+    
+    if ((icutscene->checkbboxclip))
+    {
+        if (icutscene->has_mtx)
+        {
+            bbox = cutscene->bbox;
+            wm = &icutscene->mtx;
+        }
+        else {
+            bbox = cutscene->bbox;
+            wm = &numtx_identity;
+        }
+        
+        if (NuCameraClipTestExtents(&bbox->min, &bbox->max, wm) == 0) {
+            icutscene->is_visible = 0;
+        }
+    }
     return;
-  }
-  if (((uVar1 & 0x2000000) == 0) ||
-     (fVar3 = NuCameraDistSqr(&icutscene->centre), fVar3 <= icutscene->maxdistsqr)) {
-    if ((*(uint *)&icutscene->field_0x6c & 0x4000000) == 0) {
-      return;
-    }
-    if ((*(uint *)&icutscene->field_0x6c & 0x8000000) == 0) {
-      bbox = cutscene->bbox;
-      wm = &numtx_identity;
-    }
-    else {
-      bbox = cutscene->bbox;
-      wm = &icutscene->mtx;
-    }
-    iVar2 = NuCameraClipTestExtents(&bbox->min,&bbox->max,wm);
-    if (iVar2 != 0) {
-      return;
-    }
-  }
-  *(uint *)&icutscene->field_0x6c = *(uint *)&icutscene->field_0x6c & 0xfeffffff;
-  return;
 }
 
-void instNuGCutSceneUpdate(instNUGCUTSCENE_s *icutscene,int paused)
-
+//PS2
+static void instNuGCutSceneUpdate(struct instNUGCUTSCENE_s *icutscene,s32 paused)
 {
-  uint uVar1;
-  code *endfn;
-  NUGCUTSCENE_s *cutscene;
-  double dVar2;
-  float dt;
-  
-  cutscene = icutscene->cutscene;
-  if ((*(uint *)&icutscene->field_0x6c & 0x800000) != 0) {
+    /*
+    NUGCUTSCENE_s* cutscene; //
+    float dt; //
+    void(*endfn)(void*);
+    */
+    struct NUGCUTSCENE_s *cutscene;
+    float dt;
+    float dt1;
+    float dt2;
+    
+    cutscene = icutscene->cutscene;
+    if (icutscene->is_disabled)
+    {
+        return;
+    }
+    
+    if (!icutscene->played_first_frame && icutscene->autostart)
+    {
+        instNuGCutSceneStart(icutscene);
+    }
+    
+    if ((icutscene->is_playing) == 0)
+    {
+        return;
+    }
+    instNuGCutSceneClipTest(icutscene);
+    
+    if ((icutscene->is_visible) == 0)
+    {
+        return;
+    }
+
+    if ((icutscene->played_first_frame) != 0)
+    {
+        if (paused == 0) {
+            dt = icutscene->cframe + icutscene->rate;
+            icutscene->cframe = dt;
+            if (1.0f > dt) {
+                icutscene->cframe = 1.0f;
+            } else {
+                if (dt >= (cutscene->nframes + 1.0f) - 1.0f) 
+                {
+                    if (icutscene->endfn != NULL) {
+                        void(*old)(void*) = icutscene->endfn;
+                        icutscene->endfn = NULL;
+                        old(icutscene);
+                    }
+                    
+                    if (icutscene->next_to_play != NULL) {
+                        dt1 = icutscene->cframe -((cutscene->nframes + 1.0f) - 1.0f);
+                        if (cutscene->nframes < dt1) {
+                            dt1 = 0.0f;
+                        }
+                        
+                        instNuGCutSceneEnd(icutscene);
+                        instNuGCutSceneStart(icutscene->next_to_play);
+                        icutscene->next_to_play->cframe = icutscene->next_to_play->cframe + dt1;
+                        
+                        icutscene->next_to_play->played_first_frame = 1;
+                        instNuGCutSceneClipTest(icutscene->next_to_play);
+                        icutscene->next_to_play->been_updated_this_frame = 1;
+                        icutscene->next_to_play = NULL;
+                        return;
+                    }
+                    
+                    if ((icutscene->looping) != 0) //0x20
+                    {
+                        dt2 = (icutscene->cframe - ((cutscene->nframes + 1.0f) - 1.0f));
+                        if (cutscene->nframes < dt2) {
+                            dt2 = 0.0f;
+                        }
+                        instNuGCutSceneStart(icutscene);
+                        icutscene->cframe = icutscene->cframe + dt2;
+                        icutscene->played_first_frame = 1;
+                    } else {
+                        instNuGCutSceneEnd(icutscene);
+                    }
+                }
+            }
+        }
+    }
+    else{
+        icutscene->played_first_frame = 1;
+    }
+
+    if ((do_cameras != 0) && (icutscene->icameras != NULL)) {
+        instNuGCutCamSysUpdate(icutscene, icutscene->cframe);
+    }
+    if (icutscene->itriggersys != NULL) {
+        instNuGCutTriggerSysUpdate(icutscene, icutscene->cframe);
+    }
+    if ((do_rigids != 0) && (icutscene->irigids != NULL)) {
+        instNuGCutRigidSysUpdate(icutscene, icutscene->cframe);
+    }
+    
     return;
-  }
-  if ((*(uint *)&icutscene->field_0x6c & 0x90000000) == 0x10000000) {
-    instNuGCutSceneStart(icutscene);
-  }
-  if ((*(uint *)&icutscene->field_0x6c & 0x40000000) == 0) {
-    return;
-  }
-  instNuGCutSceneClipTest(icutscene);
-  uVar1 = *(uint *)&icutscene->field_0x6c;
-  if ((uVar1 & 0x1000000) == 0) {
-    return;
-  }
-  if ((int)uVar1 < 0) {
-    if (paused != 0) goto LAB_80089dbc;
-    dVar2 = 1.0;
-    dt = icutscene->cframe + icutscene->rate;
-    icutscene->cframe = dt;
-    if (1.0 < dt) {
-      icutscene->cframe = 1.0;
-      goto LAB_80089dbc;
-    }
-    if (dt < (cutscene->nframes + 1.0) - 1.0) goto LAB_80089dbc;
-    endfn = (code *)icutscene->endfn;
-    if (endfn != (code *)0x0) {
-      icutscene->endfn = (void *)0x0;
-      (*endfn)(icutscene);
-    }
-    if (icutscene->next_to_play != (instNUGCUTSCENE_s *)0x0) {
-      dVar2 = (double)(icutscene->cframe -
-                      (float)((double)(float)((double)cutscene->nframes + dVar2) - dVar2));
-      if ((double)cutscene->nframes < dVar2) {
-        dVar2 = 0.0;
-      }
-      instNuGCutSceneEnd(icutscene);
-      instNuGCutSceneStart(icutscene->next_to_play);
-      icutscene->next_to_play->cframe = (float)((double)icutscene->next_to_play->cframe + dVar2);
-      *(uint *)&icutscene->next_to_play->field_0x6c =
-           *(uint *)&icutscene->next_to_play->field_0x6c | 0x80000000;
-      instNuGCutSceneClipTest(icutscene->next_to_play);
-      *(uint *)&icutscene->next_to_play->field_0x6c =
-           *(uint *)&icutscene->next_to_play->field_0x6c | 0x400000;
-      icutscene->next_to_play = (instNUGCUTSCENE_s *)0x0;
-      return;
-    }
-    if ((*(uint *)&icutscene->field_0x6c & 0x20000000) == 0) {
-      instNuGCutSceneEnd(icutscene);
-      goto LAB_80089dbc;
-    }
-    dVar2 = (double)(icutscene->cframe -
-                    (float)((double)(float)((double)cutscene->nframes + dVar2) - dVar2));
-    if ((double)cutscene->nframes < dVar2) {
-      dVar2 = 0.0;
-    }
-    instNuGCutSceneStart(icutscene);
-    uVar1 = *(uint *)&icutscene->field_0x6c;
-    icutscene->cframe = (float)((double)icutscene->cframe + dVar2);
-  }
-  *(uint *)&icutscene->field_0x6c = uVar1 | 0x80000000;
-LAB_80089dbc:
-  if ((do_cameras != 0) && (icutscene->icameras != (instNUGCUTCAMSYS_s *)0x0)) {
-    instNuGCutCamSysUpdate(icutscene,icutscene->cframe);
-  }
-  if (icutscene->itriggersys != (instNUGCUTTRIGGERSYS_s *)0x0) {
-    instNuGCutTriggerSysUpdate(icutscene,icutscene->cframe);
-  }
-  if ((do_rigids != 0) && (icutscene->irigids != (instNUGCUTRIGIDSYS_s *)0x0)) {
-    instNuGCutRigidSysUpdate(icutscene,icutscene->cframe);
-  }
-  return;
 }
 
 //PS2 (change bifields from s32 to s16 type)
@@ -411,25 +450,23 @@ static void NuGCutCamsSysFixPtrs(struct NUGCUTSCENE_s *cutscene, s32 address_off
     return;
 }
 
-void instNuGCutSceneCalculateCentre(instNUGCUTSCENE_s *icutscene,numtx_s *mtx)
-
+//PS2
+static void instNuGCutSceneCalculateCentre(struct instNUGCUTSCENE_s *icutscene,struct numtx_s *mtx)
 {
-  NUGCUTSCENE_s *cut;
-  NUGCUTBBOX_s *bbox;
+  struct NUGCUTSCENE_s *cutscene;
   
-  cut = icutscene->cutscene;
-  bbox = cut->bbox;
-  if (bbox == (NUGCUTBBOX_s *)0x0) {
-    (icutscene->centre).z = 0.0;
-    (icutscene->centre).x = 0.0;
-    (icutscene->centre).y = 0.0;
+  cutscene = icutscene->cutscene;
+  if (cutscene->bbox != NULL) {
+    (icutscene->centre).x = ((cutscene->bbox->max).x + (cutscene->bbox->min).x) * 0.5f;
+    (icutscene->centre).y = ((cutscene->bbox->max).y + (cutscene->bbox->min).y) * 0.5f;
+    (icutscene->centre).z = ((cutscene->bbox->max).z + (cutscene->bbox->min).z) * 0.5f;
   }
   else {
-    (icutscene->centre).x = ((bbox->max).x + (bbox->min).x) * 0.5;
-    (icutscene->centre).y = ((cut->bbox->max).y + (cut->bbox->min).y) * 0.5;
-    (icutscene->centre).z = ((cut->bbox->max).z + (cut->bbox->min).z) * 0.5;
+    (icutscene->centre).x = 0.0f;
+    (icutscene->centre).y = 0.0f;
+    (icutscene->centre).z = 0.0f;
   }
-  if (mtx != (numtx_s *)0x0) {
+  if (mtx != NULL) {
     NuVecMtxTransform(&icutscene->centre,&icutscene->centre,mtx);
   }
   return;
@@ -817,22 +854,17 @@ static void instNuGCutLocatorSysUpdate(struct instNUGCUTSCENE_s *icutscene,float
   return;
 }
 
-
-void instNuGCutLocatorSysStart(instNUGCUTLOCATORSYS_s *ilocatorsys,NUGCUTLOCATORSYS_s *locatorsys )
-
+//PS2
+void instNuGCutLocatorSysStart(struct instNUGCUTLOCATORSYS_s *ilocatorsys,struct NUGCUTLOCATORSYS_s *locatorsys )
 {
-  uint i;
-  uint n;
-  
-  i = 0;
-  if (locatorsys->nlocators != '\0') {
-    do {
-      n = i + 1;
-      ilocatorsys->ilocators[i].time = 0.0;
-      i = n;
-    } while (n < locatorsys->nlocators);
-    return;
-  }
+  struct instNUGCUTLOCATOR_s *ilocator;
+  u32 i;
+
+    for(i = 0; (u32)locatorsys->nlocators > i; i++)
+    {
+      ilocator = &ilocatorsys->ilocators[i];
+      ilocator->timer = 0.0f;
+    }
   return;
 }
 
