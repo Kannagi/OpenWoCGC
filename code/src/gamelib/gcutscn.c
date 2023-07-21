@@ -1122,170 +1122,183 @@ static void instNuGCutRigidSysStart(struct instNUGCUTRIGIDSYS_s *irigidsys,struc
   }
 }
 
-void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *icutscene,float current_frame)
-
+//PS2
+static void instNuGCutRigidSysUpdate(struct instNUGCUTSCENE_s* icutscene, float current_frame)
 {
-  nuinstflags_s flags;
-  int iVar1;
-  nuinstance_s *tinst;
-  instNUGCUTRIGID_s *irigid;
-  numtx_s *mtmp;
-  instNUGCUTRIGIDSYS_s *irigidsys;
-  NUGCUTSCENE_s *cutscene;
-  NUGCUTRIGIDSYS_s *rigidsys;
-  instNUGCUTLOCATORSYS_s *ilocatorsys;
-  NUGCUTRIGID_s *rigid;
-  int i;
-  NUGCUTLOCATORSYS_s *locatorsys;
-  int j;
-  double dVar2;
-  numtx_s mtx;
-  uchar local_40 [20];
-  nuinstance_s *inst;
-  numtx_s *m;
-  
-  dVar2 = (double)current_frame;
-  i = 0;
+  struct instNUGCUTRIGID_s *irigid;
+  struct NUGCUTLOCATORSYS_s *locatorsys;
+  struct instNUGCUTLOCATORSYS_s *ilocatorsys;
+  s32 j;
+  struct NUGCUTLOCATOR_s *locator;
+  struct NUGCUTRIGID_s *rigid;
+  s32 i;
+  struct numtx_s mtx;
+  char newvisibilitystate;
+  struct NUGCUTSCENE_s *cutscene;
+  struct NUGCUTRIGIDSYS_s *rigidsys;
+  struct instNUGCUTRIGIDSYS_s *irigidsys;
+  s32 locix;
+////////////////////////
+    struct instNUGCUTLOCATOR_s *iloctemp;
+    struct NUGCUTLOCATORTYPE_s* loctype;
+//////////////////////
+    
   cutscene = icutscene->cutscene;
   irigidsys = icutscene->irigids;
   rigidsys = cutscene->rigids;
-  if (rigidsys->nrigids != 0) {
-    do {
-      irigid = irigidsys->irigids;
-      rigid = rigidsys->rigids + i;
-      if (((rigid->flags & 2) == 0) && ((rigid->flags & 4) != 0)) {
-        if ((rigid->visibiltyanim != (NUSTATEANIM_s *)0x0) &&
-           (j = StateAnimEvaluate(rigid->visibiltyanim,(uchar *)&irigid[i].visibleframeix,local_40 ,
-                                  (float)dVar2), j != 0)) {
-          if (local_40[0] == '\0') {
-            inst = (irigid[i].special.special)->instance;
-            flags = (nuinstflags_s)((uint)inst->flags & 0x7fffffff);
+    for(i = 0; i < (s32)rigidsys->nrigids; i++)
+    {
+      rigid = &rigidsys->rigids[i];
+      irigid = &irigidsys->irigids[i];
+        if ((rigid->flags & 2) != 0) 
+        {
+            continue;
+        }
+        if (((rigid->flags & 4) == 0))
+        {
+            continue;
+        }
+        if ((rigid->visibiltyanim != NULL) &&
+           (StateAnimEvaluate(rigid->visibiltyanim,&irigid->visibleframeix,
+                                      &newvisibilitystate,current_frame) != 0)) {
+          if ((u8*)newvisibilitystate != '\0') {
+              ((irigid->special).special)->instance->flags.visible = 1;
           }
           else {
-            inst = (irigid[i].special.special)->instance;
-            flags = (nuinstflags_s)((uint)inst->flags | 0x80000000);
-          }
-          inst->flags = flags;
-        }
-        if ((int)(irigid[i].special.special)->instance->flags < 0) {
-          NuGCutRigidCalcMtx(rigid,(float)dVar2,&mtx);
-          if ((*(uint *)&icutscene->field_0x6c & 0x8000000) != 0) {
-            NuMtxMul(&mtx,&mtx,&icutscene->mtx);
-          }
-          j = 0x30;
-          inst = (irigid[i].special.special)->instance;
-          m = &mtx;
-          do {
-            mtmp = m;
-            tinst = inst;
-            j = j + -0x18;
-            (tinst->matrix)._00 = mtmp->_00;
-            (tinst->matrix)._01 = mtmp->_01;
-            (tinst->matrix)._02 = mtmp->_02;
-            (tinst->matrix)._03 = mtmp->_03;
-            (tinst->matrix)._10 = mtmp->_10;
-            (tinst->matrix)._11 = mtmp->_11;
-            inst = (nuinstance_s *)&(tinst->matrix)._12;
-            m = (numtx_s *)&mtmp->_12;
-          } while (j != 0);
-          *(float *)inst = mtmp->_12;
-          (tinst->matrix)._13 = mtmp->_13;
-          (tinst->matrix)._20 = mtmp->_20;
-          (tinst->matrix)._21 = mtmp->_21;
-          if (((int)(irigid[i].special.special)->instance->flags < 0) &&
-             (rigid->first_locator != 0xff)) {
-            j = 0;
-            locatorsys = cutscene->locators;
-            ilocatorsys = icutscene->ilocators;
-            if (rigid->nlocators != '\0') {
-              do {
-                iVar1 = (uint)rigid->first_locator + j;
-                j = j + 1;
-                instNuGCutLocatorUpdate
-                          (icutscene,locatorsys,ilocatorsys->ilocators + iVar1,
-                           locatorsys->locators + iVar1,(float)dVar2,&mtx);
-              } while (j < (int)(uint)rigid->nlocators);
-            }
+            ((irigid->special).special)->instance->flags.visible = 0;
           }
         }
-      }
-      i = i + 1;
-    } while (i < (int)(uint)rigidsys->nrigids);
-  }
+        if (((irigid->special).special)->instance->flags.visible) // & 1
+        {
+              NuGCutRigidCalcMtx(rigid,current_frame,&mtx);
+              if ((icutscene->has_mtx) != 0) //& 0x10 
+              {
+                NuMtxMul(&mtx,&mtx,&icutscene->mtx);
+              }
+                memcpy(&(irigid->special.special)->instance->mtx, &mtx, sizeof(struct numtx_s));
+                
+              if (((((irigid->special).special)->instance->flags.visible) != 0) //& 1
+                  && (rigid->first_locator != 0xff)) {
+                locatorsys = cutscene->locators;
+                ilocatorsys = icutscene->ilocators;
+                  for (j = 0; rigid->nlocators > j; j++)
+                  {
+                    iloctemp = &ilocatorsys->ilocators[(u32)rigid->first_locator + j];
+                    locator = &locatorsys->locators[(u32)rigid->first_locator + j];
+                      loctype = &locatorsys->locator_types[locator->locator_type];
+                    if ((loctype->flags & 1) != 0) {
+                      instNuGCutDebrisLocatorUpdate(locatorsys,iloctemp,locator,current_frame,&mtx);
+                    }
+                    else {
+                      if ((loctype->flags & 2) != 0) {
+                        locix = locatorsys->locator_types[locator->locator_type].ix;
+                        if (locix != 0xffff) {
+                          (locatorfns[locix].fn)
+                              (icutscene, locatorsys, iloctemp, locator, current_frame, &mtx);
+                        }
+                      }
+                    }
+                  }
+              }
+        }
+    }
   return;
 }
 
-
-void instNuGCutRigidSysRender(instNUGCUTSCENE_s *icutscene,float current_frame)
-
+//PS2
+static void instNuGCutRigidSysRender(struct instNUGCUTSCENE_s *icutscene,float current_frame)
 {
-  nuinstflags_s flags;
-  int iVar1;
-  instNUGCUTRIGID_s *irigid;
-  nuinstance_s *inst;
-  instNUGCUTRIGIDSYS_s *irigidsys;
-  NUGCUTSCENE_s *cutscene;
-  NUGCUTRIGIDSYS_s *rigidsys;
-  instNUGCUTLOCATORSYS_s *ilocatorsys;
-  NUGCUTRIGID_s *rigid;
-  int i;
-  NUGCUTLOCATORSYS_s *locatorsys;
-  int j;
-  double dVar2;
-  numtx_s mtx;
-  uchar newvisibilitystate [20];
-  
-  dVar2 = (double)current_frame;
-  i = 0;
-  cutscene = icutscene->cutscene;
-  irigidsys = icutscene->irigids;
-  rigidsys = cutscene->rigids;
-  if (rigidsys->nrigids != 0) {
-    do {
-      irigid = irigidsys->irigids;
-      rigid = rigidsys->rigids + i;
-      if (((rigid->flags & 2) != 0) && ((rigid->flags & 4) != 0)) {
-        if ((rigid->visibiltyanim != (NUSTATEANIM_s *)0x0) &&
-           (j = StateAnimEvaluate(rigid->visibiltyanim,(uchar *)&irigid[i].visibleframeix,
-                                  newvisibilitystate,(float)dVar2), j != 0)) {
-          if (newvisibilitystate[0] == '\0') {
-            inst = (irigid[i].special.special)->instance;
-            flags = (nuinstflags_s)((uint)inst->flags & 0x7fffffff);
-          }
-          else {
-            inst = (irigid[i].special.special)->instance;
-            flags = (nuinstflags_s)((uint)inst->flags | 0x80000000);
-          }
-          inst->flags = flags;
+    s32 i;
+    s32 j;
+    struct numtx_s mtx;
+    struct NUGCUTSCENE_s *cutscene;
+    struct NUGCUTRIGIDSYS_s *rigidsys;
+    struct instNUGCUTRIGIDSYS_s *irigidsys;
+    char newvisibilitystate;
+    struct NUGCUTLOCATORSYS_s *locatorsys;
+    struct instNUGCUTLOCATORSYS_s *ilocatorsys;
+    s32 locix;
+
+    // --------------------------------------
+    struct NUGCUTRIGID_s *rigidtemp;
+    struct NUGCUTLOCATOR_s *loctemp1;
+    struct instNUGCUTLOCATOR_s *iloctemp2;
+    struct instNUGCUTRIGID_s *irigidtemp;
+    struct NUGCUTLOCATORTYPE_s* loctype;
+    s32 local_cc;
+    
+    cutscene = icutscene->cutscene;
+    irigidsys = icutscene->irigids;
+    rigidsys = cutscene->rigids;
+    
+    for(i = 0; i < rigidsys->nrigids; i++)
+    {
+        rigidtemp = &rigidsys->rigids[i];
+        irigidtemp = &irigidsys->irigids[i];
+
+        if ((rigidtemp->flags & 2) == 0)
+        {
+            continue;
         }
-        if ((int)(irigid[i].special.special)->instance->flags < 0) {
-          NuGCutRigidCalcMtx(rigid,(float)dVar2,&mtx);
-          if ((*(uint *)&icutscene->field_0x6c & 0x8000000) != 0) {
-            NuMtxMul(&mtx,&mtx,&icutscene->mtx);
-          }
-          if (NuCutSceneRigidCollisionCheck != (NuCutSceneRigidCollisionCheck *)0x0) {
-            (*NuCutSceneRigidCollisionCheck)(rigid,&mtx);
-          }
-          if (rigid->first_locator != 0xff) {
-            j = 0;
-            locatorsys = cutscene->locators;
-            ilocatorsys = icutscene->ilocators;
-            if (rigid->nlocators != '\0') {
-              do {
-                iVar1 = (uint)rigid->first_locator + j;
-                j = j + 1;
-                instNuGCutLocatorUpdate
-                          (icutscene,locatorsys,ilocatorsys->ilocators + iVar1,
-                           locatorsys->locators + iVar1,(float)dVar2,&mtx);
-              } while (j < (int)(uint)rigid->nlocators);
+        
+        if ((rigidtemp->flags & 4) == 0) {
+            continue;
+        }
+        
+        if ((rigidtemp->visibiltyanim != NULL) &&
+            (StateAnimEvaluate(rigidtemp->visibiltyanim, &irigidtemp->visibleframeix, &newvisibilitystate, current_frame) != 0)) {
+                if (newvisibilitystate != '\0') {
+                    ((irigidtemp->special).special)->instance->flags.visible = 1;
+                }
+                else {
+                    ((irigidtemp->special).special)->instance->flags.visible = 0;
+                }
             }
-          }
+        
+        if ((((irigidtemp->special).special)->instance->flags.visible))
+        {
+            NuGCutRigidCalcMtx(rigidtemp, current_frame, &mtx);
+            
+            if (icutscene->has_mtx != 0)
+            {
+                NuMtxMul(&mtx, &mtx, &icutscene->mtx);
+            }
+            
+            if (local_cc != 0) {
+                NuSpecialDrawAt(irigidtemp, &mtx);
+            }
+            
+            if (NuCutSceneRigidCollisionCheck != NULL) {
+                (*NuCutSceneRigidCollisionCheck)(rigidtemp, &mtx);
+            }
+            
+            if (rigidtemp->first_locator != 0xff) 
+            {
+                locatorsys = cutscene->locators;
+                ilocatorsys = icutscene->ilocators;
+                
+                for (j = 0; j < rigidtemp->nlocators; j++)
+                {
+                    iloctemp2 = &ilocatorsys->ilocators[(u32)rigidtemp->first_locator + j];
+                    loctemp1 = &locatorsys->locators[(u32)rigidtemp->first_locator + j];
+                    loctype = &locatorsys->locator_types[loctemp1->locator_type];
+                    
+                    if ((loctype->flags & 1) != 0) {
+                        instNuGCutDebrisLocatorUpdate(locatorsys, iloctemp2, loctemp1, current_frame, &mtx);
+                    }
+                    else { 
+                        if ((loctype->flags & 2) != 0) {
+                            locix = loctype->ix;
+                            if (locix != 0xffff) {
+                                (locatorfns[locix].fn)(icutscene, locatorsys, iloctemp2, loctemp1, current_frame, &mtx);
+                            }
+                        }
+                    }
+                }
+            }
         }
-      }
-      i = i + 1;
-    } while (i < (int)(uint)rigidsys->nrigids);
-  }
-  return;
+    }
+    return;
 }
 
 
