@@ -1,66 +1,67 @@
-nuscene_s * InstSceneLoad(char *name)
+//static struct nulsthdr_s* sceneinst_pool;
+//static struct nulsthdr_s* animdatainst_pool;
 
+//PS2
+struct nuscene_s * InstSceneLoad(char *name)
 {
-  int cmp;
-  sceneinst_s *sc;
-  nuscene_s *nus;
-  nulnkhdr_s *lnk;
+  struct sceneinst_s *sc;
   
-  lnk = (nulnkhdr_s *)0x0;
-  do {
-    lnk = NuLstGetNext(sceneinst_pool,lnk);
-    if (lnk == (nulnkhdr_s *)0x0) {
-      sc = (sceneinst_s *)NuLstAlloc(sceneinst_pool);
-      if (sc != (sceneinst_s *)0x0) {
-        nus = NuSceneLoad(name);
-        sc->nus = nus;
-        if (nus != (nuscene_s *)0x0) {
-          strcpy(sc->name,name);
-          sc->inst_cnt = 1;
-          return sc->nus;
+    sc = (struct sceneinst_s *)NuLstGetNext(sceneinst_pool,NULL);
+    while(sc != NULL) {
+        if (strcasecmp(name, sc->name) == 0) {
+            sc->inst_cnt++; 
+            return sc->scene;
         }
-        NuLstFree((nulnkhdr_s *)sc);
-      }
-      return (nuscene_s *)0x0;
+        sc = (struct sceneinst_s *)NuLstGetNext(sceneinst_pool,(struct nulnkhdr_s *)sc);
     }
-    cmp = strcmp(name,(char *)&lnk->succ);
-  } while (cmp != 0);
-  nus = (nuscene_s *)lnk->owner;
-  lnk[0x10].succ = (nulnkhdr_s *)((int)&(lnk[0x10].succ)->owner + 1);
-  return nus;
+    
+    sc = (struct sceneinst_s *)NuLstAlloc(sceneinst_pool);
+    if (sc != NULL) {
+        sc->scene = NuSceneLoad(name);
+        if (sc->scene != NULL) {
+            strcpy(sc->name, name);
+            sc->inst_cnt = 1;
+            return sc->scene;
+        } else {
+            NuLstFree((struct nulnkhdr_s *)sc);
+        }
+    }
+    
+    return NULL;
 }
 
-
-nuAnimData_s * InstAnimDataLoad(char *name)
-
+//PS2
+struct nuanimdata_s * InstAnimDataLoad(char *name)
 {
-  int cmp;
-  nulsthdr_s *pnVar1;
-  nulnkhdr_s *lstnext;
-  
-  lstnext = (nulnkhdr_s *)0x0;
-  do {
-    lstnext = NuLstGetNext(animdatainst_pool,lstnext);
-    if (lstnext == (nulnkhdr_s *)0x0) {
-      lstnext = NuLstAlloc(animdatainst_pool);
-      if (lstnext != (nulnkhdr_s *)0x0) {
-        pnVar1 = (nulsthdr_s *)NuAnimDataLoadBuff(name,&superbuffer_ptr,&superbuffer_end);
-        lstnext->owner = pnVar1;
-        if (pnVar1 != (nulsthdr_s *)0x0) {
-          strcpy((char *)&lstnext->succ,name);
-          pnVar1 = lstnext->owner;
-          lstnext[0x10].succ = (nulnkhdr_s *)0x1;
-          return (nuAnimData_s *)pnVar1;
+    struct animdatainst_s *lst;
+    struct nuanimdata_s *adat;
+    struct animdatainst_s *sc;
+
+    // can also be a for loop
+    // for (sc =NuLstGetNext(animdatainst_pool, NULL); sc != 0; sc = NuLstGetNext(animdatainst_pool,sc))
+    sc = (struct animdatainst_s *)NuLstGetNext(animdatainst_pool, NULL);
+    while(sc != 0) {
+        if (strcasecmp(name, sc->name) == 0) {
+            sc->inst_cnt++; 
+            return sc->ad;
         }
-        NuLstFree(lstnext);
-      }
-      return (nuAnimData_s *)0x0;
+        sc = (struct animdatainst_s *)NuLstGetNext(animdatainst_pool, (struct nulnkhdr_s *)sc);
     }
-    cmp = strcasecmp(name,(char *)&lstnext->succ);
-  } while (cmp != 0);
-  pnVar1 = lstnext->owner;
-  lstnext[0x10].succ = (nulnkhdr_s *)((int)&(lstnext[0x10].succ)->owner + 1);
-  return (nuAnimData_s *)pnVar1;
+    
+    lst = (struct animdatainst_s *)NuLstAlloc(animdatainst_pool);
+    if (lst != NULL) {
+        adat = NuAnimDataLoadBuff(name, &superbuffer_ptr, &superbuffer_end);
+        lst->ad = adat;
+        if (adat != NULL) {
+            strcpy(lst->name, name);
+            lst->inst_cnt = 1;
+            return lst->ad;
+        } else {
+            NuLstFree((struct nulnkhdr_s *)lst);
+        }
+    }
+    
+    return NULL;
 }
 
 
@@ -72,28 +73,40 @@ void InstInit(void)
   return;
 }
 
+//PS2
 void InstClose(void)
-
 {
-  animdatainst_s *adi;
-  sceneinst_s *sc;
+  //struct shadinst_s *sdi;
+  struct animdatainst_s *adi;
+  struct sceneinst_s *si;
   
-  if (animdatainst_pool != (nulsthdr_s *)0x0) {
-    adi = (animdatainst_s *)0x0;
-    do {
-      adi = (animdatainst_s *)NuLstGetNext(animdatainst_pool,(nulnkhdr_s *)adi);
-    } while (adi != (animdatainst_s *)0x0);
+  /*  if (shaddatainst_pool != NULL) {
+    sdi = (struct shadinst_s *)NuLstGetNext(shaddatainst_pool,NULL);
+    while (sdi != NULL) {
+      ShadDataDestroy(sdi->shad);
+     sdi = NuLstGetNext(shaddatainst_pool,(struct nulnkhdr_s *)sdi);
+    }
+    NuLstDestroy(shaddatainst_pool);
+    shaddatainst_pool = NULL;
+  }	*/
+  if (animdatainst_pool != NULL) {
+    adi = (struct animdatainst_s *)NuLstGetNext(animdatainst_pool,NULL);
+    while (adi != NULL)
+    {
+        adi = (struct animdatainst_s *)NuLstGetNext(animdatainst_pool,(struct nulnkhdr_s *)adi);
+    }
     NuLstDestroy(animdatainst_pool);
-    animdatainst_pool = (nulsthdr_s *)0x0;
+    animdatainst_pool = NULL;
   }
-  if (sceneinst_pool != (nulsthdr_s *)0x0) {
-    sc = (sceneinst_s *)0x0;
-    while (sc = (sceneinst_s *)NuLstGetNext(sceneinst_pool,(nulnkhdr_s *)sc),
-          sc != (sceneinst_s *)0x0) {
-      NuSceneDestroy(sc->nus);
+  
+  if (sceneinst_pool != NULL) {
+    si = (struct sceneinst_s *)NuLstGetNext(sceneinst_pool,NULL);
+    while (si != NULL) {
+      NuSceneDestroy(si->scene);
+      si = (struct sceneinst_s *)NuLstGetNext(sceneinst_pool,(struct nulnkhdr_s *)si);
     }
     NuLstDestroy(sceneinst_pool);
-    sceneinst_pool = (nulsthdr_s *)0x0;
+    sceneinst_pool = NULL;
   }
   return;
 }
