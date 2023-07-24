@@ -8,7 +8,7 @@
 // but the compiler doesn't feel like doing the optimization itself??
 #define FAST_DIV_20(num) (((iVar5 - iVar4) * (s32)0xCCCCCCCD) >> 4)
 
-#define PI 3.1415927f
+#define PI 3.1415927finstNuCGutCharSysCreate
 #define TAU 6.2831855f
 #define MAX_FIXED_POINT 65536
 #define DEG_TO_FIXED_POINT (MAX_FIXED_POINT * (1 / (2 * PI)))
@@ -49,7 +49,7 @@ void NuGCutSceneSysRender(void)
     
     for(icutscene = active_cutscene_instances; icutscene != NULL; icutscene = icutscene->next) { 
         instNuGCutSceneRender(icutscene);
-        icutscene->been_updated_this_frame = 0; //& 0xffbfffff
+        icutscene->been_updated_this_frame = 0;
     }
     
     return;
@@ -492,181 +492,131 @@ struct instNUGCUTCAMSYS_s * instNuCGutCamSysCreate(struct NUGCUTCAMSYS_s *camera
 }
 
 
-
-void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *icutscene,float current_frame)
-
+//PS2
+static void instNuGCutCamSysUpdate(struct instNUGCUTSCENE_s *icutscene, float current_frame)
 {
-  int state;
-  NUERRORFUNC *er;
-  NUGCUTCAMTGT_s *cutcamtgt;
-  numtx_s *ptr3;
-  nuanimdata2_s *camanim;
-  numtx_s *ptrCcamMtx;
-  numtx_s *ptrptr;
-  instNUGCUTCAM_s *icutcam;
-  NUGCUTCAM_s *cutcam2;
-  byte nexttgt;
-  NUGCUTCAMSYS_s *camsys;
-  instNUGCUTCAMSYS_s *icamSys;
-  NUGCUTCAM_s *cutcam;
-  bool c;
-  double dVar1;
-  double dVar2;
-  nuanimtime_s atime;
-  numtx_s aim_mtx;
-  Quat q_to;
-  Quat q_result;
-  Quat q_from;
-  float local_58;
-  float local_54;
-  float local_50;
-  uchar local_48 [28];
-  numtx_s *cCamMtx;
-  float frame;
-  char remap;
-  
-  dVar2 = (double)current_frame;
-  icamSys = icutscene->icameras;
-  camsys = icutscene->cutscene->cameras;
-  if ((camsys->camchanges != (NUSTATEANIM_s *)0x0) &&
-     (state = StateAnimEvaluate(camsys->camchanges,&icamSys->next_switch,local_48,current_frame),
-     state != 0)) {
-    icamSys->current_camera = local_48[0];
-  }
-  nexttgt = icamSys->next_tgt_ix;
-  if ((uint)nexttgt < (uint)icamSys->ntgts) {
-    cutcamtgt = icamSys->tgts;
-    frame = cutcamtgt[nexttgt].frame;
-    while ((double)frame <= dVar2) {
-      icutcam = icamSys->icutcams;
-      remap = camsys->remap_table[cutcamtgt[nexttgt].camid];
-      icutcam[remap].flags = icutcam[remap].flags | 2;
-      icutcam[remap].tgt_ix = icamSys->next_tgt_ix;
-      nexttgt = icamSys->next_tgt_ix + 1;
-      icamSys->next_tgt_ix = nexttgt;
-      if ((uint)icamSys->ntgts <= (uint)nexttgt) break;
-      cutcamtgt = icamSys->tgts;
-      frame = cutcamtgt[nexttgt].frame;
+    struct instNUGCUTCAMSYS_s *icamsys;
+    struct NUGCUTCAMSYS_s *camsys;
+    struct nuanimtime_s atime;
+    struct NUGCUTCAM_s *cutcam;
+    struct instNUGCUTCAM_s *icutcam;
+    struct instNUGCUTCAM_s *icutcam2;
+    struct NUGCUTCAMTGT_s *cutcamtgt;
+    struct numtx_s aim_mtx;
+    float lerp_factor;
+    float nframes;
+    struct nuquat_s q_from;
+    struct nuquat_s q_to;
+    struct nuquat_s q_result;
+    s32 lerp_out;
+    struct NuVec campos;
+    u8 camchange;
+    struct nuanimcurve2_s* curves;
+    s8* curveflags;
+    s32 curvesetflags;
+    //////////////////////////////////////////////////
+    s32 curve_ix;
+
+    
+    camsys = icutscene->cutscene->cameras;
+    icamsys = icutscene->icameras;
+    if ((camsys->camchanges != NULL) && (StateAnimEvaluate(camsys->camchanges, &icamsys->next_switch, &camchange, current_frame) != 0)) {
+        icamsys->current_camera = camchange;
     }
-  }
-  nexttgt = icamSys->next_tgt_ix;
-  if (nexttgt != 0) {
-    cutcamtgt = icamSys->tgts;
-    frame = cutcamtgt[nexttgt - 1].frame;
-    while (dVar2 < (double)frame) {
-      icutcam = icamSys->icutcams;
-      icamSys->next_tgt_ix = (uchar)(nexttgt - 1);
-      remap = camsys->remap_table[cutcamtgt->pad[((nexttgt - 1) * 0x10 & 0xff0) - 1]];
-      icutcam[remap].flags = icutcam[remap].flags | 2;
-      icutcam[remap].tgt_ix = icamSys->next_tgt_ix;
-      nexttgt = icamSys->next_tgt_ix;
-      if (nexttgt == 0) break;
-      cutcamtgt = icamSys->tgts;
-      frame = cutcamtgt[nexttgt - 1].frame;
+    
+    if (icamsys->next_tgt_ix < icamsys->ntgts) {
+        
+        for(; icamsys->tgts[icamsys->next_tgt_ix].frame <= current_frame; )
+        {
+            cutcamtgt = &icamsys->tgts[icamsys->next_tgt_ix];
+            icutcam = &icamsys->icutcams[camsys->remap_table[cutcamtgt->camid]];
+            icutcam->flags |= 2;
+            icutcam->tgt_ix = icamsys->next_tgt_ix;
+            icamsys->next_tgt_ix++;
+            if (icamsys->ntgts <= icamsys->next_tgt_ix) break;
+        } 
     }
-  }
-  if (-1 < icamSys->current_camera) {
-    if ((int)camsys->ncutcams <= (int)icamSys->current_camera) {
-      er = NuErrorProlog("C:/source/crashwoc/code/gamelib/gcutscn.c",0x2e3);
-      (*er)("instNuGCutCamSysUpdate: internal error");
+
+    
+    if (icamsys->next_tgt_ix != 0){
+        for(; current_frame < icamsys->tgts[icamsys->next_tgt_ix].frame;)
+        {
+            icamsys->next_tgt_ix--;
+            cutcamtgt = &icamsys->tgts[icamsys->next_tgt_ix];
+            icutcam = &icamsys->icutcams[camsys->remap_table[cutcamtgt->camid]];
+            icutcam->flags |= 2;
+            icutcam->tgt_ix = icamsys->next_tgt_ix;
+            if (icamsys->next_tgt_ix == 0) break;
+        }
     }
-    icutcam = icamSys->icutcams + icamSys->current_camera;
-    cutcam = camsys->cutcams + icamSys->current_camera;
-    if (((cutcam->flags & 1) == 0) || (camsys->camanim->nnodes <= (short)(ushort)cutcam->anim_ix))  {
-      state = 0x30;
-      cCamMtx = &cutscenecammtx;
-      do {
-        cutcam2 = cutcam;
-        ptrCcamMtx = cCamMtx;
-        state = state + -0x18;
-        ptrCcamMtx->_00 = (cutcam2->mtx)._00;
-        ptrCcamMtx->_01 = (cutcam2->mtx)._01;
-        ptrCcamMtx->_02 = (cutcam2->mtx)._02;
-        ptrCcamMtx->_03 = (cutcam2->mtx)._03;
-        ptrCcamMtx->_10 = (cutcam2->mtx)._10;
-        cutcam = (NUGCUTCAM_s *)&(cutcam2->mtx)._12;
-        ptrCcamMtx->_11 = (cutcam2->mtx)._11;
-        cCamMtx = (numtx_s *)&ptrCcamMtx->_12;
-      } while (state != 0);
-      ptrCcamMtx->_12 = *(float *)cutcam;
-      ptrCcamMtx->_13 = (cutcam2->mtx)._13;
-      ptrCcamMtx->_20 = (cutcam2->mtx)._20;
-      ptrCcamMtx->_21 = (cutcam2->mtx)._21;
+    
+    if (icamsys->current_camera < 0) {
+        return;
     }
-    else {
-      NuAnimData2CalcTime(camsys->camanim,(float)dVar2,&atime);
-      camanim = camsys->camanim;
-      state = (int)camanim->ncurves * (uint)cutcam->anim_ix;
-      NuAnimCurve2SetApplyToMatrix
-                (camanim->curves + state,camanim->curveflags + state,
-                 camanim->curvesetflags[cutcam->anim_ix],&atime,&cutscenecammtx);
+    
+    if (icamsys->current_camera >= camsys->ncutcams) {
+        NuErrorProlog("..\\nu2.ps2\\gamelib\\gcutscn.c", 0x378)("instNuGCutCamSysUpdate: internal error");
     }
-    if ((*(uint *)&icutscene->field_0x6c & 0x8000000) != 0) {
-      NuMtxMul(&cutscenecammtx,&cutscenecammtx,&icutscene->mtx);
+    
+    icutcam2 = &icamsys->icutcams[icamsys->current_camera];
+    cutcam = camsys->cutcams + icamsys->current_camera;
+    if (((cutcam->flags & 1) != 0) && (cutcam->anim_ix < camsys->camanim->nnodes)) {
+        NuAnimData2CalcTime(camsys->camanim, current_frame, &atime);
+        curve_ix = (int)camsys->camanim->ncurves * (u32)cutcam->anim_ix;
+        curves = &camsys->camanim->curves[curve_ix];
+        curveflags = &camsys->camanim->curveflags[curve_ix];
+        curvesetflags = camsys->camanim->curvesetflags[cutcam->anim_ix];
+        NuAnimCurve2SetApplyToMatrix(curves, curveflags, curvesetflags, &atime, &cutscenecammtx);
+    } else {
+        memcpy(&cutscenecammtx, &cutcam->mtx, sizeof(struct numtx_s));    
     }
+    
+    if ((icutscene->has_mtx) != 0) {
+        NuMtxMul(&cutscenecammtx, &cutscenecammtx, &icutscene->mtx);
+    }
+    
     set_cutscenecammtx = 1;
-    if ((icutcam->flags & 2) != 0) {
-      cutcamtgt = icamSys->tgts + icutcam->tgt_ix;
-      dVar1 = (double)cutcamtgt->nframes;
-      NuFabs(cutcamtgt->nframes);
-      frame = NuFsign(cutcamtgt->nframes);
-      c = frame < 0.0;
-      if ((!c) || (dVar2 < (double)(float)((double)cutcamtgt->frame + dVar1))) {
-        local_58 = cutscenecammtx._30;
-        local_54 = cutscenecammtx._31;
-        local_50 = cutscenecammtx._32;
-        state = 0x30;
-        cCamMtx = &aim_mtx;
-        ptrCcamMtx = &cutscenecammtx;
-        do {
-          ptrptr = ptrCcamMtx;
-          ptr3 = cCamMtx;
-          state = state + -0x18;
-          ptr3->_00 = ptrptr->_00;
-          ptr3->_01 = ptrptr->_01;
-          ptr3->_02 = ptrptr->_02;
-          ptr3->_03 = ptrptr->_03;
-          ptr3->_10 = ptrptr->_10;
-          ptr3->_11 = ptrptr->_11;
-          cCamMtx = (numtx_s *)&ptr3->_12;
-          ptrCcamMtx = (numtx_s *)&ptrptr->_12;
-        } while (state != 0);
-        ptr3->_12 = ptrptr->_12;
-        ptr3->_13 = ptrptr->_13;
-        ptr3->_20 = ptrptr->_20;
-        ptr3->_21 = ptrptr->_21;
-        NuMtxLookAtZ(&aim_mtx,cutcamtgt->tgt);
-        if (dVar1 <= 0.009999999776482582) {
-          dVar2 = 1.0;
+    if ((icutcam2->flags & 2) != 0) {
+        lerp_out = 0;
+        cutcamtgt = icamsys->tgts + icutcam2->tgt_ix;
+        lerp_factor = NuFabs(cutcamtgt->nframes);
+        
+        if ((NuFsign(cutcamtgt->nframes) < 0.0f)){
+            lerp_out = 1;
+        }
+
+        if ((lerp_out) && ((current_frame >= cutcamtgt->frame + lerp_factor))){
+            icutcam2->flags = icutcam2->flags & 0xFD;
+            return;
+        }
+        
+        memcpy(&campos, &cutscenecammtx._30, sizeof(struct NuVec));
+        memcpy(&aim_mtx, &cutscenecammtx, sizeof(struct numtx_s));
+        
+        NuMtxLookAtZ(&aim_mtx, cutcamtgt->tgt);
+        if (0.01f < lerp_factor) {
+            lerp_factor = (current_frame - cutcamtgt->frame) / lerp_factor;
+            if (1.0f < lerp_factor) {
+                lerp_out = 1;
+            }
+            else if (lerp_factor < 0.0f) {
+                lerp_out = 0;
+            }
         }
         else {
-          dVar2 = (double)(float)((double)(float)(dVar2 - (double)cutcamtgt->frame) / dVar1);
-          if (dVar2 <= 1.0) {
-            if (dVar2 < 0.0) {
-              c = false;
-            }
-          }
-          else {
-            c = true;
-          }
+            lerp_factor = 1.0f;
         }
-        if (c) {
-          dVar2 = (double)(float)(1.0 - dVar2);
+        if (lerp_out) {
+            lerp_factor = 1.0f - lerp_factor;
         }
-        NuMtxToQuat(&aim_mtx,&q_result);
-        NuMtxToQuat(&cutscenecammtx,&q_to);
-        NuQuatSlerp((float)dVar2,&q_from,&q_to,&q_result);
-        NuQuatToMtx(&q_from,&cutscenecammtx);
-        cutscenecammtx._30 = local_58;
-        cutscenecammtx._32 = local_50;
-        cutscenecammtx._31 = local_54;
-      }
-      else {
-        icutcam->flags = icutcam->flags & 0xfd;
-      }
+        
+        NuMtxToQuat(&aim_mtx, &q_to);
+        NuMtxToQuat(&cutscenecammtx, &q_from);
+        NuQuatSlerp(&q_result, &q_from, &q_to, lerp_factor);
+        NuQuatToMtx(&q_result, &cutscenecammtx);
+        memcpy(&cutscenecammtx._30, &campos, sizeof(struct NuVec));
     }
-  }
-  return;
+    return;
 }
 
 //PS2
@@ -1125,84 +1075,89 @@ static void instNuGCutRigidSysStart(struct instNUGCUTRIGIDSYS_s *irigidsys,struc
 //PS2
 static void instNuGCutRigidSysUpdate(struct instNUGCUTSCENE_s* icutscene, float current_frame)
 {
-  struct instNUGCUTRIGID_s *irigid;
-  struct NUGCUTLOCATORSYS_s *locatorsys;
-  struct instNUGCUTLOCATORSYS_s *ilocatorsys;
-  s32 j;
-  struct NUGCUTLOCATOR_s *locator;
-  struct NUGCUTRIGID_s *rigid;
-  s32 i;
-  struct numtx_s mtx;
-  char newvisibilitystate;
-  struct NUGCUTSCENE_s *cutscene;
-  struct NUGCUTRIGIDSYS_s *rigidsys;
-  struct instNUGCUTRIGIDSYS_s *irigidsys;
-  s32 locix;
-////////////////////////
+    struct NUGCUTRIGID_s *rigid; 
+    struct instNUGCUTRIGID_s *irigid;
+    s32 i;
+    s32 j;
+    struct numtx_s mtx;
+    struct NUGCUTSCENE_s *cutscene;
+    struct NUGCUTRIGIDSYS_s *rigidsys;
+    struct instNUGCUTRIGIDSYS_s *irigidsys;
+    s8 newvisibilitystate;
+    struct NUGCUTLOCATORSYS_s *locatorsys;
+    struct instNUGCUTLOCATORSYS_s *ilocatorsys;
+    s32 locix;
+    // ------------------------------------------
+    struct NUGCUTLOCATOR_s *locator;
     struct instNUGCUTLOCATOR_s *iloctemp;
     struct NUGCUTLOCATORTYPE_s* loctype;
-//////////////////////
+
     
-  cutscene = icutscene->cutscene;
-  irigidsys = icutscene->irigids;
-  rigidsys = cutscene->rigids;
-    for(i = 0; i < (s32)rigidsys->nrigids; i++)
+    cutscene = icutscene->cutscene;
+    irigidsys = icutscene->irigids;
+    rigidsys = cutscene->rigids;
+    
+    for(i = 0; i < rigidsys->nrigids; i++)
     {
-      rigid = &rigidsys->rigids[i];
-      irigid = &irigidsys->irigids[i];
-        if ((rigid->flags & 2) != 0) 
-        {
+        rigid = &rigidsys->rigids[i];
+        irigid = &irigidsys->irigids[i];
+
+        if ((rigid->flags & 2)) {
             continue;
         }
-        if (((rigid->flags & 4) == 0))
-        {
+        
+        if ((rigid->flags & 4) == 0) {
             continue;
         }
+        
         if ((rigid->visibiltyanim != NULL) &&
-           (StateAnimEvaluate(rigid->visibiltyanim,&irigid->visibleframeix,
-                                      &newvisibilitystate,current_frame) != 0)) {
-          if ((u8*)newvisibilitystate != '\0') {
-              ((irigid->special).special)->instance->flags.visible = 1;
-          }
-          else {
-            ((irigid->special).special)->instance->flags.visible = 0;
-          }
+        (StateAnimEvaluate(rigid->visibiltyanim,&irigid->visibleframeix, (u8 *)&newvisibilitystate,current_frame) != 0)) {
+            if (newvisibilitystate != '\0') {
+                ((irigid->special).special)->instance->flags.visible = 1;
+            }
+            else {
+                ((irigid->special).special)->instance->flags.visible = 0;
+            }
         }
-        if (((irigid->special).special)->instance->flags.visible) // & 1
+        
+        if ( ((irigid->special).special)->instance->flags.visible != 0) // & 1
         {
-              NuGCutRigidCalcMtx(rigid,current_frame,&mtx);
-              if ((icutscene->has_mtx) != 0) //& 0x10 
-              {
-                NuMtxMul(&mtx,&mtx,&icutscene->mtx);
-              }
-                memcpy(&(irigid->special.special)->instance->mtx, &mtx, sizeof(struct numtx_s));
-                
-              if (((((irigid->special).special)->instance->flags.visible) != 0) //& 1
-                  && (rigid->first_locator != 0xff)) {
+            NuGCutRigidCalcMtx(rigid, current_frame, &mtx);
+            
+            if ((icutscene->has_mtx) != 0) //& 0x10 
+            {
+                NuMtxMul(&mtx, &mtx, &icutscene->mtx);
+            }
+            
+            (irigid->special.special)->instance->mtx = mtx;
+
+            if (((((irigid->special).special)->instance->flags.visible) != 0) //& 1
+            && (rigid->first_locator != 0xff)) {
                 locatorsys = cutscene->locators;
                 ilocatorsys = icutscene->ilocators;
-                  for (j = 0; rigid->nlocators > j; j++)
-                  {
+                
+                for (j = 0; j < rigid->nlocators; j++)
+                {
                     iloctemp = &ilocatorsys->ilocators[(u32)rigid->first_locator + j];
                     locator = &locatorsys->locators[(u32)rigid->first_locator + j];
-                      loctype = &locatorsys->locator_types[locator->locator_type];
+                    loctype = &locatorsys->locator_types[locator->locator_type];
+                    
                     if ((loctype->flags & 1) != 0) {
-                      instNuGCutDebrisLocatorUpdate(locatorsys,iloctemp,locator,current_frame,&mtx);
+                        instNuGCutDebrisLocatorUpdate(locatorsys, iloctemp, locator, current_frame, &mtx);
                     }
                     else {
-                      if ((loctype->flags & 2) != 0) {
-                        locix = locatorsys->locator_types[locator->locator_type].ix;
-                        if (locix != 0xffff) {
-                          (locatorfns[locix].fn)
-                              (icutscene, locatorsys, iloctemp, locator, current_frame, &mtx);
+                        if ((loctype->flags & 2) != 0) {
+                            locix = locatorsys->locator_types[locator->locator_type].ix;
+                            if (locix != 0xffff) {
+                                (locatorfns[locix].fn)(icutscene, locatorsys, iloctemp, locator, current_frame, &mtx);
+                            }
                         }
-                      }
                     }
-                  }
-              }
+                }
+            }
         }
     }
-  return;
+    return;
 }
 
 //PS2

@@ -1,40 +1,41 @@
-nulsthdr_s * NuLstCreate(int elcnt,int elsize)
-
+//PS2
+struct nulsthdr_s * NuLstCreate(s32 elcnt,s32 elsize)
 {
-  nulsthdr_s *list;
-  int n;
-  prevLst free;
-  nulnkhdr_s *start;
-  prevLst curr;
-  short i;
-  
-  list = (nulsthdr_s *)NuMemAlloc(elcnt * (elsize + 0x10) + 0x10);
-  if (list != (nulsthdr_s *)0x0) {
-    start = (nulnkhdr_s *)(list + 1);
-    n = 1;
-    list->head = (nulnkhdr_s *)0x0;
-    list->free = start;
-    list->elcnt = (short)elcnt;
-    list->elsize = (short)elsize;
-    curr.s8 = (char *)((int)start + elsize + 0x10);
-    free.lhdr = start;
-    if (1 < elcnt) {
-      do {
-        start = curr.lhdr;
-        i = (short)n;
-        (free.lhdr)->succ = start;
-        (free.lhdr)->owner = list;
-        n = n + 1;
-        (free.lhdr)->id = i - 1;
-        curr.s8 = (start + elsize + 0x10).s8;
-        free.lhdr = start;
-      } while (n < elcnt);
+    union Lst prev;
+    struct nulsthdr_s *list;
+    union Lst curr;
+    struct nulnkhdr_s* start;
+    struct nulnkhdr_s* start1;
+    s32 n;
+    s32 k;
+    
+    k = (elsize + 0x10);
+    list = (struct nulsthdr_s *)NuMemAlloc(elcnt * (k) + 0x10, ".\\listman.c", 0x24);
+    if (list != NULL) {
+        list->head = NULL;
+        list->elcnt = (short)elcnt;
+        list->elsize = (short)elsize;
+        start = (struct nulnkhdr_s *)list + 1;
+        list->free = start;
+        curr.lhdr = start;
+        
+        start = (s8*)start + elsize + 0x10;
+        // n = 1;
+        for(n = 1;  n < elsize; n++)
+        {
+            (curr.lhdr)->succ = start;
+            (curr.lhdr)->owner = list;
+            (curr.lhdr)->id = n - 1;
+            curr.lhdr = start;
+            start = (s8*)start + (k);
+        
+        }
+        prev.s8 = (s8*)start + (k);
+        start->id = n - 1;
+        start->succ = NULL;
+        start->owner = list;
     }
-    start->succ = (nulnkhdr_s *)0x0;
-    start->id = (short)n - 1;
-    start->owner = list;
-  }
-  return list;
+    return list;
 }
 
 
@@ -46,68 +47,71 @@ void NuLstDestroy(nulsthdr_s *hdr)
   return;
 }
 
-
-nulnkhdr_s * NuLstAlloc(nulsthdr_s *hdr)
-
+//PS2
+struct nulnkhdr_s * NuLstAlloc(struct nulsthdr_s *hdr)
 {
-  nulnkhdr_s *lnk;
+  struct nulnkhdr_s *rv;
   
-  lnk = hdr->free;
-  if (lnk != (nulnkhdr_s *)0x0) {
-    hdr->free = lnk->succ;
-    lnk->succ = hdr->head;
-    if (hdr->head == (nulnkhdr_s *)0x0) {
-      hdr->tail = lnk;
+  rv = hdr->free;
+  if (rv != NULL) {
+    hdr->free = rv->succ;
+    rv->succ = hdr->head;
+    if (hdr->head != NULL) {
+      hdr->head->prev = rv;
     }
     else {
-      hdr->head->prev = lnk;
+      hdr->tail = rv;
     }
-    lnk->prev = (nulnkhdr_s *)0x0;
-    hdr->head = lnk;
-    *(uint *)&lnk->id = *(uint *)&lnk->id | 0x8000;
-    return lnk + 1;
+    rv->prev = NULL;
+    hdr->head = rv;
+    *(uint *)&rv->id = *(uint *)&rv->id | 0x10000;
+    return rv + 1;
   }
-  return (nulnkhdr_s *)0x0;
+  return NULL;
 }
 
 
-void NuLstFree(nulnkhdr_s *lnk)
-
+//PS2
+void NuLstFree(struct nulnkhdr_s *lnk)
 {
-  nulsthdr_s *owner;
+  struct nulsthdr_s *hdr;
+    // struct nulnkhdr_s* prev = lnk - 1;
+    lnk -= 1;
   
-  owner = lnk[-1].owner;
-  if (lnk[-1].succ == (nulnkhdr_s *)0x0) {
-    owner->tail = lnk[-1].prev;
+  hdr = lnk->owner;
+  if (lnk->succ != NULL) {
+    (lnk->succ)->prev = lnk->prev;
   }
   else {
-    (lnk[-1].succ)->prev = lnk[-1].prev;
+    hdr->tail = lnk->prev;
   }
-  if (lnk[-1].prev == (nulnkhdr_s *)0x0) {
-    owner->head = lnk[-1].succ;
+  if (lnk->prev != NULL) {
+    (lnk->prev)->succ = lnk->succ;
   }
   else {
-    (lnk[-1].prev)->succ = lnk[-1].succ;
+    hdr->head = lnk->succ;
   }
-  lnk[-1].succ = owner->free;
-  owner->free = lnk + -1;
-  *(uint *)&lnk[-1].id = *(uint *)&lnk[-1].id & 0xffff7fff;
+  lnk->succ = hdr->free;
+  hdr->free = lnk;
+  *(u32 *)&lnk->id = *(u32 *)&lnk->id & 0xfffeffff;
   return;
 }
 
-
-nulnkhdr_s * NuLstGetNext(nulsthdr_s *hdr,nulnkhdr_s *lnk)
-
+//PS2
+struct nulnkhdr_s * NuLstGetNext(struct nulsthdr_s *hdr,struct nulnkhdr_s *lnk)
 {
-  if (lnk == (nulnkhdr_s *)0x0) {
-    if (hdr->head != (nulnkhdr_s *)0x0) {
-      return hdr->head + 1;
-    }
+  struct nulnkhdr_s *pnVar1;
+  
+  if (lnk != NULL) {
+    pnVar1 = lnk[-1].succ;	//correct?
   }
-  else if (lnk[-1].succ != (nulnkhdr_s *)0x0) {
-    return lnk[-1].succ + 1;
+  else {
+    pnVar1 = hdr->head;
   }
-  return (nulnkhdr_s *)0x0;
+  if (pnVar1 == NULL) {
+    return NULL;
+  }
+  return pnVar1 + 1;
 }
 
 
