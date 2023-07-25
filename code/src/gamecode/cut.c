@@ -128,3 +128,45 @@ void UpdateCutMovieCamera(struct CamMtx *cam)
   }
   return;
 }
+
+//PS2
+void CloseCutMovie(s32 all)
+{
+    s32 i;
+  
+    for(i = 0; i < 0x20; i++)
+    {
+        if (CutInst[i] != NULL) {
+            instNuGCutSceneDestroy(CutInst[i]);
+            CutInst[i] = NULL;
+        }
+    }
+    
+    if ((ghg_inst_count != 0)) { 
+      
+        for(i = 0; i < ghg_inst_count; i++ ) {
+            NuHGobjDestroy(ghg_insts[i].scene);
+        }
+    }
+    
+    ghg_inst_count = 0;
+    for(i = 0; i < 0x20; i++)
+    {
+        world_scene[i] = NULL;
+    }
+    NuSoundUpdate();
+    NuSoundStopStream(0);
+    NuSoundStopStream(1);
+    NuSoundStopStream(2);
+    NuSoundStopStream(3);
+    NuSoundStopStream(4);
+    NuSoundUpdate();
+    //NuSoundFlushLoops();	//PS2
+    //UnLoadGBABG();  //NGC
+    if (all != 0) {
+        NuTexInit();
+        NuMtlInit(); //NuMtlRelease(); //PS2
+        NuGobjInit();
+    }
+    return;
+}

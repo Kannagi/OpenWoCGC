@@ -531,44 +531,49 @@ LAB_80017f48:
 }
 
 
-float ModelAnimDuration(int character,int action,float start,float end)
-
+//PS2
+float ModelAnimDuration(u32 character,u32 action,float start,float end)
 {
-  char cVar1;
-  float fVar2;
-  struct nuanimdata_s *anmdat;
-  
-  if ((((uint)character < 0xbf) && ((uint)action < 0x76)) &&
-     (cVar1 = CRemap[character], cVar1 != -1)) {
-    anmdat = CModel[cVar1].anmdata[action];
-    if (anmdat != NULL) {
-      fVar2 = anmdat->time;
-      if ((start < 1.0) || (fVar2 <= start)) {
-        if (((1.0 <= end) && (end < fVar2)) && (start < end)) {
-          fVar2 = end - 1.0;
-        }
-      }
-      else if (1.0 <= end) {
-        if (end < fVar2) {
-          if (start < end) {
-            fVar2 = end - start;
-          }
-          else {
-            fVar2 = fVar2 - start;
-          }
-        }
-        else {
-          fVar2 = fVar2 - start;
-        }
-      }
-      else {
-        fVar2 = fVar2 - start;
-      }
-      return fVar2 * (1.0 / (float)CModel[cVar1].fanmdata[action + -0x10]->nchunks) * FLOAT_00643f 74
-      ;
+    f32 t;
+    struct CharacterModel *model;
+    s32 index;
+
+    if ((character > 0xBE) || (action > 0x75)){
+        return 1.0f;
     }
-  }
-  return 1.0;
+    
+    index = CRemap[character];
+    if(index == -1)
+    { 
+        return 1.0f;
+    }
+    
+    model = &CModel[index];
+    if(model->anmdata[action] == NULL)
+    { 
+        return 1.0f;
+    }
+    
+    t = model->anmdata[action]->time;
+    if ((start >= 1.0f) && (start < t))
+    {
+        if ((end >= 1.0f) && (end < t) && (start < end))
+        {
+            t = end - start;
+        }
+        else
+        {
+            t -= start;
+        }
+    }
+    else if ((end >= 1.0f) && (end < t))
+    {
+        if (start < end)
+        {
+            t = end - 1.0f;
+        }
+    }
+    return t * (1.0f / model->animlist[action]->speed) * 0.033333335f;
 }
 
 

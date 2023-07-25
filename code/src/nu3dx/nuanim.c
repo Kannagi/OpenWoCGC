@@ -110,12 +110,48 @@ struct nuanimdata_s * NuAnimDataFixPtrs(struct nuanimdata_s *animdata,s32 addres
     return animdata;
 }
 
-//PS2
+//PS2 Match
 struct nuanimdata2_s* NuAnimData2FixPtrs(struct nuanimdata2_s* animdata, s32 address_offset)
 {
-	//WIP
+    s32 i;
+    s32 j;
+    s32 k;
+    int totncurves;
+    struct nuanimcurve2_s *curve;
+  
+    if (isBitCountTable == 0) {
+        for(i = 0; i < 256; i++) {        
+            BitCountTable[i] = 0;
+            for(j = 0; j < 8; j++) {
+                if (((i >> j) & 1) != 0) {
+                    BitCountTable[i]++;
+                }
+            }
+        }
+        isBitCountTable = 1;
+    }
 
-	return NULL;
+    ASSIGN_IF_SET(animdata, (struct nuanimdata2_s *)((s32)animdata + address_offset));
+
+    if (animdata != NULL) {
+        totncurves = animdata->nnodes * animdata->ncurves;
+
+        ASSIGN_IF_SET(animdata->curves, ((s32)animdata->curves + address_offset));
+        ASSIGN_IF_SET(animdata->curveflags, ((s32)animdata->curveflags + address_offset));
+        ASSIGN_IF_SET(animdata->curvesetflags, ((s32)animdata->curvesetflags + address_offset));
+        
+        for (k = 0; k < totncurves; k++)
+        {
+            if (animdata->curveflags[k] != '\0') {
+                curve = &animdata->curves[k];
+                ASSIGN_IF_SET(curve->data.curvedata, (int)curve->data.curvedata + address_offset);
+                ASSIGN_IF_SET(curve->data.curvedata->mask, (s32)curve->data.curvedata->mask + address_offset);
+                ASSIGN_IF_SET(curve->data.curvedata->key_ixs, (s32)curve->data.curvedata->key_ixs + address_offset);
+                ASSIGN_IF_SET(curve->data.curvedata->key_array, (s32)curve->data.curvedata->key_array + address_offset);
+            }
+        }
+    }
+    return animdata;
 }
 
 
