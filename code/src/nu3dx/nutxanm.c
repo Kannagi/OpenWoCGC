@@ -39,15 +39,13 @@ void NuTexAnimProgSysInit(void)
   return;
 }
 
-
+//PS2
 struct nutexanimprog_s * NuTexAnimProgFind(char *name)
-
 {
-  s32 cmp;
-  nutexanimprog_s *rv;
+  struct nutexanimprog_s *rv;
   
   rv = sys_progs;
-  while ((rv != NULL && (cmp = strcasecmp(name,rv->name), cmp != 0))) {
+  while ((rv != NULL && (strcasecmp(name,rv->name) != 0))) {
     rv = rv->succ;
   }
   return rv;
@@ -317,7 +315,7 @@ void NuTexAnimSetSignals(u32 sig)
   return;
 }
 
-
+//PS2
 void NuTexAnimProcessList(struct nutexanim_s *nta)
 
 {
@@ -684,7 +682,7 @@ LAB_800ba56c:
 }
 
 //PS2
-s32 LabTabFind(char* buf) \\static inline on ps2
+s32 LabTabFind(char* buf) //static inline on ps2
 {
     s32 i;
 
@@ -703,8 +701,8 @@ s32 LabTabFind(char* buf) \\static inline on ps2
     return labtabcnt - 1;
 }
 
-
-s32 XDefLabTabFind(char* buf)
+//PS2
+static s32 XDefLabTabFind(char* buf)
 {
    s32 i;
     if (strlen(buf) > 0x14) {
@@ -716,106 +714,71 @@ s32 XDefLabTabFind(char* buf)
       }
     }
   if (0xff < xdeflabtabcnt) {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1de)("Tex Anim Assembler Fatal Error: too many global labels");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x21b)("Tex Anim Assembler Fatal Error: too many global labels");
   }
-  strcpy(&xdeflabtab[xdeflabtabcnt++],buf);
+  NuStrCpy(&xdeflabtab[xdeflabtabcnt++],buf);
   return xdeflabtabcnt + -1;
 }
 
 
-
-void pftaTex(nufpar_s *fp)
-
+//PS2
+void pftaTex(struct nufpar_s *fp)
 {
-  int tid;
-  short eop;
-  nutexanimprog_s *prog;
+  s16 tid;
   
   tid = NuFParGetInt(fp);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 0;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)tid;
+  parprog->code[parprog->eop++] = 0;
+  parprog->code[parprog->eop++] = tid;
   return;
 }
 
-void pftaTexAdj(nufpar_s *fpar)
-
+//PS2
+void pftaTexAdj(struct nufpar_s *fpar)
 {
-  int tid;
-  int mi;
-  int ma;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 tid;
+  s32 mi;
+  s32 ma;
   
   tid = NuFParGetInt(fpar);
   mi = NuFParGetInt(fpar);
   ma = NuFParGetInt(fpar);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 1;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)tid;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)mi;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)ma;
+  parprog->code[parprog->eop++] = 1;
+  parprog->code[parprog->eop++] = (short)tid;
+  parprog->code[ parprog->eop++] = (short)mi;
+  parprog->code[ parprog->eop++] = (short)ma;
   return;
 }
 
-void pftaWait(nufpar_s *fpar)
-
+//PS2
+void pftaWait(struct nufpar_s *fpar)
 {
-  int fcnt;
-  int rcnt;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 fcnt;
+  s32 rcnt;
+
+  fcnt = NuFParGetInt(fpar);
+  rcnt = NuFParGetInt(fpar);
+  parprog->code[parprog->eop++] = 2;
+  parprog->code[parprog->eop++] = (short)fcnt;
+  parprog->code[parprog->eop++] = (short)rcnt;
+
+  return;
+}
+
+//PS2
+void pftaRate(struct nufpar_s *fpar)
+{
+  s32 fcnt;
+  s32 rcnt;
   
   fcnt = NuFParGetInt(fpar);
   rcnt = NuFParGetInt(fpar);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 2;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)fcnt;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)rcnt;
+  parprog->code[parprog->eop++] = 5;
+  parprog->code[parprog->eop++] = (short)fcnt;
+  parprog->code[parprog->eop++] = (short)rcnt;
   return;
 }
 
-void pftaRate(nufpar_s *fpar)
-
-{
-  int fcnt;
-  int rcnt;
-  short eop;
-  nutexanimprog_s *prog;
-  
-  fcnt = NuFParGetInt(fpar);
-  rcnt = NuFParGetInt(fpar);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 5;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)fcnt;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)rcnt;
-  return;
-}
-
+//PS2
 static void pftaOn(struct nufpar_s *fp)
 {
   s32 sig;
@@ -826,6 +789,7 @@ static void pftaOn(struct nufpar_s *fp)
   return;
 }
 
+//PS2
 static void pftaOff(struct nufpar_s *fp)
 {
   s32 sig;
@@ -836,191 +800,136 @@ static void pftaOff(struct nufpar_s *fp)
   return;
 }
 
+//PS2
 static void pftaLabel(struct nufpar_s *fp) {
     NuFParGetWord(fp);
     nta_labels[LabTabFind(fp->wbuff)] = parprog->eop;
 }
 
+//PS2
 static void pftaXDef(struct nufpar_s *fpar)
 {
   s32 lab;
   
   NuFParGetWord(fpar);
-  lab = XDefLabTabFind(fpar->wordBuffer + 1);
+  lab = XDefLabTabFind(fpar->wordBuffer);
   parprog->xdef_ids[parprog->xdef_cnt] = (short)lab;
   parprog->xdef_addrs[prog->xdef_cnt] = parprog->eop;
   parprog->xdef_cnt = parprog->xdef_cnt + 1;
   return;
 }
 
+//PS2
 static void pftaGoto(struct nufpar_s *fpar)
 {
   s32 lab;
   
   NuFParGetWord(fpar);
-  lab = LabTabFind(fpar->wordBuffer + 1);
-  parprog->eop = parprog->eop; + 1;
-  parprog->code[parprog->eop] = 7;
-  parprog->eop = parprog->eop + 1;
-  parprog->code[parprog->eop] = (short)lab;
+  lab = LabTabFind(fpar->wbuff);
+  parprog->code[parprog->eop++] = 7;
+  parprog->code[parprog->eop++] = (short)lab;
   return;
 }
 
-
-void pftaXRef(nufpar_s *fpar)
-
+//PS2
+void pftaXRef(struct nufpar_s *fpar)
 {
-  int lab;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 lab;
   
   NuFParGetWord(fpar);
-  lab = XDefLabTabFind(fpar->wordBuffer + 1);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 0xf;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)lab;
+  lab = XDefLabTabFind(fpar->wbuff);
+  parprog->code[parprog->eop++] = 0xf;
+  parprog->code[parprog->eop++] = (short)lab;
   return;
 }
 
-void pftaBtex(nufpar_s *fpar)
-
+//PS2
+void pftaBtex(struct nufpar_s *fpar)
 {
-  int cc;
-  int tid;
-  int lab;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 cc;
+  s32 tid;
+  s32 lab;
   
   cc = ParGetCC(fpar);
   tid = NuFParGetInt(fpar);
   NuFParGetWord(fpar);
-  lab = LabTabFind(fpar->wordBuffer + 1);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 9;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)cc;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)tid;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)lab;
+  lab = LabTabFind(fpar->wbuff + 1);
+  parprog->code[parprog->eop++] = 9;
+  parprog->code[parprog->eop++] = (short)cc;
+  parprog->code[parprog->eop++] = (short)tid;
+  parprog->code[parprog->eop++] = (short)lab;
   return;
 }
 
-void pftaGosub(nufpar_s *fpar)
-
+//PS2
+void pftaGosub(struct nufpar_s *fpar)
 {
-  int lab;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 lab;
   
   NuFParGetWord(fpar);
-  lab = LabTabFind(fpar->wordBuffer + 1);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 8;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)lab;
+  lab = LabTabFind(fpar->wbuff);
+  parprog->code[parprog->eop++] = 8;
+  parprog->code[parprog->eop++] = (short)lab;
   return;
 }
 
-void pftaRet(nufpar_s *fp)
-
+//PS2
+void pftaRet(struct nufpar_s *fp)
 {
-  short eop;
-  nutexanimprog_s *prog;
-  
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 10;
+  parprog->code[parprog->eop++] = 10;
   return;
 }
 
-
-void pftaRepeat(nufpar_s *fpar)
-
+//PS2
+void pftaRepeat(struct nufpar_s *fpar)
 {
-  int randval;
-  int cnt;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 randval;
+  s32 cnt;
   
   randval = NuFParGetInt(fpar);
   if (randval == 0) {
-    randval = 0xffff; //=-1
+    randval = 0xffff; //0x7fffffff
   }
   cnt = NuFParGetInt(fpar);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 0xb;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)randval;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)cnt;
+  parprog->code[parprog->eop++] = 0xb;
+  parprog->code[parprog->eop++] = (short)randval;
+  parprog->code[parprog->eop++] = (short)cnt;
   return;
 }
 
-void pftaRepend(nufpar_s *fp)
-
+//PS2
+void pftaRepend(struct nufpar_s *fp)
 {
-  short eop;
-  nutexanimprog_s *prog;
-  
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 0xc;
+  parprog->code[parprog->eop++] = 0xc;
   return;
 }
 
-void pftaUntiltex(nufpar_s *fpar)
-
+//PS2
+static void pftaUntiltex(nufpar_s* fp)
 {
-  int cc;
-  int tid;
-  short eop;
-  nutexanimprog_s *prog;
+  s32 cc;
+  s32 tid;
   
   cc = ParGetCC(fpar);
   tid = NuFParGetInt(fpar);
-  prog = parprog;
-  eop = parprog->eop;
-  parprog->eop = eop + 1;
-  prog->code[eop] = 0xd;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)cc;
-  eop = prog->eop;
-  prog->eop = eop + 1;
-  prog->code[eop] = (short)tid;
+  parprog->code[parprog->eop++] = 0xd;
+  parprog->code[parprog->eop++] = (short)cc;
+  parprog->code[parprog->eop++] = (short)tid;
   return;
 }
 
+//PS2
 static void pftaEnd(struct nufpar_s *fp)
 {
-  parprog->eop = parprog->eop + 1;
-  parprog->code[parprog->eop] = 0xe;
+  parprog->code[parprog->eop++] = 0xe;
   return;
 }
 
+//PS2
 static void pftaScriptname(struct nufpar_s *fpar)
 {
   NuFParGetWord(fpar);
-  fpar->wordBuffer[0x21] = '\0';
-  strcpy(parprog->name,fpar->wordBuffer + 1);
+  fpar->wbuff[0x20] = '\0';
+  strcpy(parprog->name,fpar->wbuff);
   return;
 }

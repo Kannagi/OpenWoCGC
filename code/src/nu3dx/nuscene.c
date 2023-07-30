@@ -575,61 +575,36 @@ void ReadNuIFFUnknown(fileHandle handle, u32 blockMagic)
         return;
 }
 
-s32 ReadNuIFFInstSet(fileHandle fh, struct nuinstance_s** instances, struct nuinstanim_s** instanims)
+//PS2
+s32 ReadNuIFFInstSet(s32 fh,struct nuinstance_s **instances,struct nuinstanim_s **instanims)
 {
-  s32 ninst;
-  struct nuinstance_s *inst;
-  s32 size;
-  struct nuinstanim_s *ianm;
   s32 i;
-  struct nuinstanim_s *ptrAnm2;
-  struct nuinstanim_s *pAnm;
-  struct nuinstance_s *ptrI;
-
-  ninst = NuFileReadInt(fh);
-  inst = (struct nuinstance_s *)NuMemAlloc(ninst * 0x50);
-  *instances = inst;
-  NuFileRead(fh,inst,ninst * 0x50);
-  size = NuFileReadInt(fh);
-  if (size != 0) {
-    ianm = (struct nuinstanim_s *)NuMemAlloc(size * 0x60);
-    NuFileRead(fh,ianm,size * 0x60);
+  s32 num_instanims;
+  s32 bytes;
+  s32 num_instances;
+  struct nuinstance_s *instance;
+  struct nuinstanim_s *linstanims;
+  
+  num_instances = NuFileReadInt(fh);
+  *instances = (struct nuinstance_s *)NuMemAlloc(num_instances * sizeof(struct nuinstance_s)); //,"..\\nu2.ps2\\nu3d\\nuscene.c",0x5a3
+  NuFileRead(fh,*instances,num_instances * sizeof(struct nuinstance_s));
+  num_instanims = NuFileReadInt(fh);
+  if (num_instanims != 0) {
+      bytes = num_instanims * sizeof(struct nuinstanim_s);
+    linstanims = (struct nuinstanim_s *)NuMemAlloc(bytes); //,"..\\nu2.ps2\\nu3d\\nuscene.c",0x5aa
+    NuFileRead(fh,linstanims,bytes);
     if (instanims != NULL) {
-      *instanims = ianm;
+      *instanims = linstanims;
     }
-    size = 0;
-    if (0 < ninst) {
-      do {
-        i = size + 1;
-        inst = *instances + size;
-        if (inst->anim != NULL) {
-          inst->anim = ianm;
-          ianm = ianm + 1;
-          size = 0x30;
-          pAnm = inst->anim;
-          do {
-            ptrI = inst;
-            ptrAnm2 = pAnm;
-            size = size + -0x18;
-            (ptrAnm2->mtx)._00 = (ptrI->mtx)._00;
-            (ptrAnm2->mtx)._01 = (ptrI->mtx)._01;
-            (ptrAnm2->mtx)._02 = (ptrI->mtx)._02;
-            (ptrAnm2->mtx)._03 = (ptrI->mtx)._03;
-            (ptrAnm2->mtx)._10 = (ptrI->mtx)._10;
-            inst = (struct nuinstance_s *)&(ptrI->mtx)._12;
-            (ptrAnm2->mtx)._11 = (ptrI->mtx)._11;
-            pAnm = (struct nuinstanim_s *)&(ptrAnm2->mtx)._12;
-          } while (size != 0);
-          *(float *)pAnm = *(float *)inst;
-          (ptrAnm2->mtx)._13 = (ptrI->mtx)._13;
-          (ptrAnm2->mtx)._20 = (ptrI->mtx)._20;
-          (ptrAnm2->mtx)._21 = (ptrI->mtx)._21;
-        }
-        size = i;
-      } while (i < ninst);
-    }
+      for(i = 0; i < num_instances; i++) {
+          instance = &instances[0][i];
+          if (instance->anim != 0) {
+              instance->anim = linstanims++;
+              instance->anim->mtx = instance->mtx;
+          }
+      }
   }
-  return ninst;
+  return num_instances;
 }
 
 
@@ -756,6 +731,52 @@ LAB_800b9214:
   return;
 }
 
+//PS2 (85%)
+void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
+{   
+    s32 i;
+    s32 j;
+    s32 cnt;
+    struct nutexanim_s *tex;
+    struct nutexanimprog_s* prog;
+
+
+    NuDebugMsgProlog("..\\nu2.ps2\\nu3d\\nugscn.c", 0xC61)("Reading Animated texture set...");
+    gsc->numtexanims = NuFileReadInt(fh);
+    NuFileReadInt(fh);
+    // Allocate memory for texanims
+    gsc->texanims = (struct nutexanim_s*)NuMemAlloc(gsc->numtexanims * sizeof(struct nutexanim_s)); //(, "Reading Animated texture set...", 0xC68)
+    // Read texanims from file to memory
+    NuFileRead(fh, gsc->texanims, gsc->numtexanims * sizeof(struct nutexanim_s));
+    cnt = NuFileReadInt(fh) * 2;
+    gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "Reading Animated texture set...", 0xC6D);
+    NuFileRead(fh, gsc->texanim_tids, cnt);
+    
+    for (i = 0; i < gsc->numtexanims; i++) {
+        tex = &gsc->texanims[i];
+        tex->succ = 0;
+        tex->prev = 0;
+        tex->tids = (gsc->texanim_tids + ((s32)tex->tids));
+        *(u32*)&tex->numtids = (*(u32*)&tex->numtids & 0xFFFEFFFF);
+        for(j = 0; j < tex->numtids; j++)
+        {
+            tex->tids[j] = tids[tex->tids[j]];
+        }
+        tex->ntaname = (char*)(&gsc->nametable[(s32)tex->ntaname]);
+        tex->scriptname = (char*)(&gsc->nametable[(s32)tex->scriptname]);
+        tex->mtl = gsc->mtls[(s32)tex->mtl];// + gsc->mtls;
+        tex->env = NuTexAnimEnvCreate(0, tex->mtl, tex->tids, NuTexAnimProgFind(tex->scriptname));
+    }
+    tex = &gsc->texanims[0];
+    for (i = 0; i < (gsc->numtexanims - 1); i++)
+    {
+        gsc->texanims[i].succ = &gsc->texanims[i + 1];
+        gsc->texanims[i + 1].prev = &gsc->texanims[i];
+    }
+    NuTexAnimAddList(gsc->texanims);
+    return;
+}
+
 
 void ReadNuIFFGScene(fileHandle handle,struct nugscn_s *gscene)
 {
@@ -780,7 +801,7 @@ void ReadNuIFFGScene(fileHandle handle,struct nugscn_s *gscene)
       NuSceneCalcCulling(gscene);
       if (tasFileOffset != -1) {
         NuFileSeek(handle,tasFileOffset,0);
-        //ReadNuIFFTexAnimSet(handle,gscene,nus.tids);
+        ReadNuIFFTexAnimSet(handle,gscene,nus.tids);
       }
       return;
     }

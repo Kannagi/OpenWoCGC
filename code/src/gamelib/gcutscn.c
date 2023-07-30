@@ -1,6 +1,7 @@
 //#define ALIGN_ADDRESS(addr, al) (((u32)(addr) + ((u32)al - 1)) & ~((u32)al - 1))
 #define ASSIGN_IF_SET(a, b) a = (a == NULL) ? NULL : b
 #define ALIGN_ADDRESS(addr, al) (((u32)(addr) + (al - 1)) & ~(al - 1))
+#define GET_IF_B_SET(a, b, c) a = (b == NULL) ? NULL : c
 
 // this one is a common known-integer-divisor optimization, where instead
 // of using DIV we multiply by some magic constant and then shift by 
@@ -1712,29 +1713,18 @@ static int StateAnimEvaluate(struct NUSTATEANIM_s* stateanim, u8* lastix, u8* ne
 }
 
 //PS2
-struct NUSTATEANIM_s * StateAnimFixPtrs(struct NUSTATEANIM_s *sanim,s32 address_offset)
+static struct NUSTATEANIM_s * StateAnimFixPtrs(struct NUSTATEANIM_s *sanim, s32 address_offset)
 {
-  float *pfVar1;
-  u8 *puVar2;
-  struct NUSTATEANIM_s *rv;
-  
-  rv = NULL;
-  if (sanim != NULL) {
-    rv = (struct NUSTATEANIM_s *)((s32)&sanim->nchanges + address_offset);
-  }
-  if (rv != NULL) {
-    pfVar1 = (float *)((s32)rv->frames + address_offset);
-    puVar2 = rv->states + address_offset;
-    if (rv->frames == NULL) {
-      pfVar1 = NULL;
+    struct NUSTATEANIM_s *rv;
+
+    GET_IF_B_SET(rv, sanim, (s32)&sanim->nchanges + address_offset);
+    
+    if (rv != NULL) {
+        ASSIGN_IF_SET(rv->frames, (s32)rv->frames + address_offset);
+        ASSIGN_IF_SET(rv->states, (s32)rv->states + address_offset);
     }
-    if (rv->states == NULL) {
-      puVar2 = NULL;
-    }
-    rv->frames = pfVar1;
-    rv->states = puVar2;
-  }
-  return rv;
+    
+    return rv;
 }
 
 typedef void(*NuCutScnCharacterRndr)(struct instNUGCUTSCENE_s*, struct NUGCUTSCENE_s*, 
