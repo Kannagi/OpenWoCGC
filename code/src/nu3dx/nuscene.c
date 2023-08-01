@@ -731,47 +731,47 @@ LAB_800b9214:
   return;
 }
 
-//PS2 (85%)
+//PS2 (92%)
 void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
-{   
-    s32 i;
-    s32 j;
-    s32 cnt;
+{
+    struct nutexanimf_s *ftex;
     struct nutexanim_s *tex;
-    struct nutexanimprog_s* prog;
+    struct nutexanimprog_s *prog;
+    s32 j;
+    s32 i;
+    s32 cnt;
 
 
     NuDebugMsgProlog("..\\nu2.ps2\\nu3d\\nugscn.c", 0xC61)("Reading Animated texture set...");
     gsc->numtexanims = NuFileReadInt(fh);
     NuFileReadInt(fh);
-    // Allocate memory for texanims
-    gsc->texanims = (struct nutexanim_s*)NuMemAlloc(gsc->numtexanims * sizeof(struct nutexanim_s)); //(, "Reading Animated texture set...", 0xC68)
-    // Read texanims from file to memory
+    gsc->texanims = NuMemAllocFn(gsc->numtexanims * sizeof(struct nutexanim_s), "Reading Animated texture set...", 0xC68);
     NuFileRead(fh, gsc->texanims, gsc->numtexanims * sizeof(struct nutexanim_s));
     cnt = NuFileReadInt(fh) * 2;
     gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "Reading Animated texture set...", 0xC6D);
     NuFileRead(fh, gsc->texanim_tids, cnt);
     
-    for (i = 0; i < gsc->numtexanims; i++) {
-        tex = &gsc->texanims[i];
+    for (i = 0; i < gsc->numtexanims; i++){
+        tex = &gsc->texanims[i]; //tex = gsc->texanims + (cnt << 5);
         tex->succ = 0;
         tex->prev = 0;
         tex->tids = (gsc->texanim_tids + ((s32)tex->tids));
-        *(u32*)&tex->numtids = (*(u32*)&tex->numtids & 0xFFFEFFFF);
-        for(j = 0; j < tex->numtids; j++)
+        tex->dynalloc = 0;
+        for(j = 0;  j < tex->numtids; j++)
         {
             tex->tids[j] = tids[tex->tids[j]];
         }
         tex->ntaname = (char*)(&gsc->nametable[(s32)tex->ntaname]);
         tex->scriptname = (char*)(&gsc->nametable[(s32)tex->scriptname]);
         tex->mtl = gsc->mtls[(s32)tex->mtl];// + gsc->mtls;
-        tex->env = NuTexAnimEnvCreate(0, tex->mtl, tex->tids, NuTexAnimProgFind(tex->scriptname));
+        tex->env = NuTexAnimEnvCreate(0, tex->mtl, tex->tids, NuTexAnimProgFind((s32)tex->scriptname));
     }
-    tex = &gsc->texanims[0];
-    for (i = 0; i < (gsc->numtexanims - 1); i++)
+    
+    for (i = 0;  i < (gsc->numtexanims - 1); i++)
     {
-        gsc->texanims[i].succ = &gsc->texanims[i + 1];
+        gsc->texanims[i].succ = &gsc->texanims[i] + 1; 
         gsc->texanims[i + 1].prev = &gsc->texanims[i];
+        
     }
     NuTexAnimAddList(gsc->texanims);
     return;
