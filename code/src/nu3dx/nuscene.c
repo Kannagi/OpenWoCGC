@@ -731,7 +731,7 @@ LAB_800b9214:
   return;
 }
 
-//PS2 (92%)
+//PS2
 void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
 {
     struct nutexanimf_s *ftex;
@@ -745,10 +745,10 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
     NuDebugMsgProlog("..\\nu2.ps2\\nu3d\\nugscn.c", 0xC61)("Reading Animated texture set...");
     gsc->numtexanims = NuFileReadInt(fh);
     NuFileReadInt(fh);
-    gsc->texanims = NuMemAllocFn(gsc->numtexanims * sizeof(struct nutexanim_s), "Reading Animated texture set...", 0xC68);
+    gsc->texanims = NuMemAllocFn(gsc->numtexanims * sizeof(struct nutexanim_s), "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC68);
     NuFileRead(fh, gsc->texanims, gsc->numtexanims * sizeof(struct nutexanim_s));
     cnt = NuFileReadInt(fh) * 2;
-    gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "Reading Animated texture set...", 0xC6D);
+    gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC6D);
     NuFileRead(fh, gsc->texanim_tids, cnt);
     
     for (i = 0; i < gsc->numtexanims; i++){
@@ -763,7 +763,7 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
         }
         tex->ntaname = (char*)(&gsc->nametable[(s32)tex->ntaname]);
         tex->scriptname = (char*)(&gsc->nametable[(s32)tex->scriptname]);
-        tex->mtl = gsc->mtls[(s32)tex->mtl];// + gsc->mtls;
+        tex->mtl = gsc->mtls[(s32)tex->mtl];
         tex->env = NuTexAnimEnvCreate(0, tex->mtl, tex->tids, NuTexAnimProgFind((s32)tex->scriptname));
     }
     
@@ -776,7 +776,6 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
     NuTexAnimAddList(gsc->texanims);
     return;
 }
-
 
 void ReadNuIFFGScene(fileHandle handle,struct nugscn_s *gscene)
 {
