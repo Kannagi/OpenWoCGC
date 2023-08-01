@@ -5,39 +5,34 @@ struct nulsthdr_s * NuLstCreate(s32 elcnt,s32 elsize)
     struct nulsthdr_s *list;
     union Lst curr;
     struct nulnkhdr_s* start;
-    struct nulnkhdr_s* start1;
     s32 n;
-    s32 k;
     
-    k = (elsize + 0x10);
-    list = (struct nulsthdr_s *)NuMemAlloc(elcnt * (k) + 0x10, ".\\listman.c", 0x24);
+    list = (struct nulsthdr_s *)NuMemAllocFn(elcnt * (elsize + 0x10) + 0x10, ".\\listman.c", 0x24);
     if (list != NULL) {
+        start = (struct nulnkhdr_s *)list + 1;
+        list->free = start;
         list->head = NULL;
         list->elcnt = (short)elcnt;
         list->elsize = (short)elsize;
-        start = (struct nulnkhdr_s *)list + 1;
-        list->free = start;
         curr.lhdr = start;
         
         start = (s8*)start + elsize + 0x10;
-        // n = 1;
         for(n = 1;  n < elsize; n++)
         {
             (curr.lhdr)->succ = start;
-            (curr.lhdr)->owner = list;
             (curr.lhdr)->id = n - 1;
+            (curr.lhdr)->owner = list;
             curr.lhdr = start;
-            start = (s8*)start + (k);
+            start = (s8*)start + (elsize + 0x10);
         
         }
-        prev.s8 = (s8*)start + (k);
+        prev.s8 = (s8*)start + (elsize + 0x10);
         start->id = n - 1;
         start->succ = NULL;
         start->owner = list;
     }
     return list;
 }
-
 
 
 void NuLstDestroy(nulsthdr_s *hdr)
@@ -100,18 +95,19 @@ void NuLstFree(struct nulnkhdr_s *lnk)
 //PS2
 struct nulnkhdr_s * NuLstGetNext(struct nulsthdr_s *hdr,struct nulnkhdr_s *lnk)
 {
-  struct nulnkhdr_s *pnVar1;
-  
+  struct nulnkhdr_s *rv;
+
   if (lnk != NULL) {
-    pnVar1 = lnk[-1].succ;	//correct?
+    lnk -= 1;
+    rv = lnk->succ;
   }
   else {
-    pnVar1 = hdr->head;
+    rv = hdr->head;
   }
-  if (pnVar1 == NULL) {
+  if (rv == NULL) {
     return NULL;
   }
-  return pnVar1 + 1;
+  return rv + 1;
 }
 
 

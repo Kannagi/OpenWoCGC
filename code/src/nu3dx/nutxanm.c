@@ -11,31 +11,24 @@
 s32 nta_labels[64];
 static struct nutexanimprog_s* parprog; 
 
-
+//PS2
 void NuTexAnimProgSysInit(void)
-
 {
   struct nutexanimlist_s **succ;
   struct nutexanimlist_s *nta;
   s32 n;
   
   sys_progs = NULL;
-  nta = ntalsysbuff[63]; //0x803c85f0
-  n = 0x3f;
-  succ = &ntalsysbuff[0x3e].succ;
-  do {
-    *succ = nta;
-    succ = succ + -3;
-    nta = nta + -1;
-    n = n + -1;
-  } while (n != 0);
-  ntal_free = ntalsysbuff;
-  ntalsysbuff[63].succ = NULL;
-  nta_sig_on = 0;
+    for(n = 0; n < 63; n++) {
+        ntalsysbuff[n].succ = &ntalsysbuff[n + 1].nta;
+    }
   ntal_first = NULL;
+  ntalsysbuff[63].succ = NULL; //ntalsysbuff->succ = NULL;
+  ntal_free = ntalsysbuff;
   xdeflabtabcnt = 0;
   nta_sig_old = 0;
   nta_sig_off = 0;
+  nta_sig_on = 0;
   return;
 }
 
@@ -73,160 +66,36 @@ if (rv != 0) {
 }
 
 
-/*void NuTexAnimProgAssembleEnd(nutexanimprog_s *p)
-
+//PS2
+void NuTexAnimProgAssembleEnd(struct nutexanimprog_s *p)
 {
-  short ix;
-  int i;
-  int j;
-  short code;
-  
-  i = 0;
-  if (p->eop < 1) {
-    return;
-  }
-  do {
-    code = p->code[i];
-    ix = (short)i;
-    if (code == 8) {
-LAB_800ba2fc:
-      j = i + 1;
-      ix = ix + 2;
-LAB_800ba304:
-      i = (int)ix;
-      p->code[j] = *(short *)((int)nta_labels + p->code[j] * 4 + 2);
-      goto LAB_800ba354;
-    }
-    if (code < 9) {
-      if (code < 5) {
-        if (code < 3) {
-          if (code == 1) {
-            ix = ix + 4;
-          }
-          else if (code < 2) {
-            if (code != 0) goto LAB_800ba354;
-LAB_800ba34c:
-            ix = ix + 2;
-          }
-          else {
-            ix = ix + 3;
-          }
-          goto LAB_800ba350;
-        }
-      }
-      else {
-        if (code == 5) {
-          ix = ix + 3;
-          goto LAB_800ba350;
-        }
-        if (code == 7) goto LAB_800ba2fc;
-      }
-    }
-    else {
-      if (code == 0xc) {
-        ix = ix + 1;
-      }
-      else if (code < 0xd) {
-        if (code == 10) {
-          ix = ix + 1;
-        }
-        else {
-          if (code < 0xb) {
-            j = i + 3;
-            ix = ix + 4;
-            goto LAB_800ba304;
-          }
-          ix = ix + 3;
-        }
-      }
-      else if (code == 0xe) {
-        ix = ix + 1;
-      }
-      else {
-        if (0xd < code) {
-          if (code == 0xf) goto LAB_800ba34c;
-          goto LAB_800ba354;
-        }
-        ix = ix + 3;
-      }
-LAB_800ba350:
-      i = (int)ix;
-    }
-LAB_800ba354:
-    if (p->eop <= i) {
-      return;
-    }
-  } while( true );
-}
-
-
-//DECOMP2
-
-
-void NuTexAnimProgAssembleEnd(struct nutexanimprog_s* p) {
-    s16 temp_r0;
-    s16 var_r0;
-    s16 var_r0_2;
-    s16 var_r10;
-    s16* temp_r8;
-    s32 var_r11;
-
-    var_r10 = 0;
-    if ((s16) p->eop > 0) {
-        temp_r8 = p->code;
-        do {
-            temp_r0 = temp_r8[var_r10];
-            switch (temp_r0) {                      /* irregular */
-            case 1:
-                var_r0 = var_r10 + 4;
-block_34:
-                var_r10 = (s16) var_r0;
-                break;
-            case 2:
-                var_r0 = var_r10 + 3;
-                goto block_34;
-            case 5:
-                var_r0 = var_r10 + 3;
-                goto block_34;
+    s16 ix = 0;
+    
+    while (ix < p->eop) {
+        switch(p->code[ix]) {
+            case 1: ix += 4; break;
+            case 2: ix += 3; break;
+            case 5: ix += 3; break;
             case 9:
-                var_r11 = var_r10 + 3;
-                var_r0_2 = var_r10 + 4;
-block_27:
-                var_r10 = (s16) var_r0_2;
-                temp_r8[var_r11] = (s16) nta_labels[temp_r8[var_r11]].unk2;
+                p->code[ix + 3] = nta_labels[p->code[ix + 3]];
+                ix += 4;
                 break;
-            case 8:
             case 7:
-                var_r11 = var_r10 + 1;
-                var_r0_2 = var_r10 + 2;
-                goto block_27;
-            case 10:
-                var_r0 = var_r10 + 1;
-                goto block_34;
-            case 11:
-                var_r0 = var_r10 + 3;
-                goto block_34;
-            case 12:
-                var_r0 = var_r10 + 1;
-                goto block_34;
-            case 13:
-                var_r0 = var_r10 + 3;
-                goto block_34;
-            case 14:
-                var_r0 = var_r10 + 1;
-                goto block_34;
-            case 15:
+            case 8:                
+                p->code[ix + 1] = nta_labels[p->code[ix + 1]];
+                ix += 2;
+                break;
+            case 10: ix += 1; break;
+            case 11: ix += 3; break;
+            case 12: ix += 1; break;
+            case 13: ix += 3; break;
+            case 14: ix += 1; break;
             case 0:
-                var_r0 = var_r10 + 2;
-                goto block_34;
-            }
-        } while (var_r10 < (s16) p->eop);
+            case 15: ix += 2; break;
+        }
     }
+    return;
 }
-
-
-
-*/
 
 //PS2
 struct nutexanimenv_s * NuTexAnimEnvCreate(union variptr_u *buff,struct numtl_s *mtl,s16 *tids, struct nutexanimprog_s *p)
@@ -307,17 +176,17 @@ struct nutexanimprog_s * NuTexAnimProgReadScript(union variptr_u *buff,char *fna
   return rv;
 }
 
+//PS2
 void NuTexAnimSetSignals(u32 sig)
 {
-  nta_sig_old = sig;
-  nta_sig_off = (sig ^ nta_sig_old) & ~sig;
-  nta_sig_on = (sig ^ nta_sig_old) & sig;
-  return;
+    nta_sig_on =  (sig ^ nta_sig_old) & sig;
+    nta_sig_off = (sig ^ nta_sig_old) & ~sig;
+    nta_sig_old = sig;
+    return;
 }
 
 //PS2
 void NuTexAnimProcessList(struct nutexanim_s *nta)
-
 {
   if (nta != NULL) {
     do {
@@ -330,65 +199,63 @@ void NuTexAnimProcessList(struct nutexanim_s *nta)
   return;
 }
 
-
+//PS2
 void NuTexAnimAddList(struct nutexanim_s *nta)
-
-{
-  struct nutexanimlist_s *lst;
-  struct nutexanimlist_s **prev;
-  
-  lst = ntal_free;
-  if (ntal_free == NULL) {
-    return;
-  }
-  prev = &ntal_free->prev;
-  ntal_free = ntal_free->succ;
-  *prev = NULL;
-  lst->nta = nta;
-  lst->succ = ntal_first;
-  if (ntal_first != NULL) {
-    ntal_first->prev = lst;
-  }
-  ntal_first = lst;
-  return;
-}
-
-
-void NuTexAnimRemoveList(struct nutexanim_s *nta)
-
 {
   struct nutexanimlist_s *rv;
-  struct nutexanimlist_s **succ;
-  
-  rv = ntal_first;
-  if (ntal_first == NULL) {
-    return;
+
+  //NuDisableVBlank();
+  rv = ntal_free;
+  if (ntal_free != NULL) {
+      ntal_free = ntal_free->succ;
+      rv->nta = nta;
+      rv->succ = ntal_first;
+      rv->prev = NULL;
+      if (ntal_first != NULL) {
+        ntal_first->prev = rv;
+      }
+      ntal_first = rv;
   }
-  do {
-    if (rv->nta == nta) {
-      if (rv->succ != NULL) {
-        rv->succ->prev = rv->prev;
-      }
-      if (rv->prev == NULL) {
-        ntal_first = rv->succ;
-      }
-      else {
-        rv->prev->succ = rv->succ;
-      }
-      rv->succ = ntal_free;
-      ntal_free = rv;
-      return;
-    }
-    succ = &rv->succ;
-    rv = *succ;
-  } while (*succ != NULL);
+  //NuEnableVBlank();
+  return;
+}
+
+//PS2
+void NuTexAnimRemoveList(struct nutexanim_s *nta)
+{
+  struct nutexanimlist_s *rv;
+  
+  //NuDisableVBlank();
+  rv = ntal_first;
+  if (ntal_first != NULL) {
+          do {
+                if (rv->nta == nta) {
+                      if (rv->succ != NULL) {
+                        rv->succ->prev = rv->prev;
+                      }
+                      if (rv->prev != NULL) {
+                        rv->prev->succ = rv->succ;
+                      }
+                      else {
+                        ntal_first = rv->succ;
+                      }
+                      rv->succ = ntal_free;
+                      ntal_free = rv;
+                    //NuEnableVBlank();
+                    return;
+                }
+                rv = rv->succ;
+
+          } while (rv != NULL);
+   }
+
+    //NuEnableVBlank();
   return;
 }
 
 
-
+//PS2
 void NuTexAnimProcess(void)
-
 {
   struct nutexanimlist_s *rv;
   
@@ -644,41 +511,32 @@ DWARF
 }
 
 
-s32 ParGetCC(struct nufpar_s *pf)
+//PS2
+static s32 ParGetCC(struct nufpar_s *pf)
 {
-  s32 cc;
-  char Wbuf;
   
-  NuFParGetWord(pf);
-  Wbuf = pf->wordBuffer[1];
-  if (Wbuf == '<') {
-    if (pf->wordBuffer[2] == '=') {
-      return 3;
+    NuFParGetWord(pf);
+    switch (pf->wbuff[0]){
+        case '=':
+            return CONDITION_CODE_EQUAL;
+        case '<':
+            switch (pf->wbuff[1]){
+                case '>': return CONDITION_CODE_NOT_EQUAL;
+                case '=': return CONDITION_CODE_LESS_THAN_OR_EQUAL; 
+            }
+            return CONDITION_CODE_LESS_THAN;
+        case '>':
+            switch (pf->wbuff[1]){
+                case '=': return CONDITION_CODE_GREATER_THAN_OR_EQUAL;
+            }
+            return CONDITION_CODE_GREATER_THAN;
+        case '!':
+            return CONDITION_CODE_NOT_EQUAL;
+        default:
+            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c", 0x1E9)
+                ("unknown condition \'%s\' at line %d", pf->wbuff, pf->line_num);
+            break;
     }
-    if (pf->wordBuffer[2] != '>') {
-      return 1;
-    }
-LAB_800ba56c:
-    cc = 5;
-  }
-  else {
-    if (Wbuf < '=') {
-      if (Wbuf == '!') goto LAB_800ba56c;
-    }
-    else {
-      if (Wbuf == '=') {
-        return 0;
-      }
-      if (Wbuf == '>') {
-        if (pf->wordBuffer[2] != '=') {
-          return 2;
-        }
-        return 4;
-      }
-    }
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutexanm.c",0x1ac)("unknown condition \'%s\' at line %d",pf->wordBuffer + 1,pf->line_num);
-  }
-  return cc;
 }
 
 //PS2
@@ -688,16 +546,19 @@ s32 LabTabFind(char* buf) //static inline on ps2
 
     if (strlen(buf) > 0x14) {
         buf[0x14] = '\0';
-      }
-    for(i = 0; i < labtabcnt; i++) {
-      if (strcasecmp(&labtab[i],buf) == 0) {
-          return i;
-      }
     }
-    if (0x3f < labtabcnt) {
-        NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c",0x206)("Tex Anim Assembler Fatal Error: too many labels");
-      }
-      strcpy(&labtab[labtabcnt++],buf);
+    
+    for(i = 0; i < labtabcnt; i++) {
+        if (strcasecmp(&labtab[i],buf) == 0) {
+            return i;
+        }
+    }
+    
+    if (labtabcnt >= 0x40) {
+        NuErrorProlog("..\\nu2.ps2\\nu3d\\nutexanm.c", 0x206)("Tex Anim Assembler Fatal Error: too many labels");
+    }
+    
+    strcpy(&labtab[labtabcnt++], buf);
     return labtabcnt - 1;
 }
 
@@ -812,9 +673,9 @@ static void pftaXDef(struct nufpar_s *fpar)
   s32 lab;
   
   NuFParGetWord(fpar);
-  lab = XDefLabTabFind(fpar->wordBuffer);
+  lab = XDefLabTabFind(fpar->wbuff);
   parprog->xdef_ids[parprog->xdef_cnt] = (short)lab;
-  parprog->xdef_addrs[prog->xdef_cnt] = parprog->eop;
+  parprog->xdef_addrs[parprog->xdef_cnt] = parprog->eop;
   parprog->xdef_cnt = parprog->xdef_cnt + 1;
   return;
 }
@@ -844,7 +705,7 @@ void pftaXRef(struct nufpar_s *fpar)
 }
 
 //PS2
-void pftaBtex(struct nufpar_s *fpar)
+static void pftaBtex(struct nufpar_s *fpar)
 {
   s32 cc;
   s32 tid;
@@ -853,11 +714,11 @@ void pftaBtex(struct nufpar_s *fpar)
   cc = ParGetCC(fpar);
   tid = NuFParGetInt(fpar);
   NuFParGetWord(fpar);
-  lab = LabTabFind(fpar->wbuff + 1);
+  lab = LabTabFind(fpar->wbuff);
   parprog->code[parprog->eop++] = 9;
-  parprog->code[parprog->eop++] = (short)cc;
-  parprog->code[parprog->eop++] = (short)tid;
-  parprog->code[parprog->eop++] = (short)lab;
+  parprog->code[parprog->eop++] = cc;
+  parprog->code[parprog->eop++] = tid;
+  parprog->code[parprog->eop++] = lab;
   return;
 }
 
@@ -905,7 +766,7 @@ void pftaRepend(struct nufpar_s *fp)
 }
 
 //PS2
-static void pftaUntiltex(nufpar_s* fp)
+static void pftaUntiltex(struct nufpar_s *fpar)
 {
   s32 cc;
   s32 tid;
@@ -913,8 +774,8 @@ static void pftaUntiltex(nufpar_s* fp)
   cc = ParGetCC(fpar);
   tid = NuFParGetInt(fpar);
   parprog->code[parprog->eop++] = 0xd;
-  parprog->code[parprog->eop++] = (short)cc;
-  parprog->code[parprog->eop++] = (short)tid;
+  parprog->code[parprog->eop++] = cc;
+  parprog->code[parprog->eop++] = tid;
   return;
 }
 
