@@ -1,26 +1,25 @@
-void DrawMenu(Cursor *cursor,int paused)
 
+void DrawMenu(Cursor *cursor,int paused)
 {
   float fVar1;
   float scalex;
   undefined4 uVar2;
-  nupad_s *pnVar3;
   int col;
-  uint uVar4;
-  undefined4 uVar5;
+  u32 uVar3;
+  int uVar4;
   char **txt;
-  int iVar6;
+  int iVar5;
   int unaff_r27;
+  char *(*papcVar6) [6];
   PData *pdat;
   int iVar7;
-  undefined1 *puVar8;
+  double dVar8;
   double dVar9;
   double dVar10;
-  double dVar11;
+  float local_68;
   float x;
   float y;
   int i;
-  double local_68;
   char *c;
   float dy;
   
@@ -36,8 +35,8 @@ void DrawMenu(Cursor *cursor,int paused)
   }
   x = 0.0;
   if (pause_dir != 0) {
-    local_68 = (double)CONCAT44(0x43300000,0x1eU - paused ^ 0x80000000);
-    x = (float)(local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.06666667;
+    _local_68 = (double)CONCAT44(0x43300000,0x1eU - paused ^ 0x80000000);
+    x = (float)(_local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.06666667;
     if (pause_dir == 1) {
       x = 0.0 - x;
     }
@@ -46,17 +45,17 @@ void DrawMenu(Cursor *cursor,int paused)
     }
   }
   col = (int)cursor->y_min;
-  uVar4 = cursor->y_max - col;
-  local_68 = (double)CONCAT44(0x43300000,uVar4 ^ 0x80000000);
-  dVar10 = 0.5;
-  iVar6 = (int)cursor->menu;
+  uVar3 = cursor->y_max - col;
+  _local_68 = (double)CONCAT44(0x43300000,uVar3 ^ 0x80000000);
+  dVar9 = 0.5;
+  iVar5 = (int)cursor->menu;
   i = 0;
-  dVar11 = 1.0;
-  fVar1 = (float)(local_68 - (double)(variptr_u  [2])0x4330000080000000) * MENUDY;
-  dVar9 = (double)(fVar1 * 0.5);
-  if (iVar6 != 0x17) {
-    if (iVar6 < 0x18) {
-      if (iVar6 == 0xb) {
+  dVar10 = 1.0;
+  fVar1 = (float)(_local_68 - (double)(variptr_u  [2])0x4330000080000000) * MENUDY;
+  dVar8 = (double)(fVar1 * 0.5);
+  if (iVar5 != 0x17) {
+    if (iVar5 < 0x18) {
+      if (iVar5 == 0xb) {
         if (paused < 0x1e) {
           return;
         }
@@ -178,13 +177,13 @@ void DrawMenu(Cursor *cursor,int paused)
         }
         goto LAB_80036f1c;
       }
-      if (0xb < iVar6) {
-        if (iVar6 == 0x11) {
-          DrawNameInputTable(0,(double)TT_INPUTY,cursor);
+      if (0xb < iVar5) {
+        if (iVar5 == 0x11) {
+          DrawNameInputTable(cursor,0.0,TT_INPUTY);
           return;
         }
-        if (0x11 < iVar6) {
-          if (iVar6 == 0x14) {
+        if (0x11 < iVar5) {
+          if (iVar5 == 0x14) {
             if (TempAnim.newaction == 0x75) {
               return;
             }
@@ -198,7 +197,7 @@ void DrawMenu(Cursor *cursor,int paused)
               return;
             }
             if ((TempAnim.newaction == 0x22) && (fadeval == 0)) {
-              y = (float)(0.5 - dVar9);
+              y = (float)(0.5 - dVar8);
               x = 0.4;
               DrawMenuEntry(cursor,tCONTINUE[Game.language],&x,&y,&i);
               DrawMenuEntry(cursor,tQUIT[Game.language],&x,&y,&i);
@@ -213,22 +212,22 @@ void DrawMenu(Cursor *cursor,int paused)
             }
             scalex = 0.8;
             c = tGAMEOVER[Game.language];
-            dVar11 = 1.0;
+            dVar10 = 1.0;
             x = fVar1;
             y = dy;
             goto LAB_80037ad8;
           }
-          if (iVar6 < 0x15) {
-            if (iVar6 != 0x12) {
+          if (iVar5 < 0x15) {
+            if (iVar5 != 0x12) {
               return;
             }
-            y = (float)(-0.699999988079071 - dVar9);
+            y = (float)(-0.699999988079071 - dVar8);
             DrawMenuEntry(cursor,tRESTARTRACE[Game.language],&x,&y,&i);
             c = tWARPROOM[Game.language];
             goto LAB_80036da0;
           }
-          if (iVar6 != 0x15) {
-            if (iVar6 != 0x16) {
+          if (iVar5 != 0x15) {
+            if (iVar5 != 0x16) {
               return;
             }
             iVar7 = ParseNintendoErrorCode();
@@ -266,81 +265,81 @@ void DrawMenu(Cursor *cursor,int paused)
           }
           sprintf(tbuf,c,tLOAD[Game.language],tSAVE[Game.language]);
           Text3D(tbuf,0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-          XbUpdateDateStamp((int)&Game);
+          XbUpdateDateStamp(&Game);
           DrawGameSlot(&Game,0.0,0.25,4,0.6);
-          y = (float)(-0.5 - dVar9);
+          y = (float)(-0.5 - dVar8);
           if (Game.language == 2) {
-            y = y - (float)(dVar9 * 0.2000000029802322);
+            y = y - (float)(dVar8 * 0.2000000029802322);
           }
           DrawMenuEntry(cursor,tLOADGAME[Game.language],&x,&y,&i);
           if (Game.language == 2) {
-            y = (float)(dVar9 * 0.119999997317791 + (double)y);
+            y = (float)(dVar8 * 0.119999997317791 + (double)y);
           }
           DrawMenuEntry(cursor,tSAVEGAME[Game.language],&x,&y,&i);
           if (Game.language == 2) {
-            y = (float)(dVar9 * 0.119999997317791 + (double)y);
+            y = (float)(dVar8 * 0.119999997317791 + (double)y);
           }
           DrawMenuEntry(cursor,tDELETEGAME[Game.language],&x,&y,&i);
           if (Game.language == 2) {
-            y = (float)(dVar9 * 0.119999997317791 + (double)y);
+            y = (float)(dVar8 * 0.119999997317791 + (double)y);
           }
           c = tEXIT[Game.language];
           goto LAB_80037638;
         }
-        if (iVar6 == 0xe) {
+        if (iVar5 == 0xe) {
           if (paused < 0x1e) {
             return;
           }
-          local_68 = (double)CONCAT44(0x43300000,uVar4 + 2 ^ 0x80000000);
-          y = (float)(local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.1 * 0.5 - 0.2;
+          _local_68 = (double)CONCAT44(0x43300000,uVar3 + 2 ^ 0x80000000);
+          y = (float)(_local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.1 * 0.5 - 0.2;
           i = col;
           if (cursor->y_max < col) {
             return;
           }
           do {
             iVar7 = (int)cursor->x_min;
-            dVar11 = 0.5;
-            local_68 = (double)CONCAT44(0x43300000,cursor->x - iVar7 ^ 0x80000000);
-            fVar1 = x - (float)(local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.5;
+            dVar10 = 0.5;
+            _local_68 = (double)CONCAT44(0x43300000,cursor->x - iVar7 ^ 0x80000000);
+            fVar1 = x - (float)(_local_68 - (double)(variptr_u  [2])0x4330000080000000) * 0.5;
             if (iVar7 <= cursor->x_max) {
               col = iVar7 * 0xc;
-              txt = (char **)(HubName + iVar7 * 0x18);
+              papcVar6 = HubName[iVar7];
               do {
-                dVar9 = (double)fVar1;
+                dVar8 = (double)fVar1;
                 if (i == 0) {
                   if (unaff_r27 == -1) {
                     c = "?";
                   }
                   else {
-                    c = *txt;
+                    c = (*papcVar6)[0];
                   }
                   strcpy(tbuf,c);
-                  Text3D(tbuf,(float)dVar9,y + 0.2,1.0,(float)(dVar10 * dVar11),(float)dVar10,
-                         (float)dVar10,1,4);
+                  Text3D(tbuf,(float)dVar8,y + 0.2,1.0,(float)(dVar9 * dVar10),(float)dVar9,
+                         (float)dVar9,1,4);
                 }
                 unaff_r27 = (int)(char)(&HData[0].flags)[i + col];
                 if (unaff_r27 == -1) {
                   c = "?";
                 }
                 else {
-                  c = *(char **)(LevelName + unaff_r27 * 0x18);
+                  c = LevelName[unaff_r27 * 6];
                 }
                 strcpy(tbuf,c);
                 if ((i == cursor->y) && (iVar7 == cursor->x)) {
-                  iVar6 = 3;
+                  iVar5 = 3;
                   if (GlobalTimer.frame % 0xc < 6) {
-                    iVar6 = 4;
+                    iVar5 = 4;
                   }
                 }
                 else {
-                  iVar6 = 0;
+                  iVar5 = 0;
                 }
                 iVar7 = iVar7 + 1;
                 col = col + 0xc;
-                Text3D(tbuf,(float)dVar9,y,1.0,(float)(dVar10 * dVar11),(float)dVar10,(float)dVar1 0,
-                       1,iVar6);
-                txt = txt + 6;
-                fVar1 = (float)(dVar9 + dVar11);
+                Text3D(tbuf,(float)dVar8,y,1.0,(float)(dVar9 * dVar10),(float)dVar9,(float)dVar9,1 ,
+                       iVar5);
+                papcVar6 = papcVar6[1];
+                fVar1 = (float)(dVar8 + dVar10);
               } while (iVar7 <= cursor->x_max);
             }
             i = i + 1;
@@ -348,104 +347,104 @@ void DrawMenu(Cursor *cursor,int paused)
           } while (i <= cursor->y_max);
           return;
         }
-        if (iVar6 < 0xf) {
-          if (iVar6 != 0xc) {
-            if (iVar6 != 0xd) {
+        if (iVar5 < 0xf) {
+          if (iVar5 != 0xc) {
+            if (iVar5 != 0xd) {
               return;
             }
             if (paused < 0x1e) {
               return;
             }
-            dVar9 = -0.1000000014901161;
-            local_68 = (double)CONCAT44(0x43300000,
-                                        (int)superbuffer_ptr.voidptr - (int)superbuffer_base);
-            dVar10 = 9.5367431640625e-07;
-            dVar11 = 0.5;
+            dVar8 = -0.1000000014901161;
+            _local_68 = (double)CONCAT44(0x43300000,
+                                         (int)superbuffer_ptr.voidptr - (int)superbuffer_base);
+            dVar9 = 9.5367431640625e-07;
+            dVar10 = 0.5;
             y = 0.05;
             sprintf(tbuf,"SUPERBUFFER USED: %.2fMB/%.2fMB",
-                    (double)((float)(local_68 - (double)(variptr_u  [2])0x4330000000000000) *
+                    (double)((float)(_local_68 - (double)(variptr_u  [2])0x4330000000000000) *
                             9.536743e-07),0x401c000000000000);
             if (Game.language == 'c') {
               AddSpacesIntoText(tbuf,1);
             }
-            Text3D(tbuf,x,y,1.0,(float)dVar11,(float)dVar11,(float)dVar11,1,0);
-            y = (float)((double)y + dVar9);
-            local_68 = (double)CONCAT44(0x43300000,highallocaddr ^ 0x80000000);
+            Text3D(tbuf,x,y,1.0,(float)dVar10,(float)dVar10,(float)dVar10,1,0);
+            y = (float)((double)y + dVar8);
+            _local_68 = (double)CONCAT44(0x43300000,highallocaddr ^ 0x80000000);
             sprintf(tbuf,"HIGHALLOCADDR: %.2fMB/32.00MB",
-                    (double)(float)((double)(float)(local_68 -
+                    (double)(float)((double)(float)(_local_68 -
                                                    (double)(variptr_u  [2])0x4330000080000000) *
-                                   dVar10));
+                                   dVar9));
             if (Game.language == 'c') {
               AddSpacesIntoText(tbuf,1);
             }
-            Text3D(tbuf,x,y,1.0,(float)dVar11,(float)dVar11,(float)dVar11,1,0);
+            Text3D(tbuf,x,y,1.0,(float)dVar10,(float)dVar10,(float)dVar10,1,0);
             return;
           }
           if (paused < 0x1e) {
             return;
           }
-          y = (float)(0.0 - dVar9);
-          sprintf(tbuf,"DRAW DISTANCE: %i/%i",(uint)LDATA->farclip,1000);
+          y = (float)(0.0 - dVar8);
+          sprintf(tbuf,"DRAW DISTANCE: %i/%i",(u32)LDATA->farclip,1000);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          local_68 = (double)(longlong)(int)LDATA->fognear;
-          sprintf(tbuf,"FOG NEAR: %i/%i",(int)LDATA->fognear,(uint)LDATA->farclip);
+          _local_68 = (double)(longlong)(int)LDATA->fognear;
+          sprintf(tbuf,"FOG NEAR: %i/%i",(int)LDATA->fognear,(u32)LDATA->farclip);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          local_68 = (double)(longlong)(int)LDATA->fogfar;
-          sprintf(tbuf,"FOG FAR: %i/%i",(int)LDATA->fogfar,(uint)LDATA->farclip);
+          _local_68 = (double)(longlong)(int)LDATA->fogfar;
+          sprintf(tbuf,"FOG FAR: %i/%i",(int)LDATA->fogfar,(u32)LDATA->farclip);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"FOG RED: %i/255",(uint)LDATA->fogr);
+          sprintf(tbuf,"FOG RED: %i/255",(u32)LDATA->fogr);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"FOG GREEN: %i/255",(uint)LDATA->fogg);
+          sprintf(tbuf,"FOG GREEN: %i/255",(u32)LDATA->fogg);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"FOG BLUE: %i/255",(uint)LDATA->fogb);
+          sprintf(tbuf,"FOG BLUE: %i/255",(u32)LDATA->fogb);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"FOG OPACITY: %i/127",(uint)LDATA->foga);
+          sprintf(tbuf,"FOG OPACITY: %i/127",(u32)LDATA->foga);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"HAZE RED: %i/255",(uint)LDATA->hazer);
+          sprintf(tbuf,"HAZE RED: %i/255",(u32)LDATA->hazer);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"HAZE GREEN: %i/255",(uint)LDATA->hazeg);
+          sprintf(tbuf,"HAZE GREEN: %i/255",(u32)LDATA->hazeg);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"HAZE BLUE: %i/255",(uint)LDATA->hazeb);
+          sprintf(tbuf,"HAZE BLUE: %i/255",(u32)LDATA->hazeb);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-          sprintf(tbuf,"HAZE WOBBLE: %i/255",(uint)LDATA->hazea);
+          sprintf(tbuf,"HAZE WOBBLE: %i/255",(u32)LDATA->hazea);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
           c = tbuf;
           goto LAB_80036f1c;
         }
-        if (iVar6 == 0xf) {
-          y = (float)(0.0 - dVar9);
+        if (iVar5 == 0xf) {
+          y = (float)(0.0 - dVar8);
           if (Game.language == 'c') {
             c = "L O G O S ";
           }
@@ -482,19 +481,19 @@ void DrawMenu(Cursor *cursor,int paused)
           }
           goto LAB_80036f1c;
         }
-        if (iVar6 != 0x10) {
+        if (iVar5 != 0x10) {
           return;
         }
-        y = (float)(-0.699999988079071 - dVar9);
+        y = (float)(-0.699999988079071 - dVar8);
         DrawMenuEntry(cursor,tRESTARTTRIAL[Game.language],&x,&y,&i);
         c = tWARPROOM[Game.language];
         goto LAB_80036da0;
       }
-      if (iVar6 == 5) {
+      if (iVar5 == 5) {
         if (paused < 0x1e) {
           return;
         }
-        y = (float)(-0.5 - dVar9);
+        y = (float)(-0.5 - dVar8);
         x = PANELMENUX;
         DrawMenuEntry(cursor,tRESUME[Game.language],&x,&y,&i);
         DrawMenuEntry(cursor,tOPTIONS[Game.language],&x,&y,&i);
@@ -511,29 +510,28 @@ void DrawMenu(Cursor *cursor,int paused)
         c = tRESTARTTRIAL[Game.language];
         goto LAB_80036f1c;
       }
-      if (iVar6 < 6) {
-        if (2 < iVar6) {
-          if (iVar6 == 3) {
+      if (iVar5 < 6) {
+        if (2 < iVar5) {
+          if (iVar5 == 3) {
             return;
           }
-          if (iVar6 != 4) {
+          if (iVar5 != 4) {
             return;
           }
           goto LAB_80034ee8;
         }
-        if (iVar6 < 1) {
-          if (iVar6 != 0) {
+        if (iVar5 < 1) {
+          if (iVar5 != 0) {
             return;
           }
-          y = (float)(-0.6899999976158142 - dVar9);
+          y = (float)(-0.6899999976158142 - dVar8);
           VersionDisplayFlag = 1;
-          SaveMenu = iVar6;
-          BackMenu = iVar6;
+          SaveMenu = iVar5;
+          BackMenu = iVar5;
           DrawMenuEntry(cursor,tNEWGAME[Game.language],&x,&y,&i);
           DrawMenuEntry(cursor,tLOADGAME[Game.language],&x,&y,&i);
           DrawMenuEntry(cursor,tPLAYCRASHBLAST[Game.language],&x,&y,&i);
-          sprintf(tbuf,"%s: %s",tLANGUAGE[Game.language],
-                  *(undefined4 *)(LanguageName + (uint)Game.language * 4));
+          sprintf(tbuf,"%s: %s",tLANGUAGE[Game.language],LanguageName[Game.language]);
           c = tbuf;
           goto LAB_80036f1c;
         }
@@ -545,12 +543,12 @@ void DrawMenu(Cursor *cursor,int paused)
           Text3D(c,0.0,y,1.0,0.4,0.4,0.4,1,0);
           y = y - 0.1;
         }
-        y = (float)(-0.6899999976158142 - dVar9);
+        y = (float)(-0.6899999976158142 - dVar8);
         DrawMenuEntry(cursor,tMEMCARDRETRY[Game.language],&x,&y,&i);
         DrawMenuEntry(cursor,tMEMCARDCONTINUE[Game.language],&x,&y,&i);
         iVar7 = ParseNintendoErrorCode();
         if (iVar7 == 6) {
-          uVar4 = (uint)Game.language;
+          uVar3 = (u32)Game.language;
           txt = tMEMCARDMANAGE;
           goto LAB_80037c10;
         }
@@ -561,67 +559,67 @@ void DrawMenu(Cursor *cursor,int paused)
           if (iVar7 < 2) {
             return;
           }
-          uVar4 = (uint)Game.language;
+          uVar3 = (u32)Game.language;
           txt = tFORMAT;
           goto LAB_80037c10;
         }
         goto LAB_80037be8;
       }
-      if (iVar6 == 8) {
+      if (iVar5 == 8) {
         return;
       }
-      if (iVar6 < 9) {
-        if (iVar6 != 6) {
-          if (iVar6 != 7) {
+      if (iVar5 < 9) {
+        if (iVar5 != 6) {
+          if (iVar5 != 7) {
             return;
           }
           if (paused < 0x1e) {
             return;
           }
-          uVar4 = (uint)Game.sfx_volume;
-          y = (float)(-0.4600000083446503 - dVar9) - (float)(dVar9 * 0.5);
+          uVar3 = (u32)Game.sfx_volume;
+          y = (float)(-0.4600000083446503 - dVar8) - (float)(dVar8 * 0.5);
           dme_sx = 1.0;
           x = PANELMENUX;
           uVar2 = 0x20;
-          if (uVar4 != 0) {
+          if (uVar3 != 0) {
             uVar2 = 0x3c;
           }
-          uVar5 = 0x20;
-          if (uVar4 < 100) {
-            uVar5 = 0x3e;
+          uVar4 = 0x20;
+          if (uVar3 < 100) {
+            uVar4 = 0x3e;
           }
-          sprintf(tbuf,"%c %i%% %c",uVar2,uVar4,uVar5);
+          sprintf(tbuf,"%c %i%% %c",uVar2,uVar3,uVar4);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
-          dme_sx = (float)dVar11;
+          dme_sx = (float)dVar10;
           DrawMenuEntry2(cursor,tSFXVOLUME[Game.language],tbuf,&x,&y,&i);
-          uVar4 = (uint)Game.music_volume;
+          uVar3 = (u32)Game.music_volume;
           uVar2 = 0x20;
-          if (uVar4 != 0) {
+          if (uVar3 != 0) {
             uVar2 = 0x3c;
           }
-          uVar5 = 0x20;
-          if (uVar4 < 100) {
-            uVar5 = 0x3e;
+          uVar4 = 0x20;
+          if (uVar3 < 100) {
+            uVar4 = 0x3e;
           }
-          sprintf(tbuf,"%c %i%% %c",uVar2,uVar4,uVar5);
+          sprintf(tbuf,"%c %i%% %c",uVar2,uVar3,uVar4);
           if (Game.language == 'c') {
             AddSpacesIntoText(tbuf,1);
           }
-          dme_sx = (float)dVar11;
+          dme_sx = (float)dVar10;
           DrawMenuEntry2(cursor,tMUSICVOLUME[Game.language],tbuf,&x,&y,&i);
-          dme_sx = (float)dVar11;
+          dme_sx = (float)dVar10;
           DrawMenuEntry(cursor,tDONE[Game.language],&x,&y,&i);
           return;
         }
         if (paused < 0x1e) {
           return;
         }
-        uVar4 = (uint)Game.language;
-        y = (float)(-0.5 - dVar9);
+        uVar3 = (u32)Game.language;
+        y = (float)(-0.5 - dVar8);
         x = PANELMENUX;
-        if (uVar4 == 99) {
+        if (uVar3 == 99) {
           c = tRELICS[3];
           if (Game.vibration != '\0') {
             c = tGEMS[3];
@@ -635,41 +633,41 @@ void DrawMenu(Cursor *cursor,int paused)
           else {
             txt = tON;
           }
-          sprintf(tbuf,"%s: %s",tVIBRATION[uVar4],txt[uVar4]);
+          sprintf(tbuf,"%s: %s",tVIBRATION[uVar3],txt[uVar3]);
         }
-        dme_sx = (float)dVar11;
+        dme_sx = (float)dVar10;
         DrawMenuEntry(cursor,tbuf,&x,&y,&i);
-        dme_sx = (float)dVar11;
+        dme_sx = (float)dVar10;
         DrawMenuEntry(cursor,tSOUNDOPTIONS[Game.language],&x,&y,&i);
         if (LANGUAGEOPTION != 0) {
-          dme_sx = (float)dVar11;
+          dme_sx = (float)dVar10;
           DrawMenuEntry(cursor,tLANGUAGE[Game.language],&x,&y,&i);
         }
-        dme_sx = (float)dVar11;
+        dme_sx = (float)dVar10;
         c = tDONE[Game.language];
         goto LAB_80036f1c;
       }
-      if (iVar6 == 9) {
+      if (iVar5 == 9) {
         if (paused < 0x1e) {
           return;
         }
-        puVar8 = LanguageName;
+        txt = LanguageName;
         x = PANELMENUX;
-        y = (float)(-0.5 - dVar9);
+        y = (float)(-0.5 - dVar8);
         do {
-          c = *(char **)puVar8;
-          puVar8 = (undefined1 *)((int)puVar8 + 4);
+          c = *txt;
+          txt = txt + 1;
           DrawMenuEntry(cursor,c,&x,&y,&i);
-        } while ((int)puVar8 < -0x7febcbdb);
+        } while ((int)txt < LanguageName[5]);
         return;
       }
-      if (iVar6 != 10) {
+      if (iVar5 != 10) {
         return;
       }
       if (paused < 0x1e) {
         return;
       }
-      y = (float)(-0.5 - dVar9);
+      y = (float)(-0.5 - dVar8);
       x = PANELMENUX;
       if (Level == 0x25) {
         txt = tTCR_ABANDONTHISGAME;
@@ -681,22 +679,22 @@ void DrawMenu(Cursor *cursor,int paused)
       c = tYES[Game.language];
     }
     else {
-      if (iVar6 == 0x23) {
+      if (iVar5 == 0x23) {
         DrawCredits();
         return;
       }
-      if (iVar6 < 0x24) {
-        if (iVar6 == 0x1d) {
+      if (iVar5 < 0x24) {
+        if (iVar5 == 0x1d) {
           iVar7 = ParseNintendoErrorCode();
           if (iVar7 != 0) {
 LAB_80036b44:
             BackMenu = 0x15;
-            SaveMenu = iVar6;
+            SaveMenu = iVar5;
             NewMenu(cursor,0x2f,0,-1);
             return;
           }
           iVar7 = 1;
-          Text3D(tDELETEGAME[Game.language],0.0,0.81,(float)dVar11,0.6,0.6,0.6,1,0);
+          Text3D(tDELETEGAME[Game.language],0.0,0.81,(float)dVar10,0.6,0.6,0.6,1,0);
           if (memcard_gamesavailable == 0) {
             DrawNODATAAVAILABLE();
             cursor->y = cursor->y_max;
@@ -728,18 +726,18 @@ LAB_80036c8c:
           Text3D(c,0.0,-0.81,1.0,0.6,0.6,0.6,iVar7,col);
           return;
         }
-        if (iVar6 < 0x1e) {
-          if (iVar6 == 0x1a) {
+        if (iVar5 < 0x1e) {
+          if (iVar5 == 0x1a) {
 LAB_80034ee8:
             VersionDisplayFlag = 1;
-            DrawNameInputTable(0,0xbfe0000000000000,cursor);
+            DrawNameInputTable(cursor,0.0,-0.5);
             c = MakeEditText(Game.name);
             Text3D(c,0.0,GAMENAMEY,1.0,1.0,1.0,1.0,1,4);
             return;
           }
-          if (iVar6 < 0x1b) {
-            if (iVar6 != 0x18) {
-              if (iVar6 != 0x19) {
+          if (iVar5 < 0x1b) {
+            if (iVar5 != 0x18) {
+              if (iVar5 != 0x19) {
                 return;
               }
               iVar7 = ParseNintendoErrorCode();
@@ -773,46 +771,46 @@ LAB_80034ee8:
               goto LAB_80036c8c;
             }
             Text3D(tLOADGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-            Text3D(tMEMCARDACCESS[(uint)Game.language * 2],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0 );
+            Text3D(tMEMCARDACCESS[(u32)Game.language * 2],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0 );
             scalex = 0.6;
             fVar1 = 0.0;
-            c = tMEMCARDACCESS[(uint)Game.language * 2 + 1];
+            c = tMEMCARDACCESS[(u32)Game.language * 2 + 1];
             dy = -0.45;
           }
           else {
-            if (iVar6 == 0x1b) {
+            if (iVar5 == 0x1b) {
               Text3D(tSAVEGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
               DrawGameSlot(&Game,0.0,0.25,4,0.6);
               if (game->empty == '\0') {
-                Text3D(tCONFIRMOVERWRITE[(uint)Game.language * 2],0.0,-0.3,(float)dVar11,0.6,0.6,0 .6
+                Text3D(tCONFIRMOVERWRITE[(u32)Game.language * 2],0.0,-0.3,(float)dVar10,0.6,0.6,0 .6
                        ,1,0);
-                Text3D(tCONFIRMOVERWRITE[(uint)Game.language * 2 + 1],0.0,-0.45,(float)dVar11,0.6,
+                Text3D(tCONFIRMOVERWRITE[(u32)Game.language * 2 + 1],0.0,-0.45,(float)dVar10,0.6,
                        0.6,0.6,1,0);
               }
               else {
-                Text3D(tCONFIRMSAVE[Game.language],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0);
+                Text3D(tCONFIRMSAVE[Game.language],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0);
               }
-              y = (float)(-0.699999988079071 - dVar9);
+              y = (float)(-0.699999988079071 - dVar8);
               DrawMenuEntry(cursor,tYES[Game.language],&x,&y,&i);
               c = tNO[Game.language];
               goto LAB_80036da0;
             }
-            if (iVar6 != 0x1c) {
+            if (iVar5 != 0x1c) {
               return;
             }
             Text3D(tSAVEGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-            Text3D(tMEMCARDACCESS[(uint)Game.language * 2],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0 );
+            Text3D(tMEMCARDACCESS[(u32)Game.language * 2],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0 );
             scalex = 0.6;
             fVar1 = 0.0;
-            c = tMEMCARDACCESS[(uint)Game.language * 2 + 1];
+            c = tMEMCARDACCESS[(u32)Game.language * 2 + 1];
             dy = -0.45;
           }
           goto LAB_80037ad8;
         }
-        if (iVar6 == 0x20) {
+        if (iVar5 == 0x20) {
           Text3D(tFORMAT[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-          Text3D(tCONFIRMFORMAT[Game.language],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0);
-          y = (float)(-0.699999988079071 - dVar9);
+          Text3D(tCONFIRMFORMAT[Game.language],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0);
+          y = (float)(-0.699999988079071 - dVar8);
           DrawMenuEntry(cursor,tYES[Game.language],&x,&y,&i);
           txt = tNO;
 LAB_80037624:
@@ -821,9 +819,9 @@ LAB_80037638:
           DrawMenuEntry(cursor,c,&x,&y,&i);
           return;
         }
-        if (0x20 < iVar6) {
-          if (iVar6 != 0x21) {
-            if (iVar6 != 0x22) {
+        if (0x20 < iVar5) {
+          if (iVar5 != 0x21) {
+            if (iVar5 != 0x22) {
               return;
             }
             pdat = PData + new_power;
@@ -833,59 +831,59 @@ LAB_80037638:
             else {
               fVar1 = 0.6;
             }
-            dVar11 = 0.6000000238418579;
+            dVar10 = 0.6000000238418579;
             Text3D(PData[new_power].name,0.0,POWERTEXTY + 0.6,1.0,fVar1,0.6,0.6,1,1);
             if (cursor->button_lock == '\0') {
-              y = (float)((double)(float)((double)POWERTEXTY - dVar11) - dVar9);
+              y = (float)((double)(float)((double)POWERTEXTY - dVar10) - dVar8);
               DrawMenuEntry(cursor,tPRESSxTOCONTINUE[Game.language],&x,&y,&i);
             }
-            uVar4 = PData[iVar7].font3d_letter - 0x61 & 0xff;
-            fVar1 = Font3DObjTab[uVar4].scale * 2.5;
+            uVar3 = PData[iVar7].font3d_letter - 0x61 & 0xff;
+            fVar1 = Font3DObjTab[uVar3].scale * 2.5;
             col = 0;
             DrawPanel3DCharacter
-                      ((uint)pdat->character,0.0,-0.8,1.0,fVar1,fVar1,fVar1,0,0,0,
-                       (int)Font3DObjTab[uVar4].action,Font3DObjTab[uVar4].anim_time,0);
+                      ((u32)pdat->character,0.0,-0.8,1.0,fVar1,fVar1,fVar1,0,0,0,
+                       (int)Font3DObjTab[uVar3].action,Font3DObjTab[uVar3].anim_time,0);
             while ((col < 7 &&
-                   (iVar6 = strcmp((char *)PData[iVar7].description[col],""), iVar6 != 0))) {
+                   (iVar5 = strcmp((char *)PData[iVar7].description[col],""), iVar5 != 0))) {
               col = col + 1;
             }
-            local_68 = (double)CONCAT44(0x43300000,col - 1U ^ 0x80000000);
-            dVar11 = 0.5;
-            dVar9 = (double)(MENUDY * 1.2);
+            _local_68 = (double)CONCAT44(0x43300000,col - 1U ^ 0x80000000);
+            dVar10 = 0.5;
+            dVar8 = (double)(MENUDY * 1.2);
             i = 0;
             y = POWERTEXTY -
-                (float)((double)(float)(local_68 - (double)(variptr_u  [2])0x4330000080000000) *
-                       dVar9) * 0.5;
+                (float)((double)(float)(_local_68 - (double)(variptr_u  [2])0x4330000080000000) *
+                       dVar8) * 0.5;
             if (col < 1) {
               return;
             }
             do {
-              Text3D((char *)PData[iVar7].description[i],0.0,y,1.0,(float)dVar11,(float)dVar11,0.6 ,1
+              Text3D((char *)PData[iVar7].description[i],0.0,y,1.0,(float)dVar10,(float)dVar10,0.6 ,1
                      ,0);
               i = i + 1;
-              y = (float)((double)y + dVar9);
+              y = (float)((double)y + dVar8);
             } while (i < col);
             return;
           }
           Text3D(tFORMAT[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-          Text3D(tMEMCARDACCESS[(uint)Game.language * 2],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0);
+          Text3D(tMEMCARDACCESS[(u32)Game.language * 2],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0);
           scalex = 0.6;
           fVar1 = 0.0;
-          c = tMEMCARDACCESS[(uint)Game.language * 2 + 1];
+          c = tMEMCARDACCESS[(u32)Game.language * 2 + 1];
           dy = -0.45;
           goto LAB_80037ad8;
         }
-        if (iVar6 != 0x1e) {
-          if (iVar6 != 0x1f) {
+        if (iVar5 != 0x1e) {
+          if (iVar5 != 0x1f) {
             return;
           }
           Text3D(tDELETEGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-          Text3D(tMEMCARDACCESS[(uint)Game.language * 2],0.0,-0.3,1.0,0.6,0.6,0.6,1,0);
+          Text3D(tMEMCARDACCESS[(u32)Game.language * 2],0.0,-0.3,1.0,0.6,0.6,0.6,1,0);
           scalex = 0.6;
           fVar1 = 0.0;
-          c = tMEMCARDACCESS[(uint)Game.language * 2 + 1];
+          c = tMEMCARDACCESS[(u32)Game.language * 2 + 1];
           dy = -0.45;
-          dVar11 = 1.0;
+          dVar10 = 1.0;
           goto LAB_80037ad8;
         }
         Text3D(tDELETEGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
@@ -893,44 +891,44 @@ LAB_80037638:
         txt = tCONFIRMDELETE;
         goto LAB_80036d1c;
       }
-      if (iVar6 == 0x2b) {
+      if (iVar5 == 0x2b) {
         NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
         return;
       }
-      if (iVar6 < 0x2c) {
-        if (iVar6 == 0x28) {
+      if (iVar5 < 0x2c) {
+        if (iVar5 == 0x28) {
           NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
-          Text3D(tCONNECTGBA[(uint)Game.language * 3],0.0,-0.35,(float)dVar11,0.4,0.4,0.4,1,0);
-          Text3D(tCONNECTGBA[(uint)Game.language * 3 + 1],0.0,-0.49,(float)dVar11,0.4,0.4,0.4,1,0) ;
-          Text3D(tCONNECTGBA[(uint)Game.language * 3 + 2],0.0,-0.63,(float)dVar11,0.4,0.4,0.4,1,0) ;
+          Text3D(tCONNECTGBA[(u32)Game.language * 3],0.0,-0.35,(float)dVar10,0.4,0.4,0.4,1,0);
+          Text3D(tCONNECTGBA[(u32)Game.language * 3 + 1],0.0,-0.49,(float)dVar10,0.4,0.4,0.4,1,0) ;
+          Text3D(tCONNECTGBA[(u32)Game.language * 3 + 2],0.0,-0.63,(float)dVar10,0.4,0.4,0.4,1,0) ;
           c = tPRESSxTOCONTINUE[Game.language];
           fVar1 = -0.77;
 LAB_800378c4:
-          Text3D(c,0.0,fVar1,(float)dVar11,0.4,0.4,0.4,1,0);
+          Text3D(c,0.0,fVar1,(float)dVar10,0.4,0.4,0.4,1,0);
           GBA_Draw();
           return;
         }
-        if (0x28 < iVar6) {
-          if (iVar6 == 0x29) {
+        if (0x28 < iVar5) {
+          if (iVar5 == 0x29) {
             NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
-            Text3D(tCONNECTING[Game.language],0.0,-0.35,(float)dVar11,0.4,0.4,0.4,1,0);
+            Text3D(tCONNECTING[Game.language],0.0,-0.35,(float)dVar10,0.4,0.4,0.4,1,0);
             c = tPLEASEWAIT[Game.language];
             fVar1 = -0.49;
           }
           else {
-            if (iVar6 != 0x2a) {
+            if (iVar5 != 0x2a) {
               return;
             }
             NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
             Text3D(tDOWNLOADING[Game.language],0.0,-0.35,1.0,0.4,0.4,0.4,1,0);
             c = tPLEASEWAIT[Game.language];
             fVar1 = -0.49;
-            dVar11 = 1.0;
+            dVar10 = 1.0;
           }
           goto LAB_800378c4;
         }
-        if (iVar6 != 0x26) {
-          if (iVar6 != 0x27) {
+        if (iVar5 != 0x26) {
+          if (iVar5 != 0x27) {
             return;
           }
           NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
@@ -939,9 +937,9 @@ LAB_800378c4:
           txt = tEXIT;
           goto LAB_80037624;
         }
-        pnVar3 = (nupad_s *)XbGetNumControllers();
-        if (pnVar3 == (nupad_s *)0x0) {
-          Pad[0] = pnVar3;
+        iVar7 = XbGetNumControllers();
+        if (iVar7 == 0) {
+          Pad[0] = (nupad_s *)0x0;
           return;
         }
         if (lost_controller != 0) {
@@ -992,12 +990,12 @@ LAB_80037260:
         c = tPRESSxTOCONTINUE[Game.language];
         fVar1 = 0.0;
         dy = -0.15;
-        dVar11 = 1.0;
+        dVar10 = 1.0;
 LAB_80037ad8:
-        Text3D(c,fVar1,dy,(float)dVar11,scalex,scalex,scalex,1,0);
+        Text3D(c,fVar1,dy,(float)dVar10,scalex,scalex,scalex,1,0);
         return;
       }
-      if (iVar6 == 0x2f) {
+      if (iVar5 == 0x2f) {
         y = 0.2;
         for (iVar7 = 0; iVar7 < 4; iVar7 = iVar7 + 1) {
           uVar2 = ParseNintendoErrorCode();
@@ -1006,7 +1004,7 @@ LAB_80037ad8:
           Text3D(c,0.0,y,1.0,0.4,0.4,0.4,1,0);
           y = y - 0.1;
         }
-        y = (float)(-0.6899999976158142 - dVar9);
+        y = (float)(-0.6899999976158142 - dVar8);
         DrawMenuEntry(cursor,tMEMCARDRETRY[Game.language],&x,&y,&i);
         DrawMenuEntry(cursor,tMEMCARDCONTINUE[Game.language],&x,&y,&i);
         iVar7 = ParseNintendoErrorCode();
@@ -1014,7 +1012,7 @@ LAB_80037ad8:
           return;
         }
         if (iVar7 < 4) {
-          uVar4 = (uint)Game.language;
+          uVar3 = (u32)Game.language;
           txt = tFORMAT;
           goto LAB_80037c10;
         }
@@ -1022,26 +1020,26 @@ LAB_80037be8:
         if (iVar7 != 8) {
           return;
         }
-        uVar4 = (uint)Game.language;
+        uVar3 = (u32)Game.language;
         txt = tDELETE;
 LAB_80037c10:
-        DrawMenuEntry(cursor,txt[uVar4],&x,&y,&i);
+        DrawMenuEntry(cursor,txt[uVar3],&x,&y,&i);
         cursor->y_max = '\x02';
         return;
       }
-      if (iVar6 < 0x30) {
-        if (iVar6 == 0x2c) {
+      if (iVar5 < 0x30) {
+        if (iVar5 == 0x2c) {
           NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
-          Text3D(tGAMEINST[(uint)Game.language * 3],0.0,-0.35,(float)dVar11,0.4,0.4,0.4,1,0);
-          Text3D(tGAMEINST[(uint)Game.language * 3 + 1],0.0,-0.49,(float)dVar11,0.4,0.4,0.4,1,0);
-          Text3D(tGAMEINST[(uint)Game.language * 3 + 2],0.0,-0.63,(float)dVar11,0.4,0.4,0.4,1,0);
+          Text3D(tGAMEINST[(u32)Game.language * 3],0.0,-0.35,(float)dVar10,0.4,0.4,0.4,1,0);
+          Text3D(tGAMEINST[(u32)Game.language * 3 + 1],0.0,-0.49,(float)dVar10,0.4,0.4,0.4,1,0);
+          Text3D(tGAMEINST[(u32)Game.language * 3 + 2],0.0,-0.63,(float)dVar10,0.4,0.4,0.4,1,0);
           scalex = 0.4;
           c = tPRESSxTOCONTINUE[Game.language];
           fVar1 = 0.0;
           dy = -0.77;
         }
         else {
-          if (iVar6 != 0x2d) {
+          if (iVar5 != 0x2d) {
             return;
           }
           NuRndrRectUV2di(0,0,0x280,0x1e0,0.0,0.0,1.0,1.0,-1,GBABG_mtl);
@@ -1050,26 +1048,26 @@ LAB_80037c10:
           c = tPRESSxTOCONTINUE[Game.language];
           fVar1 = 0.0;
           dy = -0.77;
-          dVar11 = 1.0;
+          dVar10 = 1.0;
         }
         goto LAB_80037ad8;
       }
-      if (iVar6 != 0x30) {
-        if (iVar6 != 0x31) {
+      if (iVar5 != 0x30) {
+        if (iVar5 != 0x31) {
           return;
         }
         Text3D(tDELETEGAME[Game.language],0.0,0.75,1.0,0.6,0.6,0.6,1,0);
-        Text3D(tMEMCARDACCESS[(uint)Game.language * 2],0.0,-0.3,1.0,0.6,0.6,0.6,1,0);
+        Text3D(tMEMCARDACCESS[(u32)Game.language * 2],0.0,-0.3,1.0,0.6,0.6,0.6,1,0);
         scalex = 0.6;
         fVar1 = 0.0;
-        c = tMEMCARDACCESS[(uint)Game.language * 2 + 1];
+        c = tMEMCARDACCESS[(u32)Game.language * 2 + 1];
         dy = -0.45;
-        dVar11 = 1.0;
+        dVar10 = 1.0;
         goto LAB_80037ad8;
       }
       Text3D(tCONFIRMDELETE[Game.language],0.0,-0.3,1.0,0.6,0.6,0.6,1,0);
       c = tYES[Game.language];
-      y = (float)(-0.699999988079071 - dVar9);
+      y = (float)(-0.699999988079071 - dVar8);
     }
     DrawMenuEntry(cursor,c,&x,&y,&i);
     c = tNO[Game.language];
@@ -1081,15 +1079,14 @@ LAB_80036f1c:
   DrawGameSlot(game,0.0,0.25,4,0.6);
   txt = tCONFIRMLOAD;
 LAB_80036d1c:
-  Text3D(txt[Game.language],0.0,-0.3,(float)dVar11,0.6,0.6,0.6,1,0);
-  y = (float)(-0.699999988079071 - dVar9);
+  Text3D(txt[Game.language],0.0,-0.3,(float)dVar10,0.6,0.6,0.6,1,0);
+  y = (float)(-0.699999988079071 - dVar8);
   DrawMenuEntry(cursor,tYES[Game.language],&x,&y,&i);
   c = tNO[Game.language];
 LAB_80036da0:
   DrawMenuEntry(cursor,c,&x,&y,&i);
   return;
 }
-
 
 
 
@@ -2803,4 +2800,486 @@ struct NUPOINTOFINTEREST_s *ptr;
   }
   return;
 */
+}
+
+void DrawNameInputTable(struct Cursor *cursor,float x0,float y0)
+{
+  s32 align;
+  s32 colour;
+  s32 col;
+  s32 j;
+  char *tmpchar;
+  float y;
+  float x;
+  s32 i;
+  
+  if (Game.language == 'c') {
+    tbuf[2] = '\0';
+    tbuf[1] = ' ';
+  }
+  else {
+    tbuf[1] = '\0';
+  }
+  y = y0 - (float)(cursor->y_max - cursor->y_min) * MENUDY * 0.5f;
+  i = 0;
+  do {
+    j = i + 1;
+    x = x0 - (float)(cursor->x_max - cursor->x_min) * 0.06f * 0.5f;
+    if (cursor->x_min <= cursor->x_max) {
+      tmpchar = (char *)((s32)NameInputTable + cursor->x_min + i * 7);
+      do {
+        tbuf[0] = *tmpchar;
+        align = 1;
+        tmpchar = tmpchar + 1;
+        if ((i == cursor->y) && (cursor->x_min == cursor->x)) {
+          align = 0x21;
+          col = 0;
+          if (5 < GlobalTimer.frame % 0xc) {
+            col = 3;
+          }
+        }
+        else {
+          col = 2;
+        }
+        cursor->x_min = cursor->x_min + 1;
+        Text3D(tbuf,x,y,1.0f,0.6f,0.6f,0.6f,align,col);
+        x = x + 0.06000000238418579f;
+      } while (cursor->x_min <= cursor->x_max);
+    }
+    x = y + MENUDY;
+    y = x;
+    i = j;
+  } while (j < 4);
+  if ('\x03' < cursor->y_max) {
+    i = 1;
+    if (cursor->y == '\x04') {
+      i = 0x21;
+      col = 0;
+      if (5 < GlobalTimer.frame % 0xc) {
+        col = 3;
+      }
+    }
+    else {
+      col = 2;
+    }
+    Text3D(tDONE[Game.language],x0,x,1.0f,0.6f,0.6f,0.6f,i,col);
+    y = y + MENUDY;
+  }
+  if ('\x04' < cursor->y_max) {
+    i = 1;
+    if (cursor->y == '\x05') {
+      i = 0x21;
+      col = 0;
+      if (5 < GlobalTimer.frame % 0xc) {
+        col = 3;
+      }
+    }
+    else {
+      col = 2;
+    }
+    Text3D(tCANCEL[Game.language],x0,y,1.0f,0.6f,0.6f,0.6f,i,col);
+  }
+  if (((cutmovie == -1) && (cursor->menu != '\x04')) && (cursor->menu != '\x1a')) {
+    DrawPanel3DObject(0x81,x0,y0,1.0f,0.11875f,0.125f,0.11875f,0xc000,0,0,ObjTab[129].obj.scene,ObjTab[129].obj.special,0);
+  }
+  return;
+}
+
+
+void DrawMenuEntry(Cursor *cursor,char *txt,float *x,float *y,s32 *i)
+{
+  s32 align;
+  s32 col;
+  float size;
+  
+  //col = *i;
+  if ((cursor->y_min <= i) && (i <= cursor->y_max)) {
+    align = 1;
+    size = dme_sy * 0.6f;
+    if (i == cursor->y) {
+      col = 0;
+      if (5 < GlobalTimer.frame % 0xc) {
+        col = 3;
+      }
+      align = 0x21;
+    }
+    else {
+      col = 2;
+    }
+    Text3D(txt,*x,*y + dme_yadj,1.0f,size * dme_sx,size * dme_symul,size,align,col);
+  }
+  NextMenuEntry(y,i);
+  dme_symul = 1.0f;
+  dme_yadj = 0.0f;
+  dme_sx = 1.0f;
+  dme_sy = 1.0f;
+  return;
+}
+
+
+void DrawMenuEntry2(struct Cursor *cursor,char *txt0,char *txt1,float *x,float *y,int *i)
+{
+  s32 align;
+  s32 col;
+  float sx2;
+  float size;
+ 
+  if ((cursor->y_min <= i) && (i <= cursor->y_max)) {
+    align = 1;
+    size = dme_sy * 0.6000000238418579f;
+    sx2 = size;
+    if (i == cursor->y) {
+      col = 0;
+      if (5 < GlobalTimer.frame % 0xc) {
+        col = 3;
+      }
+      align = 0x21;
+    }
+    else {
+      col = 2;
+    }
+    Text3D(txt0,*x,*y,1.0,(sx2 * dme_sy),size,size,align,col);
+    size = MENUDY * dme_sy + *y;
+    *y = size;
+    Text3D(txt1,*x,size,1.0,(sx2 * dme_sx),sx2,sx2,align,col);
+  }
+  NextMenuEntry(y,i);
+  dme_sy = 1.0f;
+  dme_sx = 1.0f;
+  return;
+}
+
+void NextMenuEntry(float *y,s32 *i)
+
+{
+  *y = MENUDY * dme_sy + *y;
+  *i = *i + 1;
+  return;
+}
+
+void NewMenu(Cursor *cur,s32 menu,s32 y,s32 level)
+{
+  s32 old_menu;
+  s32 lock;
+ 
+  cur->wait = '\0';
+  lock = '\0';
+  if (menu == cur->menu) {
+    menu = -1;
+  }
+  if ((menu == cur->new_menu) && (cur->wait_hack != '\0')) goto LAB_80031bb4;
+  if (menu == 0x14) {
+    gameover_hack = 0;
+    goto LAB_80031bb4;
+  }
+  if (menu < 0x15) {
+    if (8 < menu) {
+      if (menu == 0x11) {
+        i_nameinput = 0;
+      }
+      goto LAB_80031bb4;
+    }
+    if (5 < menu) goto LAB_80031bb4;
+    if (menu == -1) {
+      if ((cur->menu == 0x15) || (cur->menu == 0x18)) {
+        cur->wait = '<';
+      }
+      goto LAB_80031bb4;
+    }
+    if (menu != 4) goto LAB_80031bb4;
+LAB_80031b54:
+    y = 4;
+    Game.name[0] = 'S';
+    Game.name[1] = 'A';
+    Game.name[2] = 'R';
+    Game.name[3] = 'C';
+    Game.name[8] = '\0';
+    Game.name[4] = '_';
+    Game.name[5] = '_';
+    Game.name[6] = '_';
+    Game.name[7] = 'H';
+    cur->y = '\x04';
+    i_nameinput = 0;
+  }
+  else {
+    if (menu != 0x19) {
+      if (menu < 0x1a) {
+        if ((menu == 0x15) || (menu != 0x16)) goto LAB_80031bb4;
+      }
+      else if (menu != 0x1d) {
+        if (0x1d < menu) {
+          if (menu == 0x22) {
+            lock = -0x4c;
+          }
+          goto LAB_80031bb4;
+        }
+        if (menu != 0x1a) goto LAB_80031bb4;
+        goto LAB_80031b54;
+      }
+    }
+    InitLoadSaveDeleteScreen(cur,menu);
+  }
+LAB_80031bb4:
+  old_menu = menu;
+  if (cur->wait == '\0') {
+    ResetTimer(&MenuTimer);
+    cur->new_level = (char)level;
+    cur->new_menu = -1;
+    cur->wait = '\0';
+    cur->button_lock = lock;
+    cur->menu = old_menu;
+    if (old_menu != -1) {
+      GetMenuInfo(cur);
+      cur->x = cur->remember[menu].x;
+      if (cur->remember[menu].x < cur->x_min) {
+        cur->x = cur->x_min;
+      }
+      else if (cur->x_max < cur->remember[menu].x) {
+        cur->x = cur->x_max;
+      }
+      if ((y < cur->y_min) || (cur->y_max < y)) {
+        cur->y = cur->remember[menu].y;
+        if (cur->remember[menu].y < cur->y_min) {
+          cur->y = cur->y_min;
+        }
+        else if ((s32)cur->y_max < cur->remember[menu].y) {
+          cur->y = cur->y_max;
+        }
+      }
+      else {
+        cur->y = (char)y;
+      }
+      lock = cur->menu;
+      if (((lock == '\x04') || (lock == '\x1a')) || (lock == '\x11')) {
+        cur->x = '\0';
+      }
+      cur->wait_hack = '\0';
+      cur->menu_frame = 0;
+      cur->item_frame = 0;
+    }
+  }
+  else {
+    cur->wait_frames = cur->wait;
+    cur->new_menu = old_menu;
+  }
+  return;
+}
+
+
+void GetMenuInfo(Cursor *cur)
+
+{
+  int err;
+  char cVar1;
+  char menu;
+  
+  cVar1 = '\0';
+  menu = cur->menu;
+  cur->x_min = '\0';
+  cur->y_min = '\0';
+  cur->x_max = '\0';
+  cur->y_max = '\0';
+  if (menu == '\x15') {
+    menu = '\x03';
+    goto LAB_80031a44;
+  }
+  if (menu < '\x16') {
+    if (menu == '\t') {
+      menu = '\x05';
+      goto LAB_80031a44;
+    }
+    if ('\t' < menu) {
+      if (menu != '\x0f') {
+        if ('\x0f' < menu) {
+          if (menu == '\x11') {
+            cur->x_max = '\x06';
+            cur->y_max = '\x04';
+            if (Game.language != 'c') {
+              return;
+            }
+            menu = '\a';
+          }
+          else if ((menu < '\x11') || (menu == '\x12')) {
+            menu = '\x01';
+          }
+          else {
+            if (menu != '\x14') {
+              return;
+            }
+            menu = '\x01';
+          }
+          goto LAB_80031a44;
+        }
+        if (menu == '\v') {
+          menu = '\n';
+          goto LAB_80031a44;
+        }
+        if (menu < '\v') {
+          menu = '\x01';
+          goto LAB_80031a44;
+        }
+        if (menu == '\f') {
+          menu = '\n';
+          goto LAB_80031a44;
+        }
+        if (menu != '\x0e') {
+          return;
+        }
+        menu = '\x05';
+        goto LAB_80031a24;
+      }
+      menu = '\x04';
+      goto LAB_80031a44;
+    }
+    if (menu != '\x04') {
+      if (menu < '\x05') {
+        if (menu == '\x01') {
+LAB_800318e8:
+          err = ParseNintendoErrorCode();
+          if (err == 6) {
+            menu = '\x02';
+          }
+          else {
+            if (err < 7) {
+              if ((err < 4) && (1 < err)) {
+                menu = '\x02';
+                goto LAB_80031a44;
+              }
+            }
+            else if (err == 8) {
+              menu = '\x02';
+              goto LAB_80031a44;
+            }
+            menu = '\x01';
+          }
+          goto LAB_80031a44;
+        }
+        if ('\x01' < menu) {
+          return;
+        }
+        err = LANGUAGEOPTION;
+        if (menu != '\0') {
+          return;
+        }
+      }
+      else {
+        if (menu == '\x06') {
+          cur->y_max = '\x02';
+          if (LANGUAGEOPTION == 0) {
+            return;
+          }
+          menu = '\x03';
+          goto LAB_80031a44;
+        }
+        err = TimeTrial;
+        if ('\x05' < menu) {
+          if (menu == '\a') {
+            menu = '\x02';
+          }
+          else {
+            if (menu != '\b') {
+              return;
+            }
+            menu = '\x02';
+          }
+          goto LAB_80031a44;
+        }
+      }
+      cVar1 = '\x02';
+      if (err != 0) {
+        cVar1 = '\x03';
+      }
+LAB_80031a38:
+      cur->y_max = cVar1;
+      return;
+    }
+LAB_800319a8:
+    cur->x_max = '\x06';
+    cur->y_max = '\x05';
+    if (Game.language != 'c') {
+      return;
+    }
+    menu = '\b';
+LAB_80031a44:
+    cur->y_max = menu;
+    return;
+  }
+  if (menu != '\x1f') {
+    if (menu < ' ') {
+      if (menu != '\x1a') {
+        if (menu < '\x1b') {
+          if (menu != '\x17') {
+            if ('\x16' < menu) {
+              if (menu == '\x18') goto LAB_80031a20;
+              if (menu != '\x19') {
+                return;
+              }
+            }
+LAB_80031a00:
+            cVar1 = '\x01';
+            menu = '\x02';
+            goto LAB_80031a14;
+          }
+        }
+        else {
+          if (menu == '\x1c') goto LAB_80031a20;
+          if ('\x1b' < menu) {
+            if (menu == '\x1d') goto LAB_80031a00;
+            if (menu != '\x1e') {
+              return;
+            }
+          }
+        }
+LAB_80031a0c:
+        cVar1 = '\0';
+        menu = '\x01';
+LAB_80031a14:
+        cur->y_max = menu;
+        cur->x_max = cVar1;
+        return;
+      }
+      goto LAB_800319a8;
+    }
+    if (menu == '(') goto LAB_80031a38;
+    if (menu < ')') {
+      if (menu != '!') {
+        if (menu < '!') goto LAB_80031a0c;
+        if (menu != '&') {
+          if (menu != '\'') {
+            return;
+          }
+          menu = '\x01';
+          goto LAB_80031a44;
+        }
+      }
+    }
+    else {
+      if (menu == '/') goto LAB_800318e8;
+      if (menu < '0') {
+        if ('-' < menu) {
+          return;
+        }
+        menu = '\0';
+        goto LAB_80031a44;
+      }
+      if (menu == '0') goto LAB_80031a0c;
+      if (menu != '1') {
+        return;
+      }
+    }
+  }
+LAB_80031a20:
+  menu = '\0';
+LAB_80031a24:
+  cur->y_max = menu;
+  cur->x_max = menu;
+  return;
+}
+
+
+void DrawNODATAAVAILABLE(void)
+
+{
+  Text3D(tNODATAAVAILABLE[(uint)Game.language * 2],0.0,0.0,1.0,0.6,0.6,0.6,1,0);
+  return;
 }

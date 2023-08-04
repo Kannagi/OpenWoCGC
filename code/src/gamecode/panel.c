@@ -1020,3 +1020,114 @@ LAB_800601c8:
   GameVP();
   return;
 }
+
+s32 DrawPanel3DObject(s32 object,float x,float y,float z,float scalex,float scaley,float scalez,
+                     u16 xrot,u16 yrot,u16 zrot,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot)
+{
+  struct numtx_s *cammtx;
+  s32 i;
+  struct numtx_s m;
+  struct nuvec_s s;
+  
+  if (((scn == NULL) || (obj == NULL)) || ((scalex == 0.0f && ((scaley == 0.0f && (scalez == 0.0f)))))) {
+    i = 0;
+  }
+  else {
+    s.x = scalex;
+    s.y = scaley;
+    s.z = scalez;
+    NuMtxSetScale(&m,&s);
+    if (rot == 0) {
+      if (xrot != 0) {
+        NuMtxRotateX(&m,xrot);
+      }
+      if (yrot != 0) {
+        NuMtxRotateY(&m,yrot);
+      }
+      if (zrot != 0) {
+        NuMtxRotateZ(&m,zrot);
+      }
+    }
+    else if (rot == 1) {
+      if (yrot != 0) {
+        NuMtxRotateY(&m,yrot);
+      }
+      if (xrot != 0) {
+        NuMtxRotateX(&m,xrot);
+      }
+      if (zrot != 0) {
+        NuMtxRotateZ(&m,zrot);
+      }
+    }
+    m._30 = x * PANEL3DMULX;
+    m._32 = z;
+    m._31 = y * PANEL3DMULY;
+    cammtx = NuCameraGetMtx();
+    NuMtxMul(&m,&m,cammtx);
+    SetLevelLights();
+    i = NuRndrGScnObj(scn->gobjs[obj->instance->objid],&m);
+  }
+  return i;
+}
+
+
+//CHECK!
+s32 DrawPanel3DCharacter (s32 character,float x,float y,float z,float scalex,float scaley,float scalez,
+							u16 xrot,u16 yrot,u16 zrot,s32 action,float anim_time,s32 rot)
+{
+  s32 i;
+  struct numtx_s *cammtx;
+  struct nuanimdata_s *animdata; //tmp
+  struct CharacterModel *model;
+  struct numtx_s m;
+  struct nuvec_s s;
+  
+
+  if ((((scalex == 0.0f) && (scaley == 0.0f)) && (scalez == 0.0f)) ||
+     ((0xbe < (u32)character || (CRemap[character] == -1)))) {
+    i = 0;
+  }
+  else {
+    model = CModel + CRemap[character];
+    s.x = scalex;
+    s.y = scaley;
+    s.z = scalez;
+    NuMtxSetScale(&m,&s);
+    if (rot == 0) {
+      if (xrot != 0) {
+        NuMtxRotateX(&m,xrot);
+      }
+      if (yrot != 0) {
+        NuMtxRotateY(&m,yrot);
+      }
+      if (zrot != 0) {
+        NuMtxRotateZ(&m,zrot);
+      }
+    }
+    else if (rot == 1) {
+      if (yrot != 0) {
+        NuMtxRotateY(&m,yrot);
+      }
+      if (xrot != 0) {
+        NuMtxRotateX(&m,xrot);
+      }
+      if (zrot != 0) {
+        NuMtxRotateZ(&m,zrot);
+      }
+    }
+    m._30 = x * PANEL3DMULX;
+    m._32 = z;
+    m._31 = y * PANEL3DMULY;
+    cammtx = NuCameraGetMtx();
+    NuMtxMul(&m,&m,cammtx);
+    if ((action < 0x76) &&
+       (animdata = CharacterModel[CRemap[character]].anmdata + action * 4), (animdata != NULL)) {
+      NuHGobjEvalAnim(model->hobj,animdata,anim_time,0,NULL,tmtx);
+    }
+    else {
+      NuHGobjEval(model->hobj,0,NULL,tmtx);
+    }
+    i = NuHGobjRndrMtx(model->hobj,&m,1,NULL,tmtx);
+  }
+  return i;
+}

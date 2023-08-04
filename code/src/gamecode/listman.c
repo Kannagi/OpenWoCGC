@@ -15,25 +15,24 @@ struct nulsthdr_s * NuLstCreate(s32 elcnt,s32 elsize)
         list->elcnt = (short)elcnt;
         list->elsize = (short)elsize;
         curr.lhdr = start;
+        start = (s8*)curr.lhdr + elsize + 0x10;
         
-        start = (s8*)start + elsize + 0x10;
         for(n = 1;  n < elsize; n++)
         {
             (curr.lhdr)->succ = start;
             (curr.lhdr)->id = n - 1;
             (curr.lhdr)->owner = list;
             curr.lhdr = start;
-            start = (s8*)start + (elsize + 0x10);
+            start = (s8*)curr.lhdr + (elsize + 0x10);
         
         }
-        prev.s8 = (s8*)start + (elsize + 0x10);
+        prev.s8 = (s8*)curr.lhdr + (elsize + 0x10);
         start->id = n - 1;
         start->succ = NULL;
         start->owner = list;
     }
     return list;
 }
-
 
 void NuLstDestroy(nulsthdr_s *hdr)
 
