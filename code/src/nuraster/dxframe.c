@@ -245,12 +245,9 @@ s32 CreateDirect3D(struct HWND__ *hwnd)
 }
 
 
-struct D3DTexture * NudxTx_Create(struct nutex_s *texture,int rendertargetflag)		//TODO!!!
-{
-    /*
-    DWARF INFO
 
-
+//84% WIP
+struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) {
     long data;
     long data2;
     unsigned char* inbits24;
@@ -263,481 +260,232 @@ struct D3DTexture * NudxTx_Create(struct nutex_s *texture,int rendertargetflag)	
     int s;
     int t;
     unsigned char* b1;
-    int imagesize;
+    int imagesize; 
     int mapix;
     int ix;
     int format;
     int solid;
     int blended;
     int transparent;
-    nutextype_e type;
+    enum nutextype_e type;
     int width;
     int height;
-    void* bits;
+    u8* bits; // void
     int* pal;
     float alphatest;
 
-    */
-  char *pbVar1;
-  char *pbVar2;
-  char cVar3;
-  char bVar4;
-  float fVar5;
-  u32 uVar6;
-  short sVar7;
-  int tpid;
-  u32 *bits_00;
-  u32 uVar8;
-  u32 *puVar9;
-  u32 *puVar10;
-  u32 uVar11;
-  int *pal;
-  enum nutextype_e type;
-  u32 uVar12;
-  int height;
-  void *bits;
-  int width;
-  int iVar13;
-  u32 unaff_r30;
-  int mmcnt;
-  int width_00;
+    int iss3;
+    
+    u8 *pbVar1;
+    u8 *pbVar2;
+    char cVar3;
+    char bVar4;
+    float fVar5; //alphatest ?
+    u32 uVar6;
+    //short sVar7;
+    s32 unkcnt;
+    // long* outbits;
+    long* px_buffer;
+    u32 uVar8;
+    char *puVar9;
+    long *puVar10; //register 10?
+    long *puVar11;
+    long *piVar9;
+    u32 uVar10;
+    u32 uVar11;
+    s32 unkcnt2;
+    
+    //tempcmp =  iss3cmp;
+    type = texture->type;
+    width = texture->width;
+    height = texture->height;
+    bits = texture->bits;
+    pal = texture->pal;
+    iss3 = iss3cmp;
+    
+    if (iss3 != 0) {
+        GS_TexCreateNU(type, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
+        return NULL;
+    }
+    
+    if (type == 0x82) {
+        GS_TexCreateNU(0x82, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
+        return NULL;
+    }
+    
+    if (type == 0x81) {
+        GS_TexCreateNU(0x81, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
+        return NULL;
+    }
+    
+    if (type == 0x80) {
+        GS_TexCreateNU(0x80, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
+        return NULL;
+    }
+    
+    unkcnt = width * height;
+    inbits16 = (u16*)bits;
+    inbits24 = (s8*)bits;
+    inbits32 = (long*)bits;
+    inbits8 = (s8*)bits;
+    //uVar11 = 0;
+    //uVar10 = 0;
+    unkcnt2 = 0;
+    bits = (void* )malloc_x(unkcnt * 4);
+    texture->decal = iss3;
+    texture->linear = iss3;
+    px_buffer = bits;
+    
+    switch (type) {
+        case NUTEX_RGB16:
+        case NUTEX_RGBA16:
+            sprintf(DebugText, "RGB16/RGBA16");
+            
+            for(s = 0; s < height; s++)
+            {
+                u8* puVar10 = px_buffer;
+                for(t = 0; t < width; t++) {
+                     u8 tmp1;
+                    u8 tmp3;
+                    data = *inbits16;
+                    
+                    //bitwise transformation on uVar8, rearranging and multiplying specific bits from different positions to create a new value
+                    //uVar8 & 0x1f, the mask gets you the lowest 5 bits of uVar8
+                    //with uVar8 & 0x3e0 you get the next 5 bits above that; uVar8 & 0x7c00 you get the next 5 after that
+                    uVar8 = ((data & 0x1f) << 3) | ((data & 0x3e0) << 6) | ((data & 0x7c00) << 9);
+                    if ((data & 1) != 0) {
+                        // set the highest 8 bits (bits 24 to 31) of uVar8 to 1 while keeping the other bits unchanged
+                        uVar8 |= 0xff000000;
+                    }
+                    
+                    *(u32*)puVar10 = uVar8;
+                    tmp1 = puVar10[1];
+                    tmp3 = puVar10[3];
+                    puVar10[3] = tmp1;
+                    puVar10[1] = tmp3;
+                    puVar10 += 4;
+                    inbits16++;
+                }
+                px_buffer = px_buffer + width;
+            }
+            break;
+        case NUTEX_RGB24:
+            sprintf(DebugText, "RGB24"); // print texture type we're decoding
+    
+            for(unkcnt = 0; unkcnt < height; unkcnt++)
+            {
+                //puVar9 = (char *)inbits24; // puVar9 is output buffer for this row of pixels
+                u8* puVar10 = px_buffer; // Pushing px_buffer into local puVar10 (What makes puVar10?)
+                for(t = 0; t < width; t++) {
+                    u8 tmp1;
+                    u8 tmp3;
 
-  type = texture->type;
-  width = texture->width;
-  height = texture->height;
-  bits = texture->bits;
-  pal = texture->pal;
-  if (iss3cmp != 0) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    //GS_TexCreateNU(type,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x82) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    //GS_TexCreateNU(0x82,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x81) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    //GS_TexCreateNU(0x81,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x80) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    //GS_TexCreateNU(0x80,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  tpid = width * height;
-  uVar12 = 0;
-  uVar11 = 0;
-  mmcnt = 0;
-  bits_00 = (u32 *)malloc_x(tpid * 4);
-  texture->decal = 0;
-  texture->linear = 0;
-  if (type == NUTEX_RGB24) {
-    sprintf(DebugText,"RGB24");
-    tpid = 0;
-    puVar10 = bits_00;
-    if (0 < height) {
-      do {
-        tpid = tpid + 1;
-        puVar9 = puVar10;
-        iVar13 = width;
-        if (0 < width) {
-          do {
-                    /* WARNING: Load size is inaccurate */
-            //bVar4 = *bits;
-            uVar12 = uVar12 + 1;
-            pbVar1 = (char *)((int)bits + 1);
-            pbVar2 = (char *)((int)bits + 2);
-            bits = (void *)((int)bits + 3);
-            *puVar9 = ((u32)bVar4 + (u32)*pbVar1 * 0x100 + (u32)*pbVar2 * 0x10000) - 0x1000000;
-            cVar3 = *(char *)((int)puVar9 + 3);
-            *(char *)((int)puVar9 + 3) = *(char *)((int)puVar9 + 1);
-            *(char *)((int)puVar9 + 1) = cVar3;
-            iVar13 = iVar13 + -1;
-            puVar9 = puVar9 + 1;
-          } while (iVar13 != 0);
-        }
-        puVar10 = puVar10 + width;
-      } while (tpid < height);
-    }
-  }
-  else if (type < NUTEX_RGB24) {
-    sprintf(DebugText,"RGB16/RGBA16");
-    tpid = 0;
-    puVar10 = bits_00;
-    if (0 < height) {
-      do {
-        tpid = tpid + 1;
-        puVar9 = puVar10;
-        iVar13 = width;
-        if (0 < width) {
-          do {
-                    /* WARNING: Load size is inaccurate */
-            //uVar8 = (u32)*bits;
-            uVar8 = (uVar8 & 0x1f) << 3 | (uVar8 & 0x3e0) << 6 | (uVar8 & 0x7c00) << 9;
-            /*if ((*bits & 1) != 0) {
-              uVar8 = uVar8 | 0xff000000;
-            }*/
-            *puVar9 = uVar8;
-            bits = (void *)((int)bits + 2);
-            cVar3 = *(char *)((int)puVar9 + 3);
-            *(char *)((int)puVar9 + 3) = *(char *)((int)puVar9 + 1);
-            *(char *)((int)puVar9 + 1) = cVar3;
-            iVar13 = iVar13 + -1;
-            puVar9 = puVar9 + 1;
-          } while (iVar13 != 0);
-        }
-        puVar10 = puVar10 + width;
-      } while (tpid < height);
-    }
-  }
-  else if (type == NUTEX_RGBA32) {
-    sprintf(DebugText,"RGB32");
-    tpid = 0;
-    puVar10 = bits_00;
-    if (0 < height) {
-      do {
-        tpid = tpid + 1;
-        puVar9 = puVar10;
-        iVar13 = width;
-        if (0 < width) {
-          do {
-                    /* WARNING: Load size is inaccurate */
-            //*puVar9 = *bits;
-            /*fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)((int)puVar9 + 3) ^ 0x800000 00
-                                            ) - 4503601774854144.0) / 255.0;*/
-            if (0.063 <= fVar5) {
-              if (fVar5 <= 0.9) {
-                uVar11 = uVar11 + 1;
-              }
-              else {
-                uVar12 = uVar12 + 1;
-              }
+                    // NUTEXes seems to be little-endian based on this code
+                    uVar8  = (*inbits24++ << 0x00); // the blue component
+                    uVar8 += (*inbits24++ << 0x08); // the green component
+                    uVar8 += (*inbits24++ << 0x10); // the red component
+                    uVar8 += 0xFF000000; // set the upper two bytes to FF which means solid alpha
+                    
+                    *(u32*)puVar10 = uVar8;
+
+                    // swaps blue and red components
+                    tmp1 = puVar10[1];
+                    tmp3 = puVar10[3];
+                    
+                    // finishes swap, resulting in a big-endian ARBG color
+                    puVar10[3] = tmp1;
+                    puVar10[1] = tmp3;
+                    puVar10 += 4;
+                }
+                px_buffer = px_buffer + width;
             }
-            else {
-              mmcnt = mmcnt + 1;
+            break;
+        case NUTEX_RGBA32:
+            sprintf(DebugText,"RGB32");
+            
+            px_buffer = bits;
+            
+            for(unkcnt = 0; unkcnt < height; unkcnt++)
+            {
+                s8* puVar10 = px_buffer;
+                for(t = 0; t < width; t++) {
+                    *(u32*)puVar10 = *inbits32;
+                    fVar5 = puVar10[3] / 255.0f;
+                    
+                    if (fVar5 < 0.9f) {
+                        uVar10 = uVar10 + 1;
+                    }
+                    else if (0.063f < fVar5) {
+                        uVar11 = uVar11 + 1;
+                    }
+                    else {
+                        unkcnt2 = unkcnt2 + 1;
+                    }
+                    
+                    puVar10 += 4;
+                    inbits32++;
+                }
+                px_buffer = px_buffer + width;
             }
-            bits = (void *)((int)bits + 4);
-            iVar13 = iVar13 + -1;
-            puVar9 = puVar9 + 1;
-          } while (iVar13 != 0);
-        }
-        puVar10 = puVar10 + width;
-      } while (tpid < height);
+            break;
+        case NUTEX_PAL4:
+        case NUTEX_PAL8:
+            if (type == NUTEX_PAL4) {
+                sprintf(DebugText, "PAL4");
+            } else if (type == NUTEX_PAL8) {
+                sprintf(DebugText, "PAL8");
+            }
+            
+            // piVar9 = bits;
+            {
+        
+                s8* puVar10 = px_buffer;
+                for(s = 0; s < unkcnt;s++) {
+                    // uVar6 = (u32)bits[s];
+                    if (type == NUTEX_PAL4) {
+                        if ((s & 1) != 0) {
+                            uVar6 = bits[s / 2] >> 4;
+                        }
+                        else {
+                            uVar6 = bits[s / 2] & 0xf;
+                        }
+                    } else if (type == NUTEX_PAL8) {
+                        uVar6 = bits[s];
+                    }
+                    
+                    *(u32*)puVar10 = pal[uVar6];
+                    
+                    fVar5 = puVar10[0] / 255.0f;
+                    
+                    if (fVar5 < 0.9f) {
+                        uVar10 = uVar10 + 1;
+                    }
+                    else if (0.063f < fVar5) {
+                        uVar11 = uVar11 + 1;
+                    }
+                    else {
+                        unkcnt2 = unkcnt2 + 1;
+                    }
+                    
+                    puVar10 += 4;
+                }
+            }
+            break;
+        default:
+            NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c", 0x187)("NudxTx_Create:\tUnknown texture type!");
+            break;
     }
-  }
-  else if (type < NUTEX_PAL4_S) {
-    if (type != NUTEX_PAL4) {
-      if (type == NUTEX_PAL8) {
-        sprintf(DebugText,"PAL8");
-      }
+    
+    if (((uVar11 == 0) || (uVar10 ==  0)) || (unkcnt2 != 0)) {
+        texture->decal = 0;
     }
-    else {
-      sprintf(DebugText,"PAL4");
+    else if (0.6f > (float)uVar10/(float)uVar11)
+    {
+        texture->decal = 1;
     }
-    uVar8 = 0;
-    if (0 < tpid) {
-      puVar10 = bits_00;
-      do {
-        if (type != NUTEX_PAL4) {
-          if (type == NUTEX_PAL8) {
-            //uVar6 = (u32)*(char *)((int)bits + uVar8);
-            goto LAB_800cf184;
-          }
-        }
-        else {
-          if ((uVar8 & 1) == 0) {
-            //uVar6 = *(char *)((int)bits + (int)uVar8 / 2) & 0xf;
-          }
-          else {
-            //uVar6 = (u32)(*(char *)((int)bits + (int)uVar8 / 2) >> 4);
-          }
-LAB_800cf184:
-          unaff_r30 = pal[uVar6];
-        }
-        *puVar10 = unaff_r30;
-        /*fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)puVar10 ^ 0x80000000) -
-                       4503601774854144.0) / 255.0;*/
-        if (0.063 <= fVar5) {
-          if (fVar5 <= 0.9) {
-            uVar11 = uVar11 + 1;
-          }
-          else {
-            uVar12 = uVar12 + 1;
-          }
-        }
-        else {
-          mmcnt = mmcnt + 1;
-        }
-        uVar8 = uVar8 + 1;
-        puVar10 = puVar10 + 1;
-      } while ((int)uVar8 < tpid);
-    }
-  }
-  else {
-    //e = NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c",0x187);
-    //(*e)("NudxTx_Create:\tUnknown texture type!");
-  }
-  if (((uVar12 == 0) || (uVar11 == 0)) || (mmcnt == 0)) {
-    sVar7 = 0;
-  }
-  else {
-   /* if (0.6 <= (float)((double)CONCAT44(0x43300000,uVar11 ^ 0x80000000) - 4503601774854144.0) /
-               (float)((double)CONCAT44(0x43300000,uVar12 ^ 0x80000000) - 4503601774854144.0))*/
-    goto LAB_800cf290;
-    sVar7 = 1;
-  }
-  texture->decal = sVar7;
-LAB_800cf290:
-  mmcnt = texture->mmcnt;
-  width_00 = texture->width;
-  iVar13 = texture->height;
-  tpid = GetTPID();
-  //GS_TexCreateNU(type,width_00,iVar13,bits_00,mmcnt,rendertargetflag,tpid);
-  free_x(bits_00);
-  DebugText[0] = '\0';
-  return NULL;
+    
+    GS_TexCreateNU(type, texture->width, texture->height, &outbits, texture->mmcnt, rendertargetflag, GetTPID());
+    free_x(&outbits);
+    DebugText[0] = '\0';
+    return NULL;
 }
-
-/*  WIP
-struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) {
-  u8 *pbVar1;
-  u8 *pbVar2;
-  char cVar3;
-  char bVar4;
-  float fVar5;
-  u32 uVar6;
-  short sVar7;
-  s32 tpid;
-  long* outbits;
-  long* px_buffer;
-  u32 uVar8;
-  char *puVar9;
-  long *puVar10;
-  long *puVar11;
-  long *piVar9;
-  u32 uVar10;
-  u32 uVar11;
-  u32 uVar12;
-  s32 *pal;
-  enum nutextype_e type;
-  s32 height;
-  u8 *bits;
-  s32 width;
-  s32 iVar12;
-  s32 iVar14;
-  u32 unaff_r30;
-  s32 mmcnt;
-  s32 width_00;
-
-  type = texture->type;
-  width = texture->width;
-  height = texture->height;
-  bits = texture->bits;
-  pal = texture->pal;
-  if (iss3cmp != 0) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    GS_TexCreateNU(type,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x82) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    GS_TexCreateNU(0x82,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x81) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    GS_TexCreateNU(0x81,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  if (type == 0x80) {
-    mmcnt = texture->mmcnt;
-    tpid = GetTPID();
-    GS_TexCreateNU(0x80,width,height,bits,mmcnt,rendertargetflag,tpid);
-    return NULL;
-  }
-  tpid = width * height;
-  uVar11 = 0;
-  uVar10 = 0;
-  mmcnt = 0;
-  outbits = (long*)malloc_x(tpid * 4);
-  texture->decal = 0;
-  texture->linear = 0;
-  if (type == NUTEX_RGB24) {
-    sprintf(DebugText,"RGB24"); // print texture type we're decoding
-    tpid = 0;
-    px_buffer = outbits; // px_buffer is the output buffer for the texture
-    if (0 < height) {
-        //loading 24 bits of texture data at a time and storing them into a pointer, it then advances this pointer 3 bytes?
-      do {
-        tpid = tpid + 1; // increment current row
-        puVar9 = (char *)px_buffer; // puVar9 is output buffer for this row of pixels
-        iVar12 = width;
-        if (0 < width) {
-          do {
-               // NUTEXes seems to be little-endian based on this code
-            bVar4 = *bits; // the blue component
-            uVar11 = uVar11 + 1;
-            pbVar1 = bits + 1; // the green component
-            pbVar2 = bits + 2; // the red component
-            bits = bits + 3; // advance bits to the next pixel
-            // Combine bits into a single color, subtracting 0x1000000 sets the upper two bytes to FF which means solid alpha
-            *(uint *)puVar9 = (uint)bVar4 + (uint)*pbVar1 * 0x100 + (uint)*pbVar2 * 0x10000 + -0x1000000;
-            cVar3 = puVar9[3]; // gets red component for swap
-            puVar9[3] = puVar9[1]; // swaps blue and red components
-            puVar9[1] = cVar3; // finishes swap, resulting in a big-endian ARBG color
-            iVar12 = iVar12 + -1;
-            puVar9 = puVar9 + 4; // move puVar9 forward one pixel
-          } while (iVar12 != 0);
-        }
-        px_buffer = px_buffer + width;  // move px_buffer forward by width pixels (to next row)
-      } while (tpid < height);
-    }
-  }
-    else if (type < NUTEX_RGB24) {
-    sprintf(DebugText,"RGB16/RGBA16");
-    tpid = 0;
-    px_buffer = outbits;
-    if (0 < height) {
-      do {
-        tpid = tpid + 1;
-        puVar10 = px_buffer;
-        iVar12 = width;
-        if (0 < width) {
-          do {
-            uVar8 = (u32)*(u16 *)bits;
-            uVar8 = (uVar8 & 0x1f) << 3 | (uVar8 & 0x3e0) << 6 | (uVar8 & 0x7c00) << 9;
-            if ((*(u16 *)bits & 1) != 0) {
-              uVar8 = uVar8 | 0xff000000;
-            }
-            *(u32 *)puVar10 = uVar8;
-            bits = (u8 *)((int)bits + 2);
-            cVar3 = puVar10[3];
-            puVar10[3] = puVar10[1];
-            puVar10[1] = cVar3;
-            iVar12 = iVar12 + -1;
-            puVar10 = puVar10 + 4;
-          } while (iVar12 != 0);
-        }
-        px_buffer = px_buffer + width;
-      } while (tpid < height);
-    }
-  }
-    else if (type == NUTEX_RGBA32) {
-    sprintf(DebugText,"RGB32");
-    tpid = 0;
-    px_buffer = outbits;
-    if (0 < height) {
-      do {
-        tpid = tpid + 1;
-        piVar9 = px_buffer;
-        iVar12 = width;
-        if (0 < width) {
-          do {
-            *piVar9 = *(int *)bits;
-                          //float conversion fVar5 = (float)*(puVar9 + 3) / 255.0f;
-            fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)((int)piVar9 + 3) ^ 0x80000000
-                                            ) - 4503601774854144.0) / 255.0;
-            if (0.063 <= fVar5) {
-              if (fVar5 <= 0.9) {
-                uVar10 = uVar10 + 1;
-              }
-              else {
-                uVar11 = uVar11 + 1;
-              }
-            }
-            else {
-              mmcnt = mmcnt + 1;
-            }
-            bits = (u8 *)((int)bits + 4);
-            iVar12 = iVar12 + -1;
-            piVar9 = piVar9 + 1;
-          } while (iVar12 != 0);
-        }
-        px_buffer = px_buffer + width;
-      } while (tpid < height);
-    }
-  }
-  else if (type < NUTEX_PAL4_S) {
-    if (type != NUTEX_PAL4) {
-      if (type == NUTEX_PAL8) {
-        sprintf(DebugText,"PAL8");
-      }
-    }
-    else {
-      sprintf(DebugText,"PAL4");
-    }
-        uVar8 = 0;
-    if (0 < tpid) {
-      piVar9 = outbits;
-      do {
-        if (type != NUTEX_PAL4) {
-          if (type == NUTEX_PAL8) {
-            uVar6 = (u32)bits[uVar8];
-            goto LAB_800cf184;
-          }
-        }
-        else {
-          if ((uVar8 & 1) == 0) {
-            uVar6 = bits[(int)uVar8 / 2] & 0xf;
-          }
-          else {
-            uVar6 = (u32)(bits[(int)uVar8 / 2] >> 4);
-          }
-LAB_800cf184:
-          unaff_r30 = pal[uVar6];
-        }
-        *piVar9 = unaff_r30;
-        fVar5 = (float)((double)CONCAT44(0x43300000,(int)*(char *)piVar9 ^ 0x80000000) -
-                       4503601774854144.0) / 255.0;
-        if (0.063 <= fVar5) {
-          if (fVar5 <= 0.9) {
-            uVar10 = uVar10 + 1;
-          }
-          else {
-            uVar11 = uVar11 + 1;
-          }
-        }
-        else {
-          mmcnt = mmcnt + 1;
-        }
-        uVar8 = uVar8 + 1;
-        piVar9 = piVar9 + 1;
-      } while ((int)uVar8 < tpid);
-    }
-  }
-  else {
-      NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c",0x187)("NudxTx_Create:\tUnknown texture type!");
-  }
-  if (((uVar11 == 0) || (uVar10 == 0)) || (mmcnt == 0)) {
-    sVar7 = 0;
-  }
-  else {
-       //float conversion if (0.6 <= (float)uVar11/(float)uVar12)
-    if (0.6 <= (float)((double)CONCAT44(0x43300000,uVar10 ^ 0x80000000) - 4503601774854144.0) /
-               (float)((double)CONCAT44(0x43300000,uVar11 ^ 0x80000000) - 4503601774854144.0))
-        //
-    goto LAB_800cf290;
-    sVar7 = 1;
-  }
-  texture->decal = sVar7;
-LAB_800cf290:
-  mmcnt = texture->mmcnt;
-  width_00 = texture->width;
-  iVar12 = texture->height;
-  tpid = GetTPID();
-  GS_TexCreateNU(type,width_00,iVar12,&outbits,mmcnt,rendertargetflag,tpid);
-  free_x(&outbits);
-  DebugText[0] = '\0';
-  return NULL;
-}
-*/

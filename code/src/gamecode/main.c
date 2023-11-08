@@ -1324,44 +1324,15 @@ LAB_8004fe3c:
   return;
 }
 
-
+//GCN MATCH
 void MAHLoadingMessage(void)
-
 {
-  nucamera_s *camera;
-  int rndrBeginScene;
-  numtx_s *m2;
-  nucamera_s *camPtr;
-  nucamera_s *pNC;
-  numtx_s *m;
-  
   IsLoadingScreen = 1;
   NuRndrClear(0xb,0,1.0);
-  rndrBeginScene = NuRndrBeginScene(1);
-  if (rndrBeginScene != 0) {
-    rndrBeginScene = 0x30;
-    m = &numtx_identity;
-    pNC = pNuCam;
-    do {
-      camPtr = pNC;
-      m2 = m;
-      rndrBeginScene = rndrBeginScene + -0x18;
-      (camPtr->mtx)._00 = m2->_00;
-      (camPtr->mtx)._01 = m2->_01;
-      (camPtr->mtx)._02 = m2->_02;
-      (camPtr->mtx)._03 = m2->_03;
-      (camPtr->mtx)._10 = m2->_10;
-      (camPtr->mtx)._11 = m2->_11;
-      camera = pNuCam;
-      pNC = (nucamera_s *)&(camPtr->mtx)._12;
-      m = (numtx_s *)&m2->_12;
-    } while (rndrBeginScene != 0);
-    *(float *)pNC = m2->_12;
-    (camPtr->mtx)._13 = m2->_13;
-    (camPtr->mtx)._20 = m2->_20;
-    (camPtr->mtx)._21 = m2->_21;
-    NuCameraSet(camera);
-    if ((font3d_scene != (nugscn_s *)0x0) && (font3d_initialised != 0)) {
+  if (NuRndrBeginScene(1) != 0) {
+    memcpy(&pNuCam->mtx, &numtx_identity, sizeof (struct numtx_s));
+    NuCameraSet(pNuCam);
+    if ((font3d_scene != NULL) && (font3d_initialised != 0)) {
       NuShaderSetBypassShaders(1);
       DrawGameMessage(tLOADING[Game.language],0,0.0);
       NuShaderSetBypassShaders(0);
@@ -1372,6 +1343,7 @@ void MAHLoadingMessage(void)
   IsLoadingScreen = 0;
   return;
 }
+
 
 
 void LoadLevel(void)
@@ -1774,10 +1746,18 @@ void firstscreenfade(numtl_s *mat,int dir)
   return;
 }
 
-
-undefined4 CopyFilesThreadProc(void)
-{
-		//TODO
+//NGC MATCH
+s32 CopyFilesThreadProc() {
+    s32 iVar1;
+    char texBuf [128];
+    u32 iStack_c;
+    
+    iVar1 = GetTickCount();
+    InitLevelSfxTables();
+    InitGlobalSfx();
+    iStack_c = GetTickCount() - iVar1;
+    sprintf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
+    return 0;
 }
 
 

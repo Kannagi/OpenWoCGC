@@ -2,11 +2,6 @@
 #include"nu3dxtypes.h"
 #include"types.h"
 
-// Since this project isn't trying to match the original code,
-// I figured it would be nice to try and have the errors show the correct file/line,
-// rather than manually entering it
-
-
 void ReadNuIFFTextureSet(fileHandle handle,struct nuscene_s *scene)
 {
   s32 count;

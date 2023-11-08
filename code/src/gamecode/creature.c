@@ -1541,59 +1541,27 @@ LAB_8001d604:
   return;
 }
 
-
-void StoreLocatorMatrices(CharacterModel *model,numtx_s *mC,numtx_s *tmtx,numtx_s *mtx,nuvec_s *m om)
-
-{
-  float fVar1;
-  float fVar2;
-  float fVar3;
-  int size;
-  numtx_s *pnVar4;
-  int cnt;
-  numtx_s *ptr;
-  numtx_s *pnVar5;
-  int poiId;
-  numtx_s m;
-  numtx_s *ptr2;
+//NGC MATCH
+void StoreLocatorMatrices(struct CharacterModel *model,struct numtx_s *mC,struct numtx_s *tmtx,struct numtx_s *mtx,struct NuVec *mom) {
+  struct NuVec oldpos;
+  s32 i;
+  struct numtx_s m;
   
-  if (mtx != (numtx_s *)0x0) {
-    poiId = 0;
-    do {
-      cnt = poiId + 1;
-      if (model->pLOCATOR[poiId] != (NUPOINTOFINTEREST_s *)0x0) {
-        ptr = mtx + poiId;
-        fVar1 = ptr->_30;
-        fVar2 = ptr->_31;
-        fVar3 = ptr->_32;
-        NuHGobjPOIMtx(model->hobj,(uchar)poiId,mC,tmtx,&m);
-        size = 0x30;
-        ptr2 = &m;
-        do {
-          pnVar5 = ptr;
-          pnVar4 = ptr2;
-          size = size + -0x18;
-          pnVar5->_00 = pnVar4->_00;
-          pnVar5->_01 = pnVar4->_01;
-          pnVar5->_02 = pnVar4->_02;
-          pnVar5->_03 = pnVar4->_03;
-          pnVar5->_10 = pnVar4->_10;
-          pnVar5->_11 = pnVar4->_11;
-          ptr2 = (numtx_s *)&pnVar4->_12;
-          ptr = (numtx_s *)&pnVar5->_12;
-        } while (size != 0);
-        pnVar5->_12 = pnVar4->_12;
-        pnVar5->_13 = pnVar4->_13;
-        pnVar5->_20 = pnVar4->_20;
-        pnVar5->_21 = pnVar4->_21;
-        if (mom != (nuvec_s *)0x0) {
-          mom[poiId].x = mtx[poiId]._30 - fVar1;
-          mom[poiId].y = mtx[poiId]._31 - fVar2;
-          mom[poiId].z = mtx[poiId]._32 - fVar3;
+  if (mtx != NULL) {
+    for(i = 0; i < 0x10; i++) {
+      if (model->pLOCATOR[i] != NULL) {
+        oldpos.x = mtx[i]._30;
+        oldpos.y = mtx[i]._31;
+        oldpos.z = mtx[i]._32;
+        NuHGobjPOIMtx(model->hobj,i,mC,tmtx,&m);
+          mtx[i] = m;
+        if (mom != NULL) {
+          mom[i].x = mtx[i]._30 - oldpos.x;
+          mom[i].y = mtx[i]._31 - oldpos.y;
+          mom[i].z = mtx[i]._32 - oldpos.z;
         }
       }
-      poiId = cnt;
-    } while (cnt < 0x10);
+    }
   }
   return;
 }

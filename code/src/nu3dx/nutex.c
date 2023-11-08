@@ -3,25 +3,24 @@
 
 struct nusystex_s tinfo[0x400];
 
-initialised = 0;
-s32 tpid = 0;
-s32 ntex = 0;
+static s32 initialised;
+static s32 tpid;
+static s32 ntex;
 struct nutex_s tex;
 
-void NuTexInit()
-{
-    static s32 initialised = 0;
-	if (initialised)
-	{
+//MATCH NGC
+void NuTexInit() {
+	if (initialised != 0) {
 		NuTexClose();
 	}
-	//GS_TexReInit();
+	GS_TexReInit();
 	memset(tinfo, 0, sizeof(tinfo));
-	initialised = 1;
-	tpid = 0;
 	ntex = 0;
+	tpid = 0;
+	initialised = 1;
 }
 
+//WIP
 void NuTexClose(void)
 {
     s32 i;
@@ -70,9 +69,8 @@ s32 NuTexCreate(struct nutex_s *nutex)
   return tpid;
 }
 
-s32 NuTexGetDecalInfo(s32 tid)
-
-{
+//MATCH NGC
+s32 NuTexGetDecalInfo(s32 tid) {
   return (s32)tinfo[tid + -1].tex.decal;
 }
 
@@ -382,14 +380,13 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
 	}
 }
 
-void NuTexSetTexture(u32 stage,int tid)
-
-{
-  if (tid < 1) {
-    //GS_TexSelect(stage,0);
+//MATCH GCN
+void NuTexSetTexture(u32 stage,s32 tid) {
+  if (tid > 0) {
+    GS_TexSelect(stage,tid);
   }
   else {
-    //GS_TexSelect(stage,tid);
+    GS_TexSelect(stage,0);
   }
   return;
 }

@@ -19,26 +19,30 @@ s32 IsStencil = 0;
 
 enum nustencilmode_e stencil_mode = NUSTENCIL_NOSTENCIL;
 
-
-void NuMtlCreateDefault(void) {
+//NGC MATCH
+static void NuMtlCreateDefault(void) {
     struct numtl_s* mtl;
 
     mtl = NuMtlCreate(1);
+    
     numtl_white = mtl;
-    mtl->L = 0;
-    mtl->alpha = 1.0;
-    //mtl->attrib._word = (union numtlattribs)((u32)mtl->attrib & 0x3fc3ffff | 0x200000);
-    mtl->attrib._word = (0x3fc3ffff | 0x200000);    //should work this way
+    
+    mtl->attrib.cull = 2;
+    mtl->attrib.zmode = 0;
+    mtl->attrib.alpha = 0;
+    
+    mtl->diffuse.r = 1.0f;
+    mtl->diffuse.g = 1.0f;
+    mtl->diffuse.b = 1.0f;
+    mtl->alpha = 1.0f;
+    
     mtl->K = 0;
-    mtl->diffuse.r = 1.0;
-    mtl->diffuse.g = 1.0;
-    mtl->diffuse.b = 1.0;
-    //NuMtlUpdate(numtl_white); empty
+    mtl->L = 0;
+    NuMtlUpdate(numtl_white);
 }
 
-void NuMtlInit(void)
-
-{
+//NGC MATCH
+void NuMtlInit(void) {
   if (initialised != 0) {
     NuMtlClose();
   }
@@ -68,36 +72,35 @@ void NuMtlClose(void)
   return;
 }
 
-
-struct numtl_s* NuMtlCreate(s32 mode)
-{
+//NGC MATCH
+struct numtl_s* NuMtlCreate(s32 mode) {
   struct nusysmtl_s *sm;
   struct nusysmtl_s *ret;
-  f32 i;
+  s32 i;
+    char pad [3];
 
-  if (0 < mode) {
-    i = 1.0;
     sm = NULL;
-    do {
+  if (0 < mode) { 
+    for (i = mode; i != 0; i--) {
       ret = (struct nusysmtl_s *)malloc_x(0x6c);
       memset(ret,0,0x6c);
-      (ret->mtl).alpha = i;
-      //(ret->mtl).attrib = (struct numtlattrib_s)((u32)(ret->mtl).attrib & 0xcfffffff | 0x20000000);
-      (ret->mtl).attrib._word = (0xcfffffff | 0x20000000);
+      (ret->mtl).alpha = 1.0f;
+
+      //(ret->mtl).attrib = ((ret->mtl).attrib & 0xcfffffff | 0x20000000);
+      (ret->mtl).attrib.filter = 2;
+
       NuMtlInsert(ret);
-      mode = mode + -1;
       (ret->mtl).next = &sm->mtl;
-      nummtls = nummtls + 1;
+      nummtls++;
       sm = ret;
-    } while (mode != 0);
+    }
   }
   return &ret->mtl;
 }
 
 
-
-void NuMtlDestroy(struct numtl_s* mtl) //need test
-{
+//NGC MATCH
+void NuMtlDestroy(struct numtl_s* mtl) {
     struct nusysmtl_s* sm = (struct nusysmtl_s*)mtl; // r31
     struct nusysmtl_s* next; //unused?
 
@@ -113,6 +116,7 @@ void NuMtlDestroy(struct numtl_s* mtl) //need test
     NuMtlRemove(sm);
     free_x(mtl);
     nummtls -= 1;
+    return;
 }
 
 
@@ -138,76 +142,58 @@ struct numtl_s * NuMtlGet(int id)
   return &ret->mtl;
 }
 
-
-struct numtl_s * NuMtlRead(fileHandle handle)
-
-{
+//NGC MATCH
+struct numtl_s * NuMtlRead(s32 fh) {
   struct numtl_s *mtl;
 
   mtl = NuMtlCreate(1);
-  NuFileRead(handle,mtl,0x54);
+  NuFileRead(fh,mtl,0x54);
   return mtl;
 }
 
-
-void NuMtlInsert(struct nusysmtl_s *sm)    //need fix
-{
-  int sid;
+//NGC MATCH
+static void NuMtlInsert(struct nusysmtl_s* sm) {
+  s32 sid;
+  s32 lsid;
   struct nusysmtl_s *last;
   struct nusysmtl_s *list;
-  bool check;
-  short lsid;
 
-
-  list = smlist;
-  lsid = (sm->mtl).alpha_sort;
-  sid = (sm->mtl).tid;
-  if(smlist != NULL)
-  {
-  sm->next = NULL;
-  sm->last = NULL;
   last = NULL;
-  while ((list->next != NULL && (lsid * 0x10000 + sid < (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid)))  {
-    check =
-    last = list;
-    list = list->next;
-  }
-  if (last == NULL) {
-    sm->next = smlist;
-    smlist = sm;
-  }
-  else {
+  list = smlist;
+    
+  sid = (sm->mtl).alpha_sort * 0x10000 + (sm->mtl).tid;
+  sm->last = sm->next = NULL;
+
+  for(; list != NULL; last = list, list = list->next) {      
+    lsid = (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid;
+    if(lsid <= sid) 
+        break;
+  }         
+
+  if (last != NULL) {
     sm->last = last;
     sm->next = last->next;
     last->next = sm;
   }
-  if (sm->next == NULL) {
-      printf("sm next is null\n");
-    return;
+  else {
+    sm->next = smlist;
+    smlist = sm;
   }
-  sm->next->last = sm;
-
-  printf("smlist not null\n");
-    return;
+  if (sm->next != NULL) {
+    sm->next->last = sm;
   }
 
-  else
-
-  {
-    printf("smlist is empty\n");
-
-  }
+  return;
 }
 
-
-void NuMtlRemove(struct nusysmtl_s *sm)
-
-{
-  if (sm->last == NULL) {
-    smlist = sm->next;
+//NGC MATCH
+void NuMtlRemove(struct nusysmtl_s *sm) {
+  if (sm->last != NULL) {
+    sm->last->next = sm->next;
   }
   else {
-    sm->last->next = sm->next;
+
+    smlist = sm->next;
   }
   if (sm->next == NULL) {
     return;
@@ -222,10 +208,8 @@ void NuMtlUpdate(struct numtl_s *mtl)
   return;
 }
 
-
-void NuMtlSetStencilRender(enum nustencilmode_e mode)
-
-{
+//NGC MATCH
+void NuMtlSetStencilRender(enum nustencilmode_e mode) {
   stencil_mode = mode;
   return;
 }
@@ -345,64 +329,56 @@ LAB_800b3084:
 }
 
 
-
-void NuMtlOTInsert(struct nuotitem_s *oti)
-
-{
+//NGC MATCH
+static void NuMtlOTInsert(struct nuotitem_s *oti) {
   s32 ix;
 
   ix = (s32)(oti->mtl->mtl).alpha_sort;
   if (0x100 < ix) {
-    //error = NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x3e0);
-    //("assert");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x3e0)("assert");
   }
-  if (ot[ix] == NULL) {
-    ot[ix] = oti;
-    oti->next = NULL;
-  }
-  else {
+  if (ot[ix] != NULL) {
     oti->next = ot[ix];
     ot[ix] = oti;
+  }
+  else {
+    ot[ix] = oti;
+    oti->next = NULL;
   }
   return;
 }
 
-
-void NuMtlGet2dBuffer(struct nusysmtl_s *mtl,enum nuprimtype_e pt,struct nugeom_s **geomptr,struct nuprim_s **primptr, union variptr_u *ptr,union variptr_u *end)
-
-{
-  enum nuprimtype_e type;
-  struct nugeomitem_s *geomitem;
+//NGC MATCH
+void NuMtlGet2dBuffer(struct numtl_s *mtl,enum nuprimtype_e pt,struct nugeom_s **geomptr,struct nuprim_s **primptr, union variptr_u *ptr,union variptr_u *end) {
   struct nugeom_s *g;
   struct nuprim_s *prim;
+    struct nusysmtl_s* sm;
 
+  sm = (struct nusysmtl_s *)mtl;
   NuMemSetExternal(ptr,end);
-  if (mtl->geom2d == NULL) {
-    geomitem = (struct nugeomitem_s *)NuMemAlloc(0x24);
-    mtl->geom2d = geomitem;
-    memset(geomitem,0,0x24);
-    (mtl->geom2d->hdr).type = NURNDRITEM_GEOM2D;
-    (mtl->geom2d->hdr).flags = 0;
+  if (sm->geom2d == NULL) {
+    sm->geom2d = (struct nugeomitem_s *)NuMemAlloc(0x24);
+    memset(sm->geom2d,0,0x24);
+    (sm->geom2d->hdr).type = NURNDRITEM_GEOM2D;
+    (sm->geom2d->hdr).flags = 0;
     g = NuGeomCreate();
-    mtl->geom2d->geom = g;
-    NuGeomCreateVB(mtl->geom2d->geom,0x400,NUVT_TLTC1,1);
-    mtl->geom2d->geom->vtxcnt = 0;
+    sm->geom2d->geom = g;
+    NuGeomCreateVB(sm->geom2d->geom,0x400,NUVT_TLTC1,1);
+    sm->geom2d->geom->vtxcnt = 0;
   }
-  g = mtl->geom2d->geom;
-  prim = g->prim;
+  g = sm->geom2d->geom;
+  prim = g->prims;
   if (prim != NULL) {
-    type = prim->type;
-    while (type != pt) {
+    while (prim->type != pt) {
       prim = prim->next;
       if (prim == NULL) goto LAB_800b3234;
-      type = prim->type;
     }
     if (prim != NULL) goto LAB_800b325c;
   }
 LAB_800b3234:
   prim = NuPrimCreate(0x400,pt);
   NuGeomAddPrim(g,prim);
-  prim->vertexCount = 0;
+  prim->cnt = 0;
 LAB_800b325c:
   if (g != NULL) {
     *geomptr = g;
@@ -414,44 +390,38 @@ LAB_800b325c:
   return;
 }
 
-
-
-void NuMtlGet3dBuffer(struct nusysmtl_s *mtl,enum nuprimtype_e pt,struct nugeom_s **geomptr,struct nuprim_s **primptr,
-                     union variptr_u *ptr,union variptr_u *end)
-
-{
-  enum nuprimtype_e type_;
-  struct nugeomitem_s *geomitem;
+//NGC MATCH
+void NuMtlGet3dBuffer(struct numtl_s *mtl,enum nuprimtype_e pt,struct nugeom_s **geomptr,struct nuprim_s **primptr, union variptr_u *ptr,union variptr_u *end) {
   struct nugeom_s *geom;
   struct nuprim_s *prim;
+    struct nusysmtl_s* sm; //
+
+    sm = (struct nusysmtl_s *)mtl;
 
   NuMemSetExternal(ptr,end);
-  if (mtl->geom3d == NULL) {
-    geomitem = (struct nugeomitem_s *)NuMemAlloc(0x24);
-    mtl->geom3d = geomitem;
-    memset(geomitem,0,0x24);
-    (mtl->geom3d->hdr).type = NURNDRITEM_GEOM3D;
-    (mtl->geom3d->hdr).flags = 0;
+  if (sm->geom3d == NULL) {
+    sm->geom3d = NuMemAlloc(0x24);;
+    memset(sm->geom3d,0,0x24);
+    (sm->geom3d->hdr).type = NURNDRITEM_GEOM3D;
+    (sm->geom3d->hdr).flags = 0;
     geom = NuGeomCreate();
-    mtl->geom3d->geom = geom;
-    NuGeomCreateVB(mtl->geom3d->geom,0xc00,NUVT_TC1,1);
-    mtl->geom3d->geom->vtxcnt = 0;
+    sm->geom3d->geom = geom;
+    NuGeomCreateVB(sm->geom3d->geom,0xc00,NUVT_TC1,1);
+    sm->geom3d->geom->vtxcnt = 0;
   }
-  geom = mtl->geom3d->geom;
-  prim = geom->prim;
+  geom = sm->geom3d->geom;
+  prim = geom->prims;
   if (prim != NULL) {
-    type_ = prim->type;
-    while (type_ != pt) {
+    while (prim->type != pt) {
       prim = prim->next;
       if (prim == NULL) goto LAB_800b336c;
-      type_ = prim->type;
     }
     if (prim != NULL) goto LAB_800b3394;
   }
 LAB_800b336c:
   prim = NuPrimCreate(0xc00,pt);
   NuGeomAddPrim(geom,prim);
-  prim->vertexCount = 0;
+  prim->cnt = 0;
 LAB_800b3394:
   if (geom != NULL) {
     *geomptr = geom;
@@ -463,89 +433,85 @@ LAB_800b3394:
   return;
 }
 
-void NuMtlRender(void)
-
-{
-  //DBTimerStart(0x13);
+//NGC MATCH
+void NuMtlRender(void) {
+  DBTimerStart(0x13);
   NuMtlRender3d();
-  //DBTimerEnd(0x13);
-  //DBTimerStart(0x12);
-  //DBTimerEnd(0x12);
-  //DBTimerStart(0x11);
-  //DBTimerEnd(0x11);
-  //DBTimerStart(0x10);
+  DBTimerEnd(0x13);
+  DBTimerStart(0x12);
+  DBTimerEnd(0x12);
+  DBTimerStart(0x11);
+  DBTimerEnd(0x11);
+  DBTimerStart(0x10);
   NuMtlRenderDynamic2d3d();
-  //DBTimerEnd(0x10);
-  //DBTimerStart(0xf);
+  DBTimerEnd(0x10);
+  DBTimerStart(0xf);
   NuMtlRenderOT(0,10);
-  //DBTimerEnd(0xf);
-  //DBTimerStart(0xe);
+  DBTimerEnd(0xf);
+  DBTimerStart(0xe);
   NuMtlRenderFaceOn();
-  //DBTimerEnd(0xe);
-  //DBTimerStart(0xc);
-  //NuMtlRenderSten();
-  //DBTimerEnd(0xc);
-  //DBTimerStart(0xb);
+  DBTimerEnd(0xe);
+  DBTimerStart(0xc);
+  NuMtlRenderSten();
+  DBTimerEnd(0xc);
+  DBTimerStart(0xb);
   NuMtlRenderGlass();
-  //DBTimerEnd(0xb);
-  //DBTimerStart(10);
+  DBTimerEnd(0xb);
+  DBTimerStart(10);
   NuMtlRenderWater();
-  //DBTimerEnd(10);
-  //DBTimerStart(9);
+  DBTimerEnd(10);
+  DBTimerStart(9);
   NuMtlRenderOT(0xb,0x100);
-  //DBTimerEnd(9);
-  //DBTimerStart(8);
-  //DrawStencilShadowQuad();
-  //DBTimerEnd(8);
-  //DBTimerStart(7);
+  DBTimerEnd(9);
+  DBTimerStart(8);
+  DrawStencilShadowQuad();
+  DBTimerEnd(8);
+  DBTimerStart(7);
   NuMtlRenderUpd();
-  //DBTimerEnd(7);
+  DBTimerEnd(7);
   return;
 }
 
-void NuMtlRender3d(void)
-
-{
+//NGC MATCH
+static void NuMtlRender3d(void) {
   struct nusysmtl_s *sm;
   struct nurndritem_s *ri;
 
-  //GS_SetAlphaCompare(7,0);
+  GS_SetAlphaCompare(7,0);
   for (sm = smlist; sm != NULL; sm = sm->next) {
     if (((sm->mtl).L == '\0') && (sm->rndrlist != NULL)) {
       NuTexSetTexture(0,(sm->mtl).tid);
       NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       for (ri = sm->rndrlist; ri != NULL; ri = ri->next) {
-        //NuRndrItem(ri);
+        NuRndrItem(ri);
       }
       sm->rndrlist = NULL;
     }
   }
-  //GS_SetAlphaCompare(7,0);
+  GS_SetAlphaCompare(7,0);
   return;
 }
 
-
-void NuMtlRenderDynamic2d3d(void)
-
-{
+//NGC MATCH
+static void NuMtlRenderDynamic2d3d(void) {
   struct nuprim_s *prim;
   struct nusysmtl_s *sm;
   struct nugeomitem_s *item;
 
-  //GS_SetAlphaCompare(7,0);
+  GS_SetAlphaCompare(7,0);
   sm = smlist;
-  //GS_SetZCompare(1,0,GX_LEQUAL);
+  GS_SetZCompare(1,0,GX_LEQUAL);
   for (; sm != NULL; sm = sm->next) {
     if ((sm->geom3d != NULL) && (sm->geom3d->geom->vtxcnt != 0)) {
       NuTexSetTexture(0,(sm->mtl).tid);
       NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       item = sm->geom3d;
-      //NuRndrItem(&item->hdr);
+      NuRndrItem(&item->hdr);
       item->geom->vtxcnt = 0;
       for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
-        prim->vertexCount = 0;
+        prim->cnt = 0;
       }
     }
     if ((sm->geom2d != NULL) && (sm->geom2d->geom->vtxcnt != 0)) {
@@ -553,56 +519,48 @@ void NuMtlRenderDynamic2d3d(void)
       NuMtlSetRenderStates(&sm->mtl);
       NuTexSetTextureStates(&sm->mtl);
       item = sm->geom2d;
-      //GS_EnableLighting(0);
-      //GS_SetZCompare(1,0,GX_LEQUAL);
-      //GS_SetAlphaCompare(7,0);
-      //NuRndrItem(&item->hdr);
+      GS_EnableLighting(0);
+      GS_SetZCompare(1,0,GX_LEQUAL);
+      GS_SetAlphaCompare(7,0);
+      NuRndrItem(&item->hdr);
       item->geom->vtxcnt = 0;
       for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
-        prim->vertexCount = 0;
+        prim->cnt = 0;
       }
     }
   }
   return;
 }
 
-
-void NuMtlRenderOT(int begin,int end)
-
-{
-  struct nusysmtl_s *mtl;
-  s32 i;
+//NGC MATCH
+static void NuMtlRenderOT(s32 begin,s32 end) {
   struct nuotitem_s *oti;
+  s32 i;
 
-  //GS_SetAlphaCompare(7,0);
-  if (begin <= end) {
-    do {
-      i = begin + 1;
-      for (oti = ot[begin]; oti != NULL; oti = oti->next) {
-        mtl = oti->mtl;
-        if ((mtl->mtl).L == '\0') {
-          NuTexSetTexture(0,(mtl->mtl).tid);
+  GS_SetAlphaCompare(7,0);
+    for (i = begin; i <= end; i++) {
+      for (oti = ot[i]; oti != NULL; oti = oti->next) {
+        if ((oti->mtl->mtl).L == '\0') {
+          NuTexSetTexture(0,(oti->mtl->mtl).tid);
           NuMtlSetRenderStates(&oti->mtl->mtl);
           NuTexSetTextureStates(&oti->mtl->mtl);
-          //NuRndrItem(oti->hdr);
+          NuRndrItem(oti->hdr);
         }
         else {
-          NuTexSetTexture(0,(mtl->mtl).tid);
+          NuTexSetTexture(0,(oti->mtl->mtl).tid);
           NuMtlSetRenderStates(&oti->mtl->mtl);
           NuTexSetTextureStates(&oti->mtl->mtl);
-          //GS_SetZCompare(1,1,GX_LEQUAL);
-          //GS_SetAlphaCompare(3,0xf7);
-          //NuRndrItem(oti->hdr);
+          GS_SetZCompare(1,1,GX_LEQUAL);
+          GS_SetAlphaCompare(3,0xf7);
+          NuRndrItem(oti->hdr);
         }
       }
-      ot[begin] = NULL;
-      begin = i;
-    } while (i <= end);
-  }
+      ot[i] = NULL;
+    }
   return;
 }
 
-void NuMtlRenderFaceOn() {
+static void NuMtlRenderFaceOn() {
 
   u32 processed_count = 0; // count -> r31
   struct nufaceonitem_s* cur_list;
@@ -722,34 +680,29 @@ void NuMtlRenderFaceOn() {
 return;
 }
 
-void NuMtlRenderGlass(void)
-
-{
+//NGC MATCH
+static void NuMtlRenderGlass(void) {
   s32 i;
   struct nuotitem_s *oti;
 
   oti = dynamic_glass_items;
   i = 0;
-  if (0 < dynamic_glass_item_cnt) {
+  if (dynamic_glass_item_cnt > 0) {
     NudxFw_MakeBackBufferCopy(force_glass_screencopy_enable);
-    if (0 < dynamic_glass_item_cnt) {
-      do {
-        i = i + 1;
+      for (; i < dynamic_glass_item_cnt; i++) {
         NuTexSetTexture(0,(oti->mtl->mtl).tid);
         NuMtlSetRenderStates(&oti->mtl->mtl);
         NuTexSetTextureStates(&oti->mtl->mtl);
-        //NuRndrItem(oti->hdr);
+        NuRndrItem(oti->hdr);
         oti = oti->next;
-      } while (i < dynamic_glass_item_cnt);
-    }
+      }
     NuMtlClearGlassList();
   }
   return;
 }
 
-void NuMtlRenderWater(void)
-
-{
+//NGC MATCH
+static void NuMtlRenderWater(void) {
   s32 i;
   struct nustenitem_s *wateri;
 
@@ -757,29 +710,26 @@ void NuMtlRenderWater(void)
   if (0 < wateritem_cnt) {
     i = 0;
     NudxFw_MakeBackBufferCopy(1);
-    if (0 < wateritem_cnt) {
-      do {
-        i = i + 1;
+      for (; i < wateritem_cnt; i++) {
         NuTexSetTexture(0,(wateri->mtl->mtl).tid);
         NuMtlSetRenderStates(&wateri->mtl->mtl);
         NuTexSetTextureStates(&wateri->mtl->mtl);
-        //NuRndrItem(wateri->hdr);
+        NuRndrItem(wateri->hdr);
         wateri = wateri->next;
-      } while (i < wateritem_cnt);
-    }
+      }
   }
   wateritem_cnt = 0;
   return;
 }
 
 
-void NuMtlRenderSten(void)
-{
+//NGC MATCH
+static void NuMtlRenderSten(void) {
   struct nustenitem_s *steni;
   s32 i;
 
    steni = stenitem;
-  //GS_SetAlphaCompare(4,0);
+  GS_SetAlphaCompare(4,0);
   i = 0;
   NudxFw_SetRenderState(0x7d,1);
   NudxFw_SetRenderState(0x46,0x207);
@@ -789,72 +739,61 @@ void NuMtlRenderSten(void)
   NudxFw_SetRenderState(0x48,0xffffffff);
   NudxFw_SetRenderState(0x49,0xffffffff);
   IsStencil = 1;
-  if (0 < stenitem_cnt) {
-    do {
-      if (steni->type == 1) {
-        //GS_EnableLighting(0);
-        //GS_SetMaterialSourceEmissive(1);
-        NuTexSetTexture(0,0);
-        //GS_SetBlendSrc(1,1,0);
-      }
-      else {
-        NuTexSetTexture(0,(steni->mtl->mtl).tid);
-        NuMtlSetRenderStates(&steni->mtl->mtl);
-        NuTexSetTextureStates(&steni->mtl->mtl);
-      }
-      if (steni->type == 1) {
-        NudxFw_SetRenderState(0x45,0x1e01);
-        //NuRndrItem(steni->hdr);
-      }
-      i = i + 1;
-      steni = steni->next;
-    } while (i < stenitem_cnt);
-  }
+    for (; i < stenitem_cnt; i++) {
+          if (steni->type == 1) {
+            GS_EnableLighting(0);
+            GS_SetMaterialSourceEmissive(1);
+            NuTexSetTexture(0,0);
+            GS_SetBlendSrc(1,1,0);
+          }
+          else {
+            NuTexSetTexture(0,(steni->mtl->mtl).tid);
+            NuMtlSetRenderStates(&steni->mtl->mtl);
+            NuTexSetTextureStates(&steni->mtl->mtl);
+          }
+          if (steni->type == 1) {
+            NudxFw_SetRenderState(0x45,0x1e01);
+            NuRndrItem(steni->hdr);
+          }
+          steni = steni->next;
+    }
   stenitem_cnt = 0;
-  //GS_EnableLighting(1);
+  GS_EnableLighting(1);
   NudxFw_SetRenderState(0x7d,0);
   IsStencil = 0;
   return;
 }
 
-
-void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item)
-
-{
+//NGC MATCH
+static void NuMtlAddGlassItem(struct numtl_s *mtl,struct nurndritem_s *item) {
   struct nuotitem_s *tail;
-  bool check;
-  s32 cnt;
 
   if (0x40 < dynamic_glass_item_cnt) {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x980);
-    //(*error)("Too many dynamic glass items");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x980)("Too many dynamic glass items");
   }
-  cnt = dynamic_glass_item_cnt;
   if (dynamic_glass_item_cnt < 0x40) {
-    check = 0 < dynamic_glass_item_cnt;
-    tail = dynamic_glass_items + dynamic_glass_item_cnt;
-    dynamic_glass_items[dynamic_glass_item_cnt].hdr = item;
-    dynamic_glass_items[cnt].mtl = (struct nusysmtl_s *)mtl;
-    dynamic_glass_items[cnt].dist = 0.0;
-    if (check) {
-      dynamic_glass_items[cnt + -1].next = tail;
+    tail = &dynamic_glass_items[dynamic_glass_item_cnt];
+    tail->hdr = item;
+    tail->mtl = (struct nusysmtl_s *)mtl;
+    tail->dist = 0.0f;
+    if (0 < dynamic_glass_item_cnt) {
+      dynamic_glass_items[dynamic_glass_item_cnt + -1].next = tail;
     }
-    dynamic_glass_item_cnt = dynamic_glass_item_cnt + 1;
+    dynamic_glass_item_cnt++;
   }
   return;
 }
 
-void NuMtlClearGlassList(void)
 
-{
+//NGC MATCH
+static void NuMtlClearGlassList(void) {
   memset(dynamic_glass_items,0,0x400);
   dynamic_glass_item_cnt = 0;
   return;
 }
 
-void NuMtlRenderUpd(void)
-
-{
+//NGC MATCH
+static void NuMtlRenderUpd(void) {
   faceonitem_cnt = 0x200;
   faceonmtl_cnt = 0;
   otitem_cnt = 0x7e8;
@@ -1070,9 +1009,7 @@ LAB_800b4334:
 }
 */
 
-void NuMtlClearOt(void)
-
-{
-  memset(ot,0,0x404);
-  return;
+//NGC MATCH
+void NuMtlClearOt(void) {
+    memset(&ot, 0, 0x404);
 }

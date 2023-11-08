@@ -252,26 +252,19 @@ void NuGlassInit(void)
   return;
 }
 
-void NuGlassClose(void)	//CHECK
-
-{
-  int i;
-  int j;
-  
-  i = 0;
-  if (0 < num_glass_inst) {
-    j = 0;
-    do {
-      j = i + 1;
-      glass_inst[i] = NULL;
-      glassMtx[i] = NULL;
+//MATCH GCN
+void NuGlassClose(void) {
+  s32 i;
+    
+    for(i = 0; i < num_glass_inst; i++) 
+    {
+      glass_inst[i] = 0;
+      glassMtx[i] = 0;
       if (glassGobj[i] != NULL) {
         NuGobjDestroy(glassGobj[i]);
-        glassGobj[i] = NULL;
+        glassGobj[i] = 0;
       }
-      i = j;
-    } while (i < num_glass_inst);
-  }
+    }
   num_glass_inst = 0;
   if (glass_mtl != NULL) {
     NuMtlDestroy(glass_mtl);
