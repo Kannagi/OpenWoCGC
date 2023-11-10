@@ -470,14 +470,16 @@ s32 NuRndrTri3d(struct nuvtx_tc1_s *vtx,struct numtl_s *mtl,struct numtx_s *wm) 
     return 1;
 }
 
-float NuRndrItemDist(struct nugeomitem_s *item)
-{
-  struct nuvec_s pnt;
+//MATCH NGC
+float NuRndrItemDist(struct nurndritem_s *item) {
+  struct NuVec pnt;
   float dist;
+  struct nugeomitem_s* geomitem;
 
+  //geomitem->hdr = *item;
   dist = 0.0f;
-  if ((item->hdr).type == NURNDRITEM_GEOM3D) {
-    NuCameraTransformClip(&pnt,&item->mtx,1,NULL);
+  if (item->type == NURNDRITEM_GEOM3D) {
+    NuCameraTransformClip(&pnt,&((struct nugeomitem_s*)item)->mtx->_30,1,NULL);
     dist = pnt.z;
   }
   return dist;

@@ -109,37 +109,23 @@ void ReadNuIFFMaterialSet(fileHandle fh,struct nuscene_s *sc)	//CHECK
   return;
 }
 
-
-void NuSceneMtlUpdate(struct nuscene_s *nus)
-{
-  u8 decal;
-  struct numtl_s *mtl;
+//NGC MATCH
+void NuSceneMtlUpdate(struct nuscene_s *nus) {
   s32 i;
-  s32 n;
 
-  i = 0;
-  if (0 < nus->nummtls) {
-    do {
-      mtl = nus->mtls[i];
-      if (mtl->tid == -1) {
-        mtl->tid = 0;
-        mtl->L = '\0';
+    for(i = 0; i < nus->nummtls; i++) {
+      if (nus->mtls[i]->tid == -1) {
+        nus->mtls[i]->tid = 0;
+        nus->mtls[i]->L = '\0';
       }
       else {
-        mtl->tid = (s32)nus->tids[mtl->tid];
-        mtl = nus->mtls[i];
-        decal = NuTexGetDecalInfo(mtl->tid);
-        mtl->L = decal;
+        nus->mtls[i]->tid = (s32)nus->tids[nus->mtls[i]->tid];
+        nus->mtls[i]->L = NuTexGetDecalInfo(nus->mtls[i]->tid);
       }
-      n = i + 1;
-      NuMtlUpdate((s8)nus->mtls[i]);
-      i = n;
-    } while (n < nus->nummtls);
-  }
+      NuMtlUpdate(nus->mtls[i]);
+    }
   return;
 }
-
-
 
 
 void ReadNuIFFAnimationLibrary(fileHandle handle, struct nugscn_s* scene)
@@ -199,24 +185,26 @@ void ReadNuIFFAnimationLibrary(fileHandle handle, struct nugscn_s* scene)
   return;
 }*/
 
+//MATCH NGC
+void ReadNuIFFGobjSet(s32 fh, struct nuscene_s *sc) {
+    s32 cnt;
+    s32 i;
+    
+    cnt = NuFileReadInt(fh);
+    if (sc->gobjs != NULL) {
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0x1a8)
+        ("ReadNuIFFGobjSet : Object already defined!");
+    }
+    sc->gobjs = NuMemAlloc(cnt << 2);
+    memset(sc->gobjs,0,cnt << 2);
+    sc->numgobjs = 0;
+    
+    for (i = 0; i < cnt; i++) {
 
-void ReadNuIFFGobjSet(fileHandle handle, struct nuscene_s* nus)
-{
-    s32 numGobj = NuFileReadInt(handle);
-
-    if (nus->gobjs != NULL)
-    {
-        NuError("ReadNuIFFGobjSet : Object already defined!");
+        ReadNuIFFGeomDef(fh,sc);
     }
 
-    nus->gobjs = NuMemAlloc(numGobj * sizeof(struct nugobj_s*));
-    memset(nus->gobjs, 0, numGobj * sizeof(struct nugobj_s*));
-    nus->numgobjs = 0;
-
-    while (numGobj-- > 0)
-    {
-        ReadNuIFFGeomDef(handle, nus);
-    }
+    return;
 }
 
 struct nugobj_s * ReadNuIFFGeom(fileHandle handle,struct numtl_s **mtls)
@@ -298,100 +286,97 @@ struct nugobj_s * ReadNuIFFGeom(fileHandle handle,struct numtl_s **mtls)
   return first;
 }
 
-
-void ReadNuIFFGeomDef(fileHandle handle, struct nuscene_s* nus)
-{
+//MATCH NGC
+void ReadNuIFFGeomDef(s32 fh, struct nuscene_s* sc) {
     struct nugobj_s* gobj;
     s32 numgobjs;
 
-    gobj = ReadNuIFFGeom(handle, &nus->mtls);
-    numgobjs = nus->numgobjs;
-    nus->gobjs[numgobjs] = gobj;
-    nus->numgobjs = numgobjs + 1;
+    gobj = ReadNuIFFGeom(fh, sc->mtls);
+    numgobjs = sc->numgobjs;
+    sc->gobjs[sc->numgobjs++] = gobj;
     return;
 }
 
-void ReadNuIFFGeomVtx(fileHandle handle, struct nugeom_s* geom)
+//MATCH NGC
+void ReadNuIFFGeomVtx(s32 fh, struct nugeom_s* geom)
 {
+    s32 cnt;
+    struct nuvtx_tc1_s *vtx;
 
-    s32 vtxCount = NuFileReadInt(handle);
-    geom->vtxcnt = vtxCount;
+    cnt = NuFileReadInt(fh);
+    geom->vtxcnt = cnt;
 
-    if (vtxCount != 0)
-    {
-        NuGeomCreateVB(geom, vtxCount, NUVT_TC1, 0);
-
-        if (geom->hVB == NULL)
+    if (cnt != 0) {
+        NuGeomCreateVB(geom, cnt, NUVT_TC1, 0);
+	vtx = (struct nuvtx_tc1_s *)geom->hVB;
+        if (vtx == NULL)
         {
-            NuError("ReadNuIFFGeomVtx : Lock VB failed!");
+            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",599)("ReadNuIFFGeomVtx : Lock VB failed!");
         }
 
-        NuFileRead(handle, geom->hVB, vtxCount * 0x24);
-        //GS_ARGBTORGBA(geom->hVB, vtxCount);   add
+        NuFileRead(fh, vtx, cnt * 0x24);
+        GS_ARGBTORGBA(vtx, cnt);
     }
 }
 
-void ReadNuIFFGeomCntrl(fileHandle handle, struct nugeom_s* geom)
+//MATCH NGC
+void ReadNuIFFGeomCntrl(s32 handle, struct nugeom_s* geom)
 {
     // Removed code???
     NuFileReadInt(handle);
     return;
 }
 
-void ReadNuIFFFaceOnGeom(fileHandle handle,struct nufaceongeom_s *face)
+//MATCH NGC
+static void ReadNuIFFFaceOnGeom(s32 handle,struct nufaceongeom_s *face) {
+  s32 bytes;
 
-{
-  s32 nfaceons;
-  enum nufaceontype_s type;
-  struct nufaceon_s *faceon;
-  f32 fVar1;
-
-  nfaceons = NuFileReadInt(handle);
-  face->nfaceons = nfaceons;
-  type = NuFileReadInt(handle);
-  face->faceon_type = type;
-  fVar1 = NuFileReadFloat(handle);
-  face->faceon_radius = fVar1;
-  nfaceons = face->nfaceons * 0x18;
-  faceon = (struct nufaceon_s *)NuMemAlloc(nfaceons);
-  face->faceons = faceon;
-  NuFileRead(handle,faceon,nfaceons);
+  bytes = NuFileReadInt(handle);
+  face->nfaceons = bytes;
+  face->faceon_type = NuFileReadInt(handle);
+  face->faceon_radius = NuFileReadFloat(handle);
+  bytes = face->nfaceons * 0x18;
+  face->faceons = (struct nufaceon_s *)NuMemAlloc(bytes);
+  NuFileRead(handle,face->faceons,bytes);
   return;
 }
 
-void ReadNuIFFGeomPrim(fileHandle handle, struct nugeom_s* geom)
-{
-    s32 counter;
-    enum nuprimtype_e type;
+//MATCH NGC
+static void ReadNuIFFGeomPrim(s32 fh, struct NuGeom* geom) {
+    s32 cnt;
+    s32 type;
+    s32 i;
 
-    counter = NuFileReadInt(handle);
-    if ((counter != 0) && (0 < counter)) {
-        do {
-            type = NuFileReadInt(handle);
-            if (type == NUPT_NDXTRI) {
-                ReadNuIFFGeomTri(handle, geom, NUPT_NDXTRI);
+    cnt = NuFileReadInt(fh);
+    if (cnt != 0) {
+        for (i = 0; i < cnt; i++) {
+            type = NuFileReadInt(fh);
+            switch (type) {
+            case NUPT_NDXTRI:
+                ReadNuIFFGeomTri(fh, geom, 5);
+                break;
+            case NUPT_NDXTRISTRIP:
+                ReadNuIFFGeomTri(fh, geom, 6);
+                break;
+            default:
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c", 0x2a7)("Unknown primitive type");
+                break;
             }
-            else if (type == NUPT_NDXTRISTRIP) {
-                ReadNuIFFGeomTri(handle, geom, NUPT_NDXTRISTRIP);
-            }
-            else {
-                //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c", 0x2a7);
-                //(*e)("Unknown primitive type");
-            }
-            counter = counter + -1;
-        } while (counter != 0);
+        }
     }
-    return;
 }
 
+//MATCH NGC
 void ReadNuIFFGeomTri(fileHandle handle, struct nugeom_s* geom, enum nuprimtype_e type)
 {
     struct nuprim_s *prim;
-    s32 itemCount;
+    s32 cnt;
+    u16* idxptr;
 
-    itemCount = NuFileReadInt(handle);
-    prim = NuPrimCreate(itemCount, type);
-    NuFileRead(handle, (void*)prim->idxbuff, itemCount * 2);
+    cnt = NuFileReadInt(handle);
+    prim = NuPrimCreate(cnt, type);
+    idxptr = (u16*)prim->idxbuff;
+    NuFileRead(handle, idxptr, cnt * 2);
     NuGeomAddPrim(geom, prim);
 }
 
@@ -602,60 +587,26 @@ s32 ReadNuIFFInstSet(s32 fh,struct nuinstance_s **instances,struct nuinstanim_s 
   return num_instances;
 }
 
-
-void ReadNuIFFSpecialObjects(fileHandle fh,struct nugscn_s *gsc)
-
-{
-  s32 numspec;
+//NGC MATCH
+static void ReadNuIFFSpecialObjects(s32 fh,struct nugscn_s *gsc) {
   struct nufspecial_s *file_specials;
-  struct nuspecial_s *pnVar1;
-  s32 cnt;
   s32 i;
-  //struct nuinstance_s *inst;
-  struct nuinstance_s *pnVar2;
-  //struct nuspecial_s *spec;
 
-  numspec = NuFileReadInt(fh);
-  gsc->numspecial = numspec;
-  file_specials = (struct nufspecial_s *)malloc_x(numspec * 0x50);
+  gsc->numspecial = NuFileReadInt(fh);
+  file_specials = (struct nufspecial_s *)malloc_x(gsc->numspecial * 0x50);
   NuFileRead(fh,file_specials,gsc->numspecial * 0x50);
-  pnVar1 = (struct nuspecial_s *)NuMemAlloc(gsc->numspecial * 0x50);
-  numspec = 0;
-  gsc->specials = pnVar1;
-  if (0 < gsc->numspecial) {
-    do {
-      cnt = numspec + 1;
-      i = 0x30;
-      gsc->specials[numspec].instance = gsc->instances + file_specials[numspec].instanceix;
-      pnVar2 = gsc->specials[numspec].instance;
-      pnVar1 = gsc->specials + numspec;
+  gsc->specials = (struct nuspecial_s *)NuMemAlloc(gsc->numspecial * 0x50);
 
-      pnVar1->mtx = pnVar2->mtx;
-      /*do {
-        spec = gsc->specials + numspec;
-        inst = gsc->specials[numspec].instance;
-        i = i + -0x18;
-        (spec->mtx)._00 = (inst->mtx)._00;
-        (spec->mtx)._01 = (inst->mtx)._01;
-        (spec->mtx)._02 = (inst->mtx)._02;
-        (spec->mtx)._03 = (inst->mtx)._03;
-        (spec->mtx)._10 = (inst->mtx)._10;
-        pnVar2 = (struct nuinstance_s *)&(inst->mtx)._12;
-        (spec->mtx)._11 = (inst->mtx)._11;
-        pnVar1 = (struct nuspecial_s *)&(spec->mtx)._12;
-      } while (i != 0);
-      *(f32 *)pnVar1 = *(f32 *)pnVar2;
-      (spec->mtx)._13 = (inst->mtx)._13;
-      (spec->mtx)._20 = (inst->mtx)._20;
-      (spec->mtx)._21 = (inst->mtx)._21;*/
-      gsc->specials[numspec].name = gsc->nametable + file_specials[numspec].nameix;
-      (gsc->specials[numspec].instance)->special_flag = '\x01';
-      numspec = cnt;
-    } while (cnt < gsc->numspecial);
-  }
+  for(i = 0; i < gsc->numspecial; i++) {
+      gsc->specials[i].instance = gsc->instances + file_specials[i].instanceix;
+      gsc->specials[i].mtx = gsc->specials[i].instance->mtx;
+      gsc->specials[i].name = gsc->nametable + file_specials[i].nameix;
+      gsc->specials[i].instance->special_flag = '\x01';
+    }
   free_x(file_specials);
   return;
 }
+
 
 void NuSceneCalcCulling(struct nugscn_s *scene)
 

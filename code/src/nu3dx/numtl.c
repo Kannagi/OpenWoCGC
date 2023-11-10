@@ -283,49 +283,31 @@ void NuMtlAddRndrItem(struct nusysmtl_s *mtl,struct nugeomitem_s *item)
 }
 
 
-void NuMtlAddFaceonItem(struct numtl_s *mtl,struct nurndritem_s *item)
-
-{
-  struct nufaceonitem_s **flist;
-  s32 cnt;
-  s32 i;
-  struct nufaceonitem_s *faceoni;
-  bool check;
-  struct nufaceonitem_s *face;
-
-  face = faceonmtllist[0];
-  flist = faceonmtllist;
-  cnt = faceonitem_cnt + -1;
-  i = 0;
-  check = faceonmtllist[0] != NULL;
-  faceoni = faceonitem + cnt;
-  faceonitem_cnt = cnt;
-  faceonitem[cnt].hdr = item;
-  faceonitem[cnt].mtl = (struct nusysmtl_s *)mtl;
-  if (check) {
-    if (face->mtl != (struct nusysmtl_s *)mtl) {
-      do {
-        if (0x31 < i) {
-          //e = NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x2f5);
-          //(*e)("Out of room for face-ons in the list");
+//NGC MATCH
+void NuMtlAddFaceonItem(struct numtl_s *mtl,struct nurndritem_s *item) {
+    struct nusysmtl_s* sm; // unused
+    struct nufaceonitem_s *faceoni;
+    s32 i;
+    
+    faceoni = &faceonitem[--faceonitem_cnt];
+    faceoni->hdr = item;
+    faceoni->mtl = (struct nusysmtl_s*)mtl;
+        for(i = 0; faceonmtllist[i] && faceonmtllist[i]->mtl != faceoni->mtl; i++) {
+            if (i > 0x31) {
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/numtl.c",0x2f5)("Out of room for face-ons in the list");
+               // i++;
+            }
+            //if (faceonmtllist[++i] == NULL) goto LAB_800b3084;
         }
-        flist = flist + 1;
-        i = i + 1;
-        if (*flist == NULL) goto LAB_800b3084;
-      } while ((*flist)->mtl != faceonitem[cnt].mtl);
-    }
-    face = faceonmtllist[i];
-    if (face != NULL) {
-      faceonmtllist[i] = faceoni;
-      faceoni->next = face;
-      return;
-    }
-  }
-LAB_800b3084:
-  faceonmtllist[i] = faceoni;
-  faceoni->next = NULL;
-  faceonmtl_cnt = faceonmtl_cnt + 1;
-  return;
+        if (faceonmtllist[i] == NULL) {
+            faceonmtllist[i] = faceoni;
+            faceoni->next = NULL;
+            faceonmtl_cnt++;
+        } else {
+            faceoni->next = faceonmtllist[i];
+            faceonmtllist[i] = faceoni;
+        }
+    return;
 }
 
 
@@ -560,125 +542,125 @@ static void NuMtlRenderOT(s32 begin,s32 end) {
   return;
 }
 
+//NGC MATCH
 static void NuMtlRenderFaceOn() {
-
-  u32 processed_count = 0; // count -> r31
-  struct nufaceonitem_s* cur_list;
-  struct nusysmtl_s* sys_mtl;
-  struct numtx_s var_168;
-  struct nuvec_s var_178;
-  struct nuvec_s faceon_point_rotated;
-  struct nuvec_s faceon_world_pos;
-  struct nuvec_s* mtx_translation;
-  struct numtx_s faceon_transform;
-  struct nuvec_s vertex_corner;
-  struct nuvec_s vertex_transformed;
-  struct nugeomitem_s* list_geomitem;
-  struct nufaceongeom_s* faceon_geom;
-  struct numtx_s faceon_geom_xf;
-
-  //ResetShaders();
-  //SetVertexShader(0x142);
-  //GS_LoadWorldMatrixIdentity();
-
-  if (faceonmtl_cnt <= 0) {
-    return;
-  }
-  do {
-    cur_list = faceonmtllist[processed_count];
-
-    sys_mtl = cur_list->mtl;
-    if (sys_mtl->mtl.L) {
-      NuTexSetTexture(0, sys_mtl->mtl.tid);
-      NuMtlSetRenderStates(cur_list->mtl);
-      NuTexSetTextureStates(cur_list->mtl);
-      //GS_SetZCompare(1, 0, 3);
-      //GS_SetAlphaCompare(3, 0xf7);
-    } else {
-      NuTexSetTexture(0, sys_mtl->mtl.tid);
-      NuMtlSetRenderStates(cur_list->mtl);
-      NuTexSetTextureStates(cur_list->mtl);
-      //GS_SetAlphaCompare(4, 0);
-      //GS_SetZCompare(1, 1, 3);
-    }
-
-    // nufaceonitem_s::hdr is probably a nugeomitem_s*
-    // TODO: remove this cast
-    var_168 = *((struct nugeomitem_s*)cur_list->hdr)->mtx;
-
-    for (; cur_list != NULL; cur_list = cur_list->next) {
-      faceon_geom_xf = *((struct nugeomitem_s*)cur_list->hdr)->mtx;
-        var_178.x = 0.0f;
-        var_178.y = 0.0f;
-        var_178.z = 0.0f;
-      list_geomitem = (struct nugeomitem_s*)cur_list->hdr;
-      faceon_geom = (struct NuFaceOnGeom*)list_geomitem->geom;
-
-
-      for (; faceon_geom != NULL; faceon_geom = faceon_geom->next) {
-        s32 faceon_count = faceon_geom->nfaceons;
-        struct nufaceon_s* faceon_list = faceon_geom->faceons;
-        //GS_DrawQuadListBeginBlock(faceon_count * 4);
-
-        for (; faceon_count > 0; faceon_count -= 1, faceon_list += 1) {
-          const f32 right = faceon_list->width * 0.5f; // 30
-          const f32 top = faceon_list->height * 0.5f; //31
-          const f32 left = -right;
-          const f32 bottom = -top;
-
-
-          NuVecMtxRotate(&faceon_point_rotated, &faceon_list->point, &faceon_geom_xf);
-
-          //NEED FIX!
-        //mtx_translation = (struct nuvec_s*)((struct nugeomitem_s*)cur_list)->mtx->_30;
-          NuVecAdd(&faceon_world_pos, &faceon_point_rotated, mtx_translation);
-
-
-          NuMtxCalcCheapFaceOn(&faceon_transform, &faceon_world_pos);
-
-          vertex_corner.x = left;
-          vertex_corner.y = top;
-          vertex_corner.z = 0.0f;
-
-          vertex_transformed.x = left;
-          vertex_transformed.y = top;
-          vertex_transformed.z = 0.0f;
-          NuVecMtxTransform(&vertex_transformed, &vertex_corner, &faceon_transform);
-
-          // Color is defined ARGB?
-          //GS_SetQuadListRGBA((faceon_list->colour >> 16) & 0xff,
-                            // (faceon_list->colour >> 8) & 0xff,
-                             //faceon_list->colour & 0xff,
-                            // (faceon_list->colour >> 24) & 0xff);
-          //GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 0.0f);
-
-          vertex_corner.x = right;
-          vertex_corner.y = top;
-          vertex_corner.z = 0.0f;
-          NuVecMtxTransform(&vertex_transformed, &vertex_corner, &faceon_transform);
-          //GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 0.0f);
-
-          vertex_corner.x = right;
-          vertex_corner.y = bottom;
-          vertex_corner.z = 0.0f;
-          NuVecMtxTransform(&vertex_transformed, &vertex_corner, &faceon_transform);
-          //GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 1.0f);
-
-          vertex_corner.x = left;
-          vertex_corner.y = bottom;
-          vertex_corner.z = 0.0f;
-          NuVecMtxTransform(&vertex_transformed, &vertex_corner, &faceon_transform);
-          //GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 1.0f);
+    s32 processed_count = 0;
+    struct nufaceonitem_s* cur_list;
+    struct numtx_s rotation;
+    struct numtx_s itemmtx;
+    struct numtx_s faceonmtx;
+    float w;
+    float h;
+    float r;
+    float g;
+    float b;
+    float a;
+    struct NuVec vertex_transformed;
+    struct NuVec faceon_point_rotated;
+    struct NuVec faceon_world_pos;
+    struct NuVec vtxpos;
+    struct nugeomitem_s* list_geomitem;
+    struct NuFaceOnGeom* fop;
+    s32 faceon_count;
+    struct nufaceon_s* faceon_list;
+    struct nugeomitem_s* item;
+    char stack_padding[0x34];
+    
+    ResetShaders();
+    SetVertexShader(0x142);
+    GS_LoadWorldMatrixIdentity();
+    
+    for (; processed_count < faceonmtl_cnt; processed_count++) {
+        cur_list = faceonmtllist[processed_count];
+        
+        if (cur_list->mtl->mtl.L == 0) {
+            NuTexSetTexture(0, cur_list->mtl->mtl.tid);
+            NuMtlSetRenderStates(&cur_list->mtl->mtl);
+            NuTexSetTextureStates(&cur_list->mtl->mtl);
+            GS_SetAlphaCompare(4, 0);
+            GS_SetZCompare(1, 1, 3);
+        } else {
+            NuTexSetTexture(0, cur_list->mtl->mtl.tid);
+            NuMtlSetRenderStates(&cur_list->mtl->mtl);
+            NuTexSetTextureStates(&cur_list->mtl->mtl);
+            GS_SetZCompare(1, 0, 3);
+            GS_SetAlphaCompare(3, 0xf7);
         }
-      }
+
+         //nufaceonitem_s::hdr is probably a nugeomitem_s*
+         //TODO: remove this cast
+        itemmtx = *((struct nugeomitem_s*)cur_list->hdr)->mtx;
+
+        for (; cur_list != NULL; cur_list = cur_list->next) {
+            item = ((struct nugeomitem_s*)cur_list->hdr);
+            // get rotation matrix and zero out translation
+            rotation = *item->mtx;
+            rotation._30 = 0.0f;
+            rotation._31 = 0.0f;
+            rotation._32 = 0.0f;
+            list_geomitem = (struct nugeomitem_s*)cur_list->hdr;
+            fop = (struct NuFaceOnGeom*)list_geomitem->geom;
+        
+        
+            for (; fop != NULL; fop = fop->next) {
+                int i;
+                faceon_count = fop->nfaceons;
+                faceon_list = fop->faceons;
+                GS_DrawQuadListBeginBlock(faceon_count * 4, 0);
+            
+                for (i = 0; i < faceon_count; i++, faceon_list += 1) {
+                    w = faceon_list->width * 0.5f;  //30
+                    h = faceon_list->height * 0.5f; //31
+                    
+                    
+                    NuVecMtxRotate(&faceon_point_rotated, &faceon_list->point, &rotation);
+                    
+                    NuVecAdd(&faceon_world_pos, &faceon_point_rotated, 
+                        (struct NuVec*)&item->mtx->_30);
+                    
+                    
+                    NuMtxCalcCheapFaceOn(&faceonmtx, &faceon_world_pos);
+                    
+                    vtxpos.x = -w;
+                    vtxpos.y = h;
+                    vtxpos.z = 0.0f;
+                    
+                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
+                    
+                    //Color is defined ARGB?
+                    GS_SetQuadListRGBA((faceon_list->colour >> 16) & 0xff,
+                             (faceon_list->colour >> 8) & 0xff,
+                             faceon_list->colour & 0xff,
+                             (faceon_list->colour >> 24) & 0xff);
+                    GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 0.0f);
+                    
+                    vtxpos.x = w;
+                    vtxpos.y = h;
+                    vtxpos.z = 0.0f;
+                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
+                    GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 0.0f);
+                    
+                    vtxpos.x = w;
+                    vtxpos.y = -h;
+                    vtxpos.z = 0.0f;
+                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
+                    GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 1.0f);
+                    
+                    vtxpos.x = -w;
+                    vtxpos.y = -h;
+                    vtxpos.z = 0.0f;
+                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);        
+                    
+                    GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 1.0f);
+                }   
+                GS_DrawQuadListEndBlock();
+            }
+        }
+    
+        faceonmtllist[processed_count] = 0;
     }
-
-    faceonmtllist[processed_count] = 0;
-    processed_count += 1;
-  } while (processed_count < faceonmtl_cnt);
-
-return;
 }
+
 
 //NGC MATCH
 static void NuMtlRenderGlass(void) {
@@ -801,105 +783,102 @@ static void NuMtlRenderUpd(void) {
   return;
 }
 
-
-void NuMtlSetRenderStates(struct numtl_s *mtl)
-{
-  s32 ivar2;
-  struct _D3DMATERIAL8 d3dmtl;
-  u32 attrib;
-  bool check;
-
-  d3dmtl.Diffuse.a = mtl->alpha;
-  d3dmtl.Diffuse.r = (mtl->diffuse).r;
-  d3dmtl.Diffuse.g = (mtl->diffuse).g;
-  d3dmtl.Diffuse.b = (mtl->diffuse).b;
-  d3dmtl.Ambient.r = (mtl->ambient).r;
-  d3dmtl.Ambient.g = (mtl->ambient).g;
-  d3dmtl.Ambient.b = (mtl->ambient).b;
-  d3dmtl.Emissive.r = d3dmtl.Ambient.r;
-  d3dmtl.Emissive.g = d3dmtl.Ambient.g;
-  d3dmtl.Emissive.b = d3dmtl.Ambient.b;
-  /*if (((u32)mtl->attrib >> 0x10 & 3) == 2)  fix
-  {
-    d3dmtl.Emissive.r = d3dmtl.Diffuse.r;
-    d3dmtl.Emissive.g = d3dmtl.Diffuse.g;
-    d3dmtl.Emissive.b = d3dmtl.Diffuse.b;
-  }*/
-  d3dmtl.Power = mtl->power;
-  d3dmtl.Ambient.a = d3dmtl.Diffuse.a;
-  d3dmtl.Emissive.a = d3dmtl.Diffuse.a;
-  //GS_SetMaterial(&d3dmtl);
-  //attrib = (u32)mtl->attrib >> 0x1e;  fix
-  if (attrib == 0) {
-    //GS_SetBlendSrc(1,1,0);
-    ivar2 = 7;
-  }
-  else {
-    if (attrib == 1) {
-      ivar2 = 5;
+//NGC MATCH
+void NuMtlSetRenderStates(struct numtl_s *mtl) {
+    struct _D3DMATERIAL8 d3dmtl;
+    
+    d3dmtl.Diffuse.r = (mtl->diffuse).r;
+    d3dmtl.Diffuse.g = (mtl->diffuse).g;
+    d3dmtl.Diffuse.b = (mtl->diffuse).b;
+    d3dmtl.Diffuse.a = mtl->alpha;
+    
+    d3dmtl.Ambient.r = (mtl->ambient).r;
+    d3dmtl.Ambient.g = (mtl->ambient).g;
+    d3dmtl.Ambient.b = (mtl->ambient).b;
+    d3dmtl.Ambient.a = d3dmtl.Diffuse.a;
+    
+    if (mtl->attrib.lighting == 2) {
+        d3dmtl.Emissive.r = mtl->diffuse.r;
+        d3dmtl.Emissive.g = mtl->diffuse.g;
+        d3dmtl.Emissive.b = mtl->diffuse.b;
+        d3dmtl.Emissive.a = d3dmtl.Diffuse.a;
+    } else {
+        d3dmtl.Emissive.r = mtl->ambient.r;
+        d3dmtl.Emissive.g = mtl->ambient.g;
+        d3dmtl.Emissive.b = mtl->ambient.b;
+        d3dmtl.Emissive.a = d3dmtl.Diffuse.a;
     }
-    else {
-      if (attrib != 2) {
-        if (attrib == 3) {
-          //GS_SetBlendSrc(1,0,3);
-          //GS_SetAlphaCompare(4,0);
+    d3dmtl.Power = mtl->power;
+    GS_SetMaterial(&d3dmtl);
+    
+    if (mtl->attrib.alpha == 0) {
+        GS_SetBlendSrc(1,1,0);
+        GS_SetAlphaCompare(7,0);
+    } else if (mtl->attrib.alpha == 1) {
+        GS_SetBlendSrc(1,4,5);
+        GS_SetAlphaCompare(4,0);
+    } else if (mtl->attrib.alpha == 2) {
+        GS_SetBlendSrc(1,4,1);
+        GS_SetAlphaCompare(4,0);
+    } else if (mtl->attrib.alpha == 3) {
+        GS_SetBlendSrc(1,0,3);
+        GS_SetAlphaCompare(4,0);
+    }
+    
+    GS_SetAlphaCompare(4,0);
+    NudxFw_SetRenderState(0x80,0);
+
+    if (mtl->attrib.zmode == 0) {
+        GS_SetZCompare(1,1,GX_LEQUAL);
+    }
+    
+    if (mtl->attrib.zmode == 1) {
+        GS_SetZCompare(1,0,GX_LEQUAL);
+    }
+    
+    if (mtl->attrib.zmode == 2) {
+        GS_SetZCompare(1,1,GX_ALWAYS);
+    }
+    
+    if (mtl->attrib.zmode == 3) {
+        GS_SetZCompare(0,0,GX_ALWAYS);
+    }
+    
+    IsObjLit = 0;
+    if (mtl->attrib.lighting == 0) {
+        GS_EnableLighting(1);
+        GS_EnableSpecular(0);
+        IsObjLit = 1;
+    }
+    
+    if (mtl->attrib.lighting == 1) {
+        GS_EnableLighting(1);
+        GS_EnableSpecular(1);
+        IsObjLit = 2;
+    }
+    
+    if (mtl->attrib.lighting == 2) {
+        GS_EnableLighting(0);
+    }
+    
+    if (mtl->attrib.colour == 0) {
+        GS_EnableColorVertex(0);
+        GS_SetMaterialSourceAmbient(0);
+        GS_SetMaterialSourceEmissive(0);
+    }
+    
+    if (mtl->attrib.colour == 1) {
+        GS_EnableColorVertex(1);
+        GS_SetMaterialSourceAmbient(1);
+        if (mtl->attrib.lighting == 2) {
+            GS_SetMaterialSourceEmissive(1);
+        } else {
+            GS_SetMaterialSourceEmissive(0);
         }
-        goto LAB_800b40dc;
-      }
-      ivar2 = 1;
     }
-    //GS_SetBlendSrc(1,4,ivar2);
-    ivar2 = 4;
-  }
-  //GS_SetAlphaCompare(ivar2,0);
-LAB_800b40dc:
-  //GS_SetAlphaCompare(4,0);
-  NudxFw_SetRenderState(0x80,0);
-  /*if (((u32)mtl->attrib & 0xc0000) == 0)
-  {
-    //GS_SetZCompare(1,1,GX_LEQUAL);
-  }
-  if (((u32)mtl->attrib >> 0x12 & 3) == 1) {
-    //GS_SetZCompare(1,0,GX_LEQUAL);
-  }
-  if (((u32)mtl->attrib >> 0x12 & 3) == 2) {
-    //GS_SetZCompare(1,1,GX_ALWAYS);
-  }
-  if (((u32)mtl->attrib >> 0x12 & 3) == 3) {
-    //GS_SetZCompare(0,0,GX_ALWAYS);
-  }
-  IsObjLit = 0;
-  check = ((u32)mtl->attrib & 0x30000) == 0;
-  if (check) {
-    //GS_EnableLighting(1);
-    //GS_EnableSpecular(0);
-  }
-  IsObjLit = (u32)check;
-  if (((u32)mtl->attrib >> 0x10 & 3) == 1) {
-    //GS_EnableLighting(1);
-    //GS_EnableSpecular(1);
-    IsObjLit = 2;
-  }
-  if (((u32)mtl->attrib >> 0x10 & 3) == 2) {
-    //GS_EnableLighting(0);
-  }
-  if (((u32)mtl->attrib & 0x8000) == 0) {
-    //GS_EnableColorVertex(0);
-    //GS_SetMaterialSourceAmbient(0);
-    //GS_SetMaterialSourceEmissive(0);
-  }
-  if (((u32)mtl->attrib & 0x8000) != 0) {
-    //GS_EnableColorVertex(1);
-    //GS_SetMaterialSourceAmbient(1);
-    if (((u32)mtl->attrib >> 0x10 & 3) == 2) {
-      //GS_SetMaterialSourceEmissive(1);
-    }
-    else {
-      //GS_SetMaterialSourceEmissive(0);
-    }
-  }*/
-  return;
+    return;
 }
+
 
 void NuMtlAnimate(float timestep)
 
