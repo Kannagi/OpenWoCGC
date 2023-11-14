@@ -168,10 +168,8 @@ s32 NuTexPalSize(enum nutextype_e type)
   return 0;
 }
 
-
-void NuTexSetTextureStates(struct numtl_s *mtl)
-{
-  u32 flag_or_float;
+//NGC MATCH
+void NuTexSetTextureStates(struct numtl_s *mtl) {
 
   if (mtl->tid == 0) {
     NuTexSetTexture(0,0);
@@ -187,41 +185,37 @@ void NuTexSetTextureStates(struct numtl_s *mtl)
     NudxFw_SetTextureState(0,D3DTSS_ALPHAOP,4);
     NudxFw_SetTextureState(0,D3DTSS_TEXCOORDINDEX,0);
     NudxFw_SetTextureState(0,D3DTSS_TEXTURETRANSFORMFLAGS,0);
-    //flag_or_float = (u32)mtl->attrib >> 0x18 & 3;     FIX IT
-    flag_or_float = (mtl->attrib)._word >> 0x18 & 3;
-    if (flag_or_float == 0) {
-      //GS_TexSetWrapModes(0,1);
-    }
-    else if (flag_or_float == 2) {
-      //GS_TexSetWrapModes(0,2);
-    }
-    else if (flag_or_float == 3) {
-      //GS_TexSetWrapModes(0,0);
-    }
-    else {
-      //GS_TexSetWrapModes(0,0);
-    }
-    //flag_or_float = (u32)mtl->attrib >> 0x16 & 3;     FIX IT
-    flag_or_float = (mtl->attrib)._word >> 0x16 & 3;
-    if (flag_or_float == 0) {
-      //GS_TexSetWrapModet(0,1);
-    }
-    else if (flag_or_float == 2) {
-      //GS_TexSetWrapModet(0,2);
-    }
-    else if (flag_or_float == 3) {
-      //GS_TexSetWrapModet(0,0);
-    }
-    else {
-      //GS_TexSetWrapModet(0,0);
-    }
+        if (mtl->attrib.utc == 0) {
+            GS_TexSetWrapModes(0,GX_REPEAT);
+        }
+        else if (mtl->attrib.utc == 2) {
+            GS_TexSetWrapModes(0,GX_MIRROR);
+        }
+        else if (mtl->attrib.utc == 3) {
+            GS_TexSetWrapModes(0,GX_CLAMP);
+        }
+        else {
+            GS_TexSetWrapModes(0,GX_CLAMP);
+        }
+      
+        if (mtl->attrib.vtc == 0) {
+            GS_TexSetWrapModet(0,GX_REPEAT);
+        }
+        else if (mtl->attrib.vtc == 2) {
+            GS_TexSetWrapModet(0,GX_MIRROR);
+        }
+        else if (mtl->attrib.vtc == 3) {
+            GS_TexSetWrapModet(0,GX_CLAMP);
+        }
+        else {
+            GS_TexSetWrapModet(0,GX_CLAMP);
+        }
     NudxFw_SetTextureState(0,D3DTSS_MAGFILTER,2);
     NudxFw_SetTextureState(0,D3DTSS_MINFILTER,2);
     NudxFw_SetTextureState(0,D3DTSS_MIPFILTER,2);
   }
   return;
 }
-
 
 s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
 {

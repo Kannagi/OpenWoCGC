@@ -46,59 +46,53 @@ int main()
 union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
 
-/*void ResetSuperBuffer(void)	//TODO
+/*
 
+//93%
+void ResetSuperBuffer(void)
 {
-
-  if ((double)CONCAT44(0x43300000,superbuffersize ^ 0x80000000) - (double)0x4330000080000000 !=
-      (double)0x4156eb851eb851ec) {
-    if (superbuffer_base.voidptr != (void *)0x0) {
+  if (superbuffersize != (double)0x4156eb851eb851ec) {
+    if (superbuffer_base.voidptr != NULL) {
       NuMemFree(superbuffer_base.voidptr);
     }
     superbuffer_base.voidptr = NuMemAlloc(0x5bae14);
-    superbuffer_end.voidptr = (void *)(superbuffer_base.intaddr + 0x5bae14);
+
     superbuffersize = 0x5bae14;
-    superbuffer_reset_base.voidptr = superbuffer_base.voidptr;
-    if (superbuffer_base.voidptr == (void *)0x0) {
-      e = NuErrorProlog("C:/source/crashwoc/code/gamecode/main.c",0x5c5);
-      //(*e)("unable to allocate super buffer");
+    superbuffer_reset_base = superbuffer_base;
+    superbuffer_end.voidptr = (&superbuffer_base.voidptr + 0x5bae14);
+    if (superbuffer_base.voidptr == NULL) {
+      NuErrorProlog("C:/source/crashwoc/code/gamecode/main.c",0x5c5)
+                                      ("unable to allocate super buffer");
     }
   }
   superbuffer_ptr = superbuffer_reset_base;
   return;
 }
 
-
-void ResetSuperBuffer2(void)
-
-{
-  double dVar1;
-  double local_18;
-  
-  dVar1 = (double)0x4156eb851eb851ec;
-  local_18 = (double)CONCAT44(0x43300000,superbuffersize ^ 0x80000000);
-  if (local_18 - (double)0x4330000080000000 != (double)0x4156eb851eb851ec) {
-    if (superbuffer_base.voidptr != (void *)0x0) {
-      NuMemFree(superbuffer_base.voidptr);
+//78%
+void ResetSuperBuffer2(void) {
+    double dVar1;
+    
+    if (superbuffersize != (double)6008340.48) {
+        if (superbuffer_base.voidptr != NULL) {
+            NuMemFree(superbuffer_base.voidptr);
+        }
+        superbuffer_base.voidptr = NuMemAlloc(0x5bae14);
+        superbuffersize = 0x5bae14;
+        if ((double)0x4156eb851eb851ec <= superbuffersize + 6008340) {
+            superbuffer_end.intaddr = (int)(0x4156eb851eb851ec);
+        }
+        else {
+            superbuffer_end.intaddr = (uint)dVar1;
+        }
+        superbuffer_reset_base.voidptr = superbuffer_base.voidptr;
+        if (superbuffer_base.voidptr == NULL) {
+            NuErrorProlog("C:/source/crashwoc/code/gamecode/main.c",0x5e2)
+            ("unable to allocate super buffer");
+        }
     }
-    superbuffer_base.voidptr = NuMemAlloc(0x5bae14);
-    local_18 = (double)CONCAT44(0x43300000,superbuffer_base.voidptr);
-    superbuffersize = 0x5bae14;
-    dVar1 = (local_18 - (double)0x4330000000000000) + dVar1;
-    if ((double)0x41e0000000000000 <= dVar1) {
-      superbuffer_end.intaddr = (int)(dVar1 - (double)0x41e0000000000000) ^ 0x80000000;
-    }
-    else {
-      superbuffer_end.intaddr = (uint)dVar1;
-    }
-    superbuffer_reset_base.voidptr = superbuffer_base.voidptr;
-    if (superbuffer_base.voidptr == (void *)0x0) {
-      e = NuErrorProlog("C:/source/crashwoc/code/gamecode/main.c",0x5e2);
-      //(*e)("unable to allocate super buffer");
-    }
-  }
-  superbuffer_ptr = superbuffer_reset_base;
-  return;
+    superbuffer_ptr = superbuffer_reset_base;
+    return;
 }
 
 
@@ -948,88 +942,74 @@ void InitTexAnimScripts(void)	//PS2
     return;
 }
 
-void SetTexAnimSignals(void)
 
-{
-  uint tbits;
-  mask *mask;
-  char dead;
-  
-  if ((player->used == '\0') ||
-     (((dead = (player->obj).dead, dead != '\x03' && (dead != '\b')) && (player->freeze == '\0'))) )
-  {
-    tbits = texanimbits & 0xfffffffd;
-  }
-  else {
-    tbits = texanimbits | 2;
-  }
-  mask = (player->obj).mask;
-  if ((mask == (mask *)0x0) || (mask->active < 2)) {
-    tbits = tbits & 0xfffffffb;
-  }
-  else {
-    tbits = tbits | 4;
-  }
-  if (((player->used == '\0') || (dead = (player->obj).dead, dead == '\0')) || (dead == '\x12')) {
-    tbits = tbits & 0xffffffdf;
-  }
-  else {
-    tbits = tbits | 0x20;
-  }
-  if (Level == 0x17) {
-    texanimbits = tbits | 0x40;
-  }
-  else {
-    texanimbits = tbits & 0xffffffbf;
-  }
-  if (Level == 0x18) {
-    if (WeatherBossSkeletonTimer == 0.0) {
-      tbits = texanimbits & 0xfffffeff;
+//NGC MATCH
+void SetTexAnimSignals(void) {
+    
+    if ((player->used != '\0') && (player->obj.dead == '\x03' || (player->obj.dead == '\b') || (player->freeze != '\0'))) {
+        texanimbits = texanimbits | 2;
     }
     else {
-      tbits = texanimbits | 0x100;
+        texanimbits = texanimbits & 0xfffffffd;
     }
-    if (WeatherBossDead == 0) {
-      texanimbits = tbits & 0xfffffdff;
+    if (((player->obj).mask != NULL) && ((player->obj).mask->active > 1)) {
+        texanimbits = texanimbits | 4;
     }
     else {
-      texanimbits = tbits | 0x200;
+        texanimbits = texanimbits & 0xfffffffb;
     }
-  }
-  NuTexAnimSetSignals(texanimbits);
-  NuTexAnimProcess();
-  return;
+    if (((player->used != '\0') && ((player->obj).dead != '\0')) && ((player->obj).dead != '\x12'))  {
+        texanimbits = texanimbits | 0x20;
+    }
+    else {
+        texanimbits = texanimbits & 0xffffffdf;
+    }
+    if (Level == 0x17) {
+        texanimbits = texanimbits | 0x40;
+    }
+    else {
+        texanimbits = texanimbits & 0xffffffbf;
+    }
+    if (Level == 0x18) {
+        if (WeatherBossSkeletonTimer != 0.0f) {
+            texanimbits = texanimbits | 0x100;
+        }
+        else {
+            texanimbits = texanimbits & 0xfffffeff;
+        }
+        if (WeatherBossDead != 0) {
+            texanimbits = texanimbits | 0x200;
+        }
+        else {
+            texanimbits = texanimbits & 0xfffffdff;
+        }
+    }
+    NuTexAnimSetSignals(texanimbits);
+    NuTexAnimProcess();
+    return;
 }
 
-void LoadFont3D(void)
+//NGC MATCH
+void LoadFont3D() {
 
-{
   font3d_initialised = 0;
   font3d_scene2 = NuSceneReader2(&superbuffer_ptr,&superbuffer_end,"stuff\\font.nus");
-  if (font3d_scene2 != (nuscene_s *)0x0) {
+  if (font3d_scene2 != NULL) {
     font3d_scene = font3d_scene2->gscene;
     InitFont3D(font3d_scene);
   }
   return;
 }
 
+//NGC MATCH
+void InitCreatureModels(void) {
+  s32 i;
 
-
-void InitCreatureModels(void)
-
-{
-  creature_s *c;
-  int i;
-  
-  i = 9;
-  c = Character;
-  do {
-    c->used = '\0';
-    c->on = '\0';
-    c->off_wait = '\0';
-    c = c + 1;
-    i = i + -1;
-  } while (i != 0);
+  for (i = 0; i < 9; i++) {
+    Character[i].used = '\0';
+    Character[i].on = '\0';
+    Character[i].off_wait = '\0';
+  }
   GAMEOBJECTCOUNT = 0;
   InitSkinning(0);
   LoadCharacterModels();
@@ -1037,30 +1017,26 @@ void InitCreatureModels(void)
   return;
 }
 
-void InitCreatures(void)
-
-{
-  int i;
+//NGC MATCH
+void InitCreatures(void) {
+  s32 i;
   
   InitAI();
   InitChases();
   ResetChases();
   i = LDATA->flags & 1;
   if ((LDATA->flags & 1) != 0) {
-    AddCreature((int)LDATA->character,0,-1);
+    AddCreature((s32)LDATA->character,0,-1);
     i = 1;
   }
   PLAYERCOUNT = i;
   return;
 }
 
-
-int IsTitleScreen(void)
-
-{
-  return (uint)(cutmovie == 0);
+//NGC MATCH
+s32 IsTitleScreen(void) {
+  return (cutmovie == 0);
 }
-
 
 void CreateFadeMtl(void)
 
@@ -1074,20 +1050,17 @@ void CreateFadeMtl(void)
   return;
 }
 
-void UpdateFade(void)
-
-{
-  int old;
+//NGC MATCH
+void UpdateFade(void) {
+  s32 old;
   
   old = fadeval;
   fadeval = fadeval + fade_rate;
-  if (fadeval < 0x100) {
-    if (fadeval < 0) {
-      fadeval = 0;
-    }
-  }
-  else {
+  if (fadeval > 0xff) {
     fadeval = 0xff;
+  }
+  else if (fadeval < 0) {
+      fadeval = 0;
   }
   if ((old < 0xff) && (fadeval == 0xff)) {
     fadehack = 1;

@@ -159,7 +159,7 @@ struct NUPOINTOFINTEREST_s* NuHGobjGetPOI(struct NUHGOBJ_s* hgobj, u8 poi_id) {
     return NULL;
 }
 
-//93%
+//MATCH GCN
 static void ReadNuIFFHGobj(s32 handle, struct NUHGOBJ_s *hgobj) {
     s32 magic;
     s32 i;
@@ -175,7 +175,7 @@ static void ReadNuIFFHGobj(s32 handle, struct NUHGOBJ_s *hgobj) {
     scene.nummtls = 0;
     scene.mtls = NULL;
 
-    while ((magic = NuFileBeginBlkRead(handle, 0)) != 0)
+    while (magic = NuFileBeginBlkRead(handle, 0))
     {
         switch(magic)
         {
@@ -214,6 +214,7 @@ static void ReadNuIFFHGobj(s32 handle, struct NUHGOBJ_s *hgobj) {
         NuFileEndBlkRead(handle);
     }
     NuSceneMtlUpdate(&scene);
+    scene.tids = 0;
 	return;
 }
 

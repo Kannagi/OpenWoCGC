@@ -6,6 +6,32 @@ void InitCutScenes(void) {
   return;
 }
 
+//NGC MATCH
+u32 CutLoadScreenThreadProc(void * lpParameter) {
+    u32 time;
+    u32 dwQuantum; //
+    
+    GetTickCount();
+    cut_load_framecount = 0;
+    cut_loading_finished = 0;
+    do {
+        NuRndrClear(0xb,0,1.0f);
+        if (NuRndrBeginScene(1) != 0) {
+        pNuCam->mtx = numtx_identity;
+            NuCameraSet(pNuCam);
+            if ((font3d_scene != NULL) && (font3d_initialised != 0)) {
+                DrawGameMessage(tLOADING[Game.language],cut_load_framecount,0.0f);
+                cut_load_framecount++;
+            }
+            NuRndrEndScene();
+        }
+        NuRndrSwapScreen(1);
+        Sleep(0x10);
+    } while (cut_loading_finished == 0);
+    time = GetTickCount();
+    return time;
+}
+
 //PS2
 void AppCutSceneCharacterRender
                (struct instNUGCUTSCENE_s *icutscene,struct NUGCUTSCENE_s *cutscene,struct instNUGCUTCHAR_s *icutchar,
