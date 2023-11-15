@@ -10,7 +10,7 @@ An open source, reverse engineered re-implementation of Crash Bandicoot: Wrath O
 - [ ] OpenGL ES 3 or OpenGL 3 link
 
 ### nulib compile
-- [ ] nu3dx function (8%)
+- [ ] nu3dx function (80%)
 - [x] nucore function 
 - [x] numath function 
 - [x] nusound function 

@@ -187,83 +187,71 @@ void ReadNuIFFGobjSet(s32 fh, struct nuscene_s *sc) {
     return;
 }
 
-struct nugobj_s * ReadNuIFFGeom(fileHandle handle,struct numtl_s **mtls)
+//MATCH NGC
+struct NuGobj* ReadNuIFFGeom(s32 handle, struct numtl_s** mtls) {
 
-{
-  s32 ngobjs;
-  struct nugobj_s *gobject;
-  enum gobjtype_s type;
-  s32 mtlid;
-  struct nufaceongeom_s *face;
-  struct nugobj_s *first;
-  struct nugobj_s *last;
-  struct nugeom_s *geom;
-  s32 i;
-  s32 count;
-  struct nuvec_s zero;
+    struct NuGobj* gobject;
+    struct NuGobj* first;
+    struct NuGobj* last;
+    struct NuGeom* geom;
+    struct NuFaceOnGeom* fgeom;
+    s32 count;
+    s32 i;
+    s32 j;
+    s32 ngobjs;
+    struct NuVec zero;
 
-  memset(&zero,0,0xc);
-  i = 0;
-  last = NULL;
-  ngobjs = NuFileReadInt(handle);
-  if (0 < ngobjs) {
-    do {
-      gobject = NuGobjCreate();
-      gobject->ignore = 0;
-      if (i == 0) {
-        gobject->ngobjs = ngobjs;
-        first = gobject;
-      }
-      else {
-        gobject->ngobjs = 0;
-      }
-      type = NuFileReadInt(handle);
-      gobject->type = type;
-      if (type == NUGOBJ_MESH) {
-        NuFileRead(handle,&gobject->origin,0xc);
-        count = NuFileReadInt(handle);
-        if (0 < count) {
-          do {
-            geom = NuGeomCreate();
-            mtlid = NuFileReadInt(handle);
-            geom->mtl_id = mtlid;
-            geom->mtl = mtls[mtlid];
-            ReadNuIFFGeomVtx(handle,geom);
-            ReadNuIFFGeomCntrl(handle,geom);
-            ReadNuIFFGeomPrim(handle,geom);
-            ReadNuIFFGeomSkin(handle,geom);
-            ReadNuIFFBlendShape(handle,geom);
-            NuGobjAddGeom(gobject,geom);
-            count = count + -1;
-          } while (count != 0);
+    memset(&zero, 0, 0xc); // or struct NuVec zero = {};
+    last = NULL;
+    ngobjs = NuFileReadInt(handle);
+    for (i = 0; i < ngobjs; i++) {
+        gobject = NuGobjCreate();
+        gobject->ignore = 0;
+        if (i == 0) {
+            first = gobject;
+            gobject->ngobjs = ngobjs;
+        } else {
+            gobject->ngobjs = 0;
         }
-      }
-      else if ((type == NUGOBJ_FACEON) && (count = NuFileReadInt(handle), 0 < count)) {
-        do {
-          (gobject->origin).x = zero.x;
-          (gobject->origin).y = zero.y;
-          (gobject->origin).z = zero.z;
-          face = NuFaceOnGeomCreate();
-          mtlid = NuFileReadInt(handle);
-          face->mtl_id = mtlid;
-          face->mtl = mtls[mtlid];
-          ReadNuIFFFaceOnGeom(handle,face);
-          NuGobjAddFaceOnGeom(gobject,face);
-          count = count + -1;
-        } while (count != 0);
-      }
-      i = i + 1;
-      NuPs2CreateSkin(gobject);   //finish cvtskin file
-      NuGobjCalcDims(gobject);
-      for (geom = gobject->geom; geom != NULL; geom = geom->next) {
-      }
-      if (last != NULL) {
-        last->next_gobj = gobject;
-      }
-      last = gobject;
-    } while (i < ngobjs);
-  }
-  return first;
+        gobject->type = NuFileReadInt(handle);
+        switch (gobject->type) {
+            case NUGOBJ_MESH:
+                NuFileRead(handle, &gobject->origin, 0xc);
+                count = NuFileReadInt(handle);
+                for (j = 0; j < count; j++) {
+                    geom = NuGeomCreate();
+                    geom->mtl_id = NuFileReadInt(handle);
+                    geom->mtl = mtls[geom->mtl_id];
+                    ReadNuIFFGeomVtx(handle, geom);
+                    ReadNuIFFGeomCntrl(handle, geom);
+                    ReadNuIFFGeomPrim(handle, geom);
+                    ReadNuIFFGeomSkin(handle, geom);
+                    ReadNuIFFBlendShape(handle, geom);
+                    NuGobjAddGeom(gobject, geom);
+                }
+                break;
+            case NUGOBJ_FACEON:
+                count = NuFileReadInt(handle);
+                for (j = 0; j < count; j++) {
+                    gobject->origin = zero;
+                    fgeom = NuFaceOnGeomCreate();
+                    fgeom->mtl_id = NuFileReadInt(handle);
+                    fgeom->mtl = mtls[fgeom->mtl_id];
+                    ReadNuIFFFaceOnGeom(handle, fgeom);
+                    NuGobjAddFaceOnGeom(gobject, fgeom);
+                }
+                break;
+        }
+        NuPs2CreateSkin(gobject);
+        NuGobjCalcDims(gobject);
+        for (geom = gobject->geom; geom != NULL; geom = geom->next) {
+        }
+        if (last != NULL) {
+            last->next_gobj = gobject;
+        }
+        last = gobject;
+    }
+    return first;
 }
 
 //MATCH NGC
