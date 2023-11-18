@@ -112,26 +112,19 @@ void InitOverrideMtl(void)	//TODO
 
 */
 
-
-s32 isGlassInstance(struct nugscn_s *gsc,struct nuinstance_s *inst)
-
-{
+//NGC MATCH
+static s32 isGlassInstance(struct nugscn_s *gsc,struct nuinstance_s *inst) {
   struct nugeom_s *geom;
-  u8 fxid;
   
-  geom = (&gsc->gobjs->sysnext)[inst->objid]->geom;
-  if (-1 < (int)inst->flags) {
-    return 0;
-  }
-  while( true ) {
-    if (geom == NULL) {
-      return 0;
-    }
-    fxid = geom->mtls->fxid;
-    if (((fxid == '\x01') || (fxid == '\x03')) || (fxid == 'd')) break;
-    geom = geom->next;
-  }
-  return 1;
+  geom = gsc->gobjs[inst->objid]->geom;
+        if (inst->flags.visible >= 0) {
+              return 0;
+           }
+          while( geom != NULL  ) {
+            if ((((geom->mtl)->fxid == '\x01') || ((geom->mtl)->fxid == '\x03')) || ((geom->mtl)->fxid == 'd')) return 1;
+            geom = geom->next;
+          }
+  return 0;
 }
 
 
@@ -366,20 +359,21 @@ LAB_800af49c:
   return;
 }
 
+//MATCH NGC
+void DrawGlassCreatures(s32 solid) {
+    if (Level != 0x17) {
+        if ((GLASSPLAYER != 0) && (plr_invisibility_time < 5.0f)) {
+        glass_phase = 1;
+        glass_draw = solid;
+        DrawCreatures(Character,1,1,0);
+        force_glass_screencopy_enable = 0;
+    }
 
-void DrawGlassCreatures(int solid)
-
-{
-  if (Level == 0x17) {
-    glass_phase = 1;
-    glass_draw = solid;
-    DrawCreatures(Character + 1,8,1,1);
-  }
-  else if ((GLASSPLAYER != 0) && (plr_invisibility_time < 5.0)) {
-    glass_phase = 1;
-    glass_draw = solid;
-    DrawCreatures(Character,1,1,0);
-    force_glass_screencopy_enable = 0;
-  }
-  return;
+    } 
+    else {
+        glass_draw = solid;
+        glass_phase = 1;
+        DrawCreatures(Character + 1,8,1,1);
+    }
+    return;
 }

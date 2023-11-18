@@ -1616,65 +1616,63 @@ static void instNuGCutTriggerSysStart(struct instNUGCUTSCENE_s *icutscene)
   return;
 }
 
-void CalculateLocatorDirection(locdir ldir,numtx_s *mtx,nuvec_s *dir)
+//PS2 87%
+void CalculateLocatorDirection(enum locdir ldir, struct numtx_s* mtx, struct NuVec* dir) {
+    int calc_rots;
 
-{
-  bool c;
-  float calc_rots;
-  
-  c = false;
-  if (ldir == LOCATOR_NEGX) {
-    calc_rots = 1.0;
-LAB_8008ad5c:
-    c = true;
-    dir->z = 0.0;
-    dir->x = calc_rots;
-    dir->y = 0.0;
-  }
-  else {
-    if (LOCATOR_NEGX < ldir) {
-      if (ldir == LOCATOR_NEGY) {
-        dir->z = 0.0;
-        dir->y = 1.0;
-      }
-      else if (ldir < LOCATOR_NEGY) {
-        dir->z = 0.0;
-        dir->y = -1.0;
-      }
-      else {
-        if (ldir == LOCATOR_Z) {
-          calc_rots = 1.0;
-        }
-        else {
-          if (ldir != LOCATOR_NEGZ) goto LAB_8008ade4;
-          calc_rots = -1.0;
-        }
-        dir->y = 0.0;
-        dir->z = calc_rots;
-      }
-      c = true;
-      dir->x = 0.0;
-      goto LAB_8008ade4;
+    calc_rots = 0;
+    switch (ldir) {
+    case LOCATOR_NO_DIRECTION:
+    case LOCATOR_UP:
+        dir->x = 0.0f;
+        dir->y = 1.0f; //var_f0
+        dir->z = 0.0f;
+        break;
+    case LOCATOR_DOWN:
+        dir->x = 0.0f;
+        dir->y = -1.0f; //var_f0
+        dir->z = 0.0f;
+        break;
+    case LOCATOR_X:
+        dir->x = -1.0f; //var_f0_2
+        dir->y = 0.0f;
+        dir->z = 0.0f;
+        calc_rots = 1;
+        break;
+    case LOCATOR_NEGX:
+        dir->x = 1.0f; //var_f0_2
+        dir->y = 0.0f;
+        dir->z = 0.0f;
+        calc_rots = 1;
+        break;
+    case LOCATOR_Y:
+        dir->x = 0.0f;
+        dir->y = -1.0f;
+        dir->z = 0.0f;
+        calc_rots = 1;
+        break;
+    case LOCATOR_NEGY:
+        dir->x = 0.0f;
+        dir->y = 1.0f;
+        dir->z = 0.0f;
+        calc_rots = 1;
+        break;
+    case LOCATOR_Z:
+        dir->x = 0.0f;
+        dir->y = 0.0f;
+        dir->z = 1.0f; //var_f0_3
+        calc_rots = 1;
+        break;
+    case LOCATOR_NEGZ:
+        dir->x = 0.0f;
+        dir->y = 0.0f;
+        dir->z = -1.0f;
+        calc_rots = 1;
+        break;
     }
-    if (ldir == LOCATOR_DOWN) {
-      calc_rots = -1.0;
+    if (calc_rots != 0) {
+        NuVecMtxRotate(dir, dir, mtx);
     }
-    else {
-      if (LOCATOR_DOWN < ldir) {
-        calc_rots = -1.0;
-        goto LAB_8008ad5c;
-      }
-      calc_rots = 1.0;
-    }
-    dir->x = 0.0;
-    dir->y = calc_rots;
-    dir->z = 0.0;
-  }
-LAB_8008ade4:
-  if (c) {
-    NuVecMtxRotate(dir,dir,mtx);
-  }
-  return;
 }
 
 //PS2

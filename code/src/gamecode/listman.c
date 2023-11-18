@@ -1,4 +1,12 @@
-//PS2
+
+union Lst
+{
+    char* s8; // Offset: 0x0
+    struct nulnkhdr_s* lhdr; // Offset: 0x0
+}; 
+
+
+//GCN MATCH
 struct nulsthdr_s * NuLstCreate(s32 elcnt,s32 elsize)
 {
     union Lst prev;
@@ -7,29 +15,29 @@ struct nulsthdr_s * NuLstCreate(s32 elcnt,s32 elsize)
     struct nulnkhdr_s* start;
     s32 n;
     
-    list = (struct nulsthdr_s *)NuMemAllocFn(elcnt * (elsize + 0x10) + 0x10, ".\\listman.c", 0x24);
+    list = (struct nulsthdr_s *)NuMemAlloc(elcnt * (elsize + 0x10) + 0x10);
     if (list != NULL) {
-        start = (struct nulnkhdr_s *)list + 1;
-        list->free = start;
         list->head = NULL;
+        // start = (struct nulnkhdr_s *)list + 1;
+        list->free = list + 1;
+        curr.lhdr = (struct nulnkhdr_s *)list + 1;
         list->elcnt = (short)elcnt;
         list->elsize = (short)elsize;
-        curr.lhdr = start;
         start = (s8*)curr.lhdr + elsize + 0x10;
-        
-        for(n = 1;  n < elsize; n++)
+        for(n = 1; n < elcnt; n++)
         {
             (curr.lhdr)->succ = start;
             (curr.lhdr)->id = n - 1;
             (curr.lhdr)->owner = list;
             curr.lhdr = start;
-            start = (s8*)curr.lhdr + (elsize + 0x10);
+            start = (s8*)start + (elsize + 0x10);
         
         }
         prev.s8 = (s8*)curr.lhdr + (elsize + 0x10);
-        start->id = n - 1;
-        start->succ = NULL;
-        start->owner = list;
+
+        curr.lhdr->succ = NULL;
+        curr.lhdr->id = n - 1;        
+        curr.lhdr->owner = list;
     }
     return list;
 }

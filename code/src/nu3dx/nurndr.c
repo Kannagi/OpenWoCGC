@@ -1414,7 +1414,9 @@ void NuRndrAddWaterRipple(struct NuVec *pos,float size,float endsize,s32 duratio
 }
 
 //NGC MATCH
-void NuRndrAddShadow(struct NuVec* v, s16 shade, s16 xrot, s16 yrot, s16 zrot, f32 scale) {
+void NuRndrAddShadow(struct NuVec* v, f32 scale, s16 shade, s16 xrot,  s16 yrot, s16 zrot) {
+    //char pad [3];
+
     if ((NuCameraClipTestPoints(v, 1, NULL) == 0) && ((s32) NuRndrShadowCnt < 0x80)) {
         v->y += 0.01f;
         NuRndrShadPolDat[NuRndrShadowCnt].pos = *v;

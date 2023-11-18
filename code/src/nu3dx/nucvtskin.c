@@ -40,113 +40,91 @@ void NuPs2CreateSkin(struct nugobj_s* gobj) {
 return;
 }
 
+//76%
+static void CreateSkinGeom(struct NuGeom* geom, struct primdef_s* pd, s32 pdcnt) {
 
-/********************************WIP*************************************************/
-
-void CreateSkinGeom(struct nugeom_s* ge, struct primdef_s* pd, s32 pdcnt) {
-
-    u32 amount_per_range_arr[300];    //primsize
-    s32 uniq_baseid_ranges;
+    s32 amount_prim;
+    struct NuPrim* nextprim;
+    struct NuPrim* startprim;
+    struct NuPrim* currentprim;
+    struct nuvtx_sk3tc1_s* newvertexbuff;
+    struct primdef_s* currpd;
     s32 i;
+    s32 count;
+    u16* indexbuffer;
+    s32 primsize[300];
+    s32 currentbaseid;
+    s32 iVar6;
     s32 j;
-    s32 k;
-    s32 vtx_k;
-    u16 j1;
-    s32 cur_baseid;
-    u32* amount_per_range;
-    struct nuprim_s* new_prim_list;    //nextprim
-    struct nuprim_s* cur_prim;
-    struct nuvtx_sk3tc1_s* vertex_buffer;
-    struct primdef_s* cur_pd;
-    float const* cur_vert_weights;
-    s32 weight_idx;
-    s32 nonzero_weight_count;
-    struct nuprim_s* old_prims;
 
-
-
-    if (ge->vtxtype != NUVT_TC1) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c",0x69)("CreateSkinGeom : Unknown vertex type!");
+    if (geom->vtxtype != NUVT_TC1) {
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c", 0x69)("CreateSkinGeom : Unknown vertex type!");
     }
 
-  memset(amount_per_range_arr, 0, sizeof(amount_per_range_arr));
-  uniq_baseid_ranges = 1;
-  for (i = 0, cur_baseid = pd[0].baseid; i < pdcnt; ++i) {
-    if (pd[i].baseid != cur_baseid) {
-      cur_baseid = pd[i].baseid;
-      ++uniq_baseid_ranges;
-    }
-    amount_per_range_arr[uniq_baseid_ranges] += 3;
-  }
+    currentbaseid = pd[0].baseid;
 
-  // Since the first element is never referenced, it's easier to read if working from index 1
-  amount_per_range = amount_per_range_arr + 1;
-  new_prim_list = NuPrimCreate(amount_per_range[0], NUPT_NDXTRI);
-  cur_prim = new_prim_list; // r28
-  for (i = 1; i < uniq_baseid_ranges; i++) {
-    cur_prim->next = NuPrimCreate(amount_per_range[i], NUPT_NDXTRI);
-    cur_prim = cur_prim->next;
-  }
+    memset(primsize, 0, sizeof(primsize));
 
-  vertex_buffer = (struct nuvtx_sk3tc1_s*)GS_CreateBuffer(ge->vtxcnt * sizeof(struct nuvtx_sk3tc1_s), 1);
-
-  cur_pd = pd; // bound to r4
-  cur_prim = new_prim_list; // bound to r27
-  for (i = 0; i < uniq_baseid_ranges; i++) {
-    for (j = 0; j < 15; j++) {
-      cur_prim->skinmtxlookup[j] = cur_pd->mtxid[j];
-    }
-
-    // j ~= r10, r18
-    for (j1 = 0; j1 < cur_prim->vertexCount; j1 += 3) {
-      ((u16*)cur_prim->idxbuff)[j1] = cur_pd->vid[0];
-      ((u16*)cur_prim->idxbuff)[j1 + 1] = cur_pd->vid[1];
-      ((u16*)cur_prim->idxbuff)[j1 + 2] = cur_pd->vid[2];
-
-      // k ~= r10, r24
-      for (k = 0; k < 3; k++) {
-        s32 vtx_k = cur_pd->vid[k];
-        vertex_buffer[vtx_k].pnt.x = cur_pd->vrts[k].pnt.x;
-        vertex_buffer[vtx_k].pnt.y = cur_pd->vrts[k].pnt.y;
-        vertex_buffer[vtx_k].pnt.z = cur_pd->vrts[k].pnt.z;
-        vertex_buffer[vtx_k].nrm.x = cur_pd->vrts[k].nrm.x;
-        vertex_buffer[vtx_k].nrm.y = cur_pd->vrts[k].nrm.y;
-        vertex_buffer[vtx_k].nrm.z = cur_pd->vrts[k].nrm.z;
-        vertex_buffer[vtx_k].tc[0] = cur_pd->vrts[k].tc[0];
-        vertex_buffer[vtx_k].tc[1] = cur_pd->vrts[k].tc[1];
-        vertex_buffer[vtx_k].diffuse = cur_pd->vrts[k].diffuse;
-        memset(vertex_buffer[vtx_k].weights, 0, sizeof(float[2]));
-        memset(vertex_buffer[vtx_k].indexes, 0, sizeof(float[3]));
-
-        // TODO: Likely need to flip weights around to be [3][15]
-        cur_vert_weights = (float const*)cur_pd->weights + j * 15;
-        weight_idx = 0;
-        nonzero_weight_count = 0;
-        while (weight_idx < 15 && nonzero_weight_count < 3) {
-          if (cur_vert_weights[weight_idx] != 0.0f) {
-            vertex_buffer[vtx_k].indexes[nonzero_weight_count] = (float)weight_idx;
-            if (nonzero_weight_count > 0) {
-              vertex_buffer[vtx_k].weights[nonzero_weight_count - 1] = cur_vert_weights[weight_idx];
-            }
-            ++nonzero_weight_count;
-          }
-          ++weight_idx;
+    count = 1;
+    for (i = 0; i < pdcnt; i++) {
+        if (pd[i].baseid != currentbaseid) {
+            currentbaseid = pd[i].baseid;
+            count++;
         }
-      }
+        primsize[count] += 3;
     }
-  }
-
-  GS_DeleteBuffer((u8*)ge->hVB);
-  old_prims = ge->prim;
-  while (old_prims != NULL) {
-    struct NuPrim* old_prim_next = old_prims->next;
-    NuPrimDestroy(old_prims);
-    old_prims = old_prim_next;
-  }
-
-  ge->hVB = vertex_buffer;
-  ge->vtxtype = NUVT_SK3TC1;
-  ge->prim = new_prim_list;
+    startprim = NuPrimCreate(primsize[1], NUPT_NDXTRI);
+    nextprim = startprim;
+    for (i = 1; i < count; i++) {
+        nextprim->next = currentprim=NuPrimCreate(primsize[i + 1], NUPT_NDXTRI);
+        nextprim = nextprim->next;
+    }
+    newvertexbuff = (struct nuvtx_sk3tc1_s*)GS_CreateBuffer(geom->vtxcnt * sizeof(struct nuvtx_sk3tc1_s), 1);
+    for (currentbaseid = 0; currentbaseid < count; currentbaseid++) {
+        currpd = pd;
+        for (i = 0; i < 15; i++) {
+            currentprim->skinmtxlookup[i] = currpd->mtxid[i];
+        }
+        indexbuffer = (u16*)currentprim->idxbuff;
+        for (amount_prim = 0; amount_prim < currentprim->cnt; amount_prim += 3) {
+            indexbuffer[amount_prim] = currpd->vid[0];
+            indexbuffer[amount_prim + 1] = currpd->vid[1];
+            indexbuffer[amount_prim + 2] = currpd->vid[2];
+            for (i = 0; i < 3; i++) {
+                // indexbuffer[amount_prim + i] = currpd->vid[i];
+                // vid = currpd->vid[i];
+                newvertexbuff[currpd->vid[i]].pnt = currpd->vrts[i].pnt;
+                newvertexbuff[currpd->vid[i]].nrm = currpd->vrts[i].nrm;
+                newvertexbuff[currpd->vid[i]].diffuse = currpd->vrts[i].diffuse;
+                newvertexbuff[currpd->vid[i]].tc[0] = currpd->vrts[i].tc[0];
+                newvertexbuff[currpd->vid[i]].tc[1] = currpd->vrts[i].tc[1];
+                for (j = 0; j < 3; j++) {
+                    newvertexbuff[currpd->vid[i]].weights[j] = 0.0f;
+                    newvertexbuff[currpd->vid[i]].indexes[j] = 0.0f;
+                }
+                for (iVar6 = 0, j = 0; j <= 14 && iVar6 < 3; j++) {
+                    if (currpd->weights[i][j] != 0.0f) {
+                        newvertexbuff[currpd->vid[i]].indexes[iVar6] = (float)j;
+                        if (iVar6 < 2) {
+                            newvertexbuff[currpd->vid[i]].weights[iVar6] = currpd->weights[i][j];
+                        }
+                        iVar6++;
+                    }
+                }
+            }
+        }
+        currentprim = currentprim->next;
+    }
+    GS_DeleteBuffer((u8*)geom->hVB);
+    for (currentprim = geom->prim; currentprim != NULL;) {
+        nextprim = currentprim->next;
+        NuPrimDestroy(currentprim);
+        currentprim = nextprim;
+    }
+    geom->hVB = (s32)newvertexbuff;
+    geom->prim = startprim;
+    geom->vtxtype = NUVT_SK3TC1;
+    return;
 }
 
 
@@ -278,7 +256,7 @@ static s32 FillFreeMatrixSlots(struct primdef_s* pd, s32 cnt, s32 start) {
 }
 
 
-//67%
+//69,92%
 s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
     s32 scnt; //
     s32 tot; // 
@@ -311,8 +289,9 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
     s32 i; // 
     s32 j;
 
-    //temp
     s32 l;
+    s32 u;
+    s32 z;
     s32 var_r8_4;
     s32 iVar6;
     s32 iVar9;
@@ -323,8 +302,7 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
     s32 iVar23;
     s32 bID;
     s32 k;
-    //    
-
+    
     bID = 0;
     // 'Tis but a bubble sort
     for (i = 0; i < count; i++) {
@@ -358,8 +336,8 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
                 if ((pd[j].sorted == 0) && (pd[k].nummtx >= pd[j].nummtx)) {
                     iVar6 = 0;
                     for (i = 0; i < pd[j].nummtx; i++) {
-                        matrixslot = (mtxused[pd[j].mtxid[i]] - 1) >> 0x1f;
-                        iVar6 += ((matrixslot ^ (s32)mtxused[pd[j].mtxid[i]] - 1) - matrixslot);
+                        matrixslot = ((mtxused[pd[j].mtxid[i]] - 1) >> 0x1f);
+                        iVar6 += ((matrixslot ^ (mtxused[pd[j].mtxid[i]] - 1)) - matrixslot);
                     }
                     
                     if (iVar6 == 0) {
@@ -402,14 +380,11 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
     i = -1;
     for (iVar17 = 0; iVar17 < bID; iVar17++) {
         for (iVar21 = 0; iVar21 < 0xF; iVar21++) {
-            iVar9 = batchmatrices[iVar17][iVar21];
-            if (iVar9 != -1) {
-                matrixusecount[iVar9]++;
-                iVar9 = batchmatrices[iVar17][iVar21];
-                if (iVar9 < i) {
-                    iVar9 = i;
+            if (batchmatrices[iVar17][iVar21] != -1) {
+                matrixusecount[batchmatrices[iVar17][iVar21]]++;
+                if (batchmatrices[iVar17][iVar21] < i) {
+                    i = batchmatrices[iVar17][iVar21];
                 }
-                i = iVar9;
             }
         }
     }
@@ -439,40 +414,27 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
                 }
             }
         }
-        
-        iVar21 = iVar9;
-        if (iVar23 > 0) {
-            for (iVar9 = 0; iVar9 < 0xf; iVar9++) {
+        u = 0;
+        while (1){
                 iVar16 = 0;
-                iVar9 = iVar21 + 1;
-                if (0 < iVar23) {
-                    iVar22 = iVar23;
-                    do {
-                        batchcount = &matchingslot->batch;
-                        if ((*batchmatrices_sorted)[batchcount * 0xf + iVar21] == -1) {
-                            iVar16 = iVar16 + 1;
+                for (iVar22 = 0; iVar22 < iVar23; iVar22++) {
+                        if (batchmatrices_sorted[matchingslot[iVar22].batch][iVar9] == -1) {
+                            iVar16++;
                         }
-                        iVar22 = iVar22 + -1;
-                    } while (iVar22 != 0);
                 }
-                if (iVar23 <= iVar16) goto LAB_800ae5b0;
-                iVar21 = iVar9;
-            }
-            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c", 0x232)("SortPrimDefs: Unable to find a matching free slot in all batches!!");
-        }
-        else {
-            LAB_800ae5b0:
-            if (0 < iVar23) {
-                do {
-                    batchcount = &matchingslot->batch;
-                    iVar23 = iVar23 + -1;
-                    batchmatrices_sorted[-1][batchcount * 0xf + iVar9 + 199] = iVar17;
+                u++;
+                if (iVar16 < iVar23) {
+                    if (u > 0xE){
+                        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c", 0x232)("SortPrimDefs: Unable to find a matching free slot in all batches!!");
+                        break;
+                    }
+                }
+            for (z = 0; z < iVar23; z++) {
+                    batchmatrices_sorted[matchingslot[z].batch][u - 1] = iVar17;
                     matrixusecount[iVar17] = 0;
-                } while (iVar23 != 0);
             }
         }
     }
-    
     bID = 0;
     iVar17 = 0;
     for (iVar23 = 0; iVar23 < count; iVar23++) {
@@ -515,7 +477,6 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
     }
     return i;
 }
-
 
 //MATCH GCN
 static s32 AddMtxToPrimDef(struct primdef_s *primdef,s32 mtxid)

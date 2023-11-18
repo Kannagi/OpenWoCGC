@@ -921,7 +921,7 @@ void DrawStencilShadowQuad(void)
   return;
 }
 
-
+//MATCH NGC
 s32 NuGobjAverageTextureSpaceVerts(struct NuGobj *gobj1,struct numtx_s *m1,struct NuGobj *gobj2,struct numtx_s *m2)
 {
   struct NuGeom *geom1;

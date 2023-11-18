@@ -196,3 +196,26 @@ void CloseCutMovie(s32 all)
     }
     return;
 }
+
+
+//part of cutscene_locatorfns variable
+static void locatorfn_fadeout(struct instNUGCUTSCENE_s *icutscene,struct NUGCUTLOCATORSYS_s *locatorsys, struct instNUGCUTLOCATOR_s *ilocator,struct NUGCUTLOCATOR_s *locator,struct numtx_s *wm) {
+    float currf;
+    nuanimtime_s atime;
+    float remaining;
+    
+    if (locator->anim != NULL) {
+        NuAnimData2CalcTime(locator->anim,currf,&atime);
+        if ( (NuGCutLocatorIsVisble(locator,currf,&atime,NULL) != 0) && (ilocator->data == NULL)) {
+            ilocator->data = (void *)0x1;
+            remaining = 255.0f / (icutscene->cutscene->nframes - icutscene->cframe);
+            if (1.0f <= remaining) {
+                fade_rate = (s32)remaining;
+            }
+            else {
+                fade_rate = 1;
+            }
+        }
+    }
+    return;
+}

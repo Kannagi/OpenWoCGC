@@ -28,4 +28,14 @@
   800bd238 000120 800bd238  4 NuWaterRender 	Global
 */
 
+static s32 nwinst;
+static s32 nwater_mtl;
+static struct nugscn_s* wgsc[256];
+static struct nuinstance_s* winst[256];
+static s32 dynamicWaterInitialised;
+static s32 dynamicWaterEnabled; 
+static s32 dynamicWaterForceStepOneTex; 
+static s32 dynamicWaterTextureIds[6];
+struct numtl_s* water_copy_mtl;
+
 #endif // !NUWATER_H

@@ -1038,14 +1038,19 @@ s32 IsTitleScreen(void) {
   return (cutmovie == 0);
 }
 
-void CreateFadeMtl(void)
-
-{
-  numtl_s *mtl;
+//NGC MATCH
+void CreateFadeMtl() {
+  struct numtl_s *mtl;
   
   mtl = NuMtlCreate(1);
   fade_mtl = mtl;
-  mtl->attrib = (numtlattrib_s)((uint)mtl->attrib & 0xcc3effff | 0xd14e8000);
+  fade_mtl->attrib.zmode = 3;
+  fade_mtl->attrib.filter = 1;
+  fade_mtl->attrib.lighting = 2;
+  fade_mtl->attrib.utc = 1;
+  fade_mtl->attrib.vtc = 1;
+  fade_mtl->attrib.colour = 1;
+  fade_mtl->attrib.alpha = 3;
   NuMtlUpdate(mtl);
   return;
 }
@@ -1678,45 +1683,32 @@ void SetLevel(void)
   return;
 }
 
-
-void firstscreenfade(numtl_s *mat,int dir)
-
-{
-  uint uVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  uint uVar5;
-  uint uVar6;
-  uint uVar7;
-  
-  if (dir < 1) {
-    uVar5 = 0xff;
-    iVar3 = -0x10;
-  }
-  else {
-    uVar5 = 0;
-    iVar3 = 0x10;
-  }
-  iVar4 = 0xe;
-  uVar6 = uVar5 << 8;
-  uVar7 = uVar5 << 0x10;
-  do {
-    uVar1 = uVar6 | 0xff000000;
-    uVar6 = uVar6 + iVar3 * 0x100;
-    uVar1 = uVar7 | uVar1 | uVar5;
-    uVar7 = uVar7 + iVar3 * 0x10000;
-    iVar2 = NuRndrBeginScene(1);
-    uVar5 = uVar5 + iVar3;
-    if (iVar2 != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,uVar1,mat);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
+//NGC MATCH
+void firstscreenfade(struct numtl_s *mat,s32 dir) {
+    s32 s;
+    s32 t;
+    u32 colour;
+    s32 col;
+    
+    if (dir > 0) {
+        colour = 0;
+        s = 0x10;
     }
-    iVar4 = iVar4 + -1;
-  } while (iVar4 != 0);
-  return;
+    else {
+        colour = 0xff;
+        s = -0x10;
+    }
+    for (t = 0; t < 0xe; t++) {
+        col = (0xFF << 24) | (colour << 16) | (colour << 8) | colour;
+        colour = colour + s;
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb,0,1.0f);
+            NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,col,mat);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+    }
+    return;
 }
 
 //NGC MATCH
