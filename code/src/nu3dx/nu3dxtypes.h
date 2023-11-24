@@ -4,7 +4,8 @@
 #include "types.h"
 #include<string.h>
 #include"system/gxtype.h"
-
+#include"system/gs.h"
+#include "gamecode/camera.h"
 
 s32 initialised;
 s32 force_decal;
@@ -56,37 +57,6 @@ enum nutextype_e
 	NUTEX_RGB16 = 0
 };
 
-enum gs_texturetype_e
-{
-	GS_TEX_NUMTEXTURETYPES = 26,
-	GS_TEX_RZT16 = 25,
-	GS_TEX_RZT24 = 24,
-	GS_TEX_RZT32 = 23,
-	GS_TEX_RTT16 = 22,
-	GS_TEX_RTT24 = 21,
-	GS_TEX_RTT32 = 20,
-	GS_TEX_RT16 = 19,
-	GS_TEX_RT24 = 18,
-	GS_TEX_RT32 = 17,
-	GS_TEX_RT8H = 16,
-	GS_TEX_RTT8 = 15,
-	GS_TEX_RT8 = 14,
-	GS_TEX_BB = 13,
-	GS_TEX_DXT5 = 12,
-	GS_TEX_DXT4 = 11,
-	GS_TEX_DXT3 = 10,
-	GS_TEX_DXT2 = 9,
-	GS_TEX_DXT1 = 8,
-	GS_TEX_PAL8_S = 7,
-	GS_TEX_PAL4_S = 6,
-	GS_TEX_PAL8 = 5,
-	GS_TEX_PAL4 = 4,
-	GS_TEX_RGBA32 = 3,
-	GS_TEX_RGB24 = 2,
-	GS_TEX_RGBA16 = 1,
-	GS_TEX_RGB16 = 0
-};
-
 //Size: 0x4
 enum nurndritemtype_s
 {
@@ -105,14 +75,6 @@ struct nurndritem_s
 	enum nurndritemtype_s type;
 	s32 flags;
 	s16 lights_index;
-};
-
-// Size: 0xC
-struct nucolour3_s
-{
-	f32 r;
-	f32 g;
-	f32 b;
 };
 
 // Camera.
@@ -220,9 +182,9 @@ struct nusystex_s
 
 
 // Size: 0x4
-union numtlattrib_s
+struct numtlattrib_s
 {
-    struct {
+    //struct {
 	unsigned int alpha : 2; // Offset: 0x0, Bit Offset: 0, Bit Size: 2
 	unsigned int filter : 2; // Offset: 0x0, Bit Offset: 2, Bit Size: 2
 	unsigned int fx : 2; // Offset: 0x0, Bit Offset: 4, Bit Size: 2
@@ -237,8 +199,8 @@ union numtlattrib_s
 	unsigned int aref : 8; // Offset: 0x0, Bit Offset: 21, Bit Size: 8
 	unsigned int afail : 2; // Offset: 0x0, Bit Offset: 29, Bit Size: 2
 	unsigned int uvmode : 1; // Offset: 0x0, Bit Offset: 31, Bit Size: 1
-    } _bitfld;
-    u32 _word;
+    //} _bitfld;
+    //u32 _word;
 };
 
 // Size: 0x4
@@ -421,7 +383,7 @@ struct nuplane_s
 struct numtl_s
 {
 	struct numtl_s* next;
-	union numtlattrib_s attrib;
+	struct numtlattrib_s attrib;
 	struct nucolour3_s ambient;
 	struct nucolour3_s diffuse;
 	union nufx_u fx1;
@@ -727,23 +689,6 @@ struct nuanimkey_s
 	float d;
 };
 
-typedef struct Rail Rail, *PRail;
-
-struct Rail {
-    struct nugspline_s * pINPLAT;
-    struct nugspline_s * pINCAM;
-    struct nugspline_s * pLEFT;
-    struct nugspline_s * pCAM;
-    struct nugspline_s * pRIGHT;
-    struct nugspline_s * pOUTCAM;
-    struct nugspline_s * pOUTPLAT;
-    float in_distance;
-    float out_distance;
-    short edges;
-    char type;
-    char circuit;
-};
-
 // Size: 0x1C
 typedef struct {
     int next;
@@ -791,36 +736,6 @@ struct visidata_s {
     int binfosize;
     int curspline;
     int curknot;
-};
-
-
- // Size: 0x4C
-struct _GS_TEXTURE
-{
-    s32 Flags;
-    enum gs_texturetype_e Format;
-    u32 Width;
-    u32 Height;
-    u32 TexBits;
-    u32 PalBits;
-    u32 NUID;
-    u32 Pad;
-    struct _GXTexObj Tex;
-	//struct _GXTlutObj Tlut;   //Gamecube SDK
-};
-
-// Size: 0x24
-struct _GS_VERTEX
-{
-    float x; // Offset: 0x0
-    float y; // Offset: 0x4
-    float z; // Offset: 0x8
-    float nx; // Offset: 0xC
-    float ny; // Offset: 0x10
-    float nz; // Offset: 0x14
-    u32 diffuse; // Offset: 0x18
-    float u; // Offset: 0x1C
-    float v; // Offset: 0x20
 };
 
 #endif // !NU3DXTYPES_H

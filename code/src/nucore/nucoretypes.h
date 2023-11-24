@@ -2,6 +2,7 @@
 #define NUCORETYPES_H
 
 #include "types.h"
+#include "stddef.h"
 
 enum nufilemode_e
 {

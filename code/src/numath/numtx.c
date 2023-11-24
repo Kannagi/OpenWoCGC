@@ -39,7 +39,7 @@ void NuMtxSetIdentity(struct Mtx* m)
 	m->m44 = mident.m44;
 }
 
-void NuMtxSetTranslation(struct Mtx* m, struct Vec* v)
+void NuMtxSetTranslation(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m11 = 1.0;
 	m->m12 = 0.0;
@@ -59,7 +59,7 @@ void NuMtxSetTranslation(struct Mtx* m, struct Vec* v)
 	m->m44 = 1.0;
 }
 
-void NuMtxSetScale(struct Mtx* m, struct Vec* v)
+void NuMtxSetScale(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m11 = v->x;
 	m->m12 = 0.0;
@@ -145,21 +145,21 @@ void NuMtxSetRotationZ(struct Mtx* m, s32 a)
 	m->m44 = 1.0;
 }
 
-void NuMtxTranslate(struct Mtx* m, struct Vec* v)
+void NuMtxTranslate(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m41 = m->m41 + v->x;
 	m->m42 = m->m42 + v->y;
 	m->m43 = m->m43 + v->z;
 }
 
-void NuMtxPreTranslate(struct Mtx* m, struct Vec* v)
+void NuMtxPreTranslate(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m41 = v->x * m->m11 + v->y * m->m21 + m->m41 + v->z * m->m31;
 	m->m42 = v->x * m->m12 + v->y * m->m22 + m->m42 + v->z * m->m32;
 	m->m43 = v->x * m->m13 + v->y * m->m23 + m->m43 + v->z * m->m33;
 }
 
-void NuMtxScale(struct Mtx* m, struct Vec* v)
+void NuMtxScale(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m11 = m->m11 * v->x;
 	m->m12 = m->m12 * v->y;
@@ -175,14 +175,14 @@ void NuMtxScale(struct Mtx* m, struct Vec* v)
 	m->m43 = m->m43 * v->z;
 }
 
-void NuMtxGetScale(struct Vec* dest, struct Mtx* m)
+void NuMtxGetScale(struct nuvec_s* dest, struct Mtx* m)
 {
 	dest->x = NuFsqrt(m->m11 * m->m11 + m->m12 * m->m12 + m->m13 * m->m13);
 	dest->y = NuFsqrt(m->m21 * m->m21 + m->m22 * m->m22 + m->m23 * m->m23);
 	dest->z = NuFsqrt(m->m31 * m->m31 + m->m32 * m->m32 + m->m33 * m->m33);
 }
 
-void NuMtxPreScale(struct Mtx* m, struct Vec* v)
+void NuMtxPreScale(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m11 = m->m11 * v->x;
 	m->m12 = m->m12 * v->x;
@@ -618,9 +618,9 @@ void NuMtxAlignZ(struct Mtx* dest, struct Mtx* m)
 	}
 }
 
-void NuMtxLookAtZ(struct Mtx* dest, struct Vec* v)
+void NuMtxLookAtZ(struct Mtx* dest, struct nuvec_s* v)
 {
-	struct Vec tmp;
+	struct nuvec_s tmp;
 	tmp.x = v->x - dest->m41;
 	tmp.y = v->y - dest->m42;
 	tmp.z = v->z - dest->m43;
@@ -654,7 +654,7 @@ void NuMtxAddR(struct Mtx* dest, struct Mtx* a, struct Mtx* b)
 	dest->m44 = 1.0;
 }
 
-void NuMtxSkewSymmetric(struct Mtx* m, struct Vec* v)
+void NuMtxSkewSymmetric(struct Mtx* m, struct nuvec_s* v)
 {
 	m->m11 = 0.0;
 	m->m12 = -v->z;
@@ -705,7 +705,7 @@ void NuMtxOrth(struct Mtx* m)
 	m->m21 = t3 * m13 - t4 * m12;
 }
 
-void NuMtxCalcCheapFaceOn(struct Mtx* dest, struct Vec* v)
+void NuMtxCalcCheapFaceOn(struct Mtx* dest, struct nuvec_s* v)
 {
 	struct Mtx* view = NuCameraGetViewMtx();
 	dest->m11 = -view->m11;

@@ -260,7 +260,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     int s;
     int t;
     unsigned char* b1;
-    int imagesize; 
+    int imagesize;
     int mapix;
     int ix;
     int format;
@@ -275,7 +275,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     float alphatest;
 
     int iss3;
-    
+
     u8 *pbVar1;
     u8 *pbVar2;
     char cVar3;
@@ -294,7 +294,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     u32 uVar10;
     u32 uVar11;
     s32 unkcnt2;
-    
+
     //tempcmp =  iss3cmp;
     type = texture->type;
     width = texture->width;
@@ -302,27 +302,27 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     bits = texture->bits;
     pal = texture->pal;
     iss3 = iss3cmp;
-    
+
     if (iss3 != 0) {
         GS_TexCreateNU(type, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
         return NULL;
     }
-    
+
     if (type == 0x82) {
         GS_TexCreateNU(0x82, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
         return NULL;
     }
-    
+
     if (type == 0x81) {
         GS_TexCreateNU(0x81, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
         return NULL;
     }
-    
+
     if (type == 0x80) {
         GS_TexCreateNU(0x80, width, height, bits, texture->mmcnt, rendertargetflag, GetTPID());
         return NULL;
     }
-    
+
     unkcnt = width * height;
     inbits16 = (u16*)bits;
     inbits24 = (s8*)bits;
@@ -335,12 +335,12 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     texture->decal = iss3;
     texture->linear = iss3;
     px_buffer = bits;
-    
+
     switch (type) {
         case NUTEX_RGB16:
         case NUTEX_RGBA16:
             sprintf(DebugText, "RGB16/RGBA16");
-            
+
             for(s = 0; s < height; s++)
             {
                 u8* puVar10 = px_buffer;
@@ -348,7 +348,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                      u8 tmp1;
                     u8 tmp3;
                     data = *inbits16;
-                    
+
                     //bitwise transformation on uVar8, rearranging and multiplying specific bits from different positions to create a new value
                     //uVar8 & 0x1f, the mask gets you the lowest 5 bits of uVar8
                     //with uVar8 & 0x3e0 you get the next 5 bits above that; uVar8 & 0x7c00 you get the next 5 after that
@@ -357,7 +357,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                         // set the highest 8 bits (bits 24 to 31) of uVar8 to 1 while keeping the other bits unchanged
                         uVar8 |= 0xff000000;
                     }
-                    
+
                     *(u32*)puVar10 = uVar8;
                     tmp1 = puVar10[1];
                     tmp3 = puVar10[3];
@@ -371,7 +371,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
             break;
         case NUTEX_RGB24:
             sprintf(DebugText, "RGB24"); // print texture type we're decoding
-    
+
             for(unkcnt = 0; unkcnt < height; unkcnt++)
             {
                 //puVar9 = (char *)inbits24; // puVar9 is output buffer for this row of pixels
@@ -385,13 +385,13 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                     uVar8 += (*inbits24++ << 0x08); // the green component
                     uVar8 += (*inbits24++ << 0x10); // the red component
                     uVar8 += 0xFF000000; // set the upper two bytes to FF which means solid alpha
-                    
+
                     *(u32*)puVar10 = uVar8;
 
                     // swaps blue and red components
                     tmp1 = puVar10[1];
                     tmp3 = puVar10[3];
-                    
+
                     // finishes swap, resulting in a big-endian ARBG color
                     puVar10[3] = tmp1;
                     puVar10[1] = tmp3;
@@ -402,16 +402,16 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
             break;
         case NUTEX_RGBA32:
             sprintf(DebugText,"RGB32");
-            
+
             px_buffer = bits;
-            
+
             for(unkcnt = 0; unkcnt < height; unkcnt++)
             {
                 s8* puVar10 = px_buffer;
                 for(t = 0; t < width; t++) {
                     *(u32*)puVar10 = *inbits32;
                     fVar5 = puVar10[3] / 255.0f;
-                    
+
                     if (fVar5 < 0.9f) {
                         uVar10 = uVar10 + 1;
                     }
@@ -421,7 +421,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                     else {
                         unkcnt2 = unkcnt2 + 1;
                     }
-                    
+
                     puVar10 += 4;
                     inbits32++;
                 }
@@ -435,10 +435,10 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
             } else if (type == NUTEX_PAL8) {
                 sprintf(DebugText, "PAL8");
             }
-            
+
             // piVar9 = bits;
             {
-        
+
                 s8* puVar10 = px_buffer;
                 for(s = 0; s < unkcnt;s++) {
                     // uVar6 = (u32)bits[s];
@@ -452,11 +452,11 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                     } else if (type == NUTEX_PAL8) {
                         uVar6 = bits[s];
                     }
-                    
+
                     *(u32*)puVar10 = pal[uVar6];
-                    
+
                     fVar5 = puVar10[0] / 255.0f;
-                    
+
                     if (fVar5 < 0.9f) {
                         uVar10 = uVar10 + 1;
                     }
@@ -466,16 +466,16 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
                     else {
                         unkcnt2 = unkcnt2 + 1;
                     }
-                    
+
                     puVar10 += 4;
                 }
             }
             break;
         default:
-            NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c", 0x187)("NudxTx_Create:\tUnknown texture type!");
+            NuErrorProlog("C:/source/crashwoc/code/system/crashlib.c", 0x187,"NudxTx_Create:\tUnknown texture type!");
             break;
     }
-    
+
     if (((uVar11 == 0) || (uVar10 ==  0)) || (unkcnt2 != 0)) {
         texture->decal = 0;
     }
@@ -483,7 +483,7 @@ struct D3DTexture* NudxTx_Create(struct nutex_s* texture, s32 rendertargetflag) 
     {
         texture->decal = 1;
     }
-    
+
     GS_TexCreateNU(type, texture->width, texture->height, &outbits, texture->mmcnt, rendertargetflag, GetTPID());
     free_x(&outbits);
     DebugText[0] = '\0';

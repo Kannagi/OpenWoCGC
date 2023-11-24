@@ -2,7 +2,6 @@
 
 static unsigned int GS_TexInitFlag;
 unsigned int GS_TexAllocs;
-static struct _GS_TEXTURE* GS_TexList;
 static unsigned int GS_NumTextures;
 s32 TexStages[4];
 s32 iss3cmp;
@@ -14,7 +13,7 @@ enum _GXTevStageID maxstage_189 = GX_TEVSTAGE15 | GX_MAX_TEVSTAGE | 0; //GX_TEVS
 //94%
 void GS_TexInit(void) {
     s32 i;
-    
+
     if (GS_TexInitFlag == 0) {
         for (i = 0; i < 4; i++) {
             TexStages[4] = 0;
@@ -34,8 +33,8 @@ void GS_TexInit(void) {
 void GS_TexReInit(void) {
     s32 i;
     struct _GS_TEXTURE *GSTex;
-    
-    
+
+
     if (GS_TexInitFlag != 0) {
         //j = 4;
         //i = 0;
@@ -48,7 +47,7 @@ void GS_TexReInit(void) {
             //j = j + -1;
         } //while (j != 0);
         //i = 0x400;
-        
+
         for (i = 0; i < 0x400; i++) {
             if (GSTex->Flags == -1) {
                 free((void *)GSTex->TexBits);
@@ -65,14 +64,14 @@ void GS_TexReInit(void) {
 
 /*
     int nBlkWidth; //
-    int nBlkHeight; // 
+    int nBlkHeight; //
     int nOutByte; //
-    unsigned int* pTxtDWords; // 
-    int x; // 
-    int y; // 
-    int w; // 
-    int h; // 
-    int nBlockY; // 
+    unsigned int* pTxtDWords; //
+    int x; //
+    int y; //
+    int w; //
+    int h; //
+    int nBlockY; //
     int nBlockY; //
 */
 //MATCH GCN
@@ -87,19 +86,19 @@ void GS_TexSwizzleRGB5A3(s32 nWidth,s32 nHeight,s32 *TxtBuf,char *Buf) {
     s32 iVar10;
     s32 iVar11;
     s32 iVar12;
-  
+
     s32 fixedW = nWidth;
     if (fixedW < 0) {
         fixedW = fixedW + 3;
     }
     w = fixedW >> 2;
-    
+
     fixedH = nHeight;
     if (fixedH < 0) {
         fixedH = fixedH + 3;
     }
     h = fixedH >> 2;
-    
+
     iVar4 = 0;
     for (iVar11 = 0; iVar11 < h; iVar11++) {
         for(iVar10 = 0; iVar10 < w; iVar10++) {
@@ -130,7 +129,7 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
     s32 i;
     struct _GS_TEXTURE* pTex;
     //s32 size;
-    
+
     pTex = GS_TexList;
     if (iss3cmp != 0) {
         newbits = (void *)malloc(iss3cmp);
@@ -369,27 +368,26 @@ void GS_ChangeTextureStates(int id)
   }
   return;
 }
+/*
+//MATCH NGC
+void GS_TexSetWrapModes(int id,enum _GXTexWrapMode mode) {
 
-
-void GS_TexSetWrapModes(int id,enum GXTexWrapMode mode)
-{
   if (id < 4) {
-    (&GS_TexWrapMode_s)[id] = mode;
+    GS_TexWrapMode_s[id] = mode;
     GS_ChangeTextureStates(id);
   }
   return;
 }
 
-void GS_TexSetWrapModet(int id,enum GXTexWrapMode mode)
-
-{
+//MATCH NGC
+void GS_TexSetWrapModet(int id,enum _GXTexWrapMode mode) {
   if (id < 4) {
-    (&GS_TexWrapMode_t)[id] = mode;
+    GS_TexWrapMode_t[id]= mode;
     GS_ChangeTextureStates(id);
   }
   return;
 }
-
+*/
 
 void GS_TexSelect(enum _GXTevStageID stage,int NUID)
 

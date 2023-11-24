@@ -47,25 +47,6 @@ void NuMtlUVAnimation(struct nugobj_s* gobj);
 /**********************************************************/
 
 // Size: 0x10
-struct _D3DCOLORVALUE
-{
-    f32 r;
-    f32 g;
-    f32 b;
-    f32 a;
-};
-
-// Size: 0x44
-struct _D3DMATERIAL8
-{
-    struct _D3DCOLORVALUE Diffuse;
-    struct _D3DCOLORVALUE Ambient;
-    struct _D3DCOLORVALUE Specular;
-    struct _D3DCOLORVALUE Emissive;
-    float Power;
-};
-
-// Size: 0x10
 struct nuotitem_s
 {
     struct nuotitem_s* next;

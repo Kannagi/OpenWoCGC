@@ -3,8 +3,8 @@
 
 struct nusystex_s tinfo[0x400];
 
-static s32 initialised;
-static s32 tpid;
+//static s32 initialised;
+
 static s32 ntex;
 struct nutex_s tex;
 
@@ -13,7 +13,7 @@ void NuTexInit() {
 	if (initialised != 0) {
 		NuTexClose();
 	}
-	GS_TexReInit();
+	//GS_TexReInit();
 	memset(tinfo, 0, sizeof(tinfo));
 	ntex = 0;
 	tpid = 0;
@@ -197,7 +197,7 @@ void NuTexSetTextureStates(struct numtl_s *mtl) {
         else {
             GS_TexSetWrapModes(0,GX_CLAMP);
         }
-      
+
         if (mtl->attrib.vtc == 0) {
             GS_TexSetWrapModet(0,GX_REPEAT);
         }
@@ -224,8 +224,7 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
 
 	if (fileName == NULL)
 	{
-		error_func e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999);
-		e("assert");
+		NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999, "assert");
 	}
 	fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
 	if (handle == NULL)
@@ -290,8 +289,7 @@ s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
 		}
 		else
 		{
-			error_func e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999);
-			e("NuTexLoadBitmap:Bad BitCount <%d> on loading bitmap <%s>", bitsPerPixel, fileName);
+			NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999, "NuTexLoadBitmap:Bad BitCount <%d> on loading bitmap <%s>", bitsPerPixel, fileName);
 		}
 		tex->mmcnt = mmlevel + 1;
 		tex->height = bmi.biHeight;

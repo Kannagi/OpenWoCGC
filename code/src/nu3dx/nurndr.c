@@ -8,7 +8,7 @@
 //MATCH GCN
 void NuRndrInit(void) {
       s32 lp;
-  
+
       lp = 0x20;
       NuRndrShadowCnt = 0;
       do {
@@ -96,36 +96,36 @@ void NuRndrSwapScreen(s32 hRT) {
 s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
     struct nugeomitem_s* item;
     struct NuFaceOnGeom* facegeom;
-    struct NuGeom* geom;
+    struct nugeom_s* geom;
     struct numtx_s* mtx;
     struct numtx_s premtx;
     int outcode;
     int total_outcode;
     int split;
-    struct NuVec min;
-    struct NuVec max;
+    struct nuvec_s min;
+    struct nuvec_s max;
     int current_lights;
-    
+
     total_outcode = -1;
-    
+
     if (gobj->next_gobj != NULL) {
         split = 1;
     } else {
         split = 0;
     }
-        
+
     current_lights = NuLightStoreCurrentLights();
-    
+
     for(; gobj != NULL; gobj = gobj->next_gobj)
     {
-        if (gobj->culltype == 0) 
+        if (gobj->culltype == 0)
         {
             outcode = NuCameraClipTestBoundingSphere
                 (&gobj->bounding_box_center, &gobj->bounding_radius_from_center, wm);
         }
-        else 
+        else
         {
-            if ((((gobj->origin).x != 0.0f) || ((gobj->origin).y != 0.0f)) || ((gobj->origin).z != 0.0f))  
+            if ((((gobj->origin).x != 0.0f) || ((gobj->origin).y != 0.0f)) || ((gobj->origin).z != 0.0f))
             {
                 min = gobj->bounding_box_min;
                 max = gobj->bounding_box_max;
@@ -137,24 +137,24 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                 outcode = NuCameraClipTestExtents(&gobj->bounding_box_min, &gobj->bounding_box_max, wm);
             }
         }
-        
+
         if (total_outcode == -1) {
-            total_outcode = outcode;   
+            total_outcode = outcode;
         } else {
             if (((total_outcode == 1) && (outcode != 1)) || ((total_outcode == 0) && (outcode != 0))){
                 total_outcode = 2;
             }
         }
-        
+
         if (outcode != 0)  {
             rndrmtx_cnt--;
             if (rndrmtx_cnt < 0) {
                 NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x282)("NuRndrGobj : No free matrix slots!");
             }
-            
+
             mtx = rndrmtx;
             mtx[rndrmtx_cnt] = *wm;
-            
+
             if (split != 0) {
                 NuMtxSetIdentity(&premtx);
                 premtx._30 = (gobj->origin).x;
@@ -162,7 +162,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                 premtx._32 = (gobj->origin).z;
                 NuMtxMul(mtx, &premtx, mtx);
             }
-            
+
             for(geom = gobj->geom; geom != NULL; geom = geom->next)
             {
                 if (geomitem_cnt != 0) {
@@ -177,9 +177,9 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                     item->mtx = mtx;
                     item->geom = geom;
                     item->blendvals = blendvals;
-                    
+
                     item->hShader = NuShaderAssignShader(geom);
-                    if ((nurndr_forced_mtl_table != NULL) && ((geom->mtl)->special_id != 0)) 
+                    if ((nurndr_forced_mtl_table != NULL) && ((geom->mtl)->special_id != 0))
                     {
                         if (nurndr_forced_mtl_table[(geom->mtl)->special_id] != NULL)
                         {
@@ -187,7 +187,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                         }
                     }
                     else {
-                        if (nurndr_forced_mtl != NULL) 
+                        if (nurndr_forced_mtl != NULL)
                         {
                             NuMtlAddRndrItem(nurndr_forced_mtl, &item->hdr);
                         } else {
@@ -199,13 +199,13 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                     NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x2ba)("NuRndrGobj : No free geom item slots!");
                 }
             }
-            
+
             facegeom = gobj->faceon_geom;
             if (facegeom != NULL) {
                 if (geomitem_cnt != 0) {
                     geomitem_cnt--;
                     item = &geomitem[geomitem_cnt];
-                    item->geom = (struct NuGeom *)facegeom;
+                    item->geom = (struct nugeom_s *)facegeom;
                     item->hdr.lights_index = NuLightStoreCurrentLights();
                     item->hdr.type = NURNDRITEM_GEOMFACE;
                     item->hdr.flags = 0;
@@ -222,7 +222,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
             }
         }
     }
-    
+
     return total_outcode;
 }
 
@@ -233,17 +233,17 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
     float dz;
     float dist;
     struct nugeomitem_s* item;
-    struct NuGeom *geom;
+    struct nugeom_s *geom;
     struct numtx_s *mtx;
     s32 total_outcode;
     s32 outcode;
-    struct NuVec min;
-    struct NuVec max;
+    struct nuvec_s min;
+    struct nuvec_s max;
     struct numtl_s* mtl;
         //char pad[0x7];
-    
+
     total_outcode = -1;
-    
+
         for(; gobj != NULL; gobj = gobj->next_gobj) {
             min = gobj->bounding_box_min;
             max = gobj->bounding_box_max;
@@ -262,23 +262,23 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
             }
 
         if (total_outcode == -1) {
-            total_outcode = outcode;   
+            total_outcode = outcode;
         } else {
             if (((total_outcode == 1) && (outcode != 1)) || ((total_outcode == 0) && (outcode != 0))){
                 total_outcode = 2;
             }
         }
-            
+
             if (outcode != 0) {
                     rndrmtx_cnt--;
                     if (rndrmtx_cnt < 0) {
                         NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x316)
                         ("NuRndrGobj : No free matrix slots!");
                     }
-                
+
                     mtx = &rndrmtx[rndrmtx_cnt];
                     *mtx = *wm;
-                
+
                         for(geom = gobj->geom; geom != NULL; geom = geom->next) {
                             if (geomitem_cnt != 0) {
                                 geomitem_cnt--;
@@ -292,9 +292,9 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
                                 item->mtx = mtx;
                                 item->geom = geom;
                                 item->blendvals = blendvals;
-                                
+
                                 item->hShader = NuShaderAssignShader(geom);
-                                if ((nurndr_forced_mtl_table != NULL) && (geom->mtl->special_id != 0)) 
+                                if ((nurndr_forced_mtl_table != NULL) && (geom->mtl->special_id != 0))
                                 {
                                     if (nurndr_forced_mtl_table[geom->mtl->special_id] != NULL)
                                     {
@@ -302,7 +302,7 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
                                     }
                                 }
                                 else {
-                                    if (nurndr_forced_mtl != NULL) 
+                                    if (nurndr_forced_mtl != NULL)
                                     {
                                         NuMtlAddRndrItem(nurndr_forced_mtl, &item->hdr);
                                     } else {
@@ -329,26 +329,26 @@ s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float
     struct numtx_s *mtx;
     s32 outcode;
     s32 i;
-    
-    
+
+
     if (gobj->culltype == 0) {
         outcode = NuCameraClipTestBoundingSphere(&gobj->cntr, &gobj->cntr_r, wm);
     }
     else {
         outcode = NuCameraClipTestExtents(&gobj->min, &gobj->max, wm);
     }
-    
+
     if (outcode != 0) {
         rndrmtx_cnt = rndrmtx_cnt - nummtx;
         if (rndrmtx_cnt < 0) {
             NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x3c3)("NuRndrGobjSkin : No free matrix slots!");
         }
         mtx = &rndrmtx[rndrmtx_cnt];
-        
+
         for (i = 0; i < nummtx; i++) {
             mtx[i] = wm[i];
         }
-        
+
         for(geom = gobj->geom; geom != NULL; geom = geom->next)
         {
             if (geomitem_cnt != 0) {
@@ -359,12 +359,12 @@ s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float
                 if (outcode == 1) {
                     item->hdr.flags = 1;
                 }
-                
+
                 item->hdr.lights_index = NuLightStoreCurrentLights();
                 item->blendvals = blendvals;
                 item->mtx = mtx;
                 item->geom = geom;
-                
+
                 item->hShader = NuShaderAssignShader(geom);
                 if ((nurndr_forced_mtl_table != NULL) && ((geom->mtl)->special_id != 0)) {
                     if (nurndr_forced_mtl_table[(geom->mtl)->special_id] != NULL) {
@@ -393,7 +393,7 @@ s32 NuRndrTri2d(struct nuvtx_tltc1_s *vtx,struct numtl_s *mtl)
   s32 stride;
   struct nuvtx_tltc1_s *vb;
   s32 i;
-  struct NuGeom *geom;
+  struct nugeom_s *geom;
   struct NuPrim *prim;
 
   NuMtlGet2dBuffer(mtl,NUPT_NDXTRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
@@ -401,7 +401,7 @@ s32 NuRndrTri2d(struct nuvtx_tltc1_s *vtx,struct numtl_s *mtl)
     NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c0)
     ("NuRndrTri2d : Vertex buffer full!");
   }
-  
+
   if ((s32)((u32)prim->max - (u32)prim->cnt) < 3) {
     NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c2)
     ("NuRndrTri2d : Primitive buffer full!");
@@ -412,10 +412,10 @@ s32 NuRndrTri2d(struct nuvtx_tltc1_s *vtx,struct numtl_s *mtl)
     NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c9)
     ("NuRndrTri2d : Lock VB failed!");
   }
-  
+
   vb = (struct nuvtx_tltc1_s *)((s32)vb + stride * geom->vtxcnt);
   for(i = 0; i < 3; i++) {
-    (vb->pnt).x = (vtx->pnt).x; 
+    (vb->pnt).x = (vtx->pnt).x;
     (vb->pnt).y = (vtx->pnt).y;
     (vb->pnt).z = (vtx->pnt).z;
     vb->rhw = vtx->rhw;
@@ -435,9 +435,9 @@ s32 NuRndrTri3d(struct nuvtx_tc1_s *vtx,struct numtl_s *mtl,struct numtx_s *wm) 
     s32 i;
     s32 ix;
     struct nuvtx_tc1_s *vb;
-    struct NuGeom *geom;
+    struct nugeom_s *geom;
     struct NuPrim *prim;
-    
+
 
     NuMtlGet3dBuffer(mtl,NUPT_TRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
     if (geom->vtxmax - geom->vtxcnt < 3) {
@@ -475,7 +475,7 @@ s32 NuRndrTri3d(struct nuvtx_tc1_s *vtx,struct numtl_s *mtl,struct numtx_s *wm) 
 
 //MATCH NGC
 float NuRndrItemDist(struct nurndritem_s *item) {
-  struct NuVec pnt;
+  struct nuvec_s pnt;
   float dist;
   struct nugeomitem_s* geomitem;
 
@@ -490,7 +490,7 @@ float NuRndrItemDist(struct nurndritem_s *item) {
 
 //MATCH NGC
 s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,int param_4) {
-    
+
     int stride;
     int i;
     int iVar6;
@@ -499,9 +499,9 @@ s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,i
     struct nuvtx_tc1_s *pfVar7;
 
     struct nusysmtl_s* sm; //where??
-    struct NuGeom *geom;
+    struct nugeom_s *geom;
     struct NuPrim *prim;
-    
+
     iVar6 = (param_4 - 2);
     iVar7 = iVar6 * 3;
     NuMtlGet3dBuffer(mtl, NUPT_TRI, &geom, &prim, &superbuffer_ptr, &superbuffer_end);
@@ -513,9 +513,9 @@ s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,i
     if (hvb == 0) {
         NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x64c)("NuRndrTri3d : Lock VB failed!");
     }
-    
+
     hvb += stride * geom->vtxcnt;
-    
+
     for (i = 0; i < iVar6; i++) {
         memcpy(hvb, param_1[0], 0x24);
         hvb += stride;
@@ -525,7 +525,7 @@ s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,i
         hvb += stride;
         param_1--;
     }
-    
+
     geom->vtxcnt += iVar7;
     return 1;
 }
@@ -535,11 +535,11 @@ void NuRndrItem(struct nurndritem_s *item) {
 //struct nugeomitem_s * geomitem;
 
     //geomitem->hdr = *item;
-        switch (item->type) { 
+        switch (item->type) {
                     case NURNDRITEM_GEOM2D:
                         DBTimerStart(0x1e);
                         NuRndr2dItem((struct nugeomitem_s *)item);
-                        DBTimerEnd(0x1e);   
+                        DBTimerEnd(0x1e);
                     break;
                     case NURNDRITEM_GEOM3D:
                         DBTimerStart(0x1f);
@@ -584,16 +584,16 @@ static void NuRndr2dItem(struct nugeomitem_s *item) {
 
 //NGC MATCH
 void NuRndrFaceItem(struct nugeomitem_s* item) {
-    
+
     struct nufaceongeom_s* fop;
     struct nuvtx_tc1_s vertices[4];
-    struct NuVec centrepos;
-    struct NuVec vtxpos;
+    struct nuvec_s centrepos;
+    struct nuvec_s vtxpos;
     long colour;
     struct nufaceon_s* fo;
     struct numtx_s centre;
     struct numtx_s rotation;
-    struct NuVec local;
+    struct nuvec_s local;
     struct numtx_s identity;
     int nfo;
     int ct;
@@ -602,28 +602,28 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
     float h;
 
     int pad[13];
-    
+
     DBTimerStart(0x1c);
     SetupShaders(item);
     NuMtxSetIdentity(&identity);
     NuMtxSetIdentity(&centre);
-    
+
     centre._30 = item->mtx->_30;
     centre._31 = item->mtx->_31;
     centre._32 = item->mtx->_32;
-    
+
     GS_LoadWorldMatrixIdentity();
-    
+
     rotation = *item->mtx;
     rotation._30 = 0.0f;
     rotation._31 = 0.0f;
     rotation._32 = 0.0f;
-    
+
     for (fop = (struct nufaceongeom_s*)item->geom; fop != NULL; fop = fop->next) {
-        
+
         fo = fop->faceons;
         nfo = fop->nfaceons;
-        
+
         for (ct = 0; ct < nfo; ct++, fo++)
         {
             colour = fo->colour;
@@ -641,7 +641,7 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
             vertices[0].tc[1] = 0.0f;
             vertices[0].nrm.x = 1.0f;
             vertices[0].nrm.y = 0.0f;
-            vertices[0].nrm.z = 0.0f;    
+            vertices[0].nrm.z = 0.0f;
             vtxpos.x = w;
             vtxpos.y = h;
             vtxpos.z = 0.0f;
@@ -722,7 +722,7 @@ static void NuRndrGeomItem(struct nugeomitem_s *item) {
 //NGC MATCH
 void NuRndrSkinItem2(struct nugeomitem_s *item) {
     struct NuPrim *prim;
-    
+
     if ((item->blendvals != NULL) && (item->geom->blendgeom != NULL)) {
         NuRndrBlendedSkinItem(item);
         return;
@@ -749,14 +749,14 @@ void NuRndrSkinItem2(struct nugeomitem_s *item) {
 static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
   float blendval;
   int j;
-  struct NuVec** LCBlendOffsets;
-  struct NuGeom *geom;
+  struct nuvec_s** LCBlendOffsets;
+  struct nugeom_s *geom;
   struct nuvtx_sk3tc1_s *srcverts;
-  struct NuVec *destvb;
+  struct nuvec_s *destvb;
   int i;
   struct NUBLENDGEOM_s *blendgeom;
   struct NuPrim *prim;
-  
+
   blendgeom = item->geom->blendgeom;
   DBTimerStart(4);
   DBTimerStart(0xd);
@@ -764,7 +764,7 @@ static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
   PPCMtmmcr1(0x78400000);
   geom = item->geom;
   srcverts = (struct nuvtx_sk3tc1_s *)geom->hVB;
-  destvb = (struct NuVec *)geom->blendgeom->hVB;
+  destvb = (struct nuvec_s *)geom->blendgeom->hVB;
     for (i = 0; i < item->geom->vtxcnt; i++) {
         destvb->x = srcverts->pnt.x;
         destvb->y = srcverts->pnt.y;
@@ -805,8 +805,8 @@ static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
 }
 
 //MATCH GCN
-void NuRndrAnglesZX(struct NuVec *src,struct NuVec *rot) {
-  struct NuVec v[2];
+void NuRndrAnglesZX(struct nuvec_s *src,struct nuvec_s *rot) {
+  struct nuvec_s v[2];
 
   rot->x = (float)NuAtan2D(src->z,src->y);
   NuVecRotateX(&v[0],src,(s32)-rot->x);
@@ -901,7 +901,7 @@ void NuRndrFootPrints(struct numtl_s *mtl,float *u,float *v) {
     s32 lp, cnt2;
     struct nuvtx_tc1_s *vp [4];
     static struct nuvtx_tc1_s vtx_247[256][4]; //nuvtx_tc1_s vtx[2048];
-    
+
     for (lp = 0, cnt = 0; lp < 0x40; lp++) {
         if (NuRndrFootData[lp].timer > 0) {
             if (NuRndrFootData[lp].timer < 16) {
@@ -911,25 +911,25 @@ void NuRndrFootPrints(struct numtl_s *mtl,float *u,float *v) {
             vtx_247[lp][0].pnt = NuRndrFootData[lp].pnts[0];
             vtx_247[lp][0].tc[0] = u[NuRndrFootData[lp].gfx];
             vtx_247[lp][0].tc[1] = v[NuRndrFootData[lp].gfx];
-            
+
             vtx_247[lp][1].pnt = NuRndrFootData[lp].pnts[1];
             vtx_247[lp][1].tc[0] = u[NuRndrFootData[lp].gfx + 1];
             vtx_247[lp][1].tc[1] = v[NuRndrFootData[lp].gfx + 1];
-            
+
             vtx_247[lp][2].pnt = NuRndrFootData[lp].pnts[2];
             vtx_247[lp][2].tc[0] = u[NuRndrFootData[lp].gfx + 2];
-            vtx_247[lp][2].tc[1] = v[NuRndrFootData[lp].gfx + 2]; 
-            
+            vtx_247[lp][2].tc[1] = v[NuRndrFootData[lp].gfx + 2];
+
             vtx_247[lp][3].pnt = NuRndrFootData[lp].pnts[3];
             vtx_247[lp][3].tc[0] = u[NuRndrFootData[lp].gfx + 3];
             vtx_247[lp][3].tc[1] =  v[NuRndrFootData[lp].gfx + 3];
-            
+
             vtx_247[lp][3].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
             vtx_247[lp][2].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
             vtx_247[lp][1].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
             vtx_247[lp][0].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
         }
-    } 
+    }
     if (cnt != 0) {
         for (lp = 0, cnt2=0; cnt2 < cnt; lp++, cnt2+=4) {
             vp[0] = &vtx_247[lp][0];
@@ -943,7 +943,7 @@ void NuRndrFootPrints(struct numtl_s *mtl,float *u,float *v) {
 
 //MATCH GCN
 float * NuRndrCreateBlendShapeDeformerWeightsArray(s32 nweights) {
-    float *ptr; 
+    float *ptr;
 
   rndr_blend_shape_deformer_wt_cnt -= nweights;
   if (rndr_blend_shape_deformer_wt_cnt >= 0) {
@@ -976,7 +976,7 @@ float ** NuRndrCreateBlendShapeDWAPointers(s32 size) {
 //MATCH GCN
 void NuRndrInitWorld(void) {
     s32 lp;
-    
+
     lp = 0x40;
     NuRndrShadMaskCount = 0;
     do {
@@ -1166,9 +1166,9 @@ void NuRndrWaterRip(struct numtl_s *mtl) {
     struct WaterDat *dat;
     float size;
     struct numtx_s* cmtx;
-    struct NuVec pos;
+    struct nuvec_s pos;
     int lp;
-    
+
     cmtx = NuCameraGetMtx();
     NuRndrWaterRipCnt = 0;
     for (ind = 0; ind < 0x20; ind++) {
@@ -1184,7 +1184,7 @@ void NuRndrWaterRip(struct numtl_s *mtl) {
             vtx_270[lp].nrm.y = 0.0f;
             vtx_270[lp].nrm.z = 0.0f;
         }
-        
+
         vtx2_271[0] = &vtx_270[0];
         vtx2_271[1] = &vtx_270[1];
         vtx2_271[2] = &vtx_270[2];
@@ -1196,17 +1196,17 @@ void NuRndrWaterRip(struct numtl_s *mtl) {
             vtx_270[1].diffuse = NuRndrWaterRipDat[indexlist_272[ind]].curshade + 0x80808080;
             vtx_270[2].diffuse = NuRndrWaterRipDat[indexlist_272[ind]].curshade + 0x80808080;
             vtx_270[3].diffuse = NuRndrWaterRipDat[indexlist_272[ind]].curshade + 0x80808080;
-            
+
             vtx_270[0].pnt.x = pos.x - size;
             vtx_270[0].pnt.y = pos.y - 0.1;
             vtx_270[0].pnt.z = pos.z - size;
             vtx_270[0].tc[0] = 0.75f;
             vtx_270[0].tc[1] = 0.25f;
-            
+
 
             vtx_270[1].pnt.x = pos.x + size;
             vtx_270[1].pnt.y = pos.y - 0.1;
-            vtx_270[1].pnt.z = pos.z - size; 
+            vtx_270[1].pnt.z = pos.z - size;
             vtx_270[1].tc[0] = 1.0f;
             vtx_270[1].tc[1] = 0.25f;
 
@@ -1221,7 +1221,7 @@ void NuRndrWaterRip(struct numtl_s *mtl) {
             vtx_270[3].pnt.z = pos.z + size;
             vtx_270[3].tc[0] = 1.0f;
             vtx_270[3].tc[1] = 0.5f;
-            
+
             NuRndrStrip3d(vtx2_271,mtl,0,4);
         }
     }
@@ -1309,7 +1309,7 @@ void NuRndrShadPolys(struct numtl_s *mtl)
 void NuRndrWaterRippleUpdate(s32 count) {
     float t;
     s32 lp;
-    
+
     for(lp = 0; lp < 0x20; lp++) {
         if (NuRndrWaterRipDat[lp].timer != 0) {
             NuRndrWaterRipDat[lp].timer = NuRndrWaterRipDat[lp].timer - (short)count;
@@ -1336,7 +1336,7 @@ void NuRndrWaterRippleUpdate(s32 count) {
 
 
 //NGC MATCH
-void NuRndrAddWaterRipple(struct NuVec *pos,float size,float endsize,s32 duration,s32 shade) {
+void NuRndrAddWaterRipple(struct nuvec_s *pos,float size,float endsize,s32 duration,s32 shade) {
   s32 lp;
 
   for (lp = 0; lp < 0x20; lp++) {
@@ -1358,7 +1358,7 @@ void NuRndrAddWaterRipple(struct NuVec *pos,float size,float endsize,s32 duratio
 }
 
 //NGC MATCH
-void NuRndrAddShadow(struct NuVec* v, f32 scale, s16 shade, s16 xrot,  s16 yrot, s16 zrot) {
+void NuRndrAddShadow(struct nuvec_s* v, f32 scale, s16 shade, s16 xrot,  s16 yrot, s16 zrot) {
     //char pad [3];
 
     if ((NuCameraClipTestPoints(v, 1, NULL) == 0) && ((s32) NuRndrShadowCnt < 0x80)) {
@@ -1420,12 +1420,12 @@ int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *la
     struct numtx_s *parent_T;
     struct numtx_s* WT;
     char pad[73];
-    
+
     layer = nlayers + -1;
     if (layer >= hgobj->num_layers) {
         NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x8a8)("assert");
     }
-    
+
     for (i = 0; i < hgobj->num_joints; i++) {
         T = &hgobj->T[i];
         WT = &mtx_arrayHGobj[i];
@@ -1436,7 +1436,7 @@ int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *la
             NuMtxMul(WT,T,&mtx_arrayHGobj[hgobj->joints[i].parent_ix]);
         }
     }
-    
+
     if (hgobj->layers[layer].gobjs != NULL && !(flags & 2)) {
         for (i = 0; i < hgobj->num_joints; i++) {
             if (hgobj->layers[layer].gobjs[i] != NULL) {
@@ -1444,7 +1444,7 @@ int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *la
             }
         }
     }
-    
+
     if (hgobj->layers[layer].blend_gobjs != NULL && !(flags & 2))  {
         for (i = 0; i < hgobj->num_joints; i++) {
             if (hgobj->layers[layer].blend_gobjs[i] != NULL) {
@@ -1452,15 +1452,15 @@ int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *la
             }
         }
     }
-    
+
     for (i = 0; i < hgobj->num_joints; i++) {
         NuMtxMul(&mtx_array2HGobj[i],&hgobj->INV_WT[i],&mtx_arrayHGobj[i]);
     }
-    
+
     if (hgobj->layers[layer].skin_gobj != NULL && !(flags & 1)) {
         NuRndrGobjSkin2(hgobj->layers[layer].skin_gobj,hgobj->num_joints,mtx_array2HGobj,NULL);
     }
-    
+
     if (hgobj->layers[layer].blend_skin_gobj != NULL && !(flags & 1)) {
         NuRndrGobjSkin2(hgobj->layers[layer].blend_skin_gobj,hgobj->num_joints,mtx_array2HGobj,NULL);
     }
@@ -1493,7 +1493,7 @@ LAB_800b6930:
           if ((layer >= 0) && (layer <= hgobj->num_layers)) {
             if ((hgobj->layers[layer].gobjs != NULL))  {
               for(i = 0; i < hgobj->num_joints; i++) {
-                  
+
                 if (hgobj->layers[layer].gobjs[i] != 0) {
                   NuMtxMul(&mtx,&mtx_array[i],wm);
                   rv = rv | NuRndrGobj(hgobj->layers[layer].gobjs[i],&mtx,NULL);
@@ -1502,7 +1502,7 @@ LAB_800b6930:
             }
             if ((hgobj->layers[layer].blend_gobjs != NULL)) {
               for(i = 0; i < hgobj->num_joints; i++) {
-                  
+
                 if (hgobj->layers[layer].blend_gobjs[i] != 0) {
                   NuMtxMul(&mtx,&mtx_array[i],wm);
                   rv = rv | NuRndrGobj(hgobj->layers[layer].blend_gobjs[i],&mtx,NULL);
@@ -1546,7 +1546,7 @@ void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float
     struct numtx_s *WT;
     struct numtx_s *T;
     struct numtx_s LOCAL_T;
-    struct NuVec VtxBuffer[256];
+    struct nuvec_s VtxBuffer[256];
     struct nuanimtime_s atime;
     struct nuanimdatachunk_s *chunk;
     struct NUJOINTANIM_s *offset;
@@ -1557,8 +1557,8 @@ void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float
     struct numtx_s *pnVar1;
     struct nuanimcurveset_s *animcurveset;
     struct NUJOINTDATA_s *jointdata;
-    
-  
+
+
     memset(janim_array, 0, sizeof(janim_array));
     VtxBuffer[255].x = 1.0f;
     VtxBuffer[255].y = 1.0f;
@@ -1572,20 +1572,20 @@ void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float
                 if (joint_ix != 0xff) {
                     janim_array[joint_ix] = &janim[i];
                 }
-            } 
+            }
         }
     }
-    
-    
+
+
     for (i = 0; i < hgobj->num_joints; i++) {
-        parent_T = &mtx_array[i]; 
+        parent_T = &mtx_array[i];
         if (njanims != 0) {
             offset = janim_array[i];
         }
         else {
             offset = NULL;
         }
-        
+
         animcurveset = chunk->animcurvesets[i];
         if (animcurveset != NULL) {
             if (((animcurveset->flags & 0x1A) != 0) || ((hgobj->joints[i].parent_ix_1 & 8) != 0)) {
@@ -1601,14 +1601,14 @@ void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float
         else {
             T = &hgobj->T[i];
         }
-        
+
         if (hgobj->joints[i].parent_ix == 0xff) {
             *parent_T = *T;
         }
         else {
             NuMtxMul(parent_T, T, &mtx_array[hgobj->joints[i].parent_ix]);
         }
-    } 
+    }
     return;
 }
 
@@ -1629,12 +1629,12 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
   struct numtx_s *parent_T;
   struct numtx_s* WT;
   struct numtx_s LOCAL_T;
-  struct NuVec scale_arrayHGobjEval2 [256];
-    
+  struct nuvec_s scale_arrayHGobjEval2 [256];
+
   struct nuanimtime_s atime;
   struct NUJOINTANIM_s *janim_arrayHGobjEval2 [256];
   s32 curvesetflags;
-  
+
   memset(janim_arrayHGobjEval2,0,sizeof(janim_arrayHGobjEval2));
   scale_arrayHGobjEval2[255].x = 1.0f;
   scale_arrayHGobjEval2[255].y = 1.0f;
@@ -1647,7 +1647,7 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
                 if (joint_ix != 0xff) {
                     janim_arrayHGobjEval2[joint_ix] = &janim[i];
                 }
-            } 
+            }
         }
     numJoints = hgobj->num_joints;
   }
@@ -1655,8 +1655,8 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
     numJoints = hgobj->num_joints;
   }
     for (i = 0; i < hgobj->num_joints; i++) {
-      parent_T = &mtx_array[i]; 
-        
+      parent_T = &mtx_array[i];
+
       if (njanims != 0) {
         offset = janim_arrayHGobjEval2[i];
       }
@@ -1667,12 +1667,12 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
           curves = &animdata->curves[animdata->ncurves * i];
         curveflags = &animdata->curveflags[animdata->ncurves * i];
         if ((curvesetflags & 0x1a) || (hgobj->joints[i].parent_ix_1 & 8)) {
-            NuAnimCurve2SetApplyToJoint(curves, curveflags, curvesetflags, &atime, 
-                &hgobj->joints[i], &scale_arrayHGobjEval2[i], 
+            NuAnimCurve2SetApplyToJoint(curves, curveflags, curvesetflags, &atime,
+                &hgobj->joints[i], &scale_arrayHGobjEval2[i],
                 &scale_arrayHGobjEval2[hgobj->joints[i].parent_ix], &LOCAL_T, offset);
         } else {
-            NuAnimCurve2SetApplyToJointBasic(curves, curveflags, curvesetflags, &atime, 
-                &hgobj->joints[i], &scale_arrayHGobjEval2[i], 
+            NuAnimCurve2SetApplyToJointBasic(curves, curveflags, curvesetflags, &atime,
+                &hgobj->joints[i], &scale_arrayHGobjEval2[i],
                 &scale_arrayHGobjEval2[hgobj->joints[i].parent_ix], &LOCAL_T, offset);
         }
         WT = &LOCAL_T;
@@ -1683,14 +1683,14 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
         NuMtxMul(parent_T,WT,&mtx_array[hgobj->joints[i].parent_ix]);
       }
     }
-  
+
   return;
 }
 
 
 //PS2
-void NuHGobjEvalAnimBlend (struct NUHGOBJ_s * hgobj, struct nuanimdata_s * animdata1, float time1, 
-struct nuanimdata_s * animdata2, float time2, float blend, s32 njanims, struct NUJOINTANIM_s * janim, 
+void NuHGobjEvalAnimBlend (struct NUHGOBJ_s * hgobj, struct nuanimdata_s * animdata1, float time1,
+struct nuanimdata_s * animdata2, float time2, float blend, s32 njanims, struct NUJOINTANIM_s * janim,
 struct numtx_s * mtx_array)
 {
   struct numtx_s *T;
@@ -1699,7 +1699,7 @@ struct numtx_s * mtx_array)
   u8 i;
   u8 joint_ix;
   struct numtx_s LOCAL_T;
-  struct NuVec scale_array0 [512];
+  struct nuvec_s scale_array0 [512];
   struct nuanimtime_s atime1;
   struct nuanimtime_s atime2;
   struct NUJOINTANIM_s *janim_array [256];
@@ -1707,7 +1707,7 @@ struct numtx_s * mtx_array)
   struct nuanimdatachunk_s *chunk2;
 
   struct nuanimcurveset_s *animcurveset1;
-  
+
   memset(janim_array,0,0x400);
   scale_array0[255].x = 1.0f;
   scale_array0[255].y = 1.0f;
@@ -1727,19 +1727,19 @@ struct numtx_s * mtx_array)
                 if (joint_ix != 0xff) {
                     janim_array[joint_ix] = &janim[i];
                 }
-            } 
+            }
         }
     }
 
     for (i = 0; i < hgobj->num_joints; i++) {
-        parent_T = &mtx_array[i]; 
+        parent_T = &mtx_array[i];
         if (njanims != 0) {
             offset = janim_array[i];
         }
         else {
             offset = NULL;
         }
-        
+
         if (chunk1->animcurvesets[i] != NULL) {
         animcurveset1 = chunk1->animcurvesets[i];
         if (chunk2->animcurvesets[i] == NULL) {
@@ -1751,7 +1751,7 @@ struct numtx_s * mtx_array)
                   (chunk1->animcurvesets[i],&atime1,chunk2->animcurvesets[i],&atime2,
                    blend,&hgobj->joints[i],&scale_array0[i],
                    &scale_array0[hgobj->joints[i].parent_ix],&LOCAL_T,offset);
-        T = &LOCAL_T; 
+        T = &LOCAL_T;
         }
 
       }
@@ -1759,14 +1759,14 @@ struct numtx_s * mtx_array)
 
          T = &hgobj->T[i];
       }
-        
+
         if (hgobj->joints[i].parent_ix == 0xff) {
             *parent_T = *T;
         }
         else {
             NuMtxMulVU0(parent_T, T, &mtx_array[hgobj->joints[i].parent_ix]);
         }
-    }     
+    }
   return;
 }
 
@@ -1778,7 +1778,7 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
     struct NUJOINTANIM_s *janimptr;
     struct numtx_s *m;
     struct numtx_s *m_00;
-    struct NuVec scale_arrayHGobjEval2 [256];
+    struct nuvec_s scale_arrayHGobjEval2 [256];
     struct NUJOINTANIM_s *janim_array [256];
     struct nuangvec_s rf;
     struct numtx_s auStack_130;
@@ -1787,7 +1787,7 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
     struct NUJOINTANIM_s *offset;
 
     memset(janim_array, 0, sizeof(janim_array));
-    
+
     scale_arrayHGobjEval2[255].x = 1.0f;
     scale_arrayHGobjEval2[255].y = 1.0f;
     scale_arrayHGobjEval2[255].z = 1.0f;
@@ -1798,10 +1798,10 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
                 if (joint_ix != 0xff) {
                     janim_array[joint_ix] = &janim[i];
                 }
-            } 
+            }
         }
     }
-    
+
     for (i = 0; i < hgobj->num_joints; i++) {
         m_00 = &mtx_array[i];
         if (njanims != 0) {
@@ -1810,7 +1810,7 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
         else {
             offset = NULL;
         }
-        
+
         if (offset != NULL) {
             m = &auStack_130;
             auStack_130 = hgobj->T[i];
@@ -1824,7 +1824,7 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
         else {
             m = &hgobj->T[i];
         }
-        
+
         if (hgobj->joints[i].parent_ix == 0xff) {
             *m_00 = *m;
         }

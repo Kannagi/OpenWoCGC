@@ -47,7 +47,7 @@ void ReadNuIFFTextureSet(s32 handle,struct nuscene_s *scene) {
       }
       size = NuTexCreate(&nuTex);
       scene->tids[scene->numtids++] = (s16)size;
-      
+
       if (nuTex.pal != NULL) {
         free_x(nuTex.pal);
         nuTex.pal = NULL;
@@ -67,9 +67,9 @@ void ReadNuIFFMaterialSet(s32 fh,struct nuscene_s *sc) {
     int i;
     int cnt;
     int tmp;
-    
+
     //NuDebugMsgProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0xe6)("Reading IFF Material set...");
-    
+
     cnt = NuFileReadInt(fh);
     sc->mtls = (struct numtl_s **)NuMemAlloc(cnt << 2);
         sc->nummtls = cnt;
@@ -84,7 +84,7 @@ void ReadNuIFFMaterialSet(s32 fh,struct nuscene_s *sc) {
             if (tmp > 0) {
                 nextmtl = sc->mtls[tmp - 1];
                 sc->mtls[i]->next = nextmtl;
-                sc->mtls[i]->fxid = nextmtl->fxid;        
+                sc->mtls[i]->fxid = nextmtl->fxid;
             }
             else {
                 sc->mtls[i]->next = NULL;
@@ -142,7 +142,7 @@ static void ReadNuIFFGSplineSet(s32 fh, struct nugscn_s *gsc) {
     char *temp;
     char *temp2;
     s32 i;
-    
+
     size = NuFileReadInt(fh);
     gsc->numsplines = size;
     name_ix = NuFileReadInt(fh);
@@ -151,7 +151,7 @@ static void ReadNuIFFGSplineSet(s32 fh, struct nugscn_s *gsc) {
         gsc->splinedata = temp2;
         temp = temp2;
         NuFileRead(fh,temp,name_ix);
-        gsc->splines = (struct nugspline_s *)NuMemAlloc(gsc->numsplines * sizeof(struct nugspline_s)); 
+        gsc->splines = (struct nugspline_s *)NuMemAlloc(gsc->numsplines * sizeof(struct nugspline_s));
             for(i = 0; i < gsc->numsplines; i++) {
                gsc->splines[i].len = *(s16*)(temp + 2);
                 temp += 4;
@@ -159,7 +159,7 @@ static void ReadNuIFFGSplineSet(s32 fh, struct nugscn_s *gsc) {
                 temp += 4;
                gsc->splines[i].pts = temp;
                gsc->splines[i].ptsize = 0xc;
-                temp += gsc->splines[i].len * 0xc; 
+                temp += gsc->splines[i].len * 0xc;
             }
     }
     return;
@@ -169,7 +169,7 @@ static void ReadNuIFFGSplineSet(s32 fh, struct nugscn_s *gsc) {
 void ReadNuIFFGobjSet(s32 fh, struct nuscene_s *sc) {
     s32 cnt;
     s32 i;
-    
+
     cnt = NuFileReadInt(fh);
     if (sc->gobjs != NULL) {
         NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0x1a8)
@@ -178,7 +178,7 @@ void ReadNuIFFGobjSet(s32 fh, struct nuscene_s *sc) {
     sc->gobjs = NuMemAlloc(cnt << 2);
     memset(sc->gobjs,0,cnt << 2);
     sc->numgobjs = 0;
-    
+
     for (i = 0; i < cnt; i++) {
 
         ReadNuIFFGeomDef(fh,sc);
@@ -193,15 +193,15 @@ struct NuGobj* ReadNuIFFGeom(s32 handle, struct numtl_s** mtls) {
     struct NuGobj* gobject;
     struct NuGobj* first;
     struct NuGobj* last;
-    struct NuGeom* geom;
+    struct nugeom_s* geom;
     struct NuFaceOnGeom* fgeom;
     s32 count;
     s32 i;
     s32 j;
     s32 ngobjs;
-    struct NuVec zero;
+    struct nuvec_s zero;
 
-    memset(&zero, 0, 0xc); // or struct NuVec zero = {};
+    memset(&zero, 0, 0xc); // or struct nuvec_s zero = {};
     last = NULL;
     ngobjs = NuFileReadInt(handle);
     for (i = 0; i < ngobjs; i++) {
@@ -310,7 +310,7 @@ static void ReadNuIFFFaceOnGeom(s32 handle,struct nufaceongeom_s *face) {
 }
 
 //MATCH NGC
-static void ReadNuIFFGeomPrim(s32 fh, struct NuGeom* geom) {
+static void ReadNuIFFGeomPrim(s32 fh, struct nugeom_s* geom) {
     s32 cnt;
     s32 type;
     s32 i;
@@ -349,7 +349,7 @@ void ReadNuIFFGeomTri(fileHandle handle, struct nugeom_s* geom, enum nuprimtype_
 }
 
 //MATCH NGC
-static void ReadNuIFFGeomSkin(s32 handle,struct NuGeom *geom) {
+static void ReadNuIFFGeomSkin(s32 handle,struct nugeom_s *geom) {
   s32 count;
   struct NuSkin *skin;
   s32 bytes;
@@ -385,7 +385,7 @@ static void ReadNuIFFGeomSkin(s32 handle,struct NuGeom *geom) {
 }
 
 //84%
-static void ReadNuIFFBlendShape(s32 fh,struct NuGeom *geom) {
+static void ReadNuIFFBlendShape(s32 fh,struct nugeom_s *geom) {
     s32 i;
     s32 nblends;
     s32 next_ix;
@@ -398,27 +398,27 @@ static void ReadNuIFFBlendShape(s32 fh,struct NuGeom *geom) {
         return;
     }
 
-    // Get size of memory to allocate for nblends of NuVec pointers
-    nbytes = nblends * sizeof(struct NuVec*);
+    // Get size of memory to allocate for nblends of nuvec_s pointers
+    nbytes = nblends * sizeof(struct nuvec_s*);
 
     // allocate NUBLENDGEOM_s
     geom->blendgeom = (struct NUBLENDGEOM_s *)NuMemAlloc(sizeof(struct NUBLENDGEOM_s));
-    
+
     memset(geom->blendgeom, 0, sizeof(struct NUBLENDGEOM_s));
-    
+
     geom->blendgeom->nblends = nblends;
-    
-    geom->blendgeom->blend_offsets = (struct NuVec **)NuMemAlloc(nblends * sizeof(struct NuVec*));
+
+    geom->blendgeom->blend_offsets = (struct nuvec_s **)NuMemAlloc(nblends * sizeof(struct nuvec_s*));
     memset(geom->blendgeom->blend_offsets, 0, nbytes);
-    
+
     // next_ix = (s32)NuMemAlloc(nbytes);
     geom->blendgeom->ix = (s32 *)NuMemAlloc(nbytes);
     NuFileRead(fh, geom->blendgeom->ix, nbytes);
-    
+
     numblends = NuFileReadInt(fh);
-    geom->blendgeom->offsets = (struct NuVec *)NuMemAlloc(numblends);
+    geom->blendgeom->offsets = (struct nuvec_s *)NuMemAlloc(numblends);
     NuFileRead(fh, geom->blendgeom->offsets, numblends);
-    
+
     j = 0;
     for (i = 0; i < nblends; i++) {
         if (NuFileReadChar(fh) != '\0') {
@@ -426,11 +426,11 @@ static void ReadNuIFFBlendShape(s32 fh,struct NuGeom *geom) {
             j += geom->vtxcnt;
         }
     }
-    
+
     if (numblends == 0) {
         geom->blendgeom = NULL;
     }
-    
+
     if (geom->blendgeom) {
         for (i = 0; i < geom->vtxcnt; i++) {
             for (j = 0; j < nblends; j++) {
@@ -467,7 +467,7 @@ s32 ReadNuIFFInstSet(s32 fh,struct nuinstance_s **instances,struct nuinstanim_s 
   s32 num_instances;
   struct nuinstance_s *instance;
   struct nuinstanim_s *linstanims;
-  
+
   num_instances = NuFileReadInt(fh);
   *instances = (struct nuinstance_s *)NuMemAlloc(num_instances * sizeof(struct nuinstance_s)); //,"..\\nu2.ps2\\nu3d\\nuscene.c",0x5a3
   NuFileRead(fh,*instances,num_instances * sizeof(struct nuinstance_s));
@@ -517,8 +517,8 @@ static void NuSceneCalcCulling(struct nugscn_s *scene) {
     s32 objid;
     s32 i;
     float *max_scales_array;
-    struct NuVec scale;
-    
+    struct nuvec_s scale;
+
     num_gobjs = scene->numgobj;
     num_instances = scene->numinstance;
     max_scales_array = (float*)malloc_x(num_gobjs * sizeof(float));
@@ -527,16 +527,16 @@ static void NuSceneCalcCulling(struct nugscn_s *scene) {
     for(i = 0; i < num_instances; i++) {
         if (scene->instances[i].special_flag != '\0' || scene->instances[i].anim != NULL) {
                 scene->gobjs[scene->instances[i].objid]->culltype = 1;
-        } 
+        }
         else {
                 NuMtxGetScale(&scale, &scene->instances[i].mtx);
                 objid = scene->instances[i].objid;
-                
+
                 max_scales_array[objid] = MAX(max_scales_array[objid], scale.x);
                 max_scales_array[objid] = MAX(max_scales_array[objid], scale.y);
                 max_scales_array[objid] = MAX(max_scales_array[objid], scale.z);
-                
-                scene->gobjs[objid]->culltype = 0;               
+
+                scene->gobjs[objid]->culltype = 0;
         }
     }
 
@@ -567,7 +567,7 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
     cnt = NuFileReadInt(fh) * 2;
     gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC6D);
     NuFileRead(fh, gsc->texanim_tids, cnt);
-    
+
     for (i = 0; i < gsc->numtexanims; i++){
         tex = &gsc->texanims[i]; //tex = gsc->texanims + (cnt << 5);
         tex->succ = 0;
@@ -583,12 +583,12 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
         tex->mtl = gsc->mtls[(s32)tex->mtl];
         tex->env = NuTexAnimEnvCreate(0, tex->mtl, tex->tids, NuTexAnimProgFind((s32)tex->scriptname));
     }
-    
+
     for (i = 0;  i < (gsc->numtexanims - 1); i++)
     {
-        gsc->texanims[i].succ = &gsc->texanims[i] + 1; 
+        gsc->texanims[i].succ = &gsc->texanims[i] + 1;
         gsc->texanims[i + 1].prev = &gsc->texanims[i];
-        
+
     }
     NuTexAnimAddList(gsc->texanims);
     return;
@@ -615,11 +615,11 @@ void ReadNuIFFGScene(s32 handle,struct nugscn_s *gscene) {
                             ReadNuIFFMaterialSet(handle,&sc);
                         break;
                         case 0x30545347: //"0TSG"
-                          ReadNuIFFGobjSet(handle,&sc);  
+                          ReadNuIFFGobjSet(handle,&sc);
                         break;
                         case 0x54534E49: //"TSNI"
                             gscene->numinstance = ReadNuIFFInstSet(handle,&gscene->instances,&gscene->instanimblock);
-                        break; 
+                        break;
                         case 0x4C42544E: //"LBTN"
                             gscene->nametable = ReadNuIFFNameTable(handle);
                         break;
@@ -636,7 +636,7 @@ void ReadNuIFFGScene(s32 handle,struct nugscn_s *gscene) {
                              ReadNuIFFUnknown(handle,blk);
                         break;
                     }
-              NuFileEndBlkRead(handle); 
+              NuFileEndBlkRead(handle);
     }
     NuSceneMtlUpdate(&sc);
     gscene->mtls = sc.mtls;
@@ -663,7 +663,7 @@ struct nuscene_s * NuSceneLoad(char *filename) {
   char file2[100];
   s32 i;
   //s32 j;
-  struct NuGeom *geom1;
+  struct nugeom_s *geom1;
   struct NuGobj *gobj1;
 
 
@@ -748,7 +748,7 @@ void NuGSceneDestroy(struct nugscn_s *gsc) {
 //NGC MATCH
 void NuSceneDestroy(struct nuscene_s *sc) {
     s32 i;
-    
+
     if (sc != NULL) {
         if (sc->names != NULL) {
             NuMemFree(sc->names);
@@ -759,7 +759,7 @@ void NuSceneDestroy(struct nuscene_s *sc) {
         if (sc->strings != NULL) {
             NuMemFree(sc->strings);
         }
-    
+
         for (i = 0; i < sc->numtids; i++) {
                 NuTexDestroy((int)sc->tids[i]);
         }
@@ -769,7 +769,7 @@ void NuSceneDestroy(struct nuscene_s *sc) {
         for (i = 0; i < sc->numgobjs; i++) {
                 NuGobjDestroy(sc->gobjs[i]);
         }
-    
+
         if (sc->gscene != NULL) {
             NuGSceneDestroy(sc->gscene);
         }

@@ -37,14 +37,6 @@ typedef struct
     GXTevColorArg d;
 } GXTevColorInputCache;
 
-enum GXTexWrapMode
-{
-    GX_MAX_TEXWRAPMODE = 3,
-    GX_MIRROR = 2,
-    GX_REPEAT = 1,
-    GX_CLAMP = 0
-};
-
 enum _GXTevStageID
 {
     GX_MAX_TEVSTAGE = 16,
@@ -96,6 +88,107 @@ enum _GXTexFmt
     GX_CTF_Z16L=60
 };
 
+
+
+enum _GXChannelID
+{
+    GX_COLOR_NULL = 255,
+    GX_ALPHA_BUMPN = 8,
+    GX_ALPHA_BUMP = 7,
+    GX_COLOR_ZERO = 6,
+    GX_COLOR1A1 = 5,
+    GX_COLOR0A0 = 4,
+    GX_ALPHA1 = 3,
+    GX_ALPHA0 = 2,
+    GX_COLOR1 = 1,
+    GX_COLOR0 = 0
+};
+
+enum _GXLightID
+{
+    GX_LIGHT_NULL,
+    GX_MAX_LIGHT = 256,
+    GX_LIGHT7 = 128,
+    GX_LIGHT6 = 64,
+    GX_LIGHT5 = 32,
+    GX_LIGHT4 = 16,
+    GX_LIGHT3 = 8,
+    GX_LIGHT2 = 4,
+    GX_LIGHT1 = 2,
+    GX_LIGHT0 = 1
+};
+
+// Size: 0xC
+struct _GXTlutObj
+{
+    unsigned int dummy[3]; // Offset: 0x0
+};
+
+// Size: 0x40, DWARF: 0xC20D10
+struct _GXLightObj
+{
+    unsigned int dummy[16]; // Offset: 0x0, DWARF: 0xC20D30
+};
+
+// Size: 0x4, DWARF: 0xC20A7C
+struct _GXColor
+{
+    unsigned char r; // Offset: 0x0, DWARF: 0xC20A99
+    unsigned char g; // Offset: 0x1, DWARF: 0xC20ABD
+    unsigned char b; // Offset: 0x2, DWARF: 0xC20AE1
+    unsigned char a; // Offset: 0x3, DWARF: 0xC20B05
+};
+
+
+enum _GXTexWrapMode
+{
+    GX_MAX_TEXWRAPMODE = 3,
+    GX_MIRROR = 2,
+    GX_REPEAT = 1,
+    GX_CLAMP = 0
+};
+
+// Size: 0x20
+struct _GXTexObj
+{
+    u32 dummy[8]; // Offset: 0x0
+};
+
+enum _GXColorSrc
+{
+    GX_SRC_VTX = 1,
+    GX_SRC_REG = 0
+};
+
+enum _GXDiffuseFn
+{
+    GX_DF_CLAMP = 2,
+    GX_DF_SIGN = 1,
+    GX_DF_NONE = 0
+};
+
+enum _GXAttnFn
+{
+    GX_AF_NONE = 2,
+    GX_AF_SPOT = 1,
+    GX_AF_SPEC = 0
+};
+
+
+
+enum _GXCompare
+{
+    GX_ALWAYS = 7,
+    GX_GEQUAL = 6,
+    GX_NEQUAL = 5,
+    GX_GREATER = 4,
+    GX_LEQUAL = 3,
+    GX_EQUAL = 2,
+    GX_LESS = 1,
+    GX_NEVER = 0
+};
+
+/*
 // Size: 0x20
 struct _GXTexObj{
 	UNKWORD mFlags; // at 0x0
@@ -112,10 +205,10 @@ struct _GXTexObj{
 struct _GXTlutObj{
     UNKTYPE* dummy[3]; // Offset: 0x0
 };
-
+*/
 
 void DCFlushRange(void*, u32);     //DCFlushRange(ram_addr, len)?
-UNKTYPE GXInitTexObj(struct _GXTexObj * obj, UNKTYPE *image, u16 width, u32 height, enum _GXTexFmt texFormat, enum GXTexWrapMode wrapModeS, enum GXTexWrapMode wrapModeT, char mipmap); //correct?
+void GXInitTexObj(struct _GXTexObj * obj, void* image_ptr, u16 width, u16 height, enum _GXTexFmt texFormat, enum _GXTexWrapMode wrapModeS, enum _GXTexWrapMode wrapModeT, char mipmap);
 
 /////////////////////////////////////////////////////////////////////
 

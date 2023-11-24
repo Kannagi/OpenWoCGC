@@ -21,7 +21,7 @@ struct numtl_s *mtl;
 u32 attr;
 s32 iss3cmp;
 s32 texinfo;
-void* pixel_dat;
+void* bits;
 int test_SDL_openGL();
 
 int main()
@@ -54,49 +54,58 @@ int main()
 
 
     printf("NuTrigTable init...\n");
-    NuTrigInit();
+    //NuTrigInit();
     printf("NuTex init...\n");
-    NuTexInit();
+    //NuTexInit();
     printf("NuGobj init...\n");
-    NuGobjInit();
+    //NuGobjInit();
     printf("NuMtl init...\n");
-    NuMtlInit();
+    //NuMtlInit();
     printf("NuRndr init...\n");
-    NuRndrInitEx();
+    //NuRndrInitEx();
     printf("NuLight init...\n");
-    NuLightInit();
+    //NuLightInit();
 
     //from firstscreens function
-    pixel_dat = malloc_x(0x4000c);
-    NuFileLoadBuffer("licnin.s3",pixel_dat,0x2000c);
-    tex.height = 0x200;
-    tex.decal = 0;
-    tex.pal = NULL;
-    tex.width = 0x200;
-    tex.mmcnt = 1;
+    //CopyFilesThreadProc(0);
     tex.type = NUTEX_RGB24;
+    bits = malloc_x(0x4000c);
+    NuFileLoadBuffer("gfx\\licnin.s3",bits,0x2000c);
+
+    tex.decal = 0;
+    tex.bits = bits;
+    tex.pal = NULL;
+    tex.mmcnt = 1;
+    tex.width = 0x200;
+
     iss3cmp = 0x20000;
-    tex.bits = pixel_dat;
-    texinfo = NuTexCreate(&tex);
+    tex.height = 0x200;
+    //texinfo = NuTexCreate(&tex);
     iss3cmp = 0;
-    mtl = NuMtlCreate(1);
-    attr = mtl->attrib._word;
+    //mtl = NuMtlCreate(1);
+
     mtl->tid = texinfo;
-    (mtl->diffuse).b = 1.0;
-    mtl->alpha = 0.999;
-    (mtl->diffuse).r = 1.0;
-    (mtl->diffuse).g = 1.0;
-    mtl->attrib._word = attr & (0xcc0cffff | 0x16e8000);
+    (mtl->diffuse).r = 1.0f;
+    (mtl->diffuse).g = 1.0f;
+    (mtl->diffuse).b = 1.0f;
+    mtl->alpha = 0.999f;
+    //mtl_->attrib = (struct numtlattrib_s *)((uint)attr & 0xcc0cffff | 0x16e8000);
+    mtl->attrib.cull = 0;
+    mtl->attrib.filter = 1; //
+    mtl->attrib.lighting = 0;
+    mtl->attrib.utc = 1;
+    mtl->attrib.vtc = 1;
+    mtl->attrib.colour = 1;
     //printf("attrib: %d\n", attr);
-    firstscreenfade(mtl,1);
+    //firstscreenfade(mtl,1);
     nuvideo_global_vbcnt = 0;
   do {
-    texinfo = NuRndrBeginScene(1);
+    //texinfo = NuRndrBeginScene(1);
     if (texinfo != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,mtl);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
+     // NuRndrClear(0xb,0,1.0f);
+     // NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl);
+     // NuRndrEndScene();
+     // NuRndrSwapScreen(1);
     }
     //Reseter();
     //GC_DiskErrorPoll();
@@ -105,7 +114,7 @@ int main()
 /*
   nuvideo_global_vbcnt = 0;
   firstscreenfade(mtl,-1);
-  NuRndrClear(0xb,0,1.0);
+  NuRndrClear(0xb,0,1.0f);
   NuRndrSwapScreen(1);
   if (mtl->tid != 0) {
     NuTexDestroy(mtl->tid);
@@ -280,47 +289,6 @@ int test_SDL_openGL()
 	return 0;
 }
 
-
-
-void firstscreenfade(struct numtl_s *mat,int dir)
-{
-  int texinfo;
-  int iVar1;
-  int cnt;
-  u32 uVar2;
-  u32 uVar3;
-  u32 uVar4;
-  u32 col;
-
-  if (dir < 1) {
-    uVar2 = 0xff;
-    iVar1 = -0x10;
-  }
-  else {
-    uVar2 = 0;
-    iVar1 = 0x10;
-  }
-  cnt = 0xe;
-  uVar3 = uVar2 << 8;
-  uVar4 = uVar2 << 0x10;
-  do {
-    col = uVar3 | 0xff000000;
-    uVar3 = uVar3 + iVar1 * 0x100;
-    col = uVar4 | col | uVar2;
-    uVar4 = uVar4 + iVar1 * 0x10000;
-    texinfo = NuRndrBeginScene(1);
-    uVar2 = uVar2 + iVar1;
-    if (texinfo != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,col,mat);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
-    }
-    cnt = cnt + -1;
-  } while (cnt != 0);
-  return;
-}
-
 s32 ShaderHasNormals;
 s32 shaderselected;
 s32 xytype;
@@ -381,8 +349,6 @@ LAB_800d0f80:
 
 /* TODO firstscreens
 GS_RenderClear
-
-NuRndrRectUV2di
 
 GS_SetOrthMatrix
 GS_DrawTriListTTL

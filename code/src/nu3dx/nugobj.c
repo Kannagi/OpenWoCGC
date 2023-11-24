@@ -35,7 +35,7 @@ void NuGobjClose(void) {
 }
 
 //MATCH GCN
-struct nugobj_s* NuGobjCreate(void) 
+struct nugobj_s* NuGobjCreate(void)
 {
     struct nugobj_s* gobj = (struct nugobj_s*)NuMemAlloc(sizeof(struct nugobj_s)); //0x64;
     memset(gobj, 0, sizeof(struct nugobj_s));
@@ -78,11 +78,11 @@ void NuGobjDestroy(struct nugobj_s* obj) {
 }
 
 //MATCH GCN
-void NuGobjAddGeom(struct NuGobj* gobj, struct NuGeom* geom)
+void NuGobjAddGeom(struct NuGobj* gobj, struct nugeom_s* geom)
 {
-    struct NuGeom* last;
-    struct NuGeom* next;
-    
+    struct nugeom_s* last;
+    struct nugeom_s* next;
+
     last = gobj->geom;
     next = NULL;
     while (last != NULL) {
@@ -121,14 +121,14 @@ void NuGobjCalcFaceOnDims(struct nugobj_s *gobj)
   int i;
   float r2;
   float fonWidth;
-  struct NuVec v; 
+  struct nuvec_s v;
   struct nufaceongeom_s *fgeom;
-  struct NuVec *pnt;
+  struct nuvec_s *pnt;
 
   struct nufaceon_s* faceon;
   float fonHeight;
      char pad[6];
-    
+
   gobj->bounding_box_min.x = FLT_MAX;
   gobj->bounding_box_min.y = FLT_MAX;
   gobj->bounding_box_min.z = FLT_MAX;
@@ -173,7 +173,7 @@ void NuGobjCalcFaceOnDims(struct nugobj_s *gobj)
         }
 	// z^2 + x^2 + y^2
         fonHeight = pnt->x * pnt->x + pnt->y * pnt->y + pnt->z * pnt->z;
-	// Set the radius squared(?) from the origin point, to 
+	// Set the radius squared(?) from the origin point, to
         if (fonHeight > gobj->bounding_rsq_from_origin) {
           gobj->bounding_rsq_from_origin = fonHeight;
         }
@@ -186,8 +186,8 @@ void NuGobjCalcFaceOnDims(struct nugobj_s *gobj)
   (gobj->bounding_box_center).z = ((gobj->bounding_box_min).z + (gobj->bounding_box_max).z) * 0.5f;
   gobj->bounding_rsq_from_center = 0.0f;
   for (fgeom = gobj->faceon_geom; fgeom != NULL; fgeom = fgeom->next) {
-      for (i = 0; i < fgeom->nfaceons; i++) { 
-          
+      for (i = 0; i < fgeom->nfaceons; i++) {
+
         pnt = &fgeom->faceons[i].point;
         fonWidth = pnt[1].x;
         if (pnt[1].y > pnt[1].x) {
@@ -233,7 +233,7 @@ struct nufaceongeom_s* NuFaceOnGeomCreate(void)
 }
 
 //MATCH GCN
-void NuGeomDestroy(struct NuGeom *geom) {
+void NuGeomDestroy(struct nugeom_s *geom) {
     struct NuPrim* prim;
     struct NuPrim* next;
 
@@ -322,7 +322,7 @@ void NuGeomAddPrim(struct nugeom_s* geom, struct nuprim_s* prim)
     struct nuprim_s *next;
 
     last = NULL;
-    
+
     // When next is NULL, last will be the last non-NULL prim (list last)
     for (next = geom->prims; next != NULL; next = next->next)
     {
@@ -356,7 +356,7 @@ void NuGeomAddSkin(struct nugeom_s* geom, struct nuskin_s* skin)
 
     if (last != NULL)
     {
-        last->next = skin;  
+        last->next = skin;
         return;
 
     }

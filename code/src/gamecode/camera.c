@@ -1,3 +1,5 @@
+#include "gamecode/camera.h"
+
 //MATCH NGC
 void ResetGameCameras(struct cammtx_s *Gamecam,s32 n) {
        while (n > 0) {
@@ -18,7 +20,7 @@ void ResetGameCameras(struct cammtx_s *Gamecam,s32 n) {
 void JudderGameCamera(struct cammtx_s *cam,float time,struct NuVec *pos) {
     float d;
     char pad[3];
-    
+
     if (time > cam->judder) {
         if (pos != NULL) {
             d = NuVecDist(&(player->obj).pos,pos,NULL);
@@ -44,7 +46,7 @@ void BlendGameCamera(struct cammtx_s *cam,float time) {
     return;
 }
 
-
+/*
 void InitRails(void)
 
 {
@@ -58,7 +60,7 @@ void InitRails(void)
   float fVar5;
   short len;
   char *tCmRail;
-  
+
   nRAILS = 0;
   if (world_scene[0] != (nugscn_s *)0x0) {
     rail = Rail;
@@ -182,7 +184,7 @@ float BestRailPosition(nuvec_s *pos,RPos_s *rpos,int iRAIL,int iALONG)
   nuvec_s local_80;
   nuvec_s local_70;
   nuvec_s local_60;
-  
+
   bVar2 = false;
   if ((Level == 6) || (Level == 0x22)) {
     bVar2 = true;
@@ -380,7 +382,7 @@ void ComplexRailPosition(nuvec_s *pos,int iRAIL,int iALONG,RPos_s *rpos,int set)
   byte bVar11;
   double in_f31;
   float fVar12;
-  
+
   if (set == 0) {
     tmp = temp_cRPos;
   }
@@ -469,16 +471,16 @@ void ComplexRailPosition(nuvec_s *pos,int iRAIL,int iALONG,RPos_s *rpos,int set)
   temp_fACROSS = rpos->fACROSS;
   return;
 }
+*/
 
-
-void MoveRailPosition(nuvec_s *dst,RPos_s *rpos,float distance,int direction)
+void MoveRailPosition(struct nuvec_s *dst,struct RPos_s *rpos,float distance,int direction)
 
 {
 
 //TODO
 
 }
-
+/*
 
 void RailInfo(RPos_s *RPos,nuvec_s *pos,ushort *yrot,ushort *cam_yrot,uchar *mode)	//TODO
 
@@ -502,7 +504,7 @@ void RailInfo(RPos_s *RPos,nuvec_s *pos,ushort *yrot,ushort *cam_yrot,uchar *mod
   float fVar17;
   nuvec_s local_70;
   nuvec_s local_48;
-  
+
   iVar3 = (int)RPos->iRAIL;
   if ((iVar3 != -1) && (iVar12 = (int)RPos->iALONG, iVar12 != -1)) {
     iVar11 = iVar12 + 1;
@@ -630,7 +632,7 @@ float LookUpDownRail(obj_s *obj,ushort yrot,int mode)		//TODO
   int iVar2;
   uint uVar3;
   double dVar4;
-  
+
   if (((Level == 8) && ((player->obj).RPos.iRAIL == '\0')) &&
      ((ushort)(player->obj).RPos.iALONG - 0x2d < 4)) {
 LAB_8000afb8:
@@ -685,7 +687,7 @@ int InSplineArea(nuvec_s *pos,nugspline_s *spl)
   int j;
   nuvec_s *p1;
   int i;
-  
+
   len = (int)spl->len;
   i = 1;
   if (1 < len) {
@@ -708,9 +710,9 @@ int InSplineArea(nuvec_s *pos,nugspline_s *spl)
   }
   return 1;
 }
+*/
 
-
-void MoveGameCamera(CamMtx *GameCamera,obj_s *obj)
+void MoveGameCamera(struct cammtx_s *GameCamera,struct obj_s *obj)
 
 {
 
@@ -719,10 +721,10 @@ void MoveGameCamera(CamMtx *GameCamera,obj_s *obj)
 }
 
 
-void GetALONG(nuvec_s *pos,RPos_s *rpos,int iRAIL,int iALONG,int info)
+void GetALONG(struct nuvec_s *pos,struct RPos_s *rpos,int iRAIL,int iALONG,int info)
 
 {
-  if (rpos == (RPos_s *)0x0) {
+  if (rpos == NULL) {
     rpos = &TempRPos;
   }
   if (nRAILS == 0) {
@@ -730,7 +732,7 @@ void GetALONG(nuvec_s *pos,RPos_s *rpos,int iRAIL,int iALONG,int info)
     temp_iALONG = -1;
   }
   else {
-    ComplexRailPosition(pos,iRAIL,iALONG,rpos,0);
+    //ComplexRailPosition(pos,iRAIL,iALONG,rpos,0);
   }
   return;
 }
@@ -746,7 +748,7 @@ int FurtherALONG(int iRAIL0,int iALONG0,float fALONG0,int iRAIL1,int iALONG1,flo
     }
     if (iALONG1 <= iALONG0) {
       if (iALONG0 <= iALONG1) {
-        return (uint)(fALONG1 < fALONG0);
+        return (fALONG1 < fALONG0);
       }
       return 1;
     }
@@ -765,7 +767,7 @@ int FurtherBEHIND(int iRAIL0,int iALONG0,float fALONG0,int iRAIL1,int iALONG1,fl
     }
     if (iALONG0 <= iALONG1) {
       if (iALONG1 <= iALONG0) {
-        return (uint)(fALONG0 < fALONG1);
+        return (fALONG0 < fALONG1);
       }
       return 1;
     }
@@ -773,13 +775,13 @@ int FurtherBEHIND(int iRAIL0,int iALONG0,float fALONG0,int iRAIL1,int iALONG1,fl
   return 0;
 }
 
-
+/*
 void InitCameraTargetMaterial(void)
 
 {
   numtlattrib_s attrib;
   numtl_s *mtl;
-  
+
   mtl = NuMtlCreate(1);
   attrib = mtl->attrib;
   ctmtl = mtl;
@@ -790,4 +792,4 @@ void InitCameraTargetMaterial(void)
   (mtl->diffuse).g = 0.5;
   NuMtlUpdate(mtl);
   return;
-}
+}*/

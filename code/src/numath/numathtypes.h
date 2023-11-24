@@ -2,6 +2,7 @@
 #define NUMATHTYPES_H
 
 #include "types.h"
+#include "stddef.h"
 
 // Size: 0xC // 3D vector.
 struct Vec

@@ -24,18 +24,18 @@ static void NuMtlCreateDefault(void) {
     struct numtl_s* mtl;
 
     mtl = NuMtlCreate(1);
-    
+
     numtl_white = mtl;
-    
+
     mtl->attrib.cull = 2;
     mtl->attrib.zmode = 0;
     mtl->attrib.alpha = 0;
-    
+
     mtl->diffuse.r = 1.0f;
     mtl->diffuse.g = 1.0f;
     mtl->diffuse.b = 1.0f;
     mtl->alpha = 1.0f;
-    
+
     mtl->K = 0;
     mtl->L = 0;
     NuMtlUpdate(numtl_white);
@@ -80,7 +80,7 @@ struct numtl_s* NuMtlCreate(s32 mode) {
     char pad [3];
 
     sm = NULL;
-  if (0 < mode) { 
+  if (0 < mode) {
     for (i = mode; i != 0; i--) {
       ret = (struct nusysmtl_s *)malloc_x(0x6c);
       memset(ret,0,0x6c);
@@ -161,15 +161,15 @@ static void NuMtlInsert(struct nusysmtl_s* sm) {
 
   last = NULL;
   list = smlist;
-    
+
   sid = (sm->mtl).alpha_sort * 0x10000 + (sm->mtl).tid;
   sm->last = sm->next = NULL;
 
-  for(; list != NULL; last = list, list = list->next) {      
+  for(; list != NULL; last = list, list = list->next) {
     lsid = (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid;
-    if(lsid <= sid) 
+    if(lsid <= sid)
         break;
-  }         
+  }
 
   if (last != NULL) {
     sm->last = last;
@@ -216,8 +216,8 @@ void NuMtlSetStencilRender(enum nustencilmode_e mode) {
 }
 
 //NGC MATCH
-void NuMtlAddRndrItem(struct numtl_s *mtl,struct nurndritem_s *item) { 
-    struct nusysmtl_s* sm; // 
+void NuMtlAddRndrItem(struct numtl_s *mtl,struct nurndritem_s *item) {
+    struct nusysmtl_s* sm; //
     struct nuotitem_s* oti;
     struct nustenitem_s *steni;
     struct nuwateritem_s *wateri;
@@ -283,7 +283,7 @@ void NuMtlAddFaceonItem(struct numtl_s *mtl,struct nurndritem_s *item) {
     struct nusysmtl_s* sm; // unused
     struct nufaceonitem_s *faceoni;
     s32 i;
-    
+
     faceoni = &faceonitem[--faceonitem_cnt];
     faceoni->hdr = item;
     faceoni->mtl = (struct nusysmtl_s*)mtl;
@@ -550,24 +550,24 @@ static void NuMtlRenderFaceOn() {
     float g;
     float b;
     float a;
-    struct NuVec vertex_transformed;
-    struct NuVec faceon_point_rotated;
-    struct NuVec faceon_world_pos;
-    struct NuVec vtxpos;
+    struct nuvec_s vertex_transformed;
+    struct nuvec_s faceon_point_rotated;
+    struct nuvec_s faceon_world_pos;
+    struct nuvec_s vtxpos;
     struct nugeomitem_s* list_geomitem;
     struct NuFaceOnGeom* fop;
     s32 faceon_count;
     struct nufaceon_s* faceon_list;
     struct nugeomitem_s* item;
     char stack_padding[0x34];
-    
+
     ResetShaders();
     SetVertexShader(0x142);
     GS_LoadWorldMatrixIdentity();
-    
+
     for (; processed_count < faceonmtl_cnt; processed_count++) {
         cur_list = faceonmtllist[processed_count];
-        
+
         if (cur_list->mtl->mtl.L == 0) {
             NuTexSetTexture(0, cur_list->mtl->mtl.tid);
             NuMtlSetRenderStates(&cur_list->mtl->mtl);
@@ -595,63 +595,63 @@ static void NuMtlRenderFaceOn() {
             rotation._32 = 0.0f;
             list_geomitem = (struct nugeomitem_s*)cur_list->hdr;
             fop = (struct NuFaceOnGeom*)list_geomitem->geom;
-        
-        
+
+
             for (; fop != NULL; fop = fop->next) {
                 int i;
                 faceon_count = fop->nfaceons;
                 faceon_list = fop->faceons;
                 GS_DrawQuadListBeginBlock(faceon_count * 4, 0);
-            
+
                 for (i = 0; i < faceon_count; i++, faceon_list += 1) {
                     w = faceon_list->width * 0.5f;  //30
                     h = faceon_list->height * 0.5f; //31
-                    
-                    
+
+
                     NuVecMtxRotate(&faceon_point_rotated, &faceon_list->point, &rotation);
-                    
-                    NuVecAdd(&faceon_world_pos, &faceon_point_rotated, 
-                        (struct NuVec*)&item->mtx->_30);
-                    
-                    
+
+                    NuVecAdd(&faceon_world_pos, &faceon_point_rotated,
+                        (struct nuvec_s*)&item->mtx->_30);
+
+
                     NuMtxCalcCheapFaceOn(&faceonmtx, &faceon_world_pos);
-                    
+
                     vtxpos.x = -w;
                     vtxpos.y = h;
                     vtxpos.z = 0.0f;
-                    
+
                     NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
-                    
+
                     //Color is defined ARGB?
                     GS_SetQuadListRGBA((faceon_list->colour >> 16) & 0xff,
                              (faceon_list->colour >> 8) & 0xff,
                              faceon_list->colour & 0xff,
                              (faceon_list->colour >> 24) & 0xff);
                     GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 0.0f);
-                    
+
                     vtxpos.x = w;
                     vtxpos.y = h;
                     vtxpos.z = 0.0f;
                     NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
                     GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 0.0f);
-                    
+
                     vtxpos.x = w;
                     vtxpos.y = -h;
                     vtxpos.z = 0.0f;
                     NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
                     GS_DrawQuadListSetVert(&vertex_transformed, 1.0f, 1.0f);
-                    
+
                     vtxpos.x = -w;
                     vtxpos.y = -h;
                     vtxpos.z = 0.0f;
-                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);        
-                    
+                    NuVecMtxTransform(&vertex_transformed, &vtxpos, &faceonmtx);
+
                     GS_DrawQuadListSetVert(&vertex_transformed, 0.0f, 1.0f);
-                }   
+                }
                 GS_DrawQuadListEndBlock();
             }
         }
-    
+
         faceonmtllist[processed_count] = 0;
     }
 }
@@ -781,17 +781,17 @@ static void NuMtlRenderUpd(void) {
 //NGC MATCH
 void NuMtlSetRenderStates(struct numtl_s *mtl) {
     struct _D3DMATERIAL8 d3dmtl;
-    
+
     d3dmtl.Diffuse.r = (mtl->diffuse).r;
     d3dmtl.Diffuse.g = (mtl->diffuse).g;
     d3dmtl.Diffuse.b = (mtl->diffuse).b;
     d3dmtl.Diffuse.a = mtl->alpha;
-    
+
     d3dmtl.Ambient.r = (mtl->ambient).r;
     d3dmtl.Ambient.g = (mtl->ambient).g;
     d3dmtl.Ambient.b = (mtl->ambient).b;
     d3dmtl.Ambient.a = d3dmtl.Diffuse.a;
-    
+
     if (mtl->attrib.lighting == 2) {
         d3dmtl.Emissive.r = mtl->diffuse.r;
         d3dmtl.Emissive.g = mtl->diffuse.g;
@@ -805,7 +805,7 @@ void NuMtlSetRenderStates(struct numtl_s *mtl) {
     }
     d3dmtl.Power = mtl->power;
     GS_SetMaterial(&d3dmtl);
-    
+
     if (mtl->attrib.alpha == 0) {
         GS_SetBlendSrc(1,1,0);
         GS_SetAlphaCompare(7,0);
@@ -819,49 +819,49 @@ void NuMtlSetRenderStates(struct numtl_s *mtl) {
         GS_SetBlendSrc(1,0,3);
         GS_SetAlphaCompare(4,0);
     }
-    
+
     GS_SetAlphaCompare(4,0);
     NudxFw_SetRenderState(0x80,0);
 
     if (mtl->attrib.zmode == 0) {
         GS_SetZCompare(1,1,GX_LEQUAL);
     }
-    
+
     if (mtl->attrib.zmode == 1) {
         GS_SetZCompare(1,0,GX_LEQUAL);
     }
-    
+
     if (mtl->attrib.zmode == 2) {
         GS_SetZCompare(1,1,GX_ALWAYS);
     }
-    
+
     if (mtl->attrib.zmode == 3) {
         GS_SetZCompare(0,0,GX_ALWAYS);
     }
-    
+
     IsObjLit = 0;
     if (mtl->attrib.lighting == 0) {
         GS_EnableLighting(1);
         GS_EnableSpecular(0);
         IsObjLit = 1;
     }
-    
+
     if (mtl->attrib.lighting == 1) {
         GS_EnableLighting(1);
         GS_EnableSpecular(1);
         IsObjLit = 2;
     }
-    
+
     if (mtl->attrib.lighting == 2) {
         GS_EnableLighting(0);
     }
-    
+
     if (mtl->attrib.colour == 0) {
         GS_EnableColorVertex(0);
         GS_SetMaterialSourceAmbient(0);
         GS_SetMaterialSourceEmissive(0);
     }
-    
+
     if (mtl->attrib.colour == 1) {
         GS_EnableColorVertex(1);
         GS_SetMaterialSourceAmbient(1);
@@ -878,7 +878,7 @@ void NuMtlSetRenderStates(struct numtl_s *mtl) {
 void NuMtlAnimate(float timestep) {
     struct nusysmtl_s *smtl;
     struct numtl_s* mtl;
-    
+
     sinetime_246 = sinetime_246 + timestep;
     smtl = smlist;
     if (smlist == NULL) {
@@ -899,7 +899,7 @@ void NuMtlAnimate(float timestep) {
 
 //NGC MATCH
 void NuMtlUVAnimation(struct NuGobj* gobj) {
-    struct NuGeom* geom_;
+    struct nugeom_s* geom_;
     s32 numvts;
     struct numtl_s* mtls;
     struct nuvtx_tc1_s* vt1;

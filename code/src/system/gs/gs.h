@@ -1,6 +1,7 @@
 #pragma once
 #include "stdio.h"
 #include "nuraster/nurastertypes.h"
+#include"system/gxtype.h"
 
 /*
   800c8b14 00002c 800c8b14  4 GS_SetFBCopyTexturePause 	Global
@@ -57,18 +58,6 @@ struct nuviewport_s {
 };
 
 
-enum _GXCompare
-{
-    GX_ALWAYS = 7,
-    GX_GEQUAL = 6,
-    GX_NEQUAL = 5,
-    GX_GREATER = 4,
-    GX_LEQUAL = 3,
-    GX_EQUAL = 2,
-    GX_LESS = 1,
-    GX_NEVER = 0
-};
-
 
 enum gs_texturetype_e
 {
@@ -99,70 +88,6 @@ enum gs_texturetype_e
     GS_TEX_RGB24 = 2,
     GS_TEX_RGBA16 = 1,
     GS_TEX_RGB16 = 0
-};
-
-enum _GXTexFmt
-{
-    GX_TF_A8 = 39,
-    GX_CTF_Z16L = 60,
-    GX_CTF_Z8L = 58,
-    GX_CTF_Z8M = 57,
-    GX_CTF_Z4 = 48,
-    GX_TF_Z24X8 = 22,
-    GX_TF_Z16 = 19,
-    GX_TF_Z8 = 17,
-    GX_CTF_GB8 = 44,
-    GX_CTF_RG8 = 43,
-    GX_CTF_B8 = 42,
-    GX_CTF_G8 = 41,
-    GX_CTF_R8 = 40,
-    GX_CTF_A8 = 39,
-    GX_CTF_YUVA8 = 38,
-    GX_CTF_RA8 = 35,
-    GX_CTF_RA4 = 34,
-    GX_CTF_R4 = 32,
-    GX_TF_CMPR = 14,
-    GX_TF_RGBA8 = 6,
-    GX_TF_RGB5A3 = 5,
-    GX_TF_RGB565 = 4,
-    GX_TF_IA8 = 3,
-    GX_TF_IA4 = 2,
-    GX_TF_I8 = 1,
-    GX_TF_I4 = 0
-};
-
-enum _GXTexWrapMode
-{
-    GX_MAX_TEXWRAPMODE = 3,
-    GX_MIRROR = 2,
-    GX_REPEAT = 1,
-    GX_CLAMP = 0
-};
-
-// Size: 0x20
-struct _GXTexObj
-{
-    u32 dummy[8]; // Offset: 0x0
-};
-
-enum _GXColorSrc
-{
-    GX_SRC_VTX = 1,
-    GX_SRC_REG = 0
-};
-
-enum _GXDiffuseFn
-{
-    GX_DF_CLAMP = 2,
-    GX_DF_SIGN = 1,
-    GX_DF_NONE = 0
-};
-
-enum _GXAttnFn
-{
-    GX_AF_NONE = 2,
-    GX_AF_SPOT = 1,
-    GX_AF_SPEC = 0
 };
 
 // Size: 0x40, DWARF: 0x8E9296
@@ -203,6 +128,30 @@ struct _GS_VECTOR4
     float w; // Offset: 0xC, DWARF: 0x8E924F
 };
 
+struct _GS_VIEWPORT {
+    u64 X;
+    u64 Y;
+    u64 width;
+    u64 height;
+    float MinZ;
+    float MaxZ;
+};
+
+struct _GSMATRIX33 {
+    float _11;
+    float _12;
+    float _13;
+    float _14;
+    float _21;
+    float _22;
+    float _23;
+    float _24;
+    float _31;
+    float _32;
+    float _33;
+    float _34;
+};
+
 // Size: 0x10, DWARF: 0x1B76
 struct _D3DCOLORVALUE
 {
@@ -223,66 +172,52 @@ struct _D3DMATERIAL8
 };
 
 
-enum _GXChannelID
+// Size: 0x4
+enum _D3DLIGHTTYPE
 {
-    GX_COLOR_NULL = 255,
-    GX_ALPHA_BUMPN = 8,
-    GX_ALPHA_BUMP = 7,
-    GX_COLOR_ZERO = 6,
-    GX_COLOR1A1 = 5,
-    GX_COLOR0A0 = 4,
-    GX_ALPHA1 = 3,
-    GX_ALPHA0 = 2,
-    GX_COLOR1 = 1,
-    GX_COLOR0 = 0
+    D3DLIGHT_FORCE_DWORD = 2147483647,
+    D3DLIGHT_DIRECTIONAL = 3,
+    D3DLIGHT_SPOT = 2,
+    D3DLIGHT_POINT = 1
 };
 
-// Size: 0x20
-/*struct _GXTexObj
-{
-	UNKWORD mFlags; // at 0x0
-	char UNK_0x4[0x4];
-	UNKWORD mDimensions; // at 0x8 (Height/width are split between these bits)
-	char UNK_0xC[0x4];
-	UNKWORD mUserData; // at 0x10
-	enum _GXTexFmt mFormat; // at 0x14
-	UNKWORD mTLUT; // at 0x18
-} GXTexObj;*/
 
-enum _GXLightID
+struct _D3DVECTOR
 {
-    GX_LIGHT_NULL,
-    GX_MAX_LIGHT = 256,
-    GX_LIGHT7 = 128,
-    GX_LIGHT6 = 64,
-    GX_LIGHT5 = 32,
-    GX_LIGHT4 = 16,
-    GX_LIGHT3 = 8,
-    GX_LIGHT2 = 4,
-    GX_LIGHT1 = 2,
-    GX_LIGHT0 = 1
+    f32 x;
+    f32 y;
+    f32 z;
 };
 
-// Size: 0xC
-struct _GXTlutObj
+
+// Size: 0x68
+struct _D3DLIGHT8
 {
-    unsigned int dummy[3]; // Offset: 0x0
+    enum _D3DLIGHTTYPE Type;
+    struct _D3DCOLORVALUE Diffuse;
+    struct _D3DCOLORVALUE Specular;
+    struct _D3DCOLORVALUE Ambient;
+    struct _D3DVECTOR Position;
+    struct _D3DVECTOR Direction;
+    f32 range;
+    f32 falloff;
+    f32 attenuation0;
+    f32 attenuation1;
+    f32 attenuation2;
+    f32 Theta;
+    f32 Phi;
 };
 
-// Size: 0x40, DWARF: 0xC20D10
-struct _GXLightObj
+
+// Size: 0x6C
+struct _LIGHTLIST
 {
-    unsigned int dummy[16]; // Offset: 0x0, DWARF: 0xC20D30
+    int EnableLight;
+    struct _D3DLIGHT8 Light;
 };
 
-// Size: 0x4, DWARF: 0xC20A7C
-struct _GXColor
-{
-    unsigned char r; // Offset: 0x0, DWARF: 0xC20A99
-    unsigned char g; // Offset: 0x1, DWARF: 0xC20ABD
-    unsigned char b; // Offset: 0x2, DWARF: 0xC20AE1
-    unsigned char a; // Offset: 0x3, DWARF: 0xC20B05
-};
+struct _LIGHTLIST GS_LightList[3];
+
 
 // Size: 0x4C
 struct _GS_TEXTURE
@@ -299,4 +234,20 @@ struct _GS_TEXTURE
     struct _GXTlutObj Tlut; // Offset: 0x40
 };
 
-struct _GS_TEXTURE *GS_TexList; //static
+
+// Size: 0x24
+struct _GS_VERTEX
+{
+    float x; // Offset: 0x0
+    float y; // Offset: 0x4
+    float z; // Offset: 0x8
+    float nx; // Offset: 0xC
+    float ny; // Offset: 0x10
+    float nz; // Offset: 0x14
+    u32 diffuse; // Offset: 0x18
+    float u; // Offset: 0x1C
+    float v; // Offset: 0x20
+};
+
+
+static struct _GS_TEXTURE* GS_TexList;
