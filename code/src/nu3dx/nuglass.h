@@ -31,6 +31,8 @@ static nugobj_s* glassGobj[256];
 
 static nuinstance_s* glass_inst[256]; 
 
+static numtx_s* glassMtx[256];
+
 static int num_glass_inst;
 
 int SKELETALCRASH;

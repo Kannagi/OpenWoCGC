@@ -1,62 +1,47 @@
-void ResetGameCameras(CamMtx *Gamecam,int n)
-
-{
-  if (0 < n) {
-    do {
-      Gamecam->mode = -1;
-      n = n + -1;
-      Gamecam->judder = 0.0;
-      Gamecam->blend_time = 0.0;
-      Gamecam->blend_duration = 0.0;
-      Gamecam->distance = 0.0;
-      Gamecam->ahead = 0.0;
-      Gamecam->vertical = '\0';
-      Gamecam = Gamecam + 1;
-    } while (0 < n);
+//MATCH NGC
+void ResetGameCameras(struct cammtx_s *Gamecam,s32 n) {
+       while (n > 0) {
+            Gamecam->mode = -1;
+            Gamecam->judder = 0.0f;
+            Gamecam->blend_time = 0.0f;
+            Gamecam->blend_duration = 0.0f;
+            Gamecam->distance = 0.0f;
+            Gamecam->ahead = 0.0f;
+            Gamecam->vertical = '\0';
+            Gamecam++;
+            n--;
+        }
     return;
-  }
-  return;
 }
 
-
-void JudderGameCamera(CamMtx *cam,float time,nuvec_s *pos)
-
-{
-  double dVar1;
-  float fVar2;
-  
-  dVar1 = (double)time;
-  if ((double)cam->judder < dVar1) {
-    if (pos == (nuvec_s *)0x0) {
-      cam->judder = time;
+//MATCH NGC
+void JudderGameCamera(struct cammtx_s *cam,float time,struct NuVec *pos) {
+    float d;
+    char pad[3];
+    
+    if (time > cam->judder) {
+        if (pos != NULL) {
+            d = NuVecDist(&(player->obj).pos,pos,NULL);
+            if (d < 10.0f) {
+                cam->judder = time * ((10.0f - d) / 10.0f);
+            }
+        }
+        else {
+            cam->judder = time;
+        }
     }
-    else {
-      fVar2 = NuVecDist(&(player->obj).pos,pos,(nuvec_s *)0x0);
-      if (fVar2 < 10.0) {
-        cam->judder = (float)(dVar1 * (double)((10.0 - fVar2) / 10.0));
-      }
-    }
-  }
-  return;
+    return;
 }
 
-void BlendGameCamera(CamMtx *cam,float time)
-
-{
-  float y;
-  float z;
-  
-  y = (cam->newpos).y;
-  z = (cam->newpos).z;
-  (cam->oldpos).x = (cam->newpos).x;
-  (cam->oldpos).z = z;
-  (cam->oldpos).y = y;
-  cam->blend_duration = time;
-  cam->old_xrot = cam->new_xrot;
-  cam->old_yrot = cam->new_yrot;
-  cam->old_zrot = cam->new_zrot;
-  cam->blend_time = 0.0;
-  return;
+//MATCH NGC
+void BlendGameCamera(struct cammtx_s *cam,float time) {
+    cam->oldpos = cam->newpos;
+    cam->old_xrot = cam->new_xrot;
+    cam->old_yrot = cam->new_yrot;
+    cam->old_zrot = cam->new_zrot;
+    cam->blend_time = 0.0f;
+    cam->blend_duration = time;
+    return;
 }
 
 

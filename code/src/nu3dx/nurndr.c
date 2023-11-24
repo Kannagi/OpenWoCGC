@@ -92,49 +92,52 @@ void NuRndrSwapScreen(s32 hRT) {
     return;
 }
 
-//91% NGC
+//95% NGC
 s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
     struct nugeomitem_s* item;
     struct NuFaceOnGeom* facegeom;
     struct NuGeom* geom;
     struct numtx_s* mtx;
     struct numtx_s premtx;
-    s32 outcode;
-    s32 total_outcode;
-    s32 split;
+    int outcode;
+    int total_outcode;
+    int split;
     struct NuVec min;
     struct NuVec max;
-    s32 current_lights;
-
-    struct NuGobj* t;
+    int current_lights;
     
     total_outcode = -1;
-    t = gobj->next_gobj;
-    if (t != NULL) {
-    outcode = 0;
+    
+    if (gobj->next_gobj != NULL) {
+        split = 1;
+    } else {
+        split = 0;
+    }
+        
     current_lights = NuLightStoreCurrentLights();
     
-    for(; t != NULL; t = t->next_gobj)
+    for(; gobj != NULL; gobj = gobj->next_gobj)
     {
-        if (t->culltype == 0) 
+        if (gobj->culltype == 0) 
         {
             outcode = NuCameraClipTestBoundingSphere
-                (&t->bounding_box_center, &t->bounding_radius_from_center, wm);
+                (&gobj->bounding_box_center, &gobj->bounding_radius_from_center, wm);
         }
         else 
         {
-            if ((((t->origin).x != 0.0f) || ((t->origin).y != 0.0f)) || ((t->origin).z != 0.0f))  
+            if ((((gobj->origin).x != 0.0f) || ((gobj->origin).y != 0.0f)) || ((gobj->origin).z != 0.0f))  
             {
-                min = t->bounding_box_min;
-                max = t->bounding_box_max;
-                NuVecAdd(&min, &t->bounding_box_min, &t->origin);
-                NuVecAdd(&max, &t->bounding_box_max, &t->origin);
+                min = gobj->bounding_box_min;
+                max = gobj->bounding_box_max;
+                NuVecAdd(&min, &gobj->bounding_box_min, &gobj->origin);
+                NuVecAdd(&max, &gobj->bounding_box_max, &gobj->origin);
                 outcode = NuCameraClipTestExtents(&min, &max, wm);
             }
             else {
-                outcode = NuCameraClipTestExtents(&t->bounding_box_min, &t->bounding_box_max, wm);
+                outcode = NuCameraClipTestExtents(&gobj->bounding_box_min, &gobj->bounding_box_max, wm);
             }
         }
+        
         if (total_outcode == -1) {
             total_outcode = outcode;   
         } else {
@@ -149,18 +152,18 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                 NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x282)("NuRndrGobj : No free matrix slots!");
             }
             
-            mtx = &rndrmtx[rndrmtx_cnt];
-            *mtx = *wm;
+            mtx = rndrmtx;
+            mtx[rndrmtx_cnt] = *wm;
             
-            if (gobj != NULL) {
+            if (split != 0) {
                 NuMtxSetIdentity(&premtx);
-                premtx._30 = (t->origin).x;
-                premtx._31 = (t->origin).y;
-                premtx._32 = (t->origin).z;
+                premtx._30 = (gobj->origin).x;
+                premtx._31 = (gobj->origin).y;
+                premtx._32 = (gobj->origin).z;
                 NuMtxMul(mtx, &premtx, mtx);
             }
             
-            for(geom = t->geom; geom != NULL; geom = geom->next)
+            for(geom = gobj->geom; geom != NULL; geom = geom->next)
             {
                 if (geomitem_cnt != 0) {
                     geomitem_cnt--;
@@ -197,7 +200,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                 }
             }
             
-            facegeom = t->faceon_geom;
+            facegeom = gobj->faceon_geom;
             if (facegeom != NULL) {
                 if (geomitem_cnt != 0) {
                     geomitem_cnt--;
@@ -219,7 +222,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
             }
         }
     }
-    }  
+    
     return total_outcode;
 }
 
@@ -890,112 +893,53 @@ void NuRndrAddFootPrint(int rot,float sizex,float sizez,int brightness,nuvec_s *
   }
   return;
 }
-
-
-void NuRndrFootPrints(numtl_s *mtl,float *u,float *v)
-
-{
-  char cVar1;
-  short sVar2;
-  int iVar3;
-  nuvec_s *pnVar4;
-  float *pfVar5;
-  float fVar6;
-  nuvtx_tc1_s *pnVar7;
-  float fVar8;
-  float fVar9;
-  float fVar10;
-  int iVar11;
-  undefined4 *puVar12;
-  undefined4 *puVar13;
-  undefined4 *puVar14;
-  int iVar15;
-  nuvtx_tc1_s *local_30;
-  undefined4 *local_2c;
-  undefined4 *local_28;
-  undefined4 *local_24;
-
-  iVar15 = 0x40;
-  pfVar5 = (float *)&DAT_801bd184;
-  pnVar4 = NuRndrFootData[0].pnts + 3;
-  iVar11 = 0;
-  do {
-    cVar1 = *(char *)((int)(pnVar4 + 1) + 2);
-    if ('\0' < cVar1) {
-      if (cVar1 < '\x10') {
-        *(char *)((int)(pnVar4 + 1) + 2) = cVar1 + -1;
-      }
-      iVar11 = iVar11 + 4;
-      fVar6 = *(float *)((FootData *)(pnVar4 + -3))->pnts;
-      fVar8 = *(float *)((FootData *)(pnVar4 + -3))->pnts;
-      cVar1 = *(char *)((int)(pnVar4 + 1) + 3);
-      pfVar5[-0x1b] = ((FootData *)(pnVar4 + -3))->pnts[0].x;
-      pfVar5[-0x1a] = fVar6;
-      iVar3 = (int)cVar1;
-      pfVar5[-0x19] = fVar8;
-      fVar9 = pnVar4[-2].x;
-      fVar10 = pnVar4[-2].y;
-      pfVar5[-0x14] = u[iVar3];
-      fVar6 = v[iVar3];
-      fVar8 = pnVar4[-2].z;
-      pfVar5[-0x12] = fVar9;
-      pfVar5[-0x13] = fVar6;
-      pfVar5[-0x11] = fVar10;
-      pfVar5[-0x10] = fVar8;
-      fVar8 = pnVar4[-1].y;
-      fVar9 = pnVar4[-1].x;
-      pfVar5[-0xb] = u[iVar3 + 1];
-      fVar6 = v[iVar3 + 1];
-      pfVar5[-7] = pnVar4[-1].z;
-      pfVar5[-9] = fVar9;
-      pfVar5[-10] = fVar6;
-      pfVar5[-8] = fVar8;
-      fVar6 = pnVar4->x;
-      fVar9 = pnVar4->y;
-      pfVar5[-2] = u[iVar3 + 2];
-      fVar8 = pnVar4->z;
-      pfVar5[-1] = v[iVar3 + 2];
-      *pfVar5 = fVar6;
-      cVar1 = *(char *)((int)(pnVar4 + 1) + 2);
-      sVar2 = *(short *)(pnVar4 + 1);
-      pfVar5[1] = fVar9;
-      pfVar5[2] = fVar8;
-      pfVar5[7] = u[iVar3 + 3];
-      fVar6 = v[iVar3 + 3];
-      fVar8 = (float)(((int)sVar2 * (int)cVar1 * 0x100000 & 0xff000000U) + 0x808080);
-      pfVar5[-0x15] = fVar8;
-      pfVar5[8] = fVar6;
-      pfVar5[6] = fVar8;
-      pfVar5[-3] = fVar8;
-      pfVar5[-0xc] = fVar8;
-      pfVar5 = pfVar5 + 0x24;
-    }
-    pnVar4 = (nuvec_s *)((int)(pnVar4 + 4) + 4);
-    iVar15 = iVar15 + -1;
-  } while (iVar15 != 0);
-  if ((iVar11 != 0) && (iVar15 = 0, 0 < iVar11)) {
-    pnVar7 = (nuvtx_tc1_s *)&vtx.247;
-    puVar12 = &DAT_801bd184;
-    puVar13 = &DAT_801bd160;
-    puVar14 = &DAT_801bd13c;
-    do {
-      local_30 = pnVar7;
-      local_2c = puVar14;
-      local_28 = puVar13;
-      local_24 = puVar12;
-      NuRndrStrip3d((nuvtx_tc1_s *)&local_30,mtl,0,4);
-      iVar15 = iVar15 + 4;
-      puVar12 = puVar12 + 0x24;
-      puVar13 = puVar13 + 0x24;
-      puVar14 = puVar14 + 0x24;
-      pnVar7 = pnVar7 + 4;
-    } while (iVar15 < iVar11);
-  }
-  return;
-}
-
-
 */
+
+//86% GCN
+void NuRndrFootPrints(struct numtl_s *mtl,float *u,float *v) {
+    s32 cnt;
+    s32 lp, cnt2;
+    struct nuvtx_tc1_s *vp [4];
+    static struct nuvtx_tc1_s vtx_247[256][4]; //nuvtx_tc1_s vtx[2048];
+    
+    for (lp = 0, cnt = 0; lp < 0x40; lp++) {
+        if (NuRndrFootData[lp].timer > 0) {
+            if (NuRndrFootData[lp].timer < 16) {
+                NuRndrFootData[lp].timer--;
+            }
+            cnt += 4;
+            vtx_247[lp][0].pnt = NuRndrFootData[lp].pnts[0];
+            vtx_247[lp][0].tc[0] = u[NuRndrFootData[lp].gfx];
+            vtx_247[lp][0].tc[1] = v[NuRndrFootData[lp].gfx];
+            
+            vtx_247[lp][1].pnt = NuRndrFootData[lp].pnts[1];
+            vtx_247[lp][1].tc[0] = u[NuRndrFootData[lp].gfx + 1];
+            vtx_247[lp][1].tc[1] = v[NuRndrFootData[lp].gfx + 1];
+            
+            vtx_247[lp][2].pnt = NuRndrFootData[lp].pnts[2];
+            vtx_247[lp][2].tc[0] = u[NuRndrFootData[lp].gfx + 2];
+            vtx_247[lp][2].tc[1] = v[NuRndrFootData[lp].gfx + 2]; 
+            
+            vtx_247[lp][3].pnt = NuRndrFootData[lp].pnts[3];
+            vtx_247[lp][3].tc[0] = u[NuRndrFootData[lp].gfx + 3];
+            vtx_247[lp][3].tc[1] =  v[NuRndrFootData[lp].gfx + 3];
+            
+            vtx_247[lp][3].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
+            vtx_247[lp][2].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
+            vtx_247[lp][1].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
+            vtx_247[lp][0].diffuse = (NuRndrFootData[lp].timer * NuRndrFootData[lp].brightness * 0x100000 & 0xff000000U) + 0x808080;
+        }
+    } 
+    if (cnt != 0) {
+        for (lp = 0, cnt2=0; cnt2 < cnt; lp++, cnt2+=4) {
+            vp[0] = &vtx_247[lp][0];
+            vp[1] = &vtx_247[lp][1];
+            vp[2] = &vtx_247[lp][2];
+            vp[3] = &vtx_247[lp][3];
+            NuRndrStrip3d(vp,mtl,0,4);
+        }
+    }
+}
 
 //MATCH GCN
 float * NuRndrCreateBlendShapeDeformerWeightsArray(s32 nweights) {

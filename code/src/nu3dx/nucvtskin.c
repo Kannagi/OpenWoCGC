@@ -531,21 +531,21 @@ static void SetVtxSkinData (struct primdef_s * pd, s32 pdix, struct nuvtx_tc1_s 
       return;
 }
 
-//86%
-static void SetVtxSkinData2(struct primdef_s *pd,int pdix, struct nuvtx_tc1_s *vertexbuf,int vid,struct NuGeom *currgeom)
+//86% --> equivalent?
+static void SetVtxSkinData2(struct primdef_s *pd,s32 pdix,struct nuvtx_tc1_s *vertexbuf,s32 vid,struct NuGeom *currgeom)
 {
     struct NUVTXSKININFO_s *skinfo;
-    int i;
-    int ix;
+    s32 i;
+    s32 ix;
+
     
     pd->vrts[pdix] = vertexbuf[vid];
     pd->vid[pdix] = vid;
     skinfo = &currgeom->vtxskininfo[vid];
-    // ix = 0;
-       
+    
+    
     for(i = ix = 0; i != 3 && skinfo->wts[ix] != 0.0f; i++) {
-        ix++;
-        pd->weights[pdix][AddMtxToPrimDef(pd,skinfo->joint_ixs[i])] = skinfo->wts[ix];
+        pd->weights[pdix][AddMtxToPrimDef(pd,skinfo->joint_ixs[i])] = skinfo->wts[++ix];
     }
 
     return;

@@ -9,18 +9,45 @@ void NuRndrInitEx(s32 streambuffersize)
   return;
 }
 
-void NuGScnRndr3(struct nugscn_s *scn)	//TODO
-{
+//MATCH GCN
+void NuGScnRndr3(struct nugscn_s *scn) {
+  s32 iVar3; //temp ?
+  s32 cnt;
+  struct nuinstance_s *i;
+  struct nuspecial_s *sp;
+  struct nuinstanim_s *instanim;
 
-/*
-DWARF
 
-    s32 cnt;
-    nuinstance_s* i;
-    nuspecial_s* sp;
-    nuinstanim_s* instanim; 
-*/
-
+  cnt = scn->numinstance;
+  i = &scn->instances[cnt];
+    
+  while (cnt != 0)
+  {
+    cnt--;
+    i--;
+    if ((i->flags.visible & i->flags.visitest))
+    {
+      if (i->anim != NULL) {
+        iVar3 = i->objid;
+        instanim = i->anim;
+      }
+      else {
+        iVar3 = i->objid;
+        instanim = i;
+      }
+      
+       i->flags.onscreen = NuRndrGScnObj(scn->gobjs[iVar3],&instanim->mtx);
+    }
+  }
+    cnt = scn->numexspecials;
+    while (cnt != 0)
+    {
+      sp = &scn->exspecials[--cnt];
+      if ((sp->flags.ext < 0) && ((sp->flags.ext_vis) != 0)) {
+        sp->flags.ext_onscreen = NuRndrGScnObj(scn->gobjs[sp->instance->objid],&sp->mtx);
+      }
+    }
+  return;
 }
 
 //MATCH GCN
@@ -756,12 +783,12 @@ void NuRndrParticleGroup(struct _sceDmaTag* data, struct setup_s *setup,struct n
 
 struct numtx_s debmtx;
 
-void DebMtxTransform(struct nuvec_s *v,struct nuvec_s *v0)
-{
-  v->x = v0->z * debmtx._20 + v0->x * debmtx._00 + v0->y * debmtx._10 + debmtx._30;
-  v->y = v0->z * debmtx._21 + v0->x * debmtx._01 + v0->y * debmtx._11 + debmtx._31;
-  v->z = v0->z * debmtx._22 + v0->x * debmtx._02 + v0->y * debmtx._12 + debmtx._32;
-  return;
+//NGC MATCH
+void DebMtxTransform(struct NuVec *v,struct NuVec *v0) {
+    v->x = v0->x * debmtx._00 + v0->y * debmtx._10 + v0->z * debmtx._20 + + debmtx._30;
+    v->y = v0->x * debmtx._01 + v0->y * debmtx._11 + v0->z * debmtx._21 + debmtx._31;
+    v->z = v0->x * debmtx._02 + v0->y * debmtx._12 + v0->z * debmtx._22 + debmtx._32;
+    return;
 }
 
 

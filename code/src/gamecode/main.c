@@ -46,9 +46,9 @@ int main()
 union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
 
-/*
 
-//93%
+
+//NGC MATCH
 void ResetSuperBuffer(void)
 {
   if (superbuffersize != (double)0x4156eb851eb851ec) {
@@ -59,7 +59,7 @@ void ResetSuperBuffer(void)
 
     superbuffersize = 0x5bae14;
     superbuffer_reset_base = superbuffer_base;
-    superbuffer_end.voidptr = (&superbuffer_base.voidptr + 0x5bae14);
+    superbuffer_end.voidptr = (superbuffer_base.voidptr + superbuffersize);
     if (superbuffer_base.voidptr == NULL) {
       NuErrorProlog("C:/source/crashwoc/code/gamecode/main.c",0x5c5)
                                       ("unable to allocate super buffer");
@@ -69,6 +69,7 @@ void ResetSuperBuffer(void)
   return;
 }
 
+/*
 //78%
 void ResetSuperBuffer2(void) {
     double dVar1;

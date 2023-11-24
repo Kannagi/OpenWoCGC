@@ -333,6 +333,13 @@ void GS_DrawQuadListEndBlock(void)
   return;
 }
 
+u32 QuadListColour;
+
+//NGC MATCH
+void GS_SetQuadListRGBA(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    QuadListColour = (arg0 << 0x18) | (arg1 << 0x10) | (arg2 << 8) | arg3;
+}
+
 
 void GS_DrawTriListTSkin(undefined4 param_1,int param_2,int param_3,int param_4)		//TODO
 

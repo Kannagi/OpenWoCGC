@@ -369,7 +369,7 @@ s32 NuCameraClipTestBoundingSphere(struct NuVec *gobj_centre,float *radius,struc
     return 1;
 }
 
-//WIP
+//MATCH GCN
 s32 NuCameraClipTestPoints(struct NuVec* pnts, s32 cnt, struct numtx_s* wm) {
     struct numtx_s m;
     struct NuVec v;
@@ -385,8 +385,8 @@ s32 NuCameraClipTestPoints(struct NuVec* pnts, s32 cnt, struct numtx_s* wm) {
         m = vmtx;
     }
     out = -1;
-    if (in > 0) {
-        for (i = in; i != 0; i--) {
+
+        for (i = 0; i < in; i++) {
             NuVecMtxTransform(&v, pnts, &m);
             c = 0;
             if (v.z < global_camera.nearclip) {
@@ -409,39 +409,47 @@ s32 NuCameraClipTestPoints(struct NuVec* pnts, s32 cnt, struct numtx_s* wm) {
             }
             out &= c;
             pnts++;
-        } //while (i != 0);
-    }
+        }
     return out;
 }
 
-void SetProjectionMatrix(struct numtx_s* mtx, f32 fFOV, f32 fAspect, f32 fNearPlane, f32 fFarPlane) {
-    f32 temp_f0;
-    f32 temp_f27;
-    f32 dist;
-    f32 temp_f29_2;
-    f32 temp_f30_2;
-    f32 temp_f31_2;
-    f64 temp_f30;
-    f64 temp_f31;
+//MATCH GCN  //part of SetProjectionMatrix
+float tan2(float x) {
+    return cos(x) / sin(x);
+}
 
-    dist = fFarPlane - fNearPlane;
-    temp_f27 = 0.01;
-    if (!(NuFabs(dist) > temp_f27)) {
-        //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A2)("assert");
+//MATCH GCN
+static void SetProjectionMatrix(struct numtx_s* mtx, float fFOV, float fAspect, float fNearPlane, float fFarPlane) {
+    float dVar5;
+    float h;
+    float w;
+    float Q;
+    float fVar1;
+
+    // Stack Padding
+    u8 x[0x38];
+
+    h = fFarPlane - fNearPlane;
+
+    // Probably an assert macro
+    if (NuFabs(h) > 0.01f) {
+    } else {
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c",0x2a2)("assert");
+        
     }
-    temp_f0 = fFOV * 0.5;
-    if (!(NuFabs((f32) sin(temp_f0)) > temp_f27)) {
-        //NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c", 0x2A3)("assert");
+    w = fFOV * 0.5f;
+    if (NuFabs(sin(w)) > 0.01f) {
+    } else {
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucamera.c",0x2a3)("assert");
     }
-    temp_f29_2 = fFarPlane / dist;
-    temp_f31 = cos(temp_f0);
-    temp_f31_2 = fAspect * (f32) (temp_f31 / sin(temp_f0));
-    temp_f30 = cos(temp_f0);
-    temp_f30_2 = (f32) (temp_f30 / sin(temp_f0));
-    memset(mtx, 0, 0x40);
-    mtx->_32 = -temp_f29_2 * fNearPlane;
-    mtx->_00 = temp_f31_2;
-    mtx->_11 = temp_f30_2;
-    mtx->_23 = 1.0;
-    mtx->_22 = temp_f29_2;
+    dVar5 = (fFarPlane / h);
+    Q = fAspect * (float)(cos(w) / sin(w));
+    fVar1 = (cos(w) / sin(w));
+    memset(mtx,0,0x40);
+    mtx->_00 = Q;
+    mtx->_11 = fVar1;
+    mtx->_22 = dVar5;
+    mtx->_23 = 1.0f;
+    mtx->_32 = (-dVar5 * fNearPlane);
+    return;
 }

@@ -1,9 +1,68 @@
+short RO_640460[8];
+
 //PS2
 void InitCutScenes(void) {
   NuGCutSceneSysInit(cutscene_locatorfns);
   NuSetCutSceneFindCharactersFn(AppCutSceneFindCharacters);
   NuSetCutSceneCharacterRenderFn(AppCutSceneCharacterRender);
   return;
+}
+
+//NGC MATCH //inline with CutLoadScreenThreadProc??
+s32 LoadCutComponents(struct cutscenedesc_s *csd,struct csc_s *chars) {
+    struct NUGCUTSCENE_s *cutscn;
+    s32 ret;
+    s32 ix;
+    char *path;
+    char *final_path;
+    struct nudathdr_s *char_dat;
+    char pad [6];
+    
+    char_dat = NULL;
+    InitSkinning(0);
+    ret = 0;
+    CutChar = chars;
+    if (loadcut_chardatfile != 0) {
+        char_dat = NuDatOpenMem(chardatfilename,NULL,NULL);
+        NuDatSet(char_dat);
+    }
+    LoadCutSceneCharacters(CutChar);
+    if (char_dat != NULL) {
+        NuDatClose(char_dat);
+        NuDatSet(NULL);
+    }
+    CloseSkinning();
+
+        
+    for(ix = 0; csd[ix].gscname != NULL; ix++, ret++) {
+        cutdebgroups[ix] = csd[ix].debgroup;
+        world_scene2[ix] = InstNuGScnRead(&superbuffer_ptr,&superbuffer_end,csd[ix].gscname);
+        world_scene[ix] = world_scene2[ix]->gscene;
+        InitXboxGSceneEffects(world_scene[ix],&superbuffer_ptr,&superbuffer_end);
+        CutScene[ix] = NuGCutSceneLoad(csd[ix].cutname,&superbuffer_ptr,&superbuffer_end);
+        if (CutScene[ix] != NULL) {
+            NuGCutSceneFixUp(CutScene[ix],world_scene[ix],NULL);
+            path = csd[ix].cutname;
+            cutscn = CutScene[ix];
+            if (strlen(csd[ix].cutname) != 0x10) {
+                path -= 0x10;
+                final_path = path + strlen(csd[ix].cutname);
+            } else {
+                final_path = path;
+            }
+            CutInst[ix] = instNuGCutSceneCreate(cutscn,NULL,NULL,final_path,&superbuffer_ptr);
+            if (CutInst[ix] != NULL) {
+                CutInst[ix]->rate = 0.5f;
+                CutAudio[ix] = csd[ix].sfxid;
+                instNuGCutSceneSetEndCallback(CutInst[ix],CutSceneEndFunction);
+                if ((ret != 0) && (CutInst[ix - 1] != 0)) {
+                    CutInst[ix - 1]->next_to_play =  CutInst[ix];
+                    instNuGCutSceneSetEndCallback(CutInst[ix - 1],CutSceneNextFunction);
+                }
+            }
+        }
+    } 
+    return ret;
 }
 
 //NGC MATCH
@@ -218,4 +277,90 @@ static void locatorfn_fadeout(struct instNUGCUTSCENE_s *icutscene,struct NUGCUTL
         }
     }
     return;
+}
+
+//NGC MATCH
+s32 LoadCutMovie(s32 movie) {
+    s32 i = 0;
+    s32 scenecnt;
+    union variptr_u ptr;
+    struct nudathdr_s *dfcut;
+
+    NuSoundKillAllAudio();
+    XbWaitForAllBuffersToStop();
+    LoadFont3D();
+    MAHLoadingMessage();
+    hCutLoadScreenThread = (void *)CreateThread(0,0,(s32)CutLoadScreenThreadProc,0,0,0);
+    if (hCutLoadScreenThread != NULL) {
+        SetThreadPriority((s32)hCutLoadScreenThread,0xf);
+    }
+    pause_scene = NULL;
+    scene_inst_count = 0;
+    for (i = 0x20; i > 0; i--) { 
+        world_scene[i - 1] = NULL;
+    }
+    ghg_inst_count = 0;
+    for (i = 0; i < 0x20; i++) {
+        CutScene[i] = 0;
+        CutInst[i] = 0;
+        CutAudio[i] = -1;
+    }
+    CutChar = NULL;
+    cutworldix = 0;
+    NuTexAnimProgSysInit();
+    switch (movie)
+        {
+
+            case 0:
+                        ptr.voidptr = texanimbuff;
+                        LoadGBABG();
+                        NuTexAnimProgReadScript(&ptr,"ats\\levels\\title.ats");
+                        dfcut = NuDatOpenMem("levels\\b\\titles\\titles.dat",NULL,NULL);
+                        NuDatSet(dfcut);
+                        scenecnt = LoadCutComponents(csd_titles,csc_titles);
+                        NuDatSet(NULL);
+                        if (dfcut != NULL) {
+                            NuDatClose(dfcut);
+                        }
+                        instNuGCutSceneSetEndCallback(CutInst[0],CutSceneNextLogoFunction);
+                        CutInst[scenecnt - 1]->looping = 1;
+                        instNuGCutSceneSetEndCallback(CutInst[scenecnt - 1],NULL);
+            break;
+            case 1:
+                           LoadCutComponents(csd_s32ro1,csc_s32ro1);
+                           next_cut_movie = 2;     
+            break;
+            case 2:
+                        ptr.voidptr = texanimbuff;
+                        NuTexAnimProgReadScript(&ptr,"ats\\splash\\ripples.ats");
+                        LoadCutComponents(csd_s32ro2,csc_s32ro2);
+            break;
+            case 3:
+            case 4:
+                        ptr.voidptr = texanimbuff;
+                        NuTexAnimProgReadScript(&ptr,"ats\\elecy\\elecy2.ats");
+                        if (movie == 4) {
+                            NuTexAnimProgReadScript(&ptr,"ats\\splash\\ripples.ats");
+                        }
+                        if (movie == 3) {
+                            dfcut = NuDatOpenMem("levels\\b\\outro\\outro.dat",NULL,NULL);
+                            NuDatSet(dfcut);
+                            LoadCutComponents(csd_outro,csc_outro);
+                            NuDatSet(NULL);
+                            if (dfcut != NULL) {
+                                NuDatClose(dfcut);
+                            }
+                        } else {
+                            loadcut_chardatfile = 1;
+                            strcpy(chardatfilename, "levels\\b\\outro2\\outro2chars.dat");
+                            LoadCutComponents(csd_outro2,csc_outro2);
+                            loadcut_chardatfile = 0;
+                            
+                        }
+            break;
+            default:
+                
+            break;
+        }
+    return (CutInst[0] != NULL);
 }
