@@ -48,13 +48,6 @@ struct NUHGOBJ_s* NuHGobjRead(union variptr_u* opbuff, char* fname) {
     return hgobj;
 }
 
-//MATCH GCN
-void NuHGobjDestroy(struct NUHGOBJ_s* hgobj) {
-    if (hgobj != NULL) {
-        NuHGobjDestroyDynamic(hgobj);
-    }
-    return;
-}
 
 //MATCH GCN
 static void NuHGobjDestroyDynamic(struct NUHGOBJ_s *hgobj) {
@@ -102,6 +95,14 @@ static void NuHGobjDestroyDynamic(struct NUHGOBJ_s *hgobj) {
     NuTexAnimRemoveList(hgobj->texanims);
   }
   return;
+}
+
+//MATCH GCN
+void NuHGobjDestroy(struct NUHGOBJ_s* hgobj) {
+    if (hgobj != NULL) {
+        NuHGobjDestroyDynamic(hgobj);
+    }
+    return;
 }
 
 
@@ -306,12 +307,12 @@ void ReadNuIFFHGobjSet(fileHandle fh, struct NUHGOBJ_s* hgobj) {
                     memset(hgobj->shadow_data[i].shadow_meshes, 0, hgobj->shadow_data[i].nshadow_meshes * 8);
                     for (j = 0; j < hgobj->shadow_data[i].nshadow_meshes; j++) {
                         {
-                            s32 bytes = NuFileReadInt(fh) * sizeof(struct Vec4);
+                            s32 bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
                             hgobj->shadow_data[i].shadow_meshes[j].normals = NuMemAlloc(bytes);
                             NuFileRead(fh, &hgobj->shadow_data[i].shadow_meshes[j].normals, bytes);
                         }
                         {
-                            s32 bytes = NuFileReadInt(fh) * sizeof(struct Vec4);
+                            s32 bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
                             hgobj->shadow_data[i].shadow_meshes[j].verts = NuMemAlloc(bytes);
                             NuFileRead(fh, hgobj->shadow_data[i].shadow_meshes[j].verts, bytes);
                         }

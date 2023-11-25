@@ -9,19 +9,42 @@ static struct numtx_s smtx;
 //PS2
 void NuVpInit(void)
 {
-    NuPs2GetViewport(&vpDevice);
+    //GS_GetViewport(&vpDevice);  //NuPs2GetViewport(&vpDevice);
     vpDevice.centre_x = 0.5f;
     vpDevice.centre_y = 0.5f;
     vpDevice.clipmin_x = 0.0f;
     vpDevice.clipmin_y = 0.0f;
-    vpDevice.clipmax_x = 1.0f;  
+    vpDevice.clipmax_x = 1.0f;
     vpDevice.clipmax_y = 1.0f;
-    
+
     memcpy(&vpDevice, &vpCurrent, sizeof(struct nuviewport_s));
     vport_inval = 1;
-    
+
     NuVpUpdate();
     return;
+}
+
+
+//PS2
+static void NuVpSetScalingMtx(void)
+{
+  smtx._00 = (float)vpCurrent.width * 0.5f;
+  smtx._01 = 0.0f;
+  smtx._02 = 0.0f;
+  smtx._03 = 0.0f;
+  smtx._10 = 0.0f;
+  smtx._11 = -(float)vpCurrent.height * 0.5f;
+  smtx._12 = 0.0f;
+  smtx._13 = 0.0f;
+  smtx._20 = 0.0f;
+  smtx._21 = 0.0f;
+  smtx._22 = vpCurrent.zmax - vpCurrent.zmin;
+  smtx._23 = 0.0f;
+  smtx._30 = (float)vpCurrent.x + (float)vpCurrent.width * vpCurrent.centre_x;
+  smtx._31 = (float)vpCurrent.y + (float)vpCurrent.height * vpCurrent.centre_y;
+  smtx._32 = vpCurrent.zmin;
+  smtx._33 = 1.0f;
+  return;
 }
 
 //PS2
@@ -47,28 +70,6 @@ void NuVpUpdate(void)
       vpCurrent.clip_h = vpCurrent.scis_h;
     }
   }
-  return;
-}
-
-//PS2
-static void NuVpSetScalingMtx(void)
-{
-  smtx._00 = (float)vpCurrent.width * 0.5f;
-  smtx._01 = 0.0f;
-  smtx._02 = 0.0f;
-  smtx._03 = 0.0f;
-  smtx._10 = 0.0f;
-  smtx._11 = -(float)vpCurrent.height * 0.5f;
-  smtx._12 = 0.0f;
-  smtx._13 = 0.0f;
-  smtx._20 = 0.0f;
-  smtx._21 = 0.0f;
-  smtx._22 = vpCurrent.zmax - vpCurrent.zmin;
-  smtx._23 = 0.0f;
-  smtx._30 = (float)vpCurrent.x + (float)vpCurrent.width * vpCurrent.centre_x;
-  smtx._31 = (float)vpCurrent.y + (float)vpCurrent.height * vpCurrent.centre_y;
-  smtx._32 = vpCurrent.zmin;
-  smtx._33 = 1.0f;
   return;
 }
 
@@ -113,16 +114,3 @@ void NuVpGetScalingMtx(struct numtx_s *mtx)
     }
     return;
 }
-
-
-void NuVpGetScalingMtx(struct numtx_s *mtx)
-{
-    if (mtx != NULL) {
-      memcpy(mtx, &cmtx, sizeof(struct numtx_s));
-    }
-    return;
-}
-
-
-
-
