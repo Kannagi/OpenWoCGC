@@ -336,115 +336,76 @@ float BestRailPosition(struct NuVec* pos, struct RPos_s* rpos, s32 iRAIL, s32 iA
     return dbest;
 }
 
+//MATCH NGC
+void ComplexRailPosition(struct NuVec *pos,s32 iRAIL,s32 iALONG,struct RPos_s *rpos,s32 set) {
 
-void ComplexRailPosition(nuvec_s *pos,int iRAIL,int iALONG,RPos_s *rpos,int set)
-
-{
-  bool bVar1;
-  bool bVar2;
-  RPos_s *pRVar3;
-  uint uVar4;
-  RPos_s *tmp;
-  RPos_s *pRVar5;
-  uint uVar6;
-  RPos_s *pRVar7;
-  int iVar8;
-  uint unaff_r23;
-  uint unaff_r24;
-  uint unaff_r25;
-  int iVar9;
-  RPos_s *pRVar10;
-  byte bVar11;
-  double in_f31;
-  float fVar12;
-
-  if (set == 0) {
-    tmp = temp_cRPos;
-  }
-  else {
-    tmp = cRPos;
-  }
-  bVar11 = (set == 0) << 1;
-  if (set != 0) {
-    unaff_r23 = (uint)(Bonus - 1U < 3);
-    unaff_r24 = (uint)(Death - 1U < 3);
-    unaff_r25 = (uint)(GemPath - 1U < 3);
-  }
-  iVar9 = 0;
-  pRVar10 = (RPos_s *)0x0;
-  if (iRAIL == -1) {
-    iRAIL = 0;
-    iALONG = -1;
-  }
-  iVar8 = 0;
-  bVar2 = true;
-  do {
-    if (((bool)(bVar11 >> 1 & 1)) ||
-       (((((unaff_r23 == 0 || (Rail[iRAIL].type == '\x01')) &&
-          ((unaff_r24 == 0 || (Rail[iRAIL].type == '\x02')))) &&
-         ((unaff_r25 == 0 || (Rail[iRAIL].type == '\x03')))) &&
-        ((unaff_r23 != 0 || (((unaff_r24 != 0 || (unaff_r25 != 0)) || (Rail[iRAIL].type == '\0'))) ))
-        ))) {
-      fVar12 = BestRailPosition(pos,tmp,iRAIL,iALONG);
-      if ((tmp->iRAIL != -1) && (tmp->iALONG != -1)) {
-        if ((pRVar10 == (RPos_s *)0x0) || ((double)fVar12 < in_f31)) {
-          pRVar10 = tmp;
-          in_f31 = (double)fVar12;
+    struct RPos_s *list;
+    s32 i;
+    s32 bonus;
+    s32 death;
+    s32 gempath;
+    s32 count;
+    struct RPos_s *best;
+    float d;
+    float dbest;
+    char pad[7];
+    
+    if (set != 0) {
+        list = cRPos;
+    }
+    else {
+        list = temp_cRPos;
+    }
+    if (set != 0) {
+        bonus = (Bonus - 1U < 3);
+        death = (Death - 1U < 3);
+        gempath = (GemPath - 1U < 3);
+    }
+    count = 0;
+    best = NULL;
+    if (iRAIL == -1) {
+        iRAIL = 0;
+        iALONG = -1;
+    }
+    for (i = 0; i < 8; i++) {
+        if ((set == 0) ||
+           (((((bonus == 0 || (Rail[iRAIL].type == '\x01')) &&
+              ((death == 0 || (Rail[iRAIL].type == '\x02')))) &&
+             ((gempath == 0 || (Rail[iRAIL].type == '\x03')))) &&
+            ((bonus != 0 ||
+             (((death != 0 || (gempath != 0)) || (Rail[iRAIL].type == '\0')))))))) {
+            dbest = BestRailPosition(pos,&list[count],iRAIL,iALONG);
+            if ((list[count].iRAIL != -1) && (list[count].iALONG != -1)) {
+                if ((best == NULL) || (dbest < d)) {
+                    best = &list[count];
+                    d = dbest;
+                }
+                count++;
+                if (count == 3) break;
+            }
         }
-        bVar1 = iVar9 == 2;
-        tmp = tmp + 1;
-        iVar9 = iVar9 + 1;
-        bVar2 = pRVar10 == (RPos_s *)0x0;
-        if (bVar1) break;
-      }
+        iRAIL = (iRAIL + 1) % 8;
+        iALONG = -1;
     }
-    uVar6 = iRAIL + 1;
-    uVar4 = uVar6;
-    if ((int)uVar6 < 0) {
-      uVar4 = iRAIL + 8;
+    if (best != 0) {
+        *rpos = *best;
     }
-    iVar8 = iVar8 + 1;
-    iRAIL = uVar6 - (uVar4 & 0xfffffff8);
-    iALONG = -1;
-  } while (iVar8 < 8);
-  if (bVar2) {
-    rpos->iRAIL = -1;
-    rpos->iALONG = -1;
-  }
-  else {
-    iVar8 = 0x18;
-    tmp = pRVar10;
-    pRVar3 = rpos;
-    do {
-      pRVar7 = pRVar3;
-      pRVar5 = tmp;
-      iVar8 = iVar8 + -0x18;
-      *(undefined4 *)pRVar7 = *(undefined4 *)pRVar5;
-      *(undefined4 *)&pRVar7->i1 = *(undefined4 *)&pRVar5->i1;
-      pRVar7->fALONG = pRVar5->fALONG;
-      pRVar7->fACROSS = pRVar5->fACROSS;
-      *(undefined4 *)&pRVar7->angle = *(undefined4 *)&pRVar5->angle;
-      *(undefined4 *)&pRVar7->mode = *(undefined4 *)&pRVar5->mode;
-      tmp = (RPos_s *)&pRVar5->pos;
-      pRVar3 = (RPos_s *)&pRVar7->pos;
-    } while (iVar8 != 0);
-    (pRVar7->pos).x = (pRVar5->pos).x;
-    (pRVar7->pos).y = (pRVar5->pos).y;
-    (pRVar7->pos).z = (pRVar5->pos).z;
-  }
-  if (!(bool)(bVar11 >> 1 & 1)) {
-    best_cRPos = pRVar10;
-    cRPosCOUNT = iVar9;
-    pRVar10 = temp_best_cRPos;
-    iVar9 = temp_cRPosCOUNT;
-  }
-  temp_cRPosCOUNT = iVar9;
-  temp_best_cRPos = pRVar10;
-  temp_iRAIL = (int)rpos->iRAIL;
-  temp_iALONG = (int)rpos->iALONG;
-  temp_fALONG = rpos->fALONG;
-  temp_fACROSS = rpos->fACROSS;
-  return;
+    else {
+        rpos->iRAIL = rpos->iALONG = -1;
+    }
+    if (set != 0) {
+        best_cRPos = best;
+        cRPosCOUNT = count;
+    }
+    else{
+        temp_best_cRPos = best;
+        temp_cRPosCOUNT = count;
+    }
+        temp_iRAIL = (s32)rpos->iRAIL;
+        temp_iALONG = (s32)rpos->iALONG;
+        temp_fALONG = rpos->fALONG;
+        temp_fACROSS = rpos->fACROSS;
+    return;
 }
 */
 
