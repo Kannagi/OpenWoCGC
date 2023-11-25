@@ -444,7 +444,7 @@ void NuLightAddSpotXSpanFade(struct nuvec_s* pos, float XSpan, float fade)
     buglight_distance = (2.0 / XSpan) * 3.0;
     return;
 }
-
+/*
 void NuLightMatInit(void)
 
 {
@@ -464,7 +464,7 @@ void NuLightMatInit(void)
     //NuMtlUpdate();
     return;
 }
-
+*/
 int NuLgtRand(void)
 
 {

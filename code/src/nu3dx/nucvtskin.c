@@ -44,9 +44,9 @@ return;
 static void CreateSkinGeom(struct nugeom_s* geom, struct primdef_s* pd, s32 pdcnt) {
 
     s32 amount_prim;
-    struct NuPrim* nextprim;
-    struct NuPrim* startprim;
-    struct NuPrim* currentprim;
+    struct nuprim_s* nextprim;
+    struct nuprim_s* startprim;
+    struct nuprim_s* currentprim;
     struct nuvtx_sk3tc1_s* newvertexbuff;
     struct primdef_s* currpd;
     s32 i;
@@ -127,14 +127,85 @@ static void CreateSkinGeom(struct nugeom_s* geom, struct primdef_s* pd, s32 pdcn
     return;
 }
 
+//MATCH GCN
+static s32 AddMtxToPrimDef(struct primdef_s *primdef,s32 mtxid)
+{
+  s32 n;
+  s32 i;
+
+
+     for(i = 0; i < primdef->nummtx; i++) {
+
+          n = primdef->mtxid[i];
+        if (n == mtxid) {
+            return i;
+        }
+    }
+    if (i >= 15) {
+        return 0;
+    }
+    primdef->mtxid[i] = mtxid;
+    primdef->nummtx++;
+    return i;
+}
+
+//NGC MATCH
+static void SetVtxSkinData (struct primdef_s * pd, s32 pdix, struct nuvtx_tc1_s * vb, s32 vid, struct nugeom_s * ge)
+{
+  s32 n;
+  s32 offset;
+  float *weights;
+  s32 ix;
+  struct nuskin_s *sk;
+
+      //memcpy(&vb[vid], &pd->vrts[pdix], sizeof (struct nuvtx_tc1_s));
+      pd->vrts[pdix] = vb[vid];
+      pd->vid[pdix] = vid;
+
+      if (pdix < 3) {
+        for (sk = ge->skin; sk != NULL; sk = sk->next) {
+          offset = vid - sk->vtxoffset;
+          if ((-1 < offset) && (offset < sk->vtxcnt)) {
+            weights = &sk->weights[sk->mtxcnt * offset];
+            for (ix = 0, n = 0; ix < sk->mtxcnt; ix++)
+            {
+              n = AddMtxToPrimDef(pd,sk->mtxid[ix]);
+              pd->weights[pdix * 5][n] = weights[ix];
+            }
+            return;
+          }
+        }
+      }
+      return;
+}
+
+//86% --> equivalent?
+static void SetVtxSkinData2(struct primdef_s *pd,s32 pdix,struct nuvtx_tc1_s *vertexbuf,s32 vid,struct nugeom_s *currgeom)
+{
+    struct NUVTXSKININFO_s *skinfo;
+    s32 i;
+    s32 ix;
+
+
+    pd->vrts[pdix] = vertexbuf[vid];
+    pd->vid[pdix] = vid;
+    skinfo = &currgeom->vtxskininfo[vid];
+
+
+    for(i = ix = 0; i != 3 && skinfo->wts[ix] != 0.0f; i++) {
+        pd->weights[pdix][AddMtxToPrimDef(pd,skinfo->joint_ixs[i])] = skinfo->wts[++ix];
+    }
+
+    return;
+}
 
 //94.78%
 // This function creates a skinned geometry. It does this by creating an array of
 // primitives, setting vertex skin data, sorting the primitives and then creating a
 // new geometry from the sorted primitive array. A better name for this function
-void NuPs2CreateSkinNorm(struct NuGobj *gobj) {
+void NuPs2CreateSkinNorm(struct nugobj_s *gobj) {
     struct nugeom_s* currGeom;
-    struct NuPrim *p;
+    struct nuprim_s *p;
     struct nuvtx_tc1_s *srcvb;
     struct primdef_s *pd;
     u16 *vid;
@@ -156,11 +227,11 @@ void NuPs2CreateSkinNorm(struct NuGobj *gobj) {
 
     for (currGeom = gobj->geom; currGeom != 0; currGeom = currGeom->next)
     {
-        if (currGeom->skins == NULL && !currGeom->vtxskininfo) {
+        if (currGeom->skin == NULL && !currGeom->vtxskininfo) {
             continue;
         }
         pd = primdefs;
-        p = currGeom->prims;
+        p = currGeom->prim;
         pdcnt = 0;
         vid = (u16*)p->idxbuff;
         srcvb = currGeom->hVB;
@@ -476,77 +547,4 @@ s32 SortPrimdefs(struct primdef_s* pd, s32 count) {
         }
     }
     return i;
-}
-
-//MATCH GCN
-static s32 AddMtxToPrimDef(struct primdef_s *primdef,s32 mtxid)
-{
-  s32 n;
-  s32 i;
-
-
-     for(i = 0; i < primdef->nummtx; i++) {
-
-          n = primdef->mtxid[i];
-        if (n == mtxid) {
-            return i;
-        }
-    }
-    if (i >= 15) {
-        return 0;
-    }
-    primdef->mtxid[i] = mtxid;
-    primdef->nummtx++;
-    return i;
-}
-
-
-//NGC MATCH
-static void SetVtxSkinData (struct primdef_s * pd, s32 pdix, struct nuvtx_tc1_s * vb, s32 vid, struct nugeom_s * ge)
-{
-  s32 n;
-  s32 offset;
-  float *weights;
-  s32 ix;
-  struct NuSkin *sk;
-
-      //memcpy(&vb[vid], &pd->vrts[pdix], sizeof (struct nuvtx_tc1_s));
-      pd->vrts[pdix] = vb[vid];
-      pd->vid[pdix] = vid;
-
-      if (pdix < 3) {
-        for (sk = ge->skins; sk != NULL; sk = sk->next) {
-          offset = vid - sk->vtxoffset;
-          if ((-1 < offset) && (offset < sk->vtxcnt)) {
-            weights = &sk->weights[sk->mtxcnt * offset];
-            for (ix = 0, n = 0; ix < sk->mtxcnt; ix++)
-            {
-              n = AddMtxToPrimDef(pd,sk->mtxid[ix]);
-              pd->weights[pdix * 5][n] = weights[ix];
-            }
-            return;
-          }
-        }
-      }
-      return;
-}
-
-//86% --> equivalent?
-static void SetVtxSkinData2(struct primdef_s *pd,s32 pdix,struct nuvtx_tc1_s *vertexbuf,s32 vid,struct nugeom_s *currgeom)
-{
-    struct NUVTXSKININFO_s *skinfo;
-    s32 i;
-    s32 ix;
-
-
-    pd->vrts[pdix] = vertexbuf[vid];
-    pd->vid[pdix] = vid;
-    skinfo = &currgeom->vtxskininfo[vid];
-
-
-    for(i = ix = 0; i != 3 && skinfo->wts[ix] != 0.0f; i++) {
-        pd->weights[pdix][AddMtxToPrimDef(pd,skinfo->joint_ixs[i])] = skinfo->wts[++ix];
-    }
-
-    return;
 }

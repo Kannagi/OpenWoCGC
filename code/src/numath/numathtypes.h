@@ -4,6 +4,14 @@
 #include "types.h"
 #include "stddef.h"
 
+// Size: 0xC
+struct nuangvec_s
+{
+    int x; // Offset: 0x0
+    int y; // Offset: 0x4
+    int z; // Offset: 0x8
+};
+
 // Size: 0xC // 3D vector.
 struct Vec
 {
@@ -21,7 +29,7 @@ struct nuvec_s
 };
 
 // Vector with 4 slots.
-struct Vec4
+struct nuvec4_s
 {
 	f32 x;
 	f32 y;

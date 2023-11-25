@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "nu3dxtypes.h"
+#include "nu3dx/nurndr.h"
 
 /*
   800b2aac 000074 800b2aac  4 NuMtlCreateDefault 	Global

@@ -71,10 +71,10 @@ enum nurndritemtype_s
 // Render data.
 struct nurndritem_s
 {
-	struct nurndritem_s* next;
-	enum nurndritemtype_s type;
-	s32 flags;
-	s16 lights_index;
+    struct nurndritem_s* next; // Offset: 0x0
+    enum nurndritemtype_s type; // Offset: 0x4
+    s32 flags; // Offset: 0x8
+    s16 lights_index; // Offset: 0xC
 };
 
 // Camera.
@@ -355,13 +355,36 @@ struct nugobj_s
     int culltype;
 };
 
+// Size: 0x34
+struct NUJOINTANIM_s
+{
+    float rx; // Offset: 0x0, DWARF: 0x1CBED
+    float ry; // Offset: 0x4, DWARF: 0x1CC12
+    float rz; // Offset: 0x8, DWARF: 0x1CC37
+    float tx; // Offset: 0xC, DWARF: 0x1CC5C
+    float ty; // Offset: 0x10, DWARF: 0x1CC81
+    float tz; // Offset: 0x14, DWARF: 0x1CCA6
+    float sx; // Offset: 0x18, DWARF: 0x1CCCB
+    float sy; // Offset: 0x1C, DWARF: 0x1CCF0
+    float sz; // Offset: 0x20, DWARF: 0x1CD15
+    short max_rx; // Offset: 0x24, DWARF: 0x1CD3A
+    short max_ry; // Offset: 0x26, DWARF: 0x1CD63
+    short max_rz; // Offset: 0x28, DWARF: 0x1CD8C
+    short min_rx; // Offset: 0x2A, DWARF: 0x1CDB5
+    short min_ry; // Offset: 0x2C, DWARF: 0x1CDDE
+    short min_rz; // Offset: 0x2E, DWARF: 0x1CE07
+    unsigned char joint_id; // Offset: 0x30, DWARF: 0x1CE30
+    unsigned char flags; // Offset: 0x31, DWARF: 0x1CE5B
+    unsigned char pad[2]; // Offset: 0x32, DWARF: 0x1CE83
+};
+
 
 // Size: 0x3C
 struct nuprim_s
 {
     struct nuprim_s* next;
     enum nuprimtype_e type; //Size: 0x4
-    unsigned short vertexCount;
+    unsigned short cnt;
     unsigned short max;
     unsigned short* vid;
     struct nuplane_s* pln;
@@ -620,14 +643,14 @@ struct NUELLIPSOID_s {
 struct NUCYLINDERS_s {
     struct nuvec_s centre;
     struct nuvec_s y_axis;
-    struct Vec4 x_axis;
-    struct Vec4 z_axis;
+    struct nuvec4_s x_axis;
+    struct nuvec4_s z_axis;
     char pad[8];
 };
 
 struct NUSHADOWMESH_s {
-    struct Vec4 * normals;
-    struct Vec4 * verts;
+    struct nuvec4_s * normals;
+    struct nuvec4_s * verts;
 };
 
 struct NUSHADOWDATA_s {
@@ -639,56 +662,6 @@ struct NUSHADOWDATA_s {
     u8 nshadow_meshes;
     u8 joint;
 };
-
-
-
-// Size: 0x10
-struct nuanimdata_s
-{
-	float time;
-	char* node_name;
-	int nchunks;
-	struct nuanimdatachunk_s** chunks;
-};
-
-// Size: 0x14
-struct nuanimdatachunk_s
-{
-	int numnodes;
-	int num_valid_animcurvesets;
-	struct nuanimcurveset_s** animcurvesets;
-	struct nuanimkey_s* keys;
-	struct nuanimcurve_s* curves;
-};
-
-// Size: 0x10
-struct nuanimcurveset_s
-{
-	int flags;
-	float* constants;
-	struct nuanimcurve_s** set;
-	char ncurves;
-	char pad[3];
-};
-
-// Size: 0x10
-struct nuanimcurve_s
-{
-	unsigned int mask;
-	struct nuanimkey_s* animkeys;
-	unsigned int numkeys;
-	unsigned int flags;
-};
-
-// Size: 0x10
-struct nuanimkey_s
-{
-	float time;
-	float dtime;
-	float c;
-	float d;
-};
-
 // Size: 0x1C
 typedef struct {
     int next;
@@ -709,14 +682,6 @@ struct scene_inst_s {
     struct nugscn_s * scene;
 };
 
-typedef struct sceneinst_s sceneinst_s, *Psceneinst_s;
-
-struct sceneinst_s {
-    struct nuscene_s * nus;
-    char name[256];
-    int inst_cnt;
-};
-
 typedef struct SplTab SplTab, *PSplTab;
 
 struct SplTab {
@@ -725,7 +690,7 @@ struct SplTab {
     short min;
     short max;
     char unk[4];
-    u64 levbits; /* unk_type */
+    unsigned long long levbits; /* unk_type */
 };
 
 typedef struct visidata_s visidata_s, *Pvisidata_s;
@@ -736,6 +701,31 @@ struct visidata_s {
     int binfosize;
     int curspline;
     int curknot;
+};
+
+struct rdata_s
+{
+    int dmadata[2]; // Offset: 0x0, DWARF: 0xBCB9C8
+    int unpackdata[2]; // Offset: 0x8, DWARF: 0xBCB9F4
+    // Size: 0x20
+    struct
+    {
+        float x; // Offset: 0x0, DWARF: 0xBC8BC7
+        float y; // Offset: 0x4, DWARF: 0xBC8BEB
+        float z; // Offset: 0x8, DWARF: 0xBC8C0F
+        float time; // Offset: 0xC, DWARF: 0xBC8C33
+        float mx; // Offset: 0x10, DWARF: 0xBC8C5A
+        float my; // Offset: 0x14, DWARF: 0xBC8C7F
+        float mz; // Offset: 0x18, DWARF: 0xBC8CA4
+        float etime; // Offset: 0x1C, DWARF: 0xBC8CC9
+    } debris[32]; // Offset: 0x10, DWARF: 0xBCBA23
+};
+
+// Size: 0x8
+struct matchingslot_s
+{
+    int batch; // Offset: 0x0, DWARF: 0x7D6971
+    int slot; // Offset: 0x4, DWARF: 0x7D6999
 };
 
 #endif // !NU3DXTYPES_H

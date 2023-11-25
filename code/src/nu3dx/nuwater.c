@@ -1,6 +1,8 @@
 #include "nuwater.h"
 #include "../system.h"
 
+struct numtl_s* DebMat[8]; //debris.c
+
 //NGC MATCH
 static s32 Powr2(s32 v) {
     s32 p2;
@@ -18,7 +20,7 @@ static void fixMaterials(void) {
     s32 nummtls;
     struct numtl_s *mtl;
     s32 i;
-    
+
     nummtls = NuMtlNum();
         for (i = 0; i < nummtls; i++) {
             mtl = NuMtlGet(i);
@@ -47,7 +49,7 @@ s32 dynamicWaterGetNormalMap(void) {
 //NGC MATCH
 static void NuDynamicWaterClose(void) {
     s32 i;
-    
+
     if (dynamicWaterInitialised != 0) {
         dynamicWaterInitialised = 0;
         for (i = 0; i < 6; i++) {
@@ -57,11 +59,73 @@ static void NuDynamicWaterClose(void) {
     return;
 }
 
+
+//NGC MATCH
+static void NuDynamicWaterCalcShaderUVOffsets(s32 width, s32 height, float multiplier) {
+    float hoff;
+    float woff;
+
+    woff = (1.0f / (float) width) * multiplier;
+    hoff = (1.0f / (float) height)  * multiplier;
+
+    dynamicWaterUVOffsets[0][0].x = woff * 0.5f;
+    dynamicWaterUVOffsets[0][0].y = hoff * 0.5f;
+    dynamicWaterUVOffsets[0][0].z = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][0].w = dynamicWaterUVOffsets[0][0].y;
+
+    dynamicWaterUVOffsets[0][1].x = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][1].y = dynamicWaterUVOffsets[0][0].y;
+    dynamicWaterUVOffsets[0][1].z = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][1].w = dynamicWaterUVOffsets[0][0].y;
+
+    dynamicWaterUVOffsets[1][2].x = dynamicWaterUVOffsets[0][0].x - dynamicWaterUVOffsets[0][0].x * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][2].y = dynamicWaterUVOffsets[0][0].y - hoff * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][2].z = dynamicWaterUVOffsets[0][0].x + woff * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][2].w = dynamicWaterUVOffsets[0][0].y - dynamicWaterUVOffsets[0][0].y * dynamicWaterBlurDist;
+
+    dynamicWaterUVOffsets[0][2].x = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][2].y = dynamicWaterUVOffsets[0][0].y;
+    dynamicWaterUVOffsets[0][2].z = 0.0f - woff;
+    dynamicWaterUVOffsets[0][2].w = 0.0f - hoff;
+
+    dynamicWaterUVOffsets[0][3].x = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x + woff;
+    dynamicWaterUVOffsets[0][3].y = 0.0f - hoff;
+    dynamicWaterUVOffsets[0][3].z = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x + woff;
+    dynamicWaterUVOffsets[0][3].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y + hoff;
+
+    dynamicWaterUVOffsets[0][4].x = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][4].y = dynamicWaterUVOffsets[0][0].y;
+    dynamicWaterUVOffsets[0][4].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y + hoff;
+    dynamicWaterUVOffsets[0][4].z = 0.0f - woff;
+
+    dynamicWaterUVOffsets[0][5].x = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][5].y = dynamicWaterUVOffsets[0][0].y;
+    dynamicWaterUVOffsets[0][5].z = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[0][5].w = dynamicWaterUVOffsets[0][0].y;
+
+    dynamicWaterUVOffsets[1][3].x = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][3].y = dynamicWaterUVOffsets[0][0].y + hoff * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][3].z = dynamicWaterUVOffsets[0][0].x - woff * dynamicWaterBlurDist;
+    dynamicWaterUVOffsets[1][3].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y * dynamicWaterBlurDist;
+
+    dynamicWaterUVOffsets[1][4].x = dynamicWaterUVOffsets[0][0].x - woff;
+    dynamicWaterUVOffsets[1][4].z = dynamicWaterUVOffsets[0][0].x + woff;
+    dynamicWaterUVOffsets[1][4].y = dynamicWaterUVOffsets[0][0].y;
+    dynamicWaterUVOffsets[1][4].w = dynamicWaterUVOffsets[0][0].y;
+
+    dynamicWaterUVOffsets[1][5].x = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[1][5].y = dynamicWaterUVOffsets[0][0].y + hoff;
+    dynamicWaterUVOffsets[1][5].z = dynamicWaterUVOffsets[0][0].x;
+    dynamicWaterUVOffsets[1][5].w = dynamicWaterUVOffsets[0][0].y - hoff;
+
+    return;
+}
+
 //96%
 static void NuDynamicWaterInit() {
     s32 i;
     struct nutex_s tex;
-    
+
     if (dynamicWaterEnabled != 0) {
         if (dynamicWaterInitialised != 0) {
             NuDynamicWaterClose();
@@ -199,70 +263,10 @@ static void NuDynamicWaterRender2dRect(s32 width,s32 height) {
     vtx[3].rhw = 1.0;
     vtx[3].tc[0] = 1.0f;
     vtx[3].tc[1] = 1.0f;
-    GS_DrawTriStripTTL((struct _GS_VERTEXTL *)vtx,4);
+    //GS_DrawTriStripTTL((struct _GS_VERTEXTL *)vtx,4);
     return;
 }
 
-//NGC MATCH
-static void NuDynamicWaterCalcShaderUVOffsets(s32 width, s32 height, float multiplier) {
-    float hoff;
-    float woff;
-    
-    woff = (1.0f / (float) width) * multiplier;
-    hoff = (1.0f / (float) height)  * multiplier;
-    
-    dynamicWaterUVOffsets[0][0].x = woff * 0.5f;
-    dynamicWaterUVOffsets[0][0].y = hoff * 0.5f;
-    dynamicWaterUVOffsets[0][0].z = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][0].w = dynamicWaterUVOffsets[0][0].y;
-    
-    dynamicWaterUVOffsets[0][1].x = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][1].y = dynamicWaterUVOffsets[0][0].y;
-    dynamicWaterUVOffsets[0][1].z = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][1].w = dynamicWaterUVOffsets[0][0].y;
-    
-    dynamicWaterUVOffsets[1][2].x = dynamicWaterUVOffsets[0][0].x - dynamicWaterUVOffsets[0][0].x * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][2].y = dynamicWaterUVOffsets[0][0].y - hoff * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][2].z = dynamicWaterUVOffsets[0][0].x + woff * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][2].w = dynamicWaterUVOffsets[0][0].y - dynamicWaterUVOffsets[0][0].y * dynamicWaterBlurDist;
-    
-    dynamicWaterUVOffsets[0][2].x = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][2].y = dynamicWaterUVOffsets[0][0].y;
-    dynamicWaterUVOffsets[0][2].z = 0.0f - woff;
-    dynamicWaterUVOffsets[0][2].w = 0.0f - hoff;
-    
-    dynamicWaterUVOffsets[0][3].x = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x + woff;
-    dynamicWaterUVOffsets[0][3].y = 0.0f - hoff;
-    dynamicWaterUVOffsets[0][3].z = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x + woff;
-    dynamicWaterUVOffsets[0][3].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y + hoff;
-    
-    dynamicWaterUVOffsets[0][4].x = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][4].y = dynamicWaterUVOffsets[0][0].y;
-    dynamicWaterUVOffsets[0][4].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y + hoff;
-    dynamicWaterUVOffsets[0][4].z = 0.0f - woff;
-
-    dynamicWaterUVOffsets[0][5].x = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][5].y = dynamicWaterUVOffsets[0][0].y;
-    dynamicWaterUVOffsets[0][5].z = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[0][5].w = dynamicWaterUVOffsets[0][0].y;
-    
-    dynamicWaterUVOffsets[1][3].x = dynamicWaterUVOffsets[0][0].x + dynamicWaterUVOffsets[0][0].x * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][3].y = dynamicWaterUVOffsets[0][0].y + hoff * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][3].z = dynamicWaterUVOffsets[0][0].x - woff * dynamicWaterBlurDist;
-    dynamicWaterUVOffsets[1][3].w = dynamicWaterUVOffsets[0][0].y + dynamicWaterUVOffsets[0][0].y * dynamicWaterBlurDist;
-    
-    dynamicWaterUVOffsets[1][4].x = dynamicWaterUVOffsets[0][0].x - woff;
-    dynamicWaterUVOffsets[1][4].z = dynamicWaterUVOffsets[0][0].x + woff;
-    dynamicWaterUVOffsets[1][4].y = dynamicWaterUVOffsets[0][0].y;
-    dynamicWaterUVOffsets[1][4].w = dynamicWaterUVOffsets[0][0].y;
-    
-    dynamicWaterUVOffsets[1][5].x = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[1][5].y = dynamicWaterUVOffsets[0][0].y + hoff;
-    dynamicWaterUVOffsets[1][5].z = dynamicWaterUVOffsets[0][0].x;
-    dynamicWaterUVOffsets[1][5].w = dynamicWaterUVOffsets[0][0].y - hoff;
-    
-    return;
-}
 
 //NGC MATCH
 static void NuDynamicWaterSetVertexShaderUVOffsets(s32 type) {
@@ -344,7 +348,7 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
     struct D3DSurface *currentBackBuffer;
     struct D3DSurface *currentZBuffer;
     s32 i;
-    
+
     if (((dynamicWaterInitialised != 0) && (dynamicWaterEnabled != 0)) && ((watervisible != 0 || (forceupdate != 0)))) {
         currentBackBuffer = NudxFw_GetBackBuffer();
         currentZBuffer = NudxFw_GetZBuffer();
@@ -357,7 +361,7 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
         NudxFw_SetRenderState(0x7d,0);
         GS_EnableLighting(0);
         GS_EnableColorVertex(0);
-        NuSetShaderState(CALCNEIGHBOURFORCE,NUVT_TLTC1);
+        //NuSetShaderState(CALCNEIGHBOURFORCE,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterForceStepOneTex],NULL);
         GS_SetBlendSrc(1,1,0);
         NuTexSetTexture(0,dynamicWaterTextureIds[dynamicWaterHeightSourceTex]);
@@ -374,14 +378,14 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
         }
         NuDynamicWaterSetVertexShaderUVOffsets(1);
         NuDynamicWaterRender2dRect(0x80,0x80);
-        NuSetShaderState(CALCNEIGHBOURFORCE2,NUVT_TLTC1);
+        //NuSetShaderState(CALCNEIGHBOURFORCE2,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterForceTex],NULL);
         NuTexSetTexture(0,dynamicWaterTextureIds[dynamicWaterHeightSourceTex]);
         NuTexSetTexture(1,dynamicWaterTextureIds[dynamicWaterHeightSourceTex]);
         NuTexSetTexture(2,dynamicWaterTextureIds[dynamicWaterForceStepOneTex]);
         NuDynamicWaterSetVertexShaderUVOffsets(2);
         NuDynamicWaterRender2dRect(0x80,0x80);
-        NuSetShaderState(APPLYFORCEORVELOCITY,NUVT_TLTC1);
+        //NuSetShaderState(APPLYFORCEORVELOCITY,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterVelocityTargetTex],NULL);
         NuTexSetTexture(0,dynamicWaterTextureIds[dynamicWaterVelocitySourceTex]);
         NuTexSetTexture(1,dynamicWaterTextureIds[dynamicWaterForceTex]);
@@ -389,12 +393,12 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
         NuTexSetTexture(3,0);
         NuDynamicWaterSetVertexShaderUVOffsets(0);
         NuDynamicWaterRender2dRect(0x80,0x80);
-        NuSetShaderState(APPLYFORCEORVELOCITY,NUVT_TLTC1);
+        //NuSetShaderState(APPLYFORCEORVELOCITY,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterHeightTargetTex],NULL);
         NuTexSetTexture(0,dynamicWaterTextureIds[dynamicWaterHeightSourceTex]);
         NuTexSetTexture(1,dynamicWaterTextureIds[dynamicWaterVelocityTargetTex]);
         NuDynamicWaterRender2dRect(0x80,0x80);
-        NuSetShaderState(BLURFILTER,NUVT_TLTC1);
+        //NuSetShaderState(BLURFILTER,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterBlurTex],NULL);
         i = dynamicWaterHeightTargetTex;
         dynamicWaterHeightTargetTex = dynamicWaterHeightSourceTex;
@@ -405,7 +409,7 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
         NuTexSetTexture(3,dynamicWaterTextureIds[dynamicWaterHeightSourceTex]);
         NuDynamicWaterSetVertexShaderUVOffsets(4);
         NuDynamicWaterRender2dRect(0x80,0x80);
-        NuSetShaderState(CREATENORMALMAP,NUVT_TLTC1);
+        //NuSetShaderState(CREATENORMALMAP,NUVT_TLTC1);
         NudxFw_SetRenderTargetSurface(dynamicWaterSurfaces[dynamicWaterNormalTex],NULL);
         NuTexSetTexture(0,dynamicWaterTextureIds[dynamicWaterHeightTargetTex]);
         NuTexSetTexture(1,dynamicWaterTextureIds[dynamicWaterHeightTargetTex]);
@@ -425,10 +429,10 @@ void NuDynamicWaterUpdate(s32 forceupdate) {
 //NGC MATCH
 static s32 isWaterInstance(struct nugscn_s *gsc,struct nuinstance_s *inst) {
     struct nugeom_s *geom;
-    
+
     geom = gsc->gobjs[inst->objid]->geom;
     while( geom != NULL ) {
-        if ((NuShaderAssignShader(geom) == 1) || (NuShaderAssignShader(geom) == 0x1b)) return 1;
+        //if ((NuShaderAssignShader(geom) == 1) || (NuShaderAssignShader(geom) == 0x1b)) return 1;
         geom = geom->next;
     }
     return 0;
@@ -440,13 +444,13 @@ static void initWaterGeom(struct nugeom_s* geom) {
     s32 vtxcnt = geom->vtxcnt;
     struct nuvtx_tc1_s* vbptr = (struct nuvtx_tc1_s*)geom->hVB;
     int nrmY;
-    
+
     for (i = 0; i < vtxcnt; i++) {
         nrmY = vbptr->nrm.y;
         vbptr->nrm.x = (nrmY > 0 ? nrmY : -nrmY) % 32;
         vbptr++;
     }
-    
+
     return;
 }
 
@@ -455,7 +459,7 @@ static void initWater(struct nugscn_s* gsc) {
     s32 i;
     s32 num_water_insts;
     struct nugeom_s *geom;
-    
+
     num_water_insts = 0;
     for (i = 0; i < gsc->numinstance; i++) {
             if (isWaterInstance(gsc,&gsc->instances[i]) != 0) {
@@ -484,13 +488,13 @@ static void animateWater(float scale_in, float theta_in, struct numtl_s *mtl) {
     int i;
     float scale;
     float theta;
-    struct NuVec v;
+    struct nuvec_s v;
     struct numtx_s mtx;
-    struct NuVec scalevec;
+    struct nuvec_s scalevec;
     char pad[70];
-    
 
-    scalevec = *(struct NuVec *)makenuvec(0.5f,0.5f,0.5f);
+
+    scalevec = *(struct nuvec_s *)makenuvec(0.5f,0.5f,0.5f);
     NuMtxInvR(&mtx,NuCameraGetMtx());
     NuMtxScale(&mtx,&scalevec);
     theta = (theta_in * (mtl->fx1).f32);
@@ -521,7 +525,7 @@ void NuWaterLoad(struct nugscn_s *gsc) {
 
 //NGC MATCH
 void NuWaterInit(void) {
-    
+
     float p2w = Powr2(SWIDTH);
     float p2h = Powr2(SHEIGHT);
     NuRandSeed(0x11);
@@ -564,7 +568,7 @@ void NuWaterSetup(void) {
     s32 i;
 
     for (i = 0; i < 0x20; i++) {
-        
+
     }
     return;
 }
@@ -580,7 +584,7 @@ void NuWaterRender(void) {
     s32 outcode;
     s32 i;
     static float theta;
-    
+
     watervisible = 0;
     if (nwinst != 0) {
         animateWater(0.1f,theta,wgsc[0]->gobjs[winst[0]->objid]->geom->mtl);

@@ -122,7 +122,7 @@ union variptr_u
     long long* u128;
     float* f32;
     struct nuvec_s* vec3;
-    struct Vec4* vec4;
+    struct nuvec4_s* vec4;
     struct nuivec_s* ivec3;
     struct nuivec4_s* ivec4;
     struct numtx_s* mtx44;
@@ -131,6 +131,12 @@ union variptr_u
     struct _sceDmaTag* dmatag;
     struct giftag* gifTag;
 
+};
+
+// Size: 0x8
+struct _LARGE_INTEGER_NGC
+{
+    double QuadPart; // Offset: 0x0
 };
 
 // Size: 0x2EC

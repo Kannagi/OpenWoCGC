@@ -60,10 +60,10 @@ struct nuvtx_sk3tc1_s
 // Size: 0x24
 struct nuvtx_tc1_s
 {
-    struct nuvec_s pnt;
-    struct nuvec_s nrm;
-    int diffuse;
-    float tc[2];
+    struct nuvec_s pnt; // Offset: 0x0
+    struct nuvec_s nrm; // Offset: 0xC
+    int diffuse; // Offset: 0x18
+    float tc[2]; // Offset: 0x1C
 };
 
 // Size: 0x1C

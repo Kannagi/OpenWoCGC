@@ -16,13 +16,77 @@
 
 s32 PHYSICAL_SCREEN_X = 640;
 s32 PHYSICAL_SCREEN_Y = 480;
+s32 IsLoadingScreen;
 struct nutex_s tex;
 struct numtl_s *mtl;
 u32 attr;
 s32 iss3cmp;
 s32 texinfo;
+struct nugscn_s* font3d_scene;
+struct nuscene_s* font3d_scene2;
 void* bits;
 int test_SDL_openGL();
+
+
+void MAHLoadingMessage(void)
+{
+  IsLoadingScreen = 1;
+  NuRndrClear(0xb,0,1.0);
+  if (NuRndrBeginScene(1) != 0) {
+    memcpy(&pNuCam->mtx, &numtx_identity, sizeof (struct numtx_s));
+    //NuCameraSet(pNuCam);
+    if ((font3d_scene != NULL) && (font3d_initialised != 0)) {
+      //NuShaderSetBypassShaders(1);
+      //DrawGameMessage(tLOADING[Game.language],0,0.0);
+      //NuShaderSetBypassShaders(0);
+    }
+    NuRndrEndScene();
+  }
+  NuRndrSwapScreen(1);
+  IsLoadingScreen = 0;
+  return;
+}
+
+void firstscreenfade(struct numtl_s *mat,s32 dir) {
+    s32 s;
+    s32 t;
+    u32 colour;
+    s32 col;
+
+    if (dir > 0) {
+        colour = 0;
+        s = 0x10;
+    }
+    else {
+        colour = 0xff;
+        s = -0x10;
+    }
+    for (t = 0; t < 0xe; t++) {
+        col = (0xFF << 24) | (colour << 16) | (colour << 8) | colour;
+        colour = colour + s;
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb,0,1.0f);
+            NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,col,mat);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+    }
+    return;
+}
+
+s32 CopyFilesThreadProc() {
+    s32 iVar1;
+    char texBuf [128];
+    u32 iStack_c;
+
+    iVar1 = GetTickCount();
+    //InitLevelSfxTables();
+    //InitGlobalSfx();
+    iStack_c = GetTickCount() - iVar1;
+    sprintf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
+    return 0;
+}
+
 
 int main()
 {
@@ -54,20 +118,20 @@ int main()
 
 
     printf("NuTrigTable init...\n");
-    //NuTrigInit();
+    NuTrigInit();
     printf("NuTex init...\n");
-    //NuTexInit();
+    NuTexInit();
     printf("NuGobj init...\n");
-    //NuGobjInit();
+    NuGobjInit();
     printf("NuMtl init...\n");
-    //NuMtlInit();
+    NuMtlInit();
     printf("NuRndr init...\n");
-    //NuRndrInitEx();
+    NuRndrInitEx();
     printf("NuLight init...\n");
-    //NuLightInit();
+    NuLightInit();
 
     //from firstscreens function
-    //CopyFilesThreadProc(0);
+    CopyFilesThreadProc(0);
     tex.type = NUTEX_RGB24;
     bits = malloc_x(0x4000c);
     NuFileLoadBuffer("gfx\\licnin.s3",bits,0x2000c);
@@ -80,9 +144,9 @@ int main()
 
     iss3cmp = 0x20000;
     tex.height = 0x200;
-    //texinfo = NuTexCreate(&tex);
+    texinfo = NuTexCreate(&tex);
     iss3cmp = 0;
-    //mtl = NuMtlCreate(1);
+    mtl = NuMtlCreate(1);
 
     mtl->tid = texinfo;
     (mtl->diffuse).r = 1.0f;
@@ -97,15 +161,15 @@ int main()
     mtl->attrib.vtc = 1;
     mtl->attrib.colour = 1;
     //printf("attrib: %d\n", attr);
-    //firstscreenfade(mtl,1);
+    firstscreenfade(mtl,1);
     nuvideo_global_vbcnt = 0;
   do {
-    //texinfo = NuRndrBeginScene(1);
+    texinfo = NuRndrBeginScene(1);
     if (texinfo != 0) {
-     // NuRndrClear(0xb,0,1.0f);
-     // NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl);
-     // NuRndrEndScene();
-     // NuRndrSwapScreen(1);
+      NuRndrClear(0xb,0,1.0f);
+      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl);
+      NuRndrEndScene();
+      NuRndrSwapScreen(1);
     }
     //Reseter();
     //GC_DiskErrorPoll();

@@ -214,6 +214,153 @@ void UpdateCutMovieCamera(struct CamMtx *cam)
   return;
 }
 
+//NGC MATCH
+void PlayCutMovie(s32 movie) {
+    s32 quit;
+    char pad [0x40];
+    
+    PANEL3DMULX = (float)SWIDTH / (DIVPANEL3DX * ((float)SWIDTH / (float)PHYSICAL_SCREEN_X));
+    PANEL3DMULY = (float)SHEIGHT / (DIVPANEL3DY * ((float)SHEIGHT / (float)PHYSICAL_SCREEN_Y));
+    
+    do {
+        next_cut_movie = -1;
+        GetTickCount();
+        ResetSuperBuffer2();
+        DebrisSetup();
+        DebrisRegisterCutoffCameraVec((struct NuVec *)&global_camera.mtx._30);
+        ParticleReset();
+        edppDestroyAllParticles();
+        edppDestroyAllEffects();
+        if (NuFileExists("levels\\b\\intro\\intro.ptl") != 0) {
+            edppLoadEffects("levels\\b\\intro\\intro.ptl", 1);
+        }
+        if (NuFileExists("stuff\\general.ptl") != 0) {
+            edppMergeEffects("stuff\\general.ptl", 0);
+        }
+        edppRestartAllEffectsInLevel();
+        CreateFadeMtl();
+        font3d_scene = NULL;
+        texanimbits = 0;
+        InitXboxEffectSystem(Level);
+        NuSoundKillAllAudio();
+        NuSoundKillAllAudio();
+        if (LoadCutMovie(movie) != 0) {
+            GetTickCount();
+            StartCutMovie();
+            ResetTimer(&GameTimer);
+            Paused = 0;
+            quit = 0;
+            MaxVP();
+            cut_on = 1;
+            fadeval = 0xff;
+            fade_rate = -8;
+
+            do {
+                DebrisSetRenderGroup(cutdebgroups[cutworldix]);
+                DoInput();
+                UpdateGameSfx();
+                NuXboxSoundUpdate();
+                UpdateCutMovie();
+                if (cut_on != 0) {
+                    UpdateCutMovieCamera(GameCam);
+                    Debris(0);
+                    if (world_scene[cutworldix] != NULL) {
+                        NuGScnUpdate(1.0f, world_scene[cutworldix]);
+                    }
+                    GameTiming();
+                    if (cutmovie == 0) {
+                        ProcMenu(&Cursor, Pad[0]);
+                    }
+                    UpdateFade();
+                    if (cutmovie != 0) {
+                        if ((Pad[0] != NULL) && ((Pad[0]->oldpaddata & 0x840) != 0))
+                        {
+                            next_cut_movie = -1;
+                            quit = 1;
+                        }
+                    }
+                    NuMtlAnimate(0.016666668f);
+                    NuTexAnimSetSignals(texanimbits);
+                    NuTexAnimProcess();
+                    pCam = GameCam;
+                    if (NuRndrBeginScene(1) != 0) {
+                        NuRndrClear(0xb, 0, 1.0f);
+                        if (!quit) {
+                            SetCutSceneLights();
+                            DrawCutMovie();
+                            if (world_scene[cutworldix] != NULL) {
+                                NuGScnRndr3(world_scene[cutworldix]);
+                            }
+                            if (cutmovie != 0) {
+                                DrawFade();
+                            }
+                        }
+                        NuRndrEndScene();
+                        if (NuRndrBeginScene(1) != 0) {
+                            NuWaterRender();
+                            NuRndrEndScene();
+                        }
+                        if (NuRndrBeginScene(1) != 0) {
+                            DebrisDraw(0);
+                            NuRndrEndScene();
+                        }
+                        if ((cutmovie == 0) && (NuRndrBeginScene(1) != 0)) {
+                            NuRndrClear(10, 0, 1.0f);
+                            DrawPanel();
+                            NuRndrEndScene();
+                            if (NuRndrBeginScene(1) != 0) {
+                                DrawFade();
+                                NuRndrEndScene();
+                            }
+                        }
+                    }
+                    NuRndrSwapScreen(1);
+                    
+                    if (cufps < 35.0f) {
+                        CutInst[cutworldix]->cframe = CutInst[cutworldix]->cframe + CutInst[cutworldix]->rate;
+                    }
+                    if (cufps < 25.0f) {
+                        CutInst[cutworldix]->cframe = CutInst[cutworldix]->cframe + CutInst[cutworldix]->rate;
+                    }
+                    if (cufps < 16.0f) {
+                        CutInst[cutworldix]->cframe = CutInst[cutworldix]->cframe + CutInst[cutworldix]->rate;
+                    }
+                    Reseter(0);
+                    GC_DiskErrorPoll();
+                }
+                
+                if (cutmovie != 0) {
+                    if (cut_on == 0 || quit == 0) {
+                        break;
+                    }
+                } else if ((fadeval > 0xFE) && (fadehack == 0)) {
+                    break;
+                }
+            } while (1);
+        }
+        
+        NuSoundUpdate();
+        NuSoundStopStream(0);
+        NuSoundStopStream(1);
+        NuSoundStopStream(2);
+        NuSoundStopStream(3);
+        NuSoundStopStream(4);
+        NuSoundUpdate();
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb, 0, 1.0f);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+        CloseXboxEffectSystem();
+        NuSceneDestroy(font3d_scene2);
+        CloseCutMovie(1);
+        movie = cutmovie = next_cut_movie;
+    } while( cutmovie >= 0 );
+
+    DebrisSetRenderGroup(0);
+    return;
+}
+
 //PS2
 void CloseCutMovie(s32 all)
 {

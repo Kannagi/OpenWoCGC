@@ -1,7 +1,14 @@
 #include "../system.h"
+#include "nu3dx/nu3dxtypes.h"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
+int maxblend_cntcnt;
+int maxblend_cnt;
+int globalix1;
+int globalix2;
+int gscn_dbg;
 
 void NuRndrInitEx(s32 streambuffersize)
 {
@@ -20,7 +27,7 @@ void NuGScnRndr3(struct nugscn_s *scn) {
 
   cnt = scn->numinstance;
   i = &scn->instances[cnt];
-    
+
   while (cnt != 0)
   {
     cnt--;
@@ -35,7 +42,7 @@ void NuGScnRndr3(struct nugscn_s *scn) {
         iVar3 = i->objid;
         instanim = i;
       }
-      
+
        i->flags.onscreen = NuRndrGScnObj(scn->gobjs[iVar3],&instanim->mtx);
     }
   }
@@ -54,7 +61,7 @@ void NuGScnRndr3(struct nugscn_s *scn) {
 struct nugspline_s * NuSplineFind(struct nugscn_s *scene,char *name) {
   s32 i;
   struct nugspline_s *sp;
-  
+
 
   sp = scene->splines;
     for (i = 0; i < scene->numsplines; i++) {
@@ -83,11 +90,6 @@ s32 NuSpecialFind(struct nugscn_s *scene,struct nuhspecial_s *special,char *name
   return 0;
 }
 
-void NuRndrInitEx(s32 streambuffersize) {
-  NuRndrInit();
-  return;
-}
-
 void NuRndrRect2di(s32 a,s32 b,s32 SWIDTH,s32 SHEIGHT,s32 fadecol,struct numtl_s *mtl) {
   GS_DrawFade(fadecol);
   return;
@@ -106,16 +108,16 @@ void * NuScratchAlloc32(s32 size)	//TODO
 		s32 cnt;
 		nuinstance_s* i;
 		nuspecial_s* sp;
-		nuinstanim_s* instanim; 
+		nuinstanim_s* instanim;
 	*/
 }
 
-static int ps2_scratch_free;	// --> point to PS2_SCRATCH_BASE
+static int* ps2_scratch_free;	// --> point to PS2_SCRATCH_BASE
 unsigned char PS2_SCRATCH_BASE[16384];
 
-void NuScratchRelease(void)
-{
-  ps2_scratch_free = (int *)ps2_scratch_free[-1];
+//MATCH NGC
+void NuScratchRelease(void) {
+  ps2_scratch_free = ps2_scratch_free[-1];
   return;
 }
 
@@ -132,7 +134,7 @@ float ** NuHGobjEvalDwa(int layer,void *bollox,struct nuanimdata_s *vtxanim,floa
     int i;
     struct nuanimtime_s atimeblendanim;
         char pad [12];
-    
+
     cnt = layer + -1;
     array_dwa = NULL;
     blend_cnt = 0;
@@ -154,7 +156,7 @@ float ** NuHGobjEvalDwa(int layer,void *bollox,struct nuanimdata_s *vtxanim,floa
                                 dwa[i] = NuAnimCurveCalcVal2(animcurve,&atimeblendanim);
                             }
                             else {
-                                
+
                                 dwa[i] = vtxanim->chunks[atimeblendanim.chunk]->animcurvesets[cnt]->constants[i];
                                 if (dwa[i] > 0.00000001) { //lbl_80121738
                                     blend_cnt++;
@@ -181,8 +183,8 @@ float ** NuHGobjEvalDwa(int layer,void *bollox,struct nuanimdata_s *vtxanim,floa
 float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxanim1,float vtxtime1,
                             struct nuanimdata_s *vtxanim2,float vtxtime2,float blend) {
     float** array_dwa; //
-    float* dwa; // 
-    struct nuanimtime_s atimeblendanim1; // 
+    float* dwa; //
+    struct nuanimtime_s atimeblendanim1; //
     struct nuanimtime_s atimeblendanim2; //
     int i; //
     int j; //
@@ -194,7 +196,7 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
     int layer; //
     int size; //
     char pad [18];
-    
+
     s32 nweights;
     struct nuanimcurveset_s *cv_set;
 
@@ -204,15 +206,15 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
         if (vtxanim1 != NULL) {
             NuAnimDataCalcTime(vtxanim1, vtxtime1, &atimeblendanim1);
         }
-        
+
         if (vtxanim2 != NULL) {
             NuAnimDataCalcTime(vtxanim2, vtxtime2, &atimeblendanim2);
         }
-        
+
         if (layers == NULL) {
             nlayers = 1;
         }
-        
+
         array_dwa = NuRndrCreateBlendShapeDWAPointers(nlayers);
         if (array_dwa != NULL) {
             for(i = 0; i < nlayers; i++) {
@@ -225,8 +227,8 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
                 else {
                     layer = 0;
                 }
-                
-                if ((vtxanim1 != NULL) && 
+
+                if ((vtxanim1 != NULL) &&
                     (layer < vtxanim1->chunks[atimeblendanim1.chunk]->numnodes) &&
                     (vtxanim1->chunks[atimeblendanim1.chunk]->animcurvesets[layer] != NULL)
                     ) {
@@ -244,12 +246,12 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
                 else {
                     ncurves2 = 0;
                 }
-                
+
                 nweights = MAX(ncurves1, ncurves2);
-                
+
                 dwa = NuRndrCreateBlendShapeDeformerWeightsArray(nweights);
                 array_dwa[i] = dwa;
-                
+
                 if (dwa != NULL) {
                     for(j = 0; j < nweights; j++) {
                         if (j < ncurves1) {
@@ -264,7 +266,7 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
                         else {
                             val1 = 0.0f;
                         }
-                        
+
                         if (j < ncurves2) {
                             cv_set = vtxanim2->chunks[atimeblendanim2.chunk]->animcurvesets[layer];
                             if (cv_set->set[j] != NULL) {
@@ -277,9 +279,9 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
                         else {
                             val2 = 0.0f;
                         }
-                        
+
                         dwa[j] = (val2 * blend + (val1 * (1.0f - blend)));
-                    } 
+                    }
                 }
             }
         }
@@ -291,25 +293,25 @@ float ** NuHGobjEvalDwaBlend(s32 nlayers,short *layers,struct nuanimdata_s *vtxa
 //NGC MATCH
 float ** NuHGobjEvalDwa2(int nlayers,short *layers,struct nuanimdata2_s *vtxanim,float vtxtime) {
     float** array_dwa; //
-    float* dwa; // 
-    struct nuanimtime_s atimeblendanim; // 
+    float* dwa; //
+    struct nuanimtime_s atimeblendanim; //
     int i; //
     int j; //
     int blend_cnt; //
     int layer; //
-    int size; // 
+    int size; //
     struct nuanimcurve2_s* curves; //
     char* curveflags; //
     char pad [6];
-    
+
     array_dwa = NULL;
     if ((vtxanim != NULL) && (nlayers != 0)) {
         NuAnimData2CalcTime(vtxanim, vtxtime, &atimeblendanim);
-        
+
         if (layers == NULL) {
             nlayers = 1;
         }
-        
+
         array_dwa = NuRndrCreateBlendShapeDWAPointers(nlayers);
         if (array_dwa != NULL) {
             for(i = 0; i < nlayers; i++) {
@@ -317,8 +319,8 @@ float ** NuHGobjEvalDwa2(int nlayers,short *layers,struct nuanimdata2_s *vtxanim
                     layer = (int)layers[i];
                     if (layer < 0) {
                         continue;
-                    } 
-                    
+                    }
+
                     if (layer >= vtxanim->nnodes) {
                         dwa = NuRndrCreateBlendShapeDeformerWeightsArray(0);
                         array_dwa[i] = dwa;
@@ -328,7 +330,7 @@ float ** NuHGobjEvalDwa2(int nlayers,short *layers,struct nuanimdata2_s *vtxanim
                 else {
                     layer = 0;
                 }
-                
+
                 blend_cnt = vtxanim->ncurves;
                 dwa = NuRndrCreateBlendShapeDeformerWeightsArray(blend_cnt);
                 array_dwa[i] = dwa;
@@ -345,21 +347,21 @@ float ** NuHGobjEvalDwa2(int nlayers,short *layers,struct nuanimdata2_s *vtxanim
             }
         }
     }
-    
+
     return array_dwa;
 }
 
 
 
 union variptr_u vpdmatag_curr;
-
+/*
 union variptr_u vpDmaTag_RetEx(union variptr_u ptr)
 {
   struct _sceDmaTag dmatag174;
   union variptr_u *in_r4;
   union variptr_u dtag;
   struct _sceDmaTag *next;
-  
+
   next = dmatag174.next;
   dtag = (variptr_u)in_r4->dmatag;
   vpdmatag_curr = dtag;
@@ -373,7 +375,7 @@ union variptr_u vpDmaTag_Close(union variptr_u ptr)
 {
   uint *in_r4;
   uint qwc;
-  
+
   qwc = *in_r4;
   if (vpdmatag_curr.voidptr == NULL) {
     NuErrorProlog("C:/source/crashwoc/code/nuxbox/dummyfunc.c",0x23a)("Attempted to DmaTag_End without Begin or Add");
@@ -388,7 +390,7 @@ struct _sceDmaTag * CreateDmaParticleSet(void *buffer,int *size) {
     struct debris_s *temp;
     union variptr_u buff;
     union variptr_u start;
-    
+
     vpDmaTag_RetEx(buff);
     for (lp = 0; lp < 0x20; lp++){
         temp[lp].x = 1.0f;
@@ -427,13 +429,13 @@ struct DmaDebTypePointer * CreateDmaPartEffectList(void *buffer,int *size) {
     *size = (int)start.voidptr - (int)buffer;
     return (struct DmaDebTypePointer *)buffer;
 }
-
+*/
 
 /*
 struct nupad_s * NuPs2OpenPad(s32 port,s32 slot)
 {
   struct nupad_s *pad;
-  
+
   pad = XbGetWorkingController();
   return pad;
 }
@@ -444,7 +446,7 @@ void NuPs2PadSetMotors(struct nupad_s *pad,s32 motor1,s32 motor2)	//TODO
 
 UNKTYPE* NuPs2ReadPad (struct nupad_s * pad)	//TODO
 {
-	
+
 }
 
 //reverseendian32, reverseendian16 TODO
@@ -454,7 +456,7 @@ void InitPadPlayRecord(char *name,s32 mode,s32 size,void *buff)
   u8 *puVar1;
   s32 i;
   struct PadRecInfo *recinfo;
-  
+
   if (PadRecInfo == (PadRecInfo *)0x0) {
     PadRecInfo = (PadRecInfo *)buff;
   }
@@ -540,38 +542,38 @@ void NuGScnUpdate(float param_1,struct nugscn_s *gsc)
         if ((gscn_dbg != 0) && (gscn_dbg != ninst)) {
             continue;
         }
-        
+
         anim = inst_->anim;
         iVar6 = inst_->flags.visitest;
         if (inst_->flags.visible == 0) {
             iVar6 = 0;
         }
-        
+
         if (iVar6 == 0) {
             continue;
         }
-        
+
         if (inst_->anim == NULL) {
             continue;
         }
-        
+
         if (gsc->instanimdata == NULL) {
             continue;
         }
-        
+
         if (gsc->instanimdata[inst_->anim->anim_ix] == NULL) {
             continue;
         }
 
-        
+
         instanim = gsc->instanimdata[inst_->anim->anim_ix];
         if (anim->playing) {
             anim->ltime += param_1 * anim->tfactor;
             if ((anim->waiting) && (anim->tfirst <= anim->ltime)) {
-                anim->waiting = 0; 
+                anim->waiting = 0;
                 anim->ltime -=  anim->tfactor - 1.0f;
             }
-            
+
             if (!anim->waiting) {
                 if ((instanim->time + anim->tinterval) <= anim->ltime) {
                     if (anim->repeating) {
@@ -603,7 +605,7 @@ void NuGScnUpdate(float param_1,struct nugscn_s *gsc)
         else {
             unaff_f20 = anim->ltime;
         }
-        
+
         NuAnimDataCalcTime(instanim, unaff_f20, &atime);
         NuAnimCurveSetApplyToMatrix(*instanim->chunks[atime.chunk]->animcurvesets, &atime, &mtx);
         memcpy(&anim->mtx, &mtx, sizeof(struct numtx_s));
@@ -611,24 +613,25 @@ void NuGScnUpdate(float param_1,struct nugscn_s *gsc)
     }
     return;
 }
-
+struct _LARGE_INTEGER_NGC timerfreq;
+struct _LARGE_INTEGER_NGC timer_start;
 s32 frame_counter;
 void NuInitFrameAdvance(void)
 {
-  QueryPerformanceFrequency(&timerfreq);
+  //QueryPerformanceFrequency(&timerfreq);
   frame_counter = 0;
-  QueryPerformanceCounter(&timer_start);
+  //QueryPerformanceCounter(&timer_start);
   return;
 }
 
 //MATCH GCN
 s32 NuGetFrameAdvance(void) {
-    struct _LARGE_INTEGER new_time;
+    struct _LARGE_INTEGER_NGC new_time;
     long delta_time;
     s32 advance;
     f32 time_percentage;
 
-    QueryPerformanceCounter_N1(&new_time);
+    //QueryPerformanceCounter_N1(&new_time);
     delta_time = (s32) (new_time.QuadPart - timer_start.QuadPart);
     time_percentage = ((f32) delta_time / (f32) timerfreq.QuadPart) * 60.0f;
     advance = (s32) (time_percentage - (f32) frame_counter);
@@ -638,7 +641,7 @@ s32 NuGetFrameAdvance(void) {
     frame_counter = frame_counter + advance;
     if ((frame_counter > 0x3C) || ( delta_time > timerfreq.QuadPart)) {
         frame_counter = 0;
-        QueryPerformanceCounter_N1(&timer_start);
+        //QueryPerformanceCounter_N1(&timer_start);
     }
     if (advance > 6) {
         advance = 6;
@@ -650,9 +653,9 @@ s32 NuGetFrameAdvance(void) {
 }
 
 
-extern s32 s_223;
-extern s32 t_224;
-extern s32 u_225;
+s32 s_223;
+s32 t_224;
+s32 u_225;
 
 //NGC MATCH
 s32 randy(void)
@@ -670,19 +673,13 @@ float randyfloat(void)
   return rand() * 4.656613f; //4.6566129E-10
 }
 
-void NuRndrRect2di(s32 a,s32 b,s32 SWIDTH,s32 SHEIGHT,s32 fadecol,struct numtl_s *mtl)
-{
-  GS_DrawFade(fadecol);
-  return;
-}
-
 //NGC MATCH
 void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th,s32 col,struct numtl_s *mtl) {
-    
+
     struct nuvtx_tltc1_s vtx [7];
 
     GS_SetOrthMatrix();
-    
+
     vtx[0].pnt.x = x;
     vtx[0].pnt.y = y;
     vtx[0].pnt.z = 0.000001f;
@@ -698,7 +695,7 @@ void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th
     vtx[1].diffuse = col;
     vtx[1].tc[0] = tx + tw;
     vtx[1].tc[1] = ty;
-    
+
     vtx[2].pnt.x = vtx[0].pnt.x;
     vtx[2].pnt.y = (y + h) - 1;
     vtx[2].pnt.z = 0.000001f;
@@ -706,7 +703,7 @@ void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th
     vtx[2].diffuse = col;
     vtx[2].tc[0] = tx;
     vtx[2].tc[1] = ty + th;
-    
+
     vtx[3].pnt.x = vtx[1].pnt.x;
     vtx[3].pnt.y = vtx[0].pnt.y;
     vtx[3].pnt.z = 0.000001f;
@@ -714,7 +711,7 @@ void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th
     vtx[3].diffuse = col;
     vtx[3].tc[0] = vtx[1].tc[0];
     vtx[3].tc[1] = ty;
-    
+
     vtx[4].pnt.x = vtx[1].pnt.x;
     vtx[4].pnt.y = vtx[2].pnt.y;
     vtx[4].pnt.z = 0.000001f;
@@ -722,7 +719,7 @@ void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th
     vtx[4].diffuse = col;
     vtx[4].tc[0] = vtx[1].tc[0];
     vtx[4].tc[1] = vtx[2].tc[1];
-    
+
     vtx[5].pnt.x = vtx[0].pnt.x;
     vtx[5].pnt.y = vtx[2].pnt.y;
     vtx[5].pnt.z = 0.000001f;
@@ -730,14 +727,14 @@ void NuRndrRectUV2di(s32 x,s32 y,s32 w,s32 h,float tx,float ty,float tw,float th
     vtx[5].diffuse = col;
     vtx[5].tc[0] = tx;
     vtx[5].tc[1] = vtx[2].tc[1];
-    
-    ResetShaders();
+
+    //ResetShaders();
     NuTexSetTexture(0,0);
     NuMtlSetRenderStates(mtl);
     NuTexSetTextureStates(mtl);
-    SetVertexShader(0x144);
+    //SetVertexShader(0x144);
     NuTexSetTexture(0, mtl->tid);
-    GS_DrawTriListTTL(vtx, 6);
+    //GS_DrawTriListTTL(vtx, 6);
     return;
 }
 
@@ -746,7 +743,7 @@ void NuRndrParticleGroup(struct _sceDmaTag* data, struct setup_s *setup,struct n
     s32 instruction; //
     s32 address; //
     s32 qcount; //
-    void* retaddress; // 
+    void* retaddress; //
     struct rdata_s* rdat; //
     s32 s; //
     s32 t; //
@@ -764,12 +761,12 @@ void NuRndrParticleGroup(struct _sceDmaTag* data, struct setup_s *setup,struct n
         switch (rdat->dmadata[0]) {
             case 0:
                 if (data2 != NULL) {
-                    renderpsdma(0x20, rdat, setup, mtl, time, wm);
+                    //renderpsdma(0x20, rdat, setup, mtl, time, wm);
                     rdat = (struct rdata_s *)data2;
-                }    
+                }
                 break;
             case 1:
-                renderpsdma(0x20, rdat, setup, mtl, time, wm);
+                //renderpsdma(0x20, rdat, setup, mtl, time, wm);
                 instruction = 1;
                 break;
             default:
@@ -784,14 +781,14 @@ void NuRndrParticleGroup(struct _sceDmaTag* data, struct setup_s *setup,struct n
 struct numtx_s debmtx;
 
 //NGC MATCH
-void DebMtxTransform(struct NuVec *v,struct NuVec *v0) {
+void DebMtxTransform(struct nuvec_s *v,struct nuvec_s *v0) {
     v->x = v0->x * debmtx._00 + v0->y * debmtx._10 + v0->z * debmtx._20 + + debmtx._30;
     v->y = v0->x * debmtx._01 + v0->y * debmtx._11 + v0->z * debmtx._21 + debmtx._31;
     v->z = v0->x * debmtx._02 + v0->y * debmtx._12 + v0->z * debmtx._22 + debmtx._32;
     return;
 }
 
-
+/*
 void * renderpsdma (int count, rdata_s * rdata, setup_s * setup, numtl_s * mtl, float time, numtx_s * wm)	//TODO
 {
 
@@ -815,7 +812,7 @@ DWARF
             float mz; // Offset: 0x18
             float etime; // Offset: 0x1C
         } debris[32]; // Offset: 0x10
-    }* rdat; // 
+    }* rdat; //
     // Size: 0x20
     struct
     {
@@ -845,10 +842,10 @@ DWARF
     nuvec_s* pdatpt;
     float grav; //
     float elapsed; //
-    float r; // 
-    float g; // 
-    float b; // 
-    float a; // 
+    float r; //
+    float g; //
+    float b; //
+    float a; //
     float u1; //
     float v1; //
     float u2; //
@@ -857,13 +854,13 @@ DWARF
     nuvec_s pos2; //
     nuvec_s pos3; //
     nuvec_s pos4; //
-    int numverts; // 
-    int size; // 
-    int numprims; // 
-
-*/
+    int numverts; //
+    int size; //
+    int numprims; //
 
 }
+
+*/
 
 
 void GenericDebinfoDmaTypeUpdate(struct debtab *debinfo)
@@ -874,35 +871,35 @@ void GenericDebinfoDmaTypeUpdate(struct debtab *debinfo)
     {
         nuvec_s vt[3]; // Offset: 0x0
         int colour; // Offset: 0x24
-    }* PartData; // 
-    int i; // 
-    int j; // 
-    float time; // 
-    float dt; // 
-    float tt; // 
-    float vr; // 
-    float vg; // 
-    float vb; // 
-    float va; // 
-    float vw; // 
-    float vh; // 
-    float vrot; // 
-    float vjx; // 
-    float vjy; // 
-    float x0; // 
-    float y0; // 
-    float x1; // 
+    }* PartData; //
+    int i; //
+    int j; //
+    float time; //
+    float dt; //
+    float tt; //
+    float vr; //
+    float vg; //
+    float vb; //
+    float va; //
+    float vw; //
+    float vh; //
+    float vrot; //
+    float vjx; //
+    float vjy; //
+    float x0; //
+    float y0; //
+    float x1; //
     float y1; //
-    float dx; // 
-    float dy; // 	
-	
+    float dx; //
+    float dy; //
+
 	*/
 }
 
 s32 NuSpecialDrawAt(struct nuhspecial_s *sph,struct numtx_s *mtx)
 {
   s32 rndr;
-  
+
   rndr = NuRndrGScnObj(sph->scene->gobjs[sph->special->instance->objid],mtx);
   return rndr;
 }
@@ -912,8 +909,8 @@ static s32 XboxEffectSystemInitialised;
 void InitXboxEffectSystem(s32 Level)
 {
   if (XboxEffectSystemInitialised == 0) {
-    InitialiseShaders();
-    NuHazeInit();
+    //InitialiseShaders();
+    //NuHazeInit();
     NuWaterInit();
     NuGlassInit();
     XboxEffectSystemInitialised = 1;
@@ -933,8 +930,8 @@ void InitXboxGSceneEffects(struct nugscn_s *gsc,union variptr_u *buffer,union va
 void CloseXboxEffectSystem(void)
 {
   if (XboxEffectSystemInitialised != 0) {
-    CloseShaders();
-    NuHazeClose();
+    //CloseShaders();
+    //NuHazeClose();
     NuWaterClose();
     NuGlassClose();
     XboxEffectSystemInitialised = 0;
@@ -942,16 +939,14 @@ void CloseXboxEffectSystem(void)
   return;
 }
 
-void DrawStencilShadowQuad(void)
-
-{
+void DrawStencilShadowQuad(void) {
   return;
 }
 
 //MATCH NGC
-s32 NuGobjAverageTextureSpaceVerts(struct NuGobj *gobj1,struct numtx_s *m1,struct NuGobj *gobj2,struct numtx_s *m2)
+s32 NuGobjAverageTextureSpaceVerts(struct nugobj_s *gobj1,struct numtx_s *m1,struct nugobj_s *gobj2,struct numtx_s *m2)
 {
-  struct NuGeom *geom1;
+  struct nugeom_s *geom1;
 
     while (gobj1 != NULL) {
         geom1 = gobj1->geom;
@@ -970,12 +965,12 @@ void NuSceneAverageTextureSpaceVerts(struct nuscene_s *scene) {
     s32 numinst;
     s32 ix2;
     struct nugscn_s *gsc;
-    struct NuGobj *gobj1;
-    struct NuGobj *gobj2;
+    struct nugobj_s *gobj1;
+    struct nugobj_s *gobj2;
     float dist;
-    struct NuVec pos1;
-    struct NuVec pos2;
-    
+    struct nuvec_s pos1;
+    struct nuvec_s pos2;
+
     gsc = scene->gscene;
     numinst = gsc->numinstance;
         for(ix1 = 0; ix1 < numinst; ix1++) {

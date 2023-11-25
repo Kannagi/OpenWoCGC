@@ -249,5 +249,61 @@ struct _GS_VERTEX
     float v; // Offset: 0x20
 };
 
+// Size: 0x38, DWARF: 0x8E9B5D
+struct _GS_VERTEXSKIN
+{
+    float x; // Offset: 0x0, DWARF: 0x8E9B80
+    float y; // Offset: 0x4, DWARF: 0x8E9BA4
+    float z; // Offset: 0x8, DWARF: 0x8E9BC8
+    float weights[2]; // Offset: 0xC, DWARF: 0x8E9BEC
+    float indexes[3]; // Offset: 0x14, DWARF: 0x8E9C18
+    float nx; // Offset: 0x20, DWARF: 0x8E9C44
+    float ny; // Offset: 0x24, DWARF: 0x8E9C69
+    float nz; // Offset: 0x28, DWARF: 0x8E9C8E
+    int diffuse; // Offset: 0x2C, DWARF: 0x8E9CB3
+    float u; // Offset: 0x30, DWARF: 0x8E9CDD
+    float v; // Offset: 0x34, DWARF: 0x8E9D01
+};
+
+// Size: 0x18, DWARF: 0x8E98AB
+struct _GS_VERTEXNORM
+{
+    float x; // Offset: 0x0, DWARF: 0x8E98CE
+    float y; // Offset: 0x4, DWARF: 0x8E98F2
+    float z; // Offset: 0x8, DWARF: 0x8E9916
+    float nx; // Offset: 0xC, DWARF: 0x8E993A
+    float ny; // Offset: 0x10, DWARF: 0x8E995F
+    float nz; // Offset: 0x14, DWARF: 0x8E9984
+};
+
+// Size: 0x1C, DWARF: 0x8E9762
+struct _GS_VERTEXTL
+{
+    float x; // Offset: 0x0, DWARF: 0x8E9783
+    float y; // Offset: 0x4, DWARF: 0x8E97A7
+    float z; // Offset: 0x8, DWARF: 0x8E97CB
+    float rhw; // Offset: 0xC, DWARF: 0x8E97EF
+    int diffuse; // Offset: 0x10, DWARF: 0x8E9815
+    float u; // Offset: 0x14, DWARF: 0x8E983F
+    float v; // Offset: 0x18, DWARF: 0x8E9863
+};
+
+// Size: 0x14, DWARF: 0x8E9F47
+struct _GS_VERTEXPSTL
+{
+    float x; // Offset: 0x0, DWARF: 0x8E9F6A
+    float y; // Offset: 0x4, DWARF: 0x8E9F8E
+    float z; // Offset: 0x8, DWARF: 0x8E9FB2
+    float w; // Offset: 0xC, DWARF: 0x8E9FD6
+    int diffuse; // Offset: 0x10, DWARF: 0x8E9FFA
+};
+
+// Size: 0x8
+struct _GS_BUFFER
+{
+    unsigned int length; // Offset: 0x0, DWARF: 0xD38868
+    unsigned int type; // Offset: 0x4, DWARF: 0xD38891
+};
+
 
 static struct _GS_TEXTURE* GS_TexList;

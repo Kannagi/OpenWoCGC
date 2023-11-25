@@ -1,6 +1,8 @@
 #include <nu3dx/nugobj.h>
 
-error_func e;
+#define FLT_MAX 3.402823e+38
+#define FLT_MIN -3.402823e+38
+
 static s32 sysinit;
 s32 Paused;
 s32 _timer;
@@ -78,7 +80,7 @@ void NuGobjDestroy(struct nugobj_s* obj) {
 }
 
 //MATCH GCN
-void NuGobjAddGeom(struct NuGobj* gobj, struct nugeom_s* geom)
+void NuGobjAddGeom(struct nugobj_s* gobj, struct nugeom_s* geom)
 {
     struct nugeom_s* last;
     struct nugeom_s* next;
@@ -215,6 +217,89 @@ void NuGobjCalcFaceOnDims(struct nugobj_s *gobj)
 }
 
 //MATCH GCN
+void NuGobjCalcDims(struct nugobj_s *gobj) {
+
+    struct nugeom_s *geom;
+    struct nuvec_s v;
+    struct nuvtx_tc1_s *ptr;
+    char *end;
+    s32 stride;
+    float r2;
+    float rsq;
+
+    geom = gobj->geom;
+    if (gobj->type == NUGOBJ_FACEON) {
+        NuGobjCalcFaceOnDims(gobj);
+    }
+    else {
+        gobj->bounding_box_min.x = FLT_MAX;
+        gobj->bounding_box_min.y = FLT_MAX;
+        gobj->bounding_box_min.z = FLT_MAX;
+        gobj->bounding_box_max.x = FLT_MIN;
+        gobj->bounding_box_max.y = FLT_MIN;
+        gobj->bounding_box_max.z = FLT_MIN;
+        gobj->bounding_rsq_from_origin = 0.0f;
+        for (; geom != NULL; geom = geom->next) {
+            stride = NuVtxStride(geom->vtxtype);
+            ptr = (struct nuvtx_tc1_s *)geom->hVB;
+            if (ptr == NULL) {
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x13b,"NuGobjCalcDims : Lock VB failed!");
+            }
+            end = (char*)ptr + stride * geom->vtxcnt;
+            for (; (char*)ptr < end; ptr = (struct nuvtx_tc1_s *)((int)ptr + stride)) {
+                if ((ptr->pnt).x < (gobj->bounding_box_min).x) {
+                    (gobj->bounding_box_min).x = (ptr->pnt).x;
+                }
+                if ((ptr->pnt).y < (gobj->bounding_box_min).y) {
+                    (gobj->bounding_box_min).y = (ptr->pnt).y;
+                }
+                if ((ptr->pnt).z < (gobj->bounding_box_min).z) {
+                    (gobj->bounding_box_min).z = (ptr->pnt).z;
+                }
+                if ((ptr->pnt).x > (gobj->bounding_box_max).x) {
+                    (gobj->bounding_box_max).x = (ptr->pnt).x;
+                }
+                if ((ptr->pnt).y > (gobj->bounding_box_max).y) {
+                    (gobj->bounding_box_max).y = (ptr->pnt).y;
+                }
+                if ((ptr->pnt).z > (gobj->bounding_box_max).z) {
+                    (gobj->bounding_box_max).z = (ptr->pnt).z;
+                }
+                rsq =  (ptr->pnt).x * (ptr->pnt).x + (ptr->pnt).y * (ptr->pnt).y
+                       + ((ptr->pnt).z * (ptr->pnt).z);
+                if (rsq > gobj->bounding_rsq_from_origin) {
+                    gobj->bounding_rsq_from_origin = rsq;
+                }
+            }
+        }
+        r2 = sqrt(gobj->bounding_rsq_from_origin);
+        geom = gobj->geom;
+        gobj->bounding_radius_from_origin = r2;
+        (gobj->bounding_box_center).x = ((gobj->bounding_box_min).x + (gobj->bounding_box_max).x) * 0.5f;
+        (gobj->bounding_box_center).y = ((gobj->bounding_box_min).y + (gobj->bounding_box_max).y) * 0.5f;
+        (gobj->bounding_box_center).z = ((gobj->bounding_box_min).z + (gobj->bounding_box_max).z) * 0.5f;
+        gobj->bounding_rsq_from_center = 0.0f;
+        for (; geom != NULL; geom = geom->next) {
+            stride = NuVtxStride(geom->vtxtype);
+            ptr = (struct nuvtx_tc1_s *)geom->hVB;
+            if (ptr == NULL) {
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nugobj.c",0x157,"NuGobjCalcDims : Lock VB failed!");
+            }
+            end = (char*)ptr + stride * geom->vtxcnt;
+            for (; (char*)ptr < end; ptr = (struct nuvtx_tc1_s *)((int)ptr + stride)) {
+                NuVecSub(&v,&ptr->pnt,&gobj->bounding_box_center);
+                rsq = v.x * v.x + v.y * v.y + v.z * v.z;
+                if (rsq > gobj->bounding_rsq_from_center) {
+                    gobj->bounding_rsq_from_center = rsq;
+                }
+            }
+        }
+        gobj->bounding_radius_from_center = sqrt(gobj->bounding_rsq_from_center);
+    }
+    return;
+}
+
+//MATCH GCN
 struct nugeom_s* NuGeomCreate(void)
 {
     struct nugeom_s* geom;
@@ -234,19 +319,19 @@ struct nufaceongeom_s* NuFaceOnGeomCreate(void)
 
 //MATCH GCN
 void NuGeomDestroy(struct nugeom_s *geom) {
-    struct NuPrim* prim;
-    struct NuPrim* next;
+    struct nuprim_s* prim;
+    struct nuprim_s* next;
 
-  prim = geom->prims;
+  prim = geom->prim;
   NuGeomDestroyVB(geom);
   while (prim != NULL) {
         next = prim->next;
         NuPrimDestroy(prim);
         prim = next;
   }
-  if (geom->blendShape != NULL) {
-    if (geom->blendShape->hVB != 0) {
-      GS_DeleteBuffer((struct GS_Buffer*)geom->blendShape->hVB);
+  if (geom->blendgeom != NULL) {
+    if (geom->blendgeom->hVB != 0) {
+      GS_DeleteBuffer((struct GS_Buffer*)geom->blendgeom->hVB);
     }
   }
   return;
@@ -282,15 +367,13 @@ void NuGeomCreateVB(struct nugeom_s* geom, s32 vtxCount, enum nuvtxtype_e vtxTyp
         break;
     default:
         //"NuGeomCreateVB : Unknown vertex type!"
-        e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 441);
-        e("assert");
+        NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 441, "assert");
     }
 
     if (geom->hVB != 0)
     {
         //NuAssert(geom->vertex_buffer == NULL, "NuGeomCreateVB : geom already has VB");
-        e = NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 448);
-        e("assert");
+        NuErrorProlog("OpenCrashWOC/code/nu3dx/nugobj.c", 448, "assert");
     }
 
 
@@ -324,7 +407,7 @@ void NuGeomAddPrim(struct nugeom_s* geom, struct nuprim_s* prim)
     last = NULL;
 
     // When next is NULL, last will be the last non-NULL prim (list last)
-    for (next = geom->prims; next != NULL; next = next->next)
+    for (next = geom->prim; next != NULL; next = next->next)
     {
         last = next;
     }
@@ -335,7 +418,7 @@ void NuGeomAddPrim(struct nugeom_s* geom, struct nuprim_s* prim)
         return;
     }
 
-    geom->prims = prim;
+    geom->prim = prim;
     return;
 }
 
@@ -349,7 +432,7 @@ void NuGeomAddSkin(struct nugeom_s* geom, struct nuskin_s* skin)
     last = NULL;
 
     // When next is NULL, last will be the last non-NULL skin (list last)
-    for (next = geom->skins; next != NULL; next = next->next)
+    for (next = geom->skin; next != NULL; next = next->next)
     {
         last = next;
     }
@@ -361,7 +444,7 @@ void NuGeomAddSkin(struct nugeom_s* geom, struct nuskin_s* skin)
 
     }
 
-     geom->skins = skin;
+     geom->skin = skin;
      return;
 }
 

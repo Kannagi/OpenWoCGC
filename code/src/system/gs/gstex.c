@@ -5,8 +5,8 @@ unsigned int GS_TexAllocs;
 static unsigned int GS_NumTextures;
 s32 TexStages[4];
 s32 iss3cmp;
-extern enum _GXTexWrapMode GS_TexWrapMode_s [4];
-extern enum _GXTexWrapMode GS_TexWrapMode_t [4];
+enum _GXTexWrapMode GS_TexWrapMode_t [4];
+enum _GXTexWrapMode GS_TexWrapMode_s [4];
 enum _GXTevStageID ShadowBodge = GX_TEVSTAGE0;
 enum _GXTevStageID maxstage_189 = GX_TEVSTAGE15 | GX_MAX_TEVSTAGE | 0; //GX_TEVSTAGE15 | GX_MAX_TEVSTAGE | FFFFFFE0h
 
@@ -17,8 +17,8 @@ void GS_TexInit(void) {
     if (GS_TexInitFlag == 0) {
         for (i = 0; i < 4; i++) {
             TexStages[4] = 0;
-            GS_TexWrapMode_s[i] = 1;
-            GS_TexWrapMode_t[i] = 1;
+            GS_TexWrapMode_s[i] = GX_REPEAT;
+            GS_TexWrapMode_t[i] = GX_REPEAT;
         }
         GS_TexList = (struct _GS_TEXTURE *)malloc(0x13000);
         memset(GS_TexList,0,0x13000);
@@ -41,8 +41,8 @@ void GS_TexReInit(void) {
         GSTex = GS_TexList;
         for (i = 0; i < 4; i++) {
            TexStages[4] = 0;
-           GS_TexWrapMode_s[i] = 1;
-           GS_TexWrapMode_t[i] = 1;
+           GS_TexWrapMode_s[i] = GX_REPEAT;
+           GS_TexWrapMode_t[i] = GX_REPEAT;
             //i = i + 4;
             //j = j + -1;
         } //while (j != 0);
@@ -368,7 +368,7 @@ void GS_ChangeTextureStates(int id)
   }
   return;
 }
-/*
+
 //MATCH NGC
 void GS_TexSetWrapModes(int id,enum _GXTexWrapMode mode) {
 
@@ -387,7 +387,7 @@ void GS_TexSetWrapModet(int id,enum _GXTexWrapMode mode) {
   }
   return;
 }
-*/
+
 
 void GS_TexSelect(enum _GXTevStageID stage,int NUID)
 

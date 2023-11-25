@@ -1,8 +1,10 @@
+#include"system/port.h"
+
 //NGC MATCH
-void NuShaderSetSkinningConstants(struct nugeomitem_s* item, struct NuPrim* prim) { 
+void NuShaderSetSkinningConstants(struct nugeomitem_s* item, struct nuprim_s* prim) {
   s32 i;
   s32 lookup;
-  
+
   lookup = (s32)prim->skinmtxlookup;
   for(i = 0; i < 0x10; i++, lookup+= 2) {
     if (*(short *)lookup != -1) {

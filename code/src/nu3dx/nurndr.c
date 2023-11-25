@@ -5,6 +5,15 @@
 #define MAX_FIXED_POINT 65536
 #define DEG_TO_FIXED_POINT (MAX_FIXED_POINT * (1 / (2 * PI)))
 
+s32 GS_Parallax;
+static struct nugeomitem_s geomitem[2048];
+static s32 geomitem_cnt;
+static s32 hgobj_enabled;
+struct numtx_s mtx_array2HGobjRndrDwa[256];
+struct numtx_s mtx_array2HGobj[256];
+static struct nuvtx_tc1_s vtx_270[4];
+static struct nuvtx_tc1_s* vtx2_271[4];
+
 //MATCH GCN
 void NuRndrInit(void) {
       s32 lp;
@@ -93,9 +102,9 @@ void NuRndrSwapScreen(s32 hRT) {
 }
 
 //95% NGC
-s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
+s32 NuRndrGobj(struct nugobj_s* gobj, struct numtx_s* wm, f32** blendvals) {
     struct nugeomitem_s* item;
-    struct NuFaceOnGeom* facegeom;
+    struct nufaceongeom_s* facegeom;
     struct nugeom_s* geom;
     struct numtx_s* mtx;
     struct numtx_s premtx;
@@ -131,10 +140,10 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                 max = gobj->bounding_box_max;
                 NuVecAdd(&min, &gobj->bounding_box_min, &gobj->origin);
                 NuVecAdd(&max, &gobj->bounding_box_max, &gobj->origin);
-                outcode = NuCameraClipTestExtents(&min, &max, wm);
+                //outcode = NuCameraClipTestExtents(&min, &max, wm);
             }
             else {
-                outcode = NuCameraClipTestExtents(&gobj->bounding_box_min, &gobj->bounding_box_max, wm);
+                //outcode = NuCameraClipTestExtents(&gobj->bounding_box_min, &gobj->bounding_box_max, wm);
             }
         }
 
@@ -149,7 +158,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
         if (outcode != 0)  {
             rndrmtx_cnt--;
             if (rndrmtx_cnt < 0) {
-                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x282)("NuRndrGobj : No free matrix slots!");
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x282,"NuRndrGobj : No free matrix slots!");
             }
 
             mtx = rndrmtx;
@@ -178,7 +187,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                     item->geom = geom;
                     item->blendvals = blendvals;
 
-                    item->hShader = NuShaderAssignShader(geom);
+                    //item->hShader = NuShaderAssignShader(geom);
                     if ((nurndr_forced_mtl_table != NULL) && ((geom->mtl)->special_id != 0))
                     {
                         if (nurndr_forced_mtl_table[(geom->mtl)->special_id] != NULL)
@@ -196,7 +205,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                     }
                 }
                 else {
-                    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x2ba)("NuRndrGobj : No free geom item slots!");
+                    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x2ba,"NuRndrGobj : No free geom item slots!");
                 }
             }
 
@@ -217,7 +226,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
                     NuMtlAddFaceonItem(facegeom->mtl, &item->hdr);
                 }
                 else {
-                    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x2dc)("NuRndrGobj : No free geom item slots!");
+                    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x2dc,"NuRndrGobj : No free geom item slots!");
                 }
             }
         }
@@ -227,7 +236,7 @@ s32 NuRndrGobj(struct NuGobj* gobj, struct numtx_s* wm, f32** blendvals) {
 }
 
 //MATCH NGC
-s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
+s32 NuRndrGrassGobj(struct nugobj_s *gobj,struct numtx_s *wm,float **blendvals) {
     float dy;
     float dx;
     float dz;
@@ -272,8 +281,7 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
             if (outcode != 0) {
                     rndrmtx_cnt--;
                     if (rndrmtx_cnt < 0) {
-                        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x316)
-                        ("NuRndrGobj : No free matrix slots!");
+                        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x316,"NuRndrGobj : No free matrix slots!");
                     }
 
                     mtx = &rndrmtx[rndrmtx_cnt];
@@ -293,7 +301,7 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
                                 item->geom = geom;
                                 item->blendvals = blendvals;
 
-                                item->hShader = NuShaderAssignShader(geom);
+                                //item->hShader = NuShaderAssignShader(geom);
                                 if ((nurndr_forced_mtl_table != NULL) && (geom->mtl->special_id != 0))
                                 {
                                     if (nurndr_forced_mtl_table[geom->mtl->special_id] != NULL)
@@ -311,8 +319,7 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
                                 }
                             }
                             else {
-                                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x344)
-                                ("NuRndrGobj : No free geom item slots!");
+                                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x344,"NuRndrGobj : No free geom item slots!");
                             }
                         }
                     }
@@ -324,7 +331,7 @@ s32 NuRndrGrassGobj(struct NuGobj *gobj,struct numtx_s *wm,float **blendvals) {
 //MATCH NGC
 s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float **blendvals)
 {
-    struct nugeom_sitem_s* item;
+    struct nugeomitem_s* item;
     struct nugeom_s *geom;
     struct numtx_s *mtx;
     s32 outcode;
@@ -332,16 +339,16 @@ s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float
 
 
     if (gobj->culltype == 0) {
-        outcode = NuCameraClipTestBoundingSphere(&gobj->cntr, &gobj->cntr_r, wm);
+        outcode = NuCameraClipTestBoundingSphere(&gobj->bounding_box_center, &gobj->bounding_radius_from_center, wm);
     }
     else {
-        outcode = NuCameraClipTestExtents(&gobj->min, &gobj->max, wm);
+        //outcode = NuCameraClipTestExtents(&gobj->bounding_box_min, &gobj->bounding_box_max, wm);
     }
 
     if (outcode != 0) {
         rndrmtx_cnt = rndrmtx_cnt - nummtx;
         if (rndrmtx_cnt < 0) {
-            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x3c3)("NuRndrGobjSkin : No free matrix slots!");
+            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x3c3,"NuRndrGobjSkin : No free matrix slots!");
         }
         mtx = &rndrmtx[rndrmtx_cnt];
 
@@ -365,7 +372,7 @@ s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float
                 item->mtx = mtx;
                 item->geom = geom;
 
-                item->hShader = NuShaderAssignShader(geom);
+                //item->hShader = NuShaderAssignShader(geom);
                 if ((nurndr_forced_mtl_table != NULL) && ((geom->mtl)->special_id != 0)) {
                     if (nurndr_forced_mtl_table[(geom->mtl)->special_id] != NULL) {
                         NuMtlAddRndrItem(nurndr_forced_mtl_table[(geom->mtl)->special_id], &item->hdr);
@@ -380,7 +387,7 @@ s32 NuRndrGobjSkin2(struct nugobj_s *gobj, int nummtx, struct numtx_s *wm, float
                 }
             }
             else {
-                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x3f3)("NuRndrGobjSkin : No free geom item slots!");
+                NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x3f3,"NuRndrGobjSkin : No free geom item slots!");
             }
         }
     }
@@ -394,23 +401,20 @@ s32 NuRndrTri2d(struct nuvtx_tltc1_s *vtx,struct numtl_s *mtl)
   struct nuvtx_tltc1_s *vb;
   s32 i;
   struct nugeom_s *geom;
-  struct NuPrim *prim;
+  struct nuprim_s *prim;
 
   NuMtlGet2dBuffer(mtl,NUPT_NDXTRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
   if (geom->vtxmax - geom->vtxcnt < 3) {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c0)
-    ("NuRndrTri2d : Vertex buffer full!");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c0, "NuRndrTri2d : Vertex buffer full!");
   }
 
   if ((s32)((u32)prim->max - (u32)prim->cnt) < 3) {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c2)
-    ("NuRndrTri2d : Primitive buffer full!");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c2, "NuRndrTri2d : Primitive buffer full!");
   }
   stride = NuVtxStride(geom->vtxtype);
   vb = (struct nuvtx_tltc1_s *)geom->hVB;
   if (vb == NULL) {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c9)
-    ("NuRndrTri2d : Lock VB failed!");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5c9, "NuRndrTri2d : Lock VB failed!");
   }
 
   vb = (struct nuvtx_tltc1_s *)((s32)vb + stride * geom->vtxcnt);
@@ -436,23 +440,20 @@ s32 NuRndrTri3d(struct nuvtx_tc1_s *vtx,struct numtl_s *mtl,struct numtx_s *wm) 
     s32 ix;
     struct nuvtx_tc1_s *vb;
     struct nugeom_s *geom;
-    struct NuPrim *prim;
+    struct nuprim_s *prim;
 
 
     NuMtlGet3dBuffer(mtl,NUPT_TRI,&geom,&prim,&superbuffer_ptr,&superbuffer_end);
     if (geom->vtxmax - geom->vtxcnt < 3) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f0)
-        ("NuRndrTri3d : Vertex buffer full!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f0, "NuRndrTri3d : Vertex buffer full!");
     }
     if ((s32)((u32)prim->max - (u32)prim->cnt) < 3) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f2)
-        ("NuRndrTri3d : Primitive buffer full!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f2, "NuRndrTri3d : Primitive buffer full!");
     }
     stride = NuVtxStride(geom->vtxtype);
     vb = (struct nuvtx_tltc1_s *)geom->hVB;
     if (vb == 0) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f9)
-        ("NuRndrTri3d : Lock VB failed!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x5f9, "NuRndrTri3d : Lock VB failed!");
     }
     vb = (struct nuvtx_tc1_s *)((s32)vb + stride * geom->vtxcnt);
     for(i = 0; i < 3; vtx++ , i++) {
@@ -506,12 +507,12 @@ s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,i
     iVar7 = iVar6 * 3;
     NuMtlGet3dBuffer(mtl, NUPT_TRI, &geom, &prim, &superbuffer_ptr, &superbuffer_end);
     if (geom->vtxmax - geom->vtxcnt < (iVar7)) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x643)("NuRndrStrip3d : Vertex buffer full!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x643,"NuRndrStrip3d : Vertex buffer full!");
     }
     stride = NuVtxStride(geom->vtxtype);
     hvb = geom->hVB;
     if (hvb == 0) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x64c)("NuRndrTri3d : Lock VB failed!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c", 0x64c,"NuRndrTri3d : Lock VB failed!");
     }
 
     hvb += stride * geom->vtxcnt;
@@ -530,54 +531,19 @@ s32 NuRndrStrip3d(struct nuvtx_tc1_s **param_1,struct numtl_s *mtl,int param_3,i
     return 1;
 }
 
-//MATCH GCN
-void NuRndrItem(struct nurndritem_s *item) {
-//struct nugeomitem_s * geomitem;
-
-    //geomitem->hdr = *item;
-        switch (item->type) {
-                    case NURNDRITEM_GEOM2D:
-                        DBTimerStart(0x1e);
-                        NuRndr2dItem((struct nugeomitem_s *)item);
-                        DBTimerEnd(0x1e);
-                    break;
-                    case NURNDRITEM_GEOM3D:
-                        DBTimerStart(0x1f);
-                        NuRndrGeomItem((struct nugeomitem_s *)item);
-                        DBTimerEnd(0x1f);
-                        break;
-                    case NURNDRITEM_SKIN3D2:
-                        DBTimerStart(0x20);
-                        NuRndrSkinItem2((struct nugeomitem_s *)item);
-                        DBTimerEnd(0x20);
-                        break;
-                    case NURNDRITEM_GEOMFACE:
-                        DBTimerStart(0x22);
-                        NuRndrFaceItem((struct nugeomitem_s *)item);
-                        DBTimerEnd(0x22);
-                        break;
-                    default:
-                            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xbff)("NuRndrItem : Unknown render item type!");
-                        break;
-        }
-    return;
-
-}
-
-
 //NGC MATCH
 static void NuRndr2dItem(struct nugeomitem_s *item) {
-  struct NuPrim *prim;
+  struct nuprim_s *prim;
 
   if ((struct _GSMATRIX *)item->mtx != NULL) {
-    GS_SetWorldMatrix((struct _GSMATRIX*)item->mtx);
+    //GS_SetWorldMatrix((struct _GSMATRIX*)item->mtx);
   }
   else {
-    GS_LoadWorldMatrixIdentity();
+    //GS_LoadWorldMatrixIdentity();
   }
-  SetupShaders(item);
-  for (prim = item->geom->prims; prim != NULL; prim = prim->next) {
-    GS_DrawTriList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+  //SetupShaders(item);
+  for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
+    //GS_DrawTriList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
   }
   return;
 }
@@ -604,7 +570,7 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
     int pad[13];
 
     DBTimerStart(0x1c);
-    SetupShaders(item);
+    //SetupShaders(item);
     NuMtxSetIdentity(&identity);
     NuMtxSetIdentity(&centre);
 
@@ -612,7 +578,7 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
     centre._31 = item->mtx->_31;
     centre._32 = item->mtx->_32;
 
-    GS_LoadWorldMatrixIdentity();
+    //GS_LoadWorldMatrixIdentity();
 
     rotation = *item->mtx;
     rotation._30 = 0.0f;
@@ -672,7 +638,7 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
             vertices[3].nrm.x = 1.0f;
             vertices[3].nrm.y = 0.0f;
             vertices[3].nrm.z = 0.0f;
-            GS_DrawPrimitiveQuad(&vertices);
+            //GS_DrawPrimitiveQuad(&vertices);
         }
     }
     DBTimerStart(0x1c);
@@ -681,69 +647,43 @@ void NuRndrFaceItem(struct nugeomitem_s* item) {
 
 //MATCH GCN
 static void NuRndrGeomItem(struct nugeomitem_s *item) {
-  struct NuPrim *prim;
+  struct nuprim_s *prim;
 
   DBTimerStart(6);
   if ((struct _GSMATRIX *)item->mtx != NULL) {
-    GS_SetWorldMatrix((struct _GSMATRIX *)item->mtx);
+    //GS_SetWorldMatrix((struct _GSMATRIX *)item->mtx);
   }
   else {
-    GS_LoadWorldMatrixIdentity();
+    //GS_LoadWorldMatrixIdentity();
   }
-  SetupShaders(item);
-  for (prim = item->geom->prims; prim != NULL; prim = prim->next) {
+  //SetupShaders(item);
+  for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
           switch (prim->type) {
               case NUPT_POINT:
-                    GS_DrawPointList(item->geom->vtxcnt, item->geom->hVB, NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawPointList(item->geom->vtxcnt, item->geom->hVB, NuVtxStride(item->geom->vtxtype));
                     break;
               case NUPT_LINE:
                   break;
                 case NUPT_TRI:
-                    GS_DrawTriList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawTriList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
                     break;
                 case NUPT_TRISTRIP:
-                    GS_DrawTriStrip(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawTriStrip(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
                     break;
                 case NUPT_QUADLIST:
-                    GS_DrawQuadList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawQuadList(item->geom->vtxcnt,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
                     break;
                 case NUPT_NDXTRI:
-                    GS_DrawIndexedTriList(prim->cnt,(short *)prim->idxbuff,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawIndexedTriList(prim->cnt,(short *)prim->idxbuff,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
                     break;
                 case NUPT_NDXTRISTRIP:
-                    GS_DrawIndexedTriStrip(prim->cnt,(short *)prim->idxbuff,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawIndexedTriStrip(prim->cnt,(short *)prim->idxbuff,(float *)item->geom->hVB,NuVtxStride(item->geom->vtxtype));
               break;
           }
   }
   DBTimerEnd(6);
   return;
 }
-
-//NGC MATCH
-void NuRndrSkinItem2(struct nugeomitem_s *item) {
-    struct NuPrim *prim;
-
-    if ((item->blendvals != NULL) && (item->geom->blendgeom != NULL)) {
-        NuRndrBlendedSkinItem(item);
-        return;
-    }
-    DBTimerStart(5);
-    SetupShaders(item);
-    GS_LoadWorldMatrixIdentity();
-    GS_SetVertexSource((float *)item->geom->hVB);
-    for (prim = item->geom->prims; prim != NULL; prim = prim->next) {
-        NuShaderSetSkinningConstants(item,prim);
-        if (prim->type == NUPT_NDXTRI) {
-            SkinnedShader((u32)prim->cnt,(short *)prim->idxbuff);
-        }
-        else if (prim->type != NUPT_NDXTRISTRIP) {
-            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xf4e)("NuRndrGeomItem : Unknown primitive type!");
-        }
-    }
-    DBTimerEnd(5);
-    return;
-}
-
 
 //NGC MATCH
 static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
@@ -755,13 +695,13 @@ static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
   struct nuvec_s *destvb;
   int i;
   struct NUBLENDGEOM_s *blendgeom;
-  struct NuPrim *prim;
+  struct nuprim_s *prim;
 
   blendgeom = item->geom->blendgeom;
   DBTimerStart(4);
   DBTimerStart(0xd);
-  PPCMtmmcr0(0x8b);
-  PPCMtmmcr1(0x78400000);
+  //PPCMtmmcr0(0x8b);
+  //PPCMtmmcr1(0x78400000);
   geom = item->geom;
   srcverts = (struct nuvtx_sk3tc1_s *)geom->hVB;
   destvb = (struct nuvec_s *)geom->blendgeom->hVB;
@@ -783,25 +723,49 @@ static void NuRndrBlendedSkinItem(struct nugeomitem_s* item) {
       destvb = destvb + 1;
       srcverts = srcverts + 1;
     }
-  PPCMtmmcr1(0);
-  PPCMtmmcr0(0);
+  //PPCMtmmcr1(0);
+  //PPCMtmmcr0(0);
   DBTimerEnd(0xd);
-  SetupShaders(item);
-  GS_LoadWorldMatrixIdentity();
-  GS_SetVertexSource((float *)item->geom->hVB);
-  GS_SetBlendSource((struct _GS_VECTOR3 *)item->geom->blendgeom->hVB);
+  //SetupShaders(item);
+  //GS_LoadWorldMatrixIdentity();
+  //GS_SetVertexSource((float *)item->geom->hVB);
+  //GS_SetBlendSource((struct _GS_VECTOR3 *)item->geom->blendgeom->hVB);
   for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
     NuShaderSetSkinningConstants(item,prim);
     if (prim->type == NUPT_NDXTRI) {
       SkinnedShaderBlend(prim->cnt,prim->idxbuff);
     }
     else {
-      NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1087)
-                          ("NuRndrGeomItem : Unknown primitive type!");
+      NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1087,"NuRndrGeomItem : Unknown primitive type!");
     }
   }
   DBTimerEnd(4);
   return;
+}
+
+//NGC MATCH
+void NuRndrSkinItem2(struct nugeomitem_s *item) {
+    struct nuprim_s *prim;
+
+    if ((item->blendvals != NULL) && (item->geom->blendgeom != NULL)) {
+        NuRndrBlendedSkinItem(item);
+        return;
+    }
+    DBTimerStart(5);
+    //SetupShaders(item);
+    //GS_LoadWorldMatrixIdentity();
+    //GS_SetVertexSource((float *)item->geom->hVB);
+    for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
+        NuShaderSetSkinningConstants(item,prim);
+        if (prim->type == NUPT_NDXTRI) {
+            SkinnedShader((u32)prim->cnt,(short *)prim->idxbuff);
+        }
+        else if (prim->type != NUPT_NDXTRISTRIP) {
+            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xf4e,"NuRndrGeomItem : Unknown primitive type!");
+        }
+    }
+    DBTimerEnd(5);
+    return;
 }
 
 //MATCH GCN
@@ -812,6 +776,41 @@ void NuRndrAnglesZX(struct nuvec_s *src,struct nuvec_s *rot) {
   NuVecRotateX(&v[0],src,(s32)-rot->x);
   rot->z = (float)-NuAtan2D(v[0].x,v[0].y);
   return;
+}
+
+
+//MATCH GCN
+void NuRndrItem(struct nurndritem_s *item) {
+//struct nugeomitem_s * geomitem;
+
+    //geomitem->hdr = *item;
+        switch (item->type) {
+                    case NURNDRITEM_GEOM2D:
+                        DBTimerStart(0x1e);
+                        NuRndr2dItem((struct nugeomitem_s *)item);
+                        DBTimerEnd(0x1e);
+                    break;
+                    case NURNDRITEM_GEOM3D:
+                        DBTimerStart(0x1f);
+                        NuRndrGeomItem((struct nugeomitem_s *)item);
+                        DBTimerEnd(0x1f);
+                        break;
+                    case NURNDRITEM_SKIN3D2:
+                        DBTimerStart(0x20);
+                        NuRndrSkinItem2((struct nugeomitem_s *)item);
+                        DBTimerEnd(0x20);
+                        break;
+                    case NURNDRITEM_GEOMFACE:
+                        DBTimerStart(0x22);
+                        NuRndrFaceItem((struct nugeomitem_s *)item);
+                        DBTimerEnd(0x22);
+                        break;
+                    default:
+                            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0xbff,"NuRndrItem : Unknown render item type!");
+                        break;
+        }
+    return;
+
 }
 
 /*
@@ -950,8 +949,7 @@ float * NuRndrCreateBlendShapeDeformerWeightsArray(s32 nweights) {
     ptr = &rndr_blend_shape_deformer_wts[rndr_blend_shape_deformer_wt_cnt];
   }
   else {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4)
-    ("No free blend shape deformer weights");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4,"No free blend shape deformer weights");
     ptr = NULL;
   }
   return ptr;
@@ -966,8 +964,7 @@ float ** NuRndrCreateBlendShapeDWAPointers(s32 size) {
     ptr = &rndr_blend_shape_deformer_wt_ptrs[rndr_blend_shape_deformer_wt_ptrs_cnt];
   }
   else {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206)
-    ("No free blend shape deformer weights");
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206,"No free blend shape deformer weights");
     ptr = NULL;
   }
   return ptr;
@@ -988,7 +985,7 @@ void NuRndrInitWorld(void) {
 
 //MATCH GCN
 void NuRndrFx(s32 paused,struct nuvec_s *playerpos) {
-  NuLgtArcLaserDraw(paused);
+  //NuLgtArcLaserDraw(paused);
   return;
 }
 
@@ -1296,7 +1293,7 @@ void NuRndrShadPolys(struct numtl_s *mtl)
         vtx_282[3].pnt.x = vtx_282[1].pnt.x;
         vtx_282[3].pnt.y = vtx_282[0].pnt.y;
         vtx_282[3].pnt.z = vtx_282[2].pnt.z;
-        //NuRndrStrip3d((struct nuvtx_tc1_s *)vtx2_283,mtl,0,4);
+        NuRndrStrip3d((struct nuvtx_tc1_s *)vtx2_283,mtl,0,4);
       } while (i < NuRndrShadowCnt);
     }
     NuRndrShadowCnt = 0;
@@ -1375,41 +1372,6 @@ void NuRndrAddShadow(struct nuvec_s* v, f32 scale, s16 shade, s16 xrot,  s16 yro
 }
 
 
-/*void NuRndrParticleGroup(rdata_s *data,setup_s *setup,numtl_s *mtl,float time,numtx_s *wm)
-
-{
-  int i;
-  _sceDmaTag *data2;
-  double dVar1;
-  bool check;
-
-  dVar1 = (double)time;
-  setup->DmaHeader[3] = (int)time;
-  check = false;
-  i = 0;
-  do {
-    if (check) {
-      return;
-    }
-    data2 = (_sceDmaTag *)data->dmadata[1];
-    if (data->dmadata[0] == 0) {
-      if (data2 != (_sceDmaTag *)0x0) {
-        renderpsdma(0x20,data,setup,mtl,(float)dVar1,wm);
-        data = (rdata_s *)data2;
-      }
-    }
-    else {
-      if (data->dmadata[0] == 1) {
-        renderpsdma(0x20,data,setup,mtl,(float)dVar1,wm);
-      }
-      check = true;
-    }
-    i = i + 1;
-  } while (i < 0x101);
-  return;
-}
-*/
-
 //DONE 90%
 int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *layers)
 {
@@ -1423,7 +1385,7 @@ int NuHGobjRndr(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,short *la
 
     layer = nlayers + -1;
     if (layer >= hgobj->num_layers) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x8a8)("assert");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x8a8,"assert");
     }
 
     for (i = 0; i < hgobj->num_joints; i++) {
@@ -1477,7 +1439,7 @@ s32 NuHGobjRndrMtxDwa(struct NUHGOBJ_s *hgobj,struct numtx_s *wm,int nlayers,sho
   struct numtx_s mtx;
 
   rv = 0;
-  if (hgobj_enabled_231 == 0) {
+  if (hgobj_enabled == 0) {
        return 1;
   }
   else {
@@ -1588,7 +1550,7 @@ void NuHGobjEvalAnim(struct NUHGOBJ_s *hgobj,struct nuanimdata_s *animdata,float
 
         animcurveset = chunk->animcurvesets[i];
         if (animcurveset != NULL) {
-            if (((animcurveset->flags & 0x1A) != 0) || ((hgobj->joints[i].parent_ix_1 & 8) != 0)) {
+            if (((animcurveset->flags & 0x1A) != 0) || ((hgobj->joints[i].parent_ix & 8) != 0)) { //parent_ix_1
                 NuAnimCurveSetApplyToJoint2(animcurveset, &atime, &hgobj->joints[i], &VtxBuffer[i],
                 &VtxBuffer[hgobj->joints[i].parent_ix], &LOCAL_T, offset);
             }
@@ -1666,7 +1628,7 @@ void NuHGobjEvalAnim2(struct NUHGOBJ_s *hgobj,struct nuanimdata2_s *animdata,flo
       curvesetflags = animdata->curvesetflags[i];
           curves = &animdata->curves[animdata->ncurves * i];
         curveflags = &animdata->curveflags[animdata->ncurves * i];
-        if ((curvesetflags & 0x1a) || (hgobj->joints[i].parent_ix_1 & 8)) {
+        if ((curvesetflags & 0x1a) || (hgobj->joints[i].parent_ix & 8)) { //parent_ix_1
             NuAnimCurve2SetApplyToJoint(curves, curveflags, curvesetflags, &atime,
                 &hgobj->joints[i], &scale_arrayHGobjEval2[i],
                 &scale_arrayHGobjEval2[hgobj->joints[i].parent_ix], &LOCAL_T, offset);
@@ -1764,7 +1726,7 @@ struct numtx_s * mtx_array)
             *parent_T = *T;
         }
         else {
-            NuMtxMulVU0(parent_T, T, &mtx_array[hgobj->joints[i].parent_ix]);
+            NuMtxMul(parent_T, T, &mtx_array[hgobj->joints[i].parent_ix]); //NuMtxMulVU0
         }
     }
   return;
@@ -1817,9 +1779,9 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
             rf.x = (s32)(offset->rx * DEG_TO_FIXED_POINT);
             rf.y = (s32)(offset->ry * DEG_TO_FIXED_POINT);
             rf.z = (s32)(offset->rz * DEG_TO_FIXED_POINT);
-            NuMtxSetRotateXYZVU0(&NStack_f0, &rf);
+            NuMtxSetRotateXYZ(&NStack_f0, &rf); //NuMtxSetRotateXYZVU0
             NuMtxTranslate(&NStack_f0, &offset->tx);
-            NuMtxMulVU0(m, &NStack_f0, m);
+            NuMtxMul(m, &NStack_f0, m); //NuMtxMulVU0
         }
         else {
             m = &hgobj->T[i];
@@ -1829,7 +1791,7 @@ void NuHGobjEval(struct NUHGOBJ_s *hgobj, s32 njanims, struct NUJOINTANIM_s *jan
             *m_00 = *m;
         }
         else {
-            NuMtxMulVU0(m_00, m, &mtx_array[hgobj->joints[i].parent_ix]);
+            NuMtxMul(m_00, m, &mtx_array[hgobj->joints[i].parent_ix]); //NuMtxMulVU0
         }
     }
     return;

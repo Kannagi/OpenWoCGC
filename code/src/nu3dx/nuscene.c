@@ -188,13 +188,13 @@ void ReadNuIFFGobjSet(s32 fh, struct nuscene_s *sc) {
 }
 
 //MATCH NGC
-struct NuGobj* ReadNuIFFGeom(s32 handle, struct numtl_s** mtls) {
+struct nugobj_s* ReadNuIFFGeom(s32 handle, struct numtl_s** mtls) {
 
-    struct NuGobj* gobject;
-    struct NuGobj* first;
-    struct NuGobj* last;
+    struct nugobj_s* gobject;
+    struct nugobj_s* first;
+    struct nugobj_s* last;
     struct nugeom_s* geom;
-    struct NuFaceOnGeom* fgeom;
+    struct nufaceongeom_s* fgeom;
     s32 count;
     s32 i;
     s32 j;
@@ -351,7 +351,7 @@ void ReadNuIFFGeomTri(fileHandle handle, struct nugeom_s* geom, enum nuprimtype_
 //MATCH NGC
 static void ReadNuIFFGeomSkin(s32 handle,struct nugeom_s *geom) {
   s32 count;
-  struct NuSkin *skin;
+  struct nuskin_s *skin;
   s32 bytes;
   s32 i;
   s32 j;
@@ -559,13 +559,13 @@ void ReadNuIFFTexAnimSet(s32 fh, struct nugscn_s* gsc, s16* tids)
     s32 cnt;
 
 
-    NuDebugMsgProlog("..\\nu2.ps2\\nu3d\\nugscn.c", 0xC61)("Reading Animated texture set...");
+    //NuDebugMsgProlog("..\\nu2.ps2\\nu3d\\nugscn.c", 0xC61)("Reading Animated texture set...");
     gsc->numtexanims = NuFileReadInt(fh);
     NuFileReadInt(fh);
-    gsc->texanims = NuMemAllocFn(gsc->numtexanims * sizeof(struct nutexanim_s), "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC68);
+    gsc->texanims = NuMemAlloc(gsc->numtexanims * sizeof(struct nutexanim_s)); //, "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC68
     NuFileRead(fh, gsc->texanims, gsc->numtexanims * sizeof(struct nutexanim_s));
     cnt = NuFileReadInt(fh) * 2;
-    gsc->texanim_tids = (s16*)NuMemAllocFn(cnt, "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC6D);
+    gsc->texanim_tids = (s16*)NuMemAlloc(cnt); //, "..\\nu2.ps2\\nu3d\\nugscn.c", 0xC6D
     NuFileRead(fh, gsc->texanim_tids, cnt);
 
     for (i = 0; i < gsc->numtexanims; i++){
@@ -664,7 +664,7 @@ struct nuscene_s * NuSceneLoad(char *filename) {
   s32 i;
   //s32 j;
   struct nugeom_s *geom1;
-  struct NuGobj *gobj1;
+  struct nugobj_s *gobj1;
 
 
   strcpy(file2,filename);
@@ -697,7 +697,7 @@ struct nuscene_s * NuSceneLoad(char *filename) {
             }
             else {
               NuMemFree(scene);
-              NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0x718)("Baaaaad file <%s>",filename);
+              NuErrorProlog("C:/source/crashwoc/code/nu3dx/nuscene.c",0x718,"Baaaaad file <%s>",filename);
               return scene = NULL;
             }
               NuFileEndBlkRead(fh);

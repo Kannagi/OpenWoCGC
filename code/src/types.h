@@ -60,6 +60,12 @@ union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
 
 
+// Size: 0x4
+struct nunrand_s
+{
+    long idum; // Offset: 0x0
+};
+
 // Size: 0xC
 struct nucolour3_s
 {

@@ -2,18 +2,10 @@
 #include "nucamera.h"
 #include "numath/numtx.h"
 
-s32 clip_enable = 1;
-struct nuvec_s cam_axes = { 1.0f, 1.0f, 1.0f };
+static s32 clip_enable = 1;
+static struct nuvec_s cam_axes = { 1.0f, 1.0f, 1.0f };
 
-struct nucamera_s global_camera;
-struct numtx_s pmtx;
-struct numtx_s vpcsmtx;
-static struct numtx_s vpmtx;
-static struct Vec4 frustrumplanes[6];
-static float zx;
-static float zy;
-static enum nucamfxmode_s camfx;
-static struct nureflect_s global_reflect;
+
 
 struct nucamera_s * NuCameraCreate(void)
 {
@@ -262,55 +254,37 @@ void NuCameraTransformScreenClip(struct nuvec_s *dest,struct nuvec_s *src,s32 n,
     return;
 }
 
-/*
-//WIP
+
+//MATCH GCN
 s32 NuCameraClipTestExtents(struct nuvec_s* min, struct nuvec_s* max, const struct numtx_s* wm) {
+    struct nuvec_s* ext[2];
+    struct nuvec_s src[8];
+    struct nuvec_s dest[8];
     s32 k;
     s32 iVar2;
-    s32 iVar3;
     s32 iVar4;
-    struct nuvec_s *tmp2;
-    struct nuvec_s **tmp;
-    s32 iVar5;
     s32 iVar6;
-    struct nuvec_s src [8];
-    struct nuvec_s dest [8];
-    struct nuvec_s *ext [2];
-    char oc [8];
+    char oc[8];
 
     if (clip_enable == 0) {
         k = 1;
-    }
-    else {
+    } else {
+        int j = 0;
         ext[0] = min;
         ext[1] = max;
-        //iVar4 = 0;
-        //k = 0;
         for (iVar2 = 0; iVar2 < 2; iVar2++) {
-            //iVar2 = k + 1;
-            //iVar6 = 0;
             for (iVar6 = 0; iVar6 < 2; iVar6++) {
-                //iVar5 = iVar4 * 0xc;
-                //iVar3 = iVar6 + 1;
-                //tmp = ext;
-                for (iVar4 = 0; ((s32)ext[iVar4] <= (s32)(ext + 1)); iVar4++) {
-                    //iVar4 = iVar4 + 1;
-                    src[iVar2].x = ext[iVar2]->x;
-                    src[iVar2].y = ext[iVar2]->y;
-                    //tmp2 = *tmp;
-                    //tmp = tmp + 1;
-                    src[iVar2].z = ext[iVar2]->z;
-                    //iVar5 = iVar5 + 0xc;
-                } //while ((s32)ext[iVar4] <= (s32)(ext + 1));
-                //iVar6 = iVar3;
-            } //while (iVar3 < 2);
-            //k = iVar2;
-        } //while (iVar2 < 2);
-        NuCameraTransformView(dest,src,8,wm);
-        memset(oc,0,0x8);
-        //iVar6 = 8;
-        //k = 0;
-        //iVar4 = 0;
+                for (iVar4 = 0; iVar4 < 2; iVar4++) {
+                    src[j].x = ext[iVar2]->x;
+                    src[j].y = ext[iVar6]->y;
+                    src[j].z = ext[iVar4]->z;
+                    j++;
+                }
+            }
+        }
+
+        NuCameraTransformView(dest, src, 8, wm);
+        memset(oc, 0, sizeof(oc));
         for (k = 0; k < 8; k++) {
             if (dest[k].z < global_camera.nearclip) {
                 oc[k] = oc[k] | 1;
@@ -321,7 +295,7 @@ s32 NuCameraClipTestExtents(struct nuvec_s* min, struct nuvec_s* max, const stru
             if (dest[k].x < -dest[k].z * zx) {
                 oc[k] = oc[k] | 4;
             }
-            if (dest[k].x > dest[k].z * zx ) {
+            if (dest[k].x > dest[k].z * zx) {
                 oc[k] = oc[k] | 8;
             }
             if (dest[k].y < -dest[k].z * zy) {
@@ -330,22 +304,18 @@ s32 NuCameraClipTestExtents(struct nuvec_s* min, struct nuvec_s* max, const stru
             if (dest[k].y > dest[k].z * zy) {
                 oc[k] = oc[k] | 0x10;
             }
-            //iVar4 = iVar4 + 0xc;
-            //k = k + 1;
-            //iVar6 = iVar6 + -1;
-        } //while (iVar6 != 0);
+        }
         if ((oc[0] & oc[1] & oc[2] & oc[3] & oc[4] & oc[5] & oc[6] & oc[7]) == 0) {
             k = 1;
-            if ((char)(oc[0] | oc[1] | oc[2] | oc[3] | oc[4] | oc[5] | oc[6] | oc[7]) != 0) {
+            if ((oc[0] | oc[1] | oc[2] | oc[3] | oc[4] | oc[5] | oc[6] | oc[7]) != 0) {
                 k = 2;
             }
-        }
-        else {
+        } else {
             k = 0;
         }
     }
     return k;
-}*/
+}
 
 //MATCH GCN
 s32 NuCameraClipTestBoundingSphere(struct nuvec_s *gobj_centre,float *radius,struct numtx_s *wm) {

@@ -6,7 +6,7 @@ static s32 spectid;
 //MATCH NGC
 void InitSpecular() {
   struct nutex_s tex;
-  
+
   spectid = 0;
   NuTexReadBitmapMM("gfx\\spectxtf.bmp",0,&tex);
   spectid = NuTexCreate(&tex);
@@ -53,11 +53,11 @@ void InitOverrideMtl(void) {
 
    *glass_mtl_blendskin = *glass_mtl;
 
-    
+
   ((struct nusysmtl_s *)glass_mtl_blendskin)->hShader = 0x11;
   NuMtlUpdate(glass_mtl_blendskin);
   glass_mtl_blendskin2 = NuMtlCreate(1);
-    
+
     *glass_mtl_blendskin2 = *glass_mtl;
   pad = 8;
   ((struct nusysmtl_s *)glass_mtl_blendskin2)->hShader = 0x12;
@@ -68,7 +68,7 @@ void InitOverrideMtl(void) {
 //MATCH NGC
 static s32 isGlassInstance(struct nugscn_s *gsc,struct nuinstance_s *inst) {
   struct nugeom_s *geom;
-  
+
   geom = gsc->gobjs[inst->objid]->geom;
         if (inst->flags.visible >= 0) {
               return 0;
@@ -95,7 +95,7 @@ static void NuGlassProcessScene(struct nugscn_s* gsc) {
             }
             glass_inst[num_glass_inst] = &gsc->instances[i];
             inst = &gsc->instances[i];
-            
+
             glassMtx[num_glass_inst] = &inst->mtx;
 
             // Initiate glass gobj
@@ -115,7 +115,7 @@ static void NuGlassProcessScene(struct nugscn_s* gsc) {
 
             geom = gsc->gobjs[inst->objid]->geom;
             prev = NULL;
-            
+
             for (geom = gsc->gobjs[inst->objid]->geom; geom != NULL;) {
                 next = geom->next;
                 if ((geom->mtl->fxid == 1) || (geom->mtl->fxid == 3) || (geom->mtl->fxid == 100)) {
@@ -160,8 +160,8 @@ void NuGlassInit() {
 //MATCH NGC
 void NuGlassClose(void) {
   s32 i;
-    
-    for(i = 0; i < num_glass_inst; i++) 
+
+    for(i = 0; i < num_glass_inst; i++)
     {
       glass_inst[i] = 0;
       glassMtx[i] = 0;
@@ -243,7 +243,7 @@ void ProcessGlass(s32 paused) {
         glass_mtl_blendskin->attrib.alpha = 0;
         glass_mtl_blendskin2->attrib.alpha = 0;
     }
-    NuShaderSetGlassMix(glass_mix);
+    //NuShaderSetGlassMix(glass_mix);
     glass_mtl->diffuse = glass_col[0];
     NuMtlUpdate(glass_mtl);
     NuMtlUpdate(glass_mtl_blendskin);
@@ -257,15 +257,15 @@ void DrawGlassCreatures(s32 solid) {
         if ((GLASSPLAYER != 0) && (plr_invisibility_time < 5.0f)) {
         glass_phase = 1;
         glass_draw = solid;
-        DrawCreatures(Character,1,1,0);
+        //DrawCreatures(Character,1,1,0);
         force_glass_screencopy_enable = 0;
     }
 
-    } 
+    }
     else {
         glass_draw = solid;
         glass_phase = 1;
-        DrawCreatures(Character + 1,8,1,1);
+        //DrawCreatures(Character + 1,8,1,1);
     }
     return;
 }

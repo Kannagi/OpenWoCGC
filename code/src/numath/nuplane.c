@@ -1,6 +1,6 @@
 #include "nuplane.h"
 
-u32 NuPlnLine(struct Vec4* p1, struct nuvec_s* p2, struct nuvec_s* p3, struct nuvec_s* p4)
+u32 NuPlnLine(struct nuvec4_s* p1, struct nuvec_s* p2, struct nuvec_s* p3, struct nuvec_s* p4)
 {
   struct nuvec_s tmp;
   f32 t1 = NuVecDot(p2,(struct nuvec_s *)p1);

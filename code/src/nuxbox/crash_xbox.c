@@ -1,11 +1,15 @@
 #include "../system.h"
+#include "nu.h"
+#include"gamecode/main.h"
 
-void AddQuad3DrotXYZ(struct nuvec_s *pos,struct nuvec_s *shape,struct numtl_s *mtl,struct nuangvec_s *a,float *uvs,u32 colou r)
+int iss3cmp;
+
+void AddQuad3DrotXYZ(struct nuvec_s *pos,struct nuvec_s *shape,struct numtl_s *mtl,struct nuangvec_s *a,float *uvs,u32 colour)
 {
   s32 outcode;
   struct numtx_s mtx;
   struct nuvtx_tc1_s vtx [4];
-  
+
   vtx[0].diffuse =
        (colour & 0xff000000) + (colour & 0xff) * 0x10000 + (colour & 0xff00) +
        (colour >> 0x10 & 0xff);
@@ -62,12 +66,12 @@ void DrawMask(struct mask *mask)
     numtx_s mM; //
     numtx_s mS; //
     float** dwa; //
-    int i; 
+    int i;
 */
 }
 
 struct nuvec_s tempvec;
-struct nuvec4_s tempvec4; 
+struct nuvec4_s tempvec4;
 
 void* makenuvec(float x,float y,float z)
 {
@@ -96,7 +100,7 @@ void LoadWaterCausticTextures(void)
   s32 *causticTx;
   s32 n;
   char bmpname [24];
-  
+
   mem = malloc_x(0x1000);
   tex = (struct nutex_s *)malloc_x(0x1c);
   tex->height = 0x40;
@@ -128,7 +132,7 @@ void RemoveWaterCausticTextures(void)
 {
   int tid;
   int *i;
-  
+
   i = CausticTextures;
   do {
     tid = *i;
@@ -142,7 +146,7 @@ void RemoveWaterCausticTextures(void)
 struct nuscene_s * NuSceneReader(union variptr_u *buffer,union variptr_u *buffend,char *filename)
 {
   struct nuscene_s *data;
-  
+
   if (buffer != NULL) {
     NuMemSetExternal(buffer,buffend);
   }
@@ -156,7 +160,7 @@ struct nuscene_s * NuSceneReader(union variptr_u *buffer,union variptr_u *buffen
 struct nuscene_s * NuSceneReader2(union variptr_u *buffer,union variptr_u *buffend,char *file)
 {
   struct nuscene_s *scene;
-  
+
   if (buffer != NULL) {
     NuMemSetExternal(buffer,buffend);
   }

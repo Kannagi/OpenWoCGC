@@ -9,6 +9,10 @@
 #include "gamecode/camera.h"
 #include "nuxbox/nuxboxtypes.h"
 
+s32 SWIDTH;
+s32 SHEIGHT;
+struct nugscn_s* world_scene[32];
+struct nuscene_s* world_scene2[32];
 
 void Text3D2 (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);
 void Text3D (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);
@@ -277,5 +281,26 @@ struct pVTog {
     char pad1;
     char pad2;
 };
+// Size: 0x10, DWARF: 0x1464F0
+struct nulnkhdr_s
+{
+    struct nulsthdr_s* owner; // Offset: 0x0, DWARF: 0x14650F
+    struct nulnkhdr_s* succ; // Offset: 0x4, DWARF: 0x14653C
+    struct nulnkhdr_s* prev; // Offset: 0x8, DWARF: 0x146568
+    unsigned short id; // Offset: 0xC, DWARF: 0x146594
+    unsigned short used : 1; // Offset: 0xE, DWARF: 0x1465B9, Bit Offset: 0, Bit Size: 1
+};
+
+// Size: 0x10, DWARF: 0x1463F8
+struct nulsthdr_s
+{
+    struct nulnkhdr_s* free; // Offset: 0x0, DWARF: 0x146417
+    struct nulnkhdr_s* head; // Offset: 0x4, DWARF: 0x146443
+    struct nulnkhdr_s* tail; // Offset: 0x8, DWARF: 0x14646F
+    short elcnt; // Offset: 0xC, DWARF: 0x14649B
+    short elsize; // Offset: 0xE, DWARF: 0x1464C3
+};
+
+
 
 #endif // !MAIN_H
