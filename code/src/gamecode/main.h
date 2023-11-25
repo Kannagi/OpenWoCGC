@@ -13,6 +13,7 @@ s32 SWIDTH;
 s32 SHEIGHT;
 struct nugscn_s* world_scene[32];
 struct nuscene_s* world_scene2[32];
+s32 iss3cmp;
 
 void Text3D2 (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);
 void Text3D (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);

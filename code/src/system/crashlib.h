@@ -2,6 +2,8 @@
 #define CRASHLIB_H
 
 #include "gs.h"
+#include "nuraster/dxframe.h"
+#include "gamecode/main.h"
 
 // Size: 0x14
 struct _PERFTIMER

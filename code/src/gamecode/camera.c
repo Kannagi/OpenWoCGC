@@ -154,211 +154,186 @@ void InitRails(void)
   return;
 }
 
+//86%
+float BestRailPosition(struct NuVec* pos, struct RPos_s* rpos, s32 iRAIL, s32 iALONG) {
+    struct NuVec local_a0;
+    struct NuVec local_90;
+    struct NuVec local_80;
+    struct NuVec local_70;
+    struct NuVec local_60;
+    struct NuVec* pcVar6;
+    struct NuVec* pcVar15;
+    BOOL bVar2;
+    s32 iVar3;
+    s32 iVar5;
+    s32 iVar7;
+    s32 iVar8;
+    s32 iVar9;
+    s32 unaff_r20;
+    u32 uVar10;
+    u32 uVar11;
+    s32 iVar12;
+    s32 iVar13;
+    s32 iVar14;
+    float dbest;
+    float d;
+    float y;
+    struct rail_s* rail;
+    int r28;
+    int r24;
+    int r23;
+    int r22;
+    int r21;
+    int r20;
+    int r19;
+    int r18;
 
-float BestRailPosition(nuvec_s *pos,RPos_s *rpos,int iRAIL,int iALONG)
-
-{
-  bool bVar1;
-  bool bVar2;
-  int iVar3;
-  short sVar4;
-  int iVar5;
-  char *pcVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
-  int unaff_r20;
-  uint uVar10;
-  uint uVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  char *pcVar15;
-  byte bVar16;
-  double dVar17;
-  double dVar18;
-  double in_f31;
-  float fVar19;
-  nuvec_s local_a0;
-  nuvec_s local_90;
-  nuvec_s local_80;
-  nuvec_s local_70;
-  nuvec_s local_60;
-
-  bVar2 = false;
-  if ((Level == 6) || (Level == 0x22)) {
-    bVar2 = true;
-  }
-  bVar2 = !bVar2;
-  if (bVar2) {
-    local_a0.x = pos->x;
-    local_a0.z = pos->z;
-    local_a0.y = pos->y;
-  }
-  else {
-    local_a0.z = pos->z;
-    local_a0.y = pos->x;
-    local_a0.x = -pos->y;
-  }
-  dVar17 = 0.0;
-  rpos->iRAIL = -1;
-  rpos->iALONG = -1;
-  rpos->fALONG = 0.0;
-  rpos->fACROSS = 0.0;
-  if (Rail[iRAIL].type != -1) {
-    bVar16 = (iALONG == -1) << 1;
-    if (iALONG == -1) {
-      iALONG = (int)Rail[iRAIL].edges / 2;
+    bVar2 = 0;
+    if ((Level == 6) || (Level == 0x22)) {
+        bVar2 = 1;
     }
+    if (bVar2) {
+        local_a0.x = -pos->y;
+        local_a0.y = pos->x;
+        local_a0.z = pos->z;
+    } else {
+        local_a0 = *pos;
+    }
+    rail = &Rail[iRAIL];
+    // dbest = 0.0f;
+    rpos->iRAIL = -1;
+    rpos->iALONG = -1;
+    rpos->fALONG = 0.0f;
+    rpos->fACROSS = 0.0f;
+    if (rail->type == -1) {
+        return 0.0f;
+    }
+
+    if (iALONG == -1) {
+        r23 = (s32)rail->edges / 2;
+    } else {
+        r23 = iALONG;
+    }
+    r18 = r23 + 1;
+    r19 = r23 - 1;
+    r22 = 0;
+    r21 = 0;
     uVar11 = 0;
     uVar10 = 0;
-    iVar12 = iALONG + 1;
-    iVar3 = iALONG + -1;
-    dVar17 = in_f31;
-LAB_80009f60:
-    iVar7 = iVar12;
-    iVar8 = iVar3;
-    iVar14 = iALONG;
-    if (uVar11 != 0) {
-      if (uVar11 == 1) {
-        iVar7 = iVar12 + 1;
-        iVar14 = iVar12;
-      }
-      else {
-        iVar8 = iVar3 + -1;
-        iVar14 = iVar3;
-      }
-    }
-    if ((iVar14 < 0) || (Rail[iRAIL].edges <= iVar14)) {
-      uVar10 = uVar10 | uVar11;
-    }
-    else {
-      iVar12 = iVar14 + 1;
-      if ((iVar12 == Rail[iRAIL].edges) && (Rail[iRAIL].circuit != '\0')) {
-        iVar12 = 0;
-      }
-      iVar3 = (int)(Rail[iRAIL].pLEFT)->ptsize;
-      iVar9 = (int)(Rail[iRAIL].pRIGHT)->ptsize;
-      pcVar15 = (Rail[iRAIL].pRIGHT)->pts;
-      iVar5 = iVar12 * iVar3;
-      pcVar6 = (Rail[iRAIL].pLEFT)->pts;
-      iVar13 = iVar14 * iVar9;
-      iVar3 = iVar14 * iVar3;
-      iVar9 = iVar12 * iVar9;
-      if (bVar2) {
-        local_90.x = *(float *)(pcVar6 + iVar3);
-        local_90.z = *(float *)(pcVar6 + iVar3 + 8);
-        local_90.y = *(float *)(pcVar6 + iVar3 + 4);
-        local_80.x = *(float *)(pcVar6 + iVar5);
-        local_80.z = *(float *)(pcVar6 + iVar5 + 8);
-        local_80.y = *(float *)(pcVar6 + iVar5 + 4);
-        local_70.x = *(float *)(pcVar15 + iVar9);
-        local_70.z = *(float *)(pcVar15 + iVar9 + 8);
-        local_70.y = *(float *)(pcVar15 + iVar9 + 4);
-        local_60.x = *(float *)(pcVar15 + iVar13);
-        local_60.z = *(float *)(pcVar15 + iVar13 + 8);
-        local_60.y = *(float *)(pcVar15 + iVar13 + 4);
-      }
-      else {
-        local_90.x = -*(float *)(pcVar6 + iVar3 + 4);
-        local_90.y = *(float *)(pcVar6 + iVar3);
-        local_90.z = *(float *)(pcVar6 + iVar3 + 8);
-        local_80.x = -*(float *)(pcVar6 + iVar5 + 4);
-        local_80.y = *(float *)(pcVar6 + iVar5);
-        local_80.z = *(float *)(pcVar6 + iVar5 + 8);
-        local_70.x = -*(float *)(pcVar15 + iVar9 + 4);
-        local_70.y = *(float *)(pcVar15 + iVar9);
-        local_70.z = *(float *)(pcVar15 + iVar9 + 8);
-        local_60.x = -*(float *)(pcVar15 + iVar13 + 4);
-        local_60.y = *(float *)(pcVar15 + iVar13);
-        local_60.z = *(float *)(pcVar15 + iVar13 + 8);
-      }
-      if ((((0.0 <= (local_a0.x - local_90.x) * (local_80.z - local_90.z) +
-                    (local_a0.z - local_90.z) * (local_90.x - local_80.x)) &&
-           (0.0 <= (local_a0.x - local_80.x) * (local_70.z - local_80.z) +
-                   (local_a0.z - local_80.z) * (local_80.x - local_70.x))) &&
-          (0.0 <= (local_a0.x - local_70.x) * (local_60.z - local_70.z) +
-                  (local_a0.z - local_70.z) * (local_70.x - local_60.x))) &&
-         (0.0 <= (local_a0.x - local_60.x) * (local_90.z - local_60.z) +
-                 (local_a0.z - local_60.z) * (local_60.x - local_90.x))) {
-        fVar19 = (local_90.y + local_80.y + local_70.y + local_60.y) * 0.25 - local_a0.y;
-        dVar18 = (double)fVar19;
-        NuFabs(fVar19);
-        if ((bool)(bVar16 >> 1 & 1)) {
-          if ((rpos->iALONG == -1) || (dVar18 < dVar17)) {
-            unaff_r20 = 1;
-            dVar17 = dVar18;
-          }
+    while (1) {
+        if (r22 == 0) {
+            r28 = r23;
+        } else if (r22 == 1) {
+            r28 = r18;
+            r18++;
+        } else {
+            r28 = r19;
+            r19--;
         }
-        else {
-          unaff_r20 = 2;
-          dVar17 = dVar18;
+        if (r28 >= 0 && r28 < rail->edges) {
+            struct NuVec* r5;
+            struct NuVec* r12;
+            struct NuVec* r9;
+            struct NuVec* r30;
+            r24 = r28 + 1;
+            if ((r24 == rail->edges) && (rail->circuit != 0)) {
+                r24 = 0;
+            }
+            r12 = (char*)rail->pRIGHT->pts + (r28 * rail->pRIGHT->ptsize);
+            r30 = (char*)rail->pRIGHT->pts + (r24 * rail->pRIGHT->ptsize);
+            r5 = (char*)rail->pLEFT->pts + (r24 * rail->pLEFT->ptsize);
+            r9 = (char*)rail->pLEFT->pts + (r28 * rail->pLEFT->ptsize);
+            if (bVar2) {
+                local_90.x = -r9->y;
+                local_90.y = r9->x;
+                local_90.z = r9->z;
+
+                local_80.x = -r5->y;
+                local_80.y = r5->x;
+                local_80.z = r5->z;
+
+                local_70.x = -r30->y;
+                local_70.y = r30->x;
+                local_70.z = r30->z;
+
+                local_60.x = -r12->y;
+                local_60.y = r12->x;
+                local_60.z = r12->z;
+            } else {
+                local_90 = *r9;
+                local_80 = *r5;
+                local_70 = *r30;
+                local_60 = *r12;
+            }
+            if ((((0.0f <= (local_a0.x - local_90.x) * (local_80.z - local_90.z)
+                       + (local_a0.z - local_90.z) * (local_90.x - local_80.x))
+                  && (0.0f <= (local_a0.x - local_80.x) * (local_70.z - local_80.z)
+                          + (local_a0.z - local_80.z) * (local_80.x - local_70.x)))
+                 && (0.0f <= (local_a0.x - local_70.x) * (local_60.z - local_70.z)
+                         + (local_a0.z - local_70.z) * (local_70.x - local_60.x)))
+                && (0.0f <= (local_a0.x - local_60.x) * (local_90.z - local_60.z)
+                        + (local_a0.z - local_60.z) * (local_60.x - local_90.x)))
+            {
+                d = NuFabs(((local_90.y + local_80.y + local_70.y + local_60.y) * 0.25f - local_a0.y));
+                if (iALONG == -1 && (rpos->iALONG == -1 || d < dbest)) {
+                    dbest = d;
+                    r20 = 1;
+                } else {
+                    dbest = d;
+                    r20 = 2;
+                }
+                if (r20 != 0) {
+                    rpos->iALONG = r28;
+                    rpos->iRAIL = iRAIL;
+                    rpos->i1 = r24;
+                    rpos->i2 = r24 + 1;
+                    if ((rpos->i2 == rail->edges) && (rail->circuit != 0)) {
+                        rpos->i2 = 0;
+                    }
+                    rpos->fALONG = RatioBetweenEdges(&local_a0, &local_60, &local_90, &local_70, &local_80);
+                    rpos->fACROSS = RatioBetweenEdges(&local_a0, &local_90, &local_80, &local_60, &local_70);
+                    if (r20 == 2) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            r21 |= r22;
         }
-        if (unaff_r20 != 0) {
-          sVar4 = (short)iVar12 + 1;
-          rpos->iALONG = (short)iVar14;
-          rpos->iRAIL = (char)iRAIL;
-          rpos->i1 = (short)iVar12;
-          rpos->i2 = sVar4;
-          if ((sVar4 == Rail[iRAIL].edges) && (Rail[iRAIL].circuit != '\0')) {
-            rpos->i2 = 0;
-          }
-          fVar19 = RatioBetweenEdges(&local_a0,&local_60,&local_90,&local_70,&local_80);
-          rpos->fALONG = fVar19;
-          fVar19 = RatioBetweenEdges(&local_a0,&local_90,&local_80,&local_60,&local_70);
-          rpos->fACROSS = fVar19;
-          if (unaff_r20 == 2) goto LAB_8000a2b0;
+        if (r21 == 3) {
+            break;
         }
-      }
+        r22 = (r22 == 1) ? 2 : 1;
     }
-    if (uVar10 == 3) goto LAB_8000a2b0;
-    bVar1 = uVar11 == 1;
-    uVar11 = 1;
-    iVar12 = iVar7;
-    iVar3 = iVar8;
-    if (bVar1) {
-      uVar11 = 2;
+    temp_iRAIL = rpos->iRAIL;
+    temp_iALONG = rpos->iALONG;
+    temp_fALONG = rpos->fALONG;
+    temp_fACROSS = rpos->fACROSS;
+
+    if ((rpos->iRAIL != -1) && (temp_iALONG != -1)) {
+        iVar3 = (s32)rpos->i2;
+        iVar12 = (s32)rpos->i1;
+        rpos->vertical = '\0';
+        if ((iVar3 == iVar12) || (rail->edges <= iVar3)) {
+            iVar8 = (s32)(rail->pLEFT)->ptsize;
+            iVar7 = iVar3 * iVar8;
+            iVar8 = iVar12 * iVar8;
+            if ((pcVar6[iVar8].x == pcVar6[iVar7].x) && (pcVar6[iVar8].z == pcVar6[iVar7].z)) {
+                iVar7 = (s32)(rail->pRIGHT)->ptsize;
+                iVar3 = iVar3 * iVar7;
+                iVar12 = iVar12 * iVar7;
+                if ((pcVar6[iVar12].x == pcVar6[iVar3].x) && (pcVar6[iVar12].z == pcVar6[iVar3].z)) {
+                    rpos->vertical = '\x01';
+                }
+            }
+        }
+        if (bVar2) {
+            RailInfo(rpos, &rpos->pos, NULL, &rpos->cam_angle, NULL);
+        } else {
+            RailInfo(rpos, &rpos->pos, &rpos->angle, &rpos->cam_angle, &rpos->mode);
+        }
     }
-    goto LAB_80009f60;
-  }
-  goto LAB_8000a3d0;
-LAB_8000a2b0:
-  temp_iALONG = (int)rpos->iALONG;
-  temp_fALONG = rpos->fALONG;
-  temp_iRAIL = (int)rpos->iRAIL;
-  temp_fACROSS = rpos->fACROSS;
-  if ((rpos->iRAIL == -1) || (temp_iALONG == -1)) goto LAB_8000a3d0;
-  iVar3 = (int)rpos->i2;
-  iVar12 = (int)rpos->i1;
-  rpos->vertical = '\0';
-  if ((iVar3 == iVar12) || (Rail[iRAIL].edges <= iVar3)) {
-LAB_8000a394:
-    if (bVar2) {
-      RailInfo(rpos,&rpos->pos,&rpos->angle,&rpos->cam_angle,&rpos->mode);
-      goto LAB_8000a3d0;
-    }
-  }
-  else if (bVar2) {
-    iVar8 = (int)(Rail[iRAIL].pLEFT)->ptsize;
-    pcVar6 = (Rail[iRAIL].pLEFT)->pts;
-    iVar7 = iVar3 * iVar8;
-    iVar8 = iVar12 * iVar8;
-    if ((*(float *)(pcVar6 + iVar8) == *(float *)(pcVar6 + iVar7)) &&
-       (*(float *)(pcVar6 + iVar8 + 8) == *(float *)(pcVar6 + iVar7 + 8))) {
-      iVar7 = (int)(Rail[iRAIL].pRIGHT)->ptsize;
-      pcVar6 = (Rail[iRAIL].pRIGHT)->pts;
-      iVar3 = iVar3 * iVar7;
-      iVar12 = iVar12 * iVar7;
-      if ((*(float *)(pcVar6 + iVar12) == *(float *)(pcVar6 + iVar3)) &&
-         (*(float *)(pcVar6 + iVar12 + 8) == *(float *)(pcVar6 + iVar3 + 8))) {
-        rpos->vertical = '\x01';
-      }
-    }
-    goto LAB_8000a394;
-  }
-  RailInfo(rpos,&rpos->pos,(ushort *)0x0,&rpos->cam_angle,(uchar *)0x0);
-LAB_8000a3d0:
-  return (float)dVar17;
+    return dbest;
 }
 
 

@@ -66,5 +66,22 @@ enum fxidtypes_e
     NOFX = 0
 };
 
+s32 ForceShader;
+static float glassmix;
+static s32 bypassEffectShaders;
+s32 currentLevel;
+enum shadertypes_e defaultShader;
+s32 nobypass;
+s32 NEW_CV_COLOR_TYPE;
+s32 newCV_LIGHTS_OFF;
+struct _GS_VECTOR4 CV_MTL_COLOR;
+struct _GS_VECTOR4 CV_AMBIENT_COLOR;
+struct _GS_VECTOR4 CV_LIGHT1_COLOR;
+struct _GS_VECTOR4 CV_LIGHT1_POS;
+struct _GS_VECTOR4 CV_LIGHT2_COLOR;
+struct _GS_VECTOR4 CV_LIGHT2_POS;
+struct _GS_VECTOR4 CV_LIGHT3_COLOR;
+struct _GS_VECTOR4 CV_LIGHT3_POS;
+
 
 #endif // !PORT_H

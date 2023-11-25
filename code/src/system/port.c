@@ -13,3 +13,13 @@ void NuShaderSetSkinningConstants(struct nugeomitem_s* item, struct nuprim_s* pr
   }
   return;
 }
+
+void NuShaderSetBypassShaders(s32 flag) {
+    bypassEffectShaders = flag;
+    return;
+}
+
+void NuShaderSetGlassMix(float mix) {
+    glassmix = mix;
+    return;
+}
