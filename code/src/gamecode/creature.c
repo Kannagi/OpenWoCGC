@@ -711,82 +711,74 @@ void PurgeCharacterModels(void)
   return;
 }
 
+//92%
+void LoadCharacterModels(void) {
+    s32 i;
+    s32 j;
+    s32 character;
+    s32 cmodel_index;
+    // struct nudathdr_s* dfanim;
+    struct space_s *space;
+    char charsdat_filename[128];
+    s32 clist_entry;
+    s32 remap;
 
-void LoadCharacterModels(void)
-
-{
-  uint character;
-  int iVar1;
-  space *space;
-  int clist_entry;
-  double dVar2;
-  float fVar3;
-  int cmodel_index;
-  int remap;
-  char local_28 [12];
-  
-  clist_entry = (int)(CModel[0].hobj != (NUHGOBJ_s *)0x0);
-  if (Level == 0x28) {
-    space = (space *)SpaceGameCutTab[gamecut * 2];
-  }
-  else {
-    space = (space *)0x0;
-  }
-  if (LDATA->cList != (uchar *)0x0) {
-    cmodel_index = clist_entry;
-    remap = clist_entry;
-    while( true ) {
-      force_decal = 0;
-      if (space == (space *)0x0) {
-        character = (uint)LDATA->cList[clist_entry];
-      }
-      else {
-        character = space[clist_entry].character;
-      }
-      if ((character == 0x1b) || (character == 0x86)) {
-        force_decal = 1;
-      }
-      iVar1 = LoadCharacterModel(character,Level,&cmodel_index,clist_entry,&remap);
-      if (iVar1 == 0) break;
-      clist_entry = clist_entry + 1;
+    
+    if(CModel[0].hobj != NULL)
+    {
+        clist_entry = 1;
+    } else {
+        clist_entry = 0;
     }
-  }
-  fVar3 = ModelAnimDuration(0,0x30,0.0,0.0);
-  dVar2 = 60.0;
-  local_28._0_8_ = (longlong)(int)(fVar3 * 60.0);
-  CrashMoveInfo.JUMPLANDFRAMES = (short)(int)(fVar3 * 60.0);
-  fVar3 = ModelAnimDuration(0,0x1f,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CrashMoveInfo.SLAMWAITFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(0,0x44,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CrashMoveInfo.SOMERSAULTFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(0,0x43,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CrashMoveInfo.SLIDEFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(0,3,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CrashMoveInfo.CROUCHINGFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(1,0x30,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CocoMoveInfo.JUMPLANDFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(1,0x1f,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CocoMoveInfo.SLAMWAITFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(1,0x44,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CocoMoveInfo.SOMERSAULTFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(1,0x46,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CocoMoveInfo.SPINFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(1,0x43,0.0,0.0);
-  local_28._0_8_ = (longlong)(int)((double)fVar3 * dVar2);
-  CocoMoveInfo.SLIDEFRAMES = (short)(int)((double)fVar3 * dVar2);
-  fVar3 = ModelAnimDuration(0x89,99,0.0,0.0);
-  MineCartMoveInfo.JUMPFRAMES0 = (short)(int)((double)fVar3 * dVar2);
-  return;
+    
+    if (Level == 0x28) {
+        space = (struct space_s *)SpaceGameCutTab[0][gamecut * 2];
+    }
+    else {
+        space = NULL;
+    }
+   if (LDATA->clist != NULL) {
+        i = clist_entry;
+        remap = i;
+        cmodel_index = i;
+        while( 1 ) {
+            force_decal = 0;
+            if (space != NULL) {
+                // fakery
+                // j = i << 5;
+                // j &= 0xFFFFFFF0;
+                // character = ((s32*)space)[j];
+                
+                character = space[i].character;
+            }
+            else {
+                character = LDATA->clist[i];
+            }
+            
+            if ((character == 0x1b) || (character == 0x86)) {
+                force_decal = 1;
+            }
+            if (LoadCharacterModel(character, Level, &cmodel_index, i, &remap) == 0) 
+            {
+                break;
+            }
+            i++;
+        }
+    }
+    
+    CrashMoveInfo.JUMPLANDFRAMES   = ModelAnimDuration(0,   0x30, 0.0f, 0.0f) * 60.0f;
+    CrashMoveInfo.SLAMWAITFRAMES   = ModelAnimDuration(0,   0x1f, 0.0f, 0.0f) * 60.0f;
+    CrashMoveInfo.SOMERSAULTFRAMES = ModelAnimDuration(0,   0x44, 0.0f, 0.0f) * 60.0f;
+    CrashMoveInfo.SLIDEFRAMES      = ModelAnimDuration(0,   0x43, 0.0f, 0.0f) * 60.0f;
+    CrashMoveInfo.CROUCHINGFRAMES  = ModelAnimDuration(0,   3,    0.0f, 0.0f) * 60.0f;
+    CocoMoveInfo.JUMPLANDFRAMES    = ModelAnimDuration(1,   0x30, 0.0f, 0.0f) * 60.0f;
+    CocoMoveInfo.SLAMWAITFRAMES    = ModelAnimDuration(1,   0x1f, 0.0f, 0.0f) * 60.0f;
+    CocoMoveInfo.SOMERSAULTFRAMES  = ModelAnimDuration(1,   0x44, 0.0f, 0.0f) * 60.0f;
+    CocoMoveInfo.SPINFRAMES        = ModelAnimDuration(1,   0x46, 0.0f, 0.0f) * 60.0f;
+    CocoMoveInfo.SLIDEFRAMES       = ModelAnimDuration(1,   0x43, 0.0f, 0.0f) * 60.0f;
+    MineCartMoveInfo.JUMPFRAMES0   = ModelAnimDuration(0x89,  99, 0.0f, 0.0f) * 60.0f;
+    return;
 }
-
 
 void ChangeCharacter(creature_s *c,int character)
 

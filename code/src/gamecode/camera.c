@@ -46,113 +46,90 @@ void BlendGameCamera(struct cammtx_s *cam,float time) {
     return;
 }
 
-/*
-void InitRails(void)
+//96%
+void InitRails(void) {
+    s32 n;
+    s32 i;
+    s16 camlen;
+    s16 leftlen; 
+    s16 rightlen;
+    struct rail_s* rail;
 
-{
-  short sVar1;
-  nugspline_s *spl;
-  int cmp;
-  undefined4 uVar2;
-  int iVar3;
-  int iVar4;
-  Rail *rail;
-  float fVar5;
-  short len;
-  char *tCmRail;
-
-  nRAILS = 0;
-  if (world_scene[0] != (nugscn_s *)0x0) {
-    rail = Rail;
-    iVar4 = 0;
-    iVar3 = 8;
-    do {
-      tCmRail = tCamRail;
-      uVar2 = *(undefined4 *)((int)tRailExt + iVar4);
-      rail->out_distance = 25.0;
-      rail->type = -1;
-      rail->in_distance = 25.0;
-      rail->pINPLAT = (nugspline_s *)0x0;
-      rail->pINCAM = (nugspline_s *)0x0;
-      rail->pLEFT = (nugspline_s *)0x0;
-      rail->pCAM = (nugspline_s *)0x0;
-      rail->pRIGHT = (nugspline_s *)0x0;
-      rail->pOUTCAM = (nugspline_s *)0x0;
-      rail->pOUTPLAT = (nugspline_s *)0x0;
-      rail->circuit = '\0';
-      sprintf(tbuf,"%s%s",tCmRail,uVar2);
-      spl = NuSplineFind(world_scene[0],tbuf);
-      rail->pCAM = spl;
-      if (spl != (nugspline_s *)0x0) {
-        len = spl->len;
-        if (1 < len) {
-          sprintf(tbuf,"%s%s",tLeftRail,*(undefined4 *)((int)tRailExt + iVar4));
-          spl = NuSplineFind(world_scene[0],tbuf);
-          rail->pLEFT = spl;
-          if (spl != (nugspline_s *)0x0) {
-            sVar1 = spl->len;
-            if (sVar1 == len) {
-              sprintf(tbuf,"%s%s",tRightRail,*(undefined4 *)((int)tRailExt + iVar4));
-              spl = NuSplineFind(world_scene[0],tbuf);
-              rail->pRIGHT = spl;
-              tCmRail = tInPlatRail;
-              if (spl != (nugspline_s *)0x0) {
-                if (spl->len == sVar1) {
-                  uVar2 = *(undefined4 *)((int)tRailExt + iVar4);
-                  rail->edges = spl->len + -1;
-                  sprintf(tbuf,"%s%s",tCmRail,uVar2);
-                  spl = NuSplineFind(world_scene[0],tbuf);
-                  rail->pINPLAT = spl;
-                  if (spl != (nugspline_s *)0x0) {
-                    fVar5 = SplineDistance(spl);
-                    rail->in_distance = fVar5;
-                  }
-                  sprintf(tbuf,"%s%s",tInCamRail,*(undefined4 *)((int)tRailExt + iVar4));
-                  spl = NuSplineFind(world_scene[0],tbuf);
-                  rail->pINCAM = spl;
-                  sprintf(tbuf,"%s%s",tOutPlatRail,*(undefined4 *)((int)tRailExt + iVar4));
-                  spl = NuSplineFind(world_scene[0],tbuf);
-                  rail->pOUTPLAT = spl;
-                  if (spl != (nugspline_s *)0x0) {
-                    fVar5 = SplineDistance(spl);
-                    rail->out_distance = fVar5;
-                  }
-                  sprintf(tbuf,"%s%s",tOutCamRail,*(undefined4 *)((int)tRailExt + iVar4));
-                  spl = NuSplineFind(world_scene[0],tbuf);
-                  rail->pOUTCAM = spl;
-                  cmp = strcmp(*(char **)((int)tRailExt + iVar4),"bonus");
-                  if (cmp == 0) {
-                    rail->type = '\x01';
-                  }
-                  else {
-                    cmp = strcmp(*(char **)((int)tRailExt + iVar4),"death");
-                    if (cmp == 0) {
-                      rail->type = '\x02';
+    
+    nRAILS = 0;
+    if (world_scene[0] != NULL) {
+        for (i = 0, n = 8; n != 0;  n--, i++) {
+            rail = &Rail[i];
+            rail->in_distance = 25.0f;
+            rail->out_distance = 25.0f;
+            rail->type = -1;
+            rail->pINPLAT = NULL;
+            rail->pINCAM = NULL;
+            rail->pLEFT = NULL;
+            rail->pCAM = NULL;
+            rail->pRIGHT = NULL;
+            rail->pOUTCAM = NULL;
+            rail->pOUTPLAT = NULL;
+            rail->circuit = '\0';
+            sprintf(tbuf,"%s%s",tCamRail,tRailExt[i]);
+            rail->pCAM = NuSplineFind(world_scene[0],tbuf);
+            if (rail->pCAM != NULL) {
+                camlen = rail->pCAM->len;
+                if (1 < camlen) {
+                    sprintf(tbuf,"%s%s",tLeftRail,tRailExt[i]);
+                    rail->pLEFT = NuSplineFind(world_scene[0],tbuf);
+                    if (rail->pLEFT != NULL) {
+                        leftlen = rail->pLEFT->len;
+                        if (leftlen == camlen) {
+                            sprintf(tbuf,"%s%s",tRightRail,tRailExt[i]) ;
+                            rail->pRIGHT = NuSplineFind(world_scene[0],tbuf);
+                            if (rail->pRIGHT != NULL) {
+                                rightlen = rail->pRIGHT->len; 
+                                if (rightlen == leftlen) {
+                                    rail->edges = rightlen + -1;
+                                    sprintf(tbuf,"%s%s",tInPlatRail,tRailExt[i]);
+                                    rail->pINPLAT = NuSplineFind(world_scene[0],tbuf);
+                                    if (rail->pINPLAT != NULL) {
+                                        rail->in_distance = SplineDistance(rail->pINPLAT);
+                                    }
+                                    sprintf(tbuf,"%s%s",tInCamRail,tRailExt[i]);
+                                    rail->pINCAM = NuSplineFind(world_scene[0],tbuf);
+                                    sprintf(tbuf,"%s%s",tOutPlatRail,tRailExt[i]);
+                                    rail->pOUTPLAT = NuSplineFind(world_scene[0],tbuf);;
+                                    if (rail->pOUTPLAT != NULL) {
+                                        rail->out_distance = SplineDistance(rail->pOUTPLAT);
+                                    }
+                                    sprintf(tbuf,"%s%s",tOutCamRail,tRailExt[i]);
+                                    rail->pOUTCAM = NuSplineFind(world_scene[0],tbuf);
+                                    if (strcmp(tRailExt[i],"bonus") == 0) {
+                                        rail->type = '\x01';
+                                    }
+                                    else {
+                                        if (strcmp(tRailExt[i],"death") == 0) {
+                                            rail->type = '\x02';
+                                        }
+                                        else {
+                                            if (strcmp(tRailExt[i],"gem") == 0) {
+                                                rail->type = '\x03';
+                                            }
+                                            else {
+                                                rail->type = '\0';
+                                            }
+                                        }
+                                    }
+                                    nRAILS++;
+                                    
+                                }
+                            }
+                        }
                     }
-                    else {
-                      cmp = strcmp(*(char **)((int)tRailExt + iVar4),"gem");
-                      if (cmp == 0) {
-                        rail->type = '\x03';
-                      }
-                      else {
-                        rail->type = '\0';
-                      }
-                    }
-                  }
-                  nRAILS = nRAILS + 1;
                 }
-              }
             }
-          }
         }
-      }
-      iVar4 = iVar4 + 4;
-      rail = rail + 1;
-      iVar3 = iVar3 + -1;
-    } while (iVar3 != 0);
-  }
-  return;
+    }
+    return;
 }
+
 
 //86%
 float BestRailPosition(struct NuVec* pos, struct RPos_s* rpos, s32 iRAIL, s32 iALONG) {
@@ -407,7 +384,6 @@ void ComplexRailPosition(struct NuVec *pos,s32 iRAIL,s32 iALONG,struct RPos_s *r
         temp_fACROSS = rpos->fACROSS;
     return;
 }
-*/
 
 void MoveRailPosition(struct nuvec_s *dst,struct RPos_s *rpos,float distance,int direction)
 

@@ -1050,53 +1050,58 @@ LAB_800601c8:
   return;
 }
 
+//NGC MATCH
 s32 DrawPanel3DObject(s32 object,float x,float y,float z,float scalex,float scaley,float scalez,
-                     u16 xrot,u16 yrot,u16 zrot,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot)
-{
-  struct numtx_s *cammtx;
-  s32 i;
-  struct numtx_s m;
-  struct nuvec_s s;
-  
-  if (((scn == NULL) || (obj == NULL)) || ((scalex == 0.0f && ((scaley == 0.0f && (scalez == 0.0f)))))) {
-    i = 0;
-  }
-  else {
-    s.x = scalex;
-    s.y = scaley;
-    s.z = scalez;
-    NuMtxSetScale(&m,&s);
-    if (rot == 0) {
-      if (xrot != 0) {
-        NuMtxRotateX(&m,xrot);
-      }
-      if (yrot != 0) {
-        NuMtxRotateY(&m,yrot);
-      }
-      if (zrot != 0) {
-        NuMtxRotateZ(&m,zrot);
-      }
+                     u16 xrot,u16 yrot,u16 zrot,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot) {
+    struct numtx_s m;
+    struct nuvec_s s;
+    s32 i;
+    struct numtx_s *cammtx;
+    char pad [17];
+    
+
+    if (((scn != NULL) && (obj != NULL)) &&
+       ((scalex != 0.0f || ((scaley != 0.0f || (scalez != 0.0f)))))) {
+        s.x = scalex;
+        s.y = scaley;
+        s.z = scalez;
+        NuMtxSetScale(&m,&s);
+        switch (rot) {
+                case 0:
+                    if (xrot != 0) {
+                        NuMtxRotateX(&m,xrot);
+                    }
+                    if (yrot != 0) {
+                        NuMtxRotateY(&m, yrot);
+                    }
+                    if (zrot != 0) {
+                        NuMtxRotateZ(&m, zrot);
+                    }
+                    break;
+                case 1:
+                    if (yrot != 0) {
+                        NuMtxRotateY(&m, yrot);
+                    }
+                    if (xrot != 0) {
+                        NuMtxRotateX(&m, xrot);
+                    }
+                    if (zrot != 0) {
+                        NuMtxRotateZ(&m, zrot);
+                    }
+                    break;
+        }
+        m._30 = x * PANEL3DMULX;
+        m._32 = z;
+        m._31 = y * PANEL3DMULY;
+        cammtx = NuCameraGetMtx();
+        NuMtxMul(&m,&m,cammtx);
+        SetLevelLights();
+        i = NuRndrGScnObj(scn->gobjs[obj->instance->objid],&m);
     }
-    else if (rot == 1) {
-      if (yrot != 0) {
-        NuMtxRotateY(&m,yrot);
-      }
-      if (xrot != 0) {
-        NuMtxRotateX(&m,xrot);
-      }
-      if (zrot != 0) {
-        NuMtxRotateZ(&m,zrot);
-      }
+    else {
+        i = 0;
     }
-    m._30 = x * PANEL3DMULX;
-    m._32 = z;
-    m._31 = y * PANEL3DMULY;
-    cammtx = NuCameraGetMtx();
-    NuMtxMul(&m,&m,cammtx);
-    SetLevelLights();
-    i = NuRndrGScnObj(scn->gobjs[obj->instance->objid],&m);
-  }
-  return i;
+    return i;
 }
 
 
