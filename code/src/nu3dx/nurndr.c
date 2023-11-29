@@ -660,7 +660,7 @@ static void NuRndrGeomItem(struct nugeomitem_s *item) {
   for (prim = item->geom->prim; prim != NULL; prim = prim->next) {
           switch (prim->type) {
               case NUPT_POINT:
-                    //GS_DrawPointList(item->geom->vtxcnt, item->geom->hVB, NuVtxStride(item->geom->vtxtype));
+                    //GS_DrawPointList(item->geom->vtxcnt, item->geom->hVB, NuVtxStride(item->geom->vtxtype)); //GS_DrawPointList --> EMPTY FUNCTION
                     break;
               case NUPT_LINE:
                   break;
@@ -942,32 +942,28 @@ void NuRndrFootPrints(struct numtl_s *mtl,float *u,float *v) {
 
 //MATCH GCN
 float * NuRndrCreateBlendShapeDeformerWeightsArray(s32 nweights) {
-    float *ptr;
 
   rndr_blend_shape_deformer_wt_cnt -= nweights;
-  if (rndr_blend_shape_deformer_wt_cnt >= 0) {
-    ptr = &rndr_blend_shape_deformer_wts[rndr_blend_shape_deformer_wt_cnt];
+  if (rndr_blend_shape_deformer_wt_cnt < 0) {
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4,"No free blend shape deformer weights");
   }
   else {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x11f4,"No free blend shape deformer weights");
-    ptr = NULL;
+    return &rndr_blend_shape_deformer_wts[rndr_blend_shape_deformer_wt_cnt];
   }
-  return ptr;
+  return NULL;
 }
 
 //MATCH GCN
 float ** NuRndrCreateBlendShapeDWAPointers(s32 size) {
-  float **ptr;
 
   rndr_blend_shape_deformer_wt_ptrs_cnt -= size;
-  if (rndr_blend_shape_deformer_wt_cnt >= 0) {
-    ptr = &rndr_blend_shape_deformer_wt_ptrs[rndr_blend_shape_deformer_wt_ptrs_cnt];
+  if (rndr_blend_shape_deformer_wt_cnt < 0) {
+    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206,"No free blend shape deformer weights");
   }
   else {
-    NuErrorProlog("C:/source/crashwoc/code/nu3dx/nurndr.c",0x1206,"No free blend shape deformer weights");
-    ptr = NULL;
+    return &rndr_blend_shape_deformer_wt_ptrs[rndr_blend_shape_deformer_wt_ptrs_cnt];
   }
-  return ptr;
+  return NULL;
 }
 
 //MATCH GCN

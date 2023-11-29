@@ -1,5 +1,5 @@
-#ifndef SKINNED_H
-#define SKINNED_H
+#ifndef SKINNING_H
+#define SKINNING_H
 
 #include "gs.h"
 #include "system/gs.h"
@@ -11,4 +11,4 @@ int MaxSkinVerts;
 int SkinLights;
 float c_one;
 
-#endif // !SKINNED_H
+#endif // !SKINNING_H

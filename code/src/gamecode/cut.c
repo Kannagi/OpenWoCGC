@@ -8,6 +8,134 @@ void InitCutScenes(void) {
   return;
 }
 
+//NGC MATCH //inline with InitCutScenes??
+static void CutSceneEndFunction(void *icutscene) {
+    if (cutmovie == 0) {
+        NewMenu(&Cursor,0,0,-1);
+        if (logos_played == 0) {
+            GameMusic(0xaa,0);
+        }
+    }
+    else {
+        cut_on = 0;
+    }
+    return;
+}
+
+//NGC MATCH //inline with InitCutScenes??
+static void CutSceneNextFunction(void *icutscene) {
+    cutworldix++;
+    if (CutAudio[cutworldix] != -1) {
+        NuSoundStopStream(4);
+        do {
+            NuSoundUpdate();
+        } while (NuSoundKeyStatus(4) == 1);
+        gamesfx_channel = 4;
+        GameSfx(CutAudio[cutworldix],NULL);
+        cutmovie_hold = 1;
+    }
+    if (fadeval != 0) {
+        fade_rate = -8;
+    }
+    return;
+}
+
+//NGC MATCH //inline with InitCutScenes??
+static void CutSceneNextLogoFunction(void *icutscene) {
+    cutworldix++;
+    NewMenu(&Cursor,0,0,-1);
+    if (logos_played == 0) {
+        GameMusic(0xaa,0);
+    }
+    return;
+}
+
+//NGC MATCH
+void NewCut(s32 i) {
+    gamecut = i;
+    Game.cutbits = (s32) (Game.cutbits | (1 << i));
+    music_volume = (s32) Game.music_volume;
+}
+
+//NGC MATCH
+void GetSpaceCut(s32 last, s32 next) {
+    s32 hub;
+
+    gamecut = -1;
+    if ((s32) Demo == 0) {
+        if (next == 0x25) {
+            if ((last == 0x15) && (new_lev_flags & 0x800)) {
+                if ((Game.cutbits & 0x20) == 0) {
+                    NewCut(5);
+                }
+            }
+        } else {
+            hub = HubFromLevel(next);
+            switch (hub) {                      
+            case 0:
+                if (!(Game.cutbits & 2)) {
+                    NewCut(1);
+                } else if (((s32) Game.hub[0].crystals == 2) && !(Game.cutbits & 4)) {
+                    NewCut(2);
+                } else if (((s32) Game.hub[0].crystals == 4) && !(Game.cutbits & 8)) {
+                    NewCut(3);
+                } else if ((next == 0x15) && !(Game.cutbits & 0x10)) {
+                    NewCut(4);
+                }
+                break;
+            case 1:
+                if (!(Game.cutbits & 0x80)) {
+                    NewCut(7);
+                } else if (((s32) Game.hub[1].crystals == 2) && !(Game.cutbits & 0x100)) {
+                    NewCut(8);
+                } else if (((s32) Game.hub[1].crystals == 4) && !(Game.cutbits & 0x200)) {
+                    NewCut(9);
+                } else if ((next == 0x17) && !(Game.cutbits & 0x400)) {
+                    NewCut(0xA);
+                }
+                break;
+            case 2:
+                if (!(Game.cutbits & 0x1000)) {
+                    NewCut(0xC);
+                } else if (((s32) Game.hub[2].crystals == 2) && !(Game.cutbits & 0x2000)) {
+                    NewCut(0xD);
+                } else if (((s32) Game.hub[2].crystals == 4) && !(Game.cutbits & 0x4000)) {
+                    NewCut(0xE);
+                } else if ((next == 0x16) && !(Game.cutbits & 0x8000)) {
+                    NewCut(0xF);
+                }
+                break;
+            case 3:
+                if (!(Game.cutbits & 0x20000)) {
+                    NewCut(0x11);
+                } else if (((s32) Game.hub[3].crystals == 2) && !(Game.cutbits & 0x40000)) {
+                    NewCut(0x12);
+                } else if (((s32) Game.hub[3].crystals == 4) && !(Game.cutbits & 0x80000)) {
+                    NewCut(0x13);
+                } else if ((next == 0x18) && !(Game.cutbits & 0x100000)) {
+                    NewCut(0x14);
+                }
+                break;
+            case 4:
+                if (!(Game.cutbits & 0x400000)) {
+                    NewCut(0x16);
+                } else if (((s32) Game.hub[4].crystals == 2) && !(Game.cutbits & 0x800000)) {
+                    NewCut(0x17);
+                } else if (((s32) Game.hub[4].crystals == 4) && !(Game.cutbits & 0x01000000)) {
+                    NewCut(0x18);
+                } else if ((next == 0x19) && !(Game.cutbits & 0x02000000)) {
+                    NewCut(0x19);
+                }
+                break;
+            }
+        }
+        if ((s32) gamecut != -1) {
+            gamecut_newlevel = next;
+            new_level = 0x28;
+        }
+    }
+}
+
 //NGC MATCH //inline with CutLoadScreenThreadProc??
 s32 LoadCutComponents(struct cutscenedesc_s *csd,struct csc_s *chars) {
     struct NUGCUTSCENE_s *cutscn;
@@ -202,6 +330,21 @@ static void AppCutSceneFindCharacters(struct NUGCUTSCENE_s *cutscene)
     return;
 }
 
+
+
+//NGC MATCH
+void UpdateCutMovie(void) {
+    if (((cutmovie_hold == 0) || (CutAudio[cutworldix] == -1)) || (NuSoundKeyStatus(4) != 1)) {
+        CutInst[cutworldix]->rate = 0.0f;
+    }
+    else {
+        cutmovie_hold = 0;
+        SetCutMovieRate();
+    }
+    NuGCutSceneSysUpdate(Paused);
+    return;
+}
+
 //PS2
 void UpdateCutMovieCamera(struct CamMtx *cam)
 {
@@ -212,6 +355,43 @@ void UpdateCutMovieCamera(struct CamMtx *cam)
     NuCameraSet(pNuCam);
   }
   return;
+}
+
+//NGC MATCH
+void StartCutMovie(void) {
+    s32 sfx;
+    
+    cutmovie_hold = 0;
+    if ((CutScene[0] != NULL) && (CutInst[0] != NULL)) {
+        instNuGCutSceneStart(CutInst[0]);
+        if ((cutmovie == 0) && (logos_played != 0)) {
+            GameMusic(0xaa,0);
+            sfx = -1;
+            CutInst[cutworldix]->cframe =
+                 (CutScene[cutworldix]->nframes - TITLESTARTTIME * TITLEFPS) + 0.0f;
+            texanimbits = (texanimbits & 0xFFFFFFFD) | 4;
+        }
+        else {
+            sfx = CutAudio[cutworldix];
+            texanimbits = (texanimbits | 2) & 0xFFFFFFFB;
+            if (cutmovie == 0) {
+                CutInst[0]->cframe = 300.0f;
+            }
+        }
+        if ((sfx != -1) && ((cutmovie != 0 || (logos_played == 0)))) {
+            NuSoundStopStream(4);
+            gamesfx_channel = 4;
+            GameSfx(sfx,NULL);
+            cutmovie_hold = 1;
+        }
+    }
+    return;
+}
+
+//NGC MATCH
+void DrawCutMovie(void) {
+    NuGCutSceneSysRender();
+    return;
 }
 
 //NGC MATCH
@@ -510,4 +690,30 @@ s32 LoadCutMovie(s32 movie) {
             break;
         }
     return (CutInst[0] != NULL);
+}
+
+//NGC MATCH
+void NewGameCutAnim(void) {
+    s32 sfx;
+    
+    gamecut_hold = 1;
+    gamecut_sfx = (s32)pCutAnim->sfx;
+    if (gamecut_sfx != -1) {
+        NuSoundStopStream(4);
+        gamesfx_channel = 4;
+        GameSfx(gamecut_sfx,NULL);
+    }
+    if (pCutAnim->action == 0xc) {
+        sfx = 0x1e;
+    }
+    else  if (pCutAnim->action == 0xd) {
+            sfx = 0x21;
+    }
+    else {
+        sfx = -1;
+    }
+    if (sfx != -1) {
+        GameSfx(sfx,NULL);
+    }
+    return;
 }

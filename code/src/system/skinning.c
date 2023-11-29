@@ -1,8 +1,17 @@
-#include "system/skinned.h"
+#include "system/skinning.h"
 
 struct _GS_VERTEXTL* TVertices; //xform.c
 struct _GS_VERTEXPSTL* TVertices2;//pointspr.c
 
+void GS_SetVertexSource(float *vertexptr) {
+    GS_SkinVertexSource = (struct _GS_VERTEXSKIN *)vertexptr;
+    return;
+}
+
+void GS_SetBlendSource(struct _GS_VECTOR3 *vertexptr) {
+    GS_BlendSource = vertexptr;
+    return;
+}
 
 void SkinnedShader(int VertexCount,short *pIndexData)
 {

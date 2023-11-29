@@ -36,9 +36,9 @@ void MAHLoadingMessage(void)
     memcpy(&pNuCam->mtx, &numtx_identity, sizeof (struct numtx_s));
     //NuCameraSet(pNuCam);
     if ((font3d_scene != NULL) && (font3d_initialised != 0)) {
-      //NuShaderSetBypassShaders(1);
+      NuShaderSetBypassShaders(1);
       //DrawGameMessage(tLOADING[Game.language],0,0.0);
-      //NuShaderSetBypassShaders(0);
+      NuShaderSetBypassShaders(0);
     }
     NuRndrEndScene();
   }

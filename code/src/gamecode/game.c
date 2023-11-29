@@ -1,3 +1,190 @@
+//MATCH NGC
+s32 Draw3DCharacter(struct nuvec_s *pos,u16 xrot,u16 yrot,u16 zrot,struct CharacterModel *model,
+                    s32 action,float scale,float anim_time, s32 rot) {
+    s32 i;
+    struct numtx_s m;
+    struct nuvec_s s;
+    char pad[7];
+
+    if ((model != 0) && (scale != 0.0f)) {
+        if (Level != 0x25) {
+        s32 iVar3;
+            if (model->character == 0x75) {
+                iVar3 = 0x84;
+            } else if (model->character == 0x77) {
+                iVar3 = 0x88;
+            } else if (model->character == 0x78) {
+                iVar3 = 0x89;
+            } else if (model->character == 0x79) {
+                iVar3 = 0x8a;
+            } else if (model->character == 0x7a) {
+                iVar3 = 0x8b;
+            } else if (model->character == 0x7b) {
+                iVar3 = 0x8c;
+            } else if (model->character == 0x7c) {
+                iVar3 = 0x8d;
+            } else if (model->character == 0x7d) {
+                iVar3 = 0x8e;
+            }
+        }
+    
+        s.z = scale;
+        s.y = scale;
+        s.x = scale;
+        NuMtxSetScale(&m,&s);
+        switch (rot) {
+                case 0:
+                    if (xrot != NULL) {
+                        NuMtxRotateX(&m,(s32)xrot);
+                    }
+                    if (yrot != NULL) {
+                        NuMtxRotateY(&m,(s32)yrot);
+                    }
+                    if (zrot != NULL) {
+                        NuMtxRotateZ(&m,(s32)zrot);
+                    }
+                    break;
+                case 1:
+                    if (yrot != NULL) {
+                        NuMtxRotateY(&m,(s32)yrot);
+                    }
+                    if (xrot != NULL) {
+                        NuMtxRotateX(&m,(s32)xrot);
+                    }
+                    if (zrot != NULL) {
+                        NuMtxRotateZ(&m,(s32)zrot);
+                    }
+                    break;
+        }
+        NuMtxTranslate(&m,pos);
+         if (((uint)action < 0x76) && (model->anmdata[action] != NULL)) {
+            NuHGobjEvalAnim(model->hobj,model->anmdata[action],anim_time,0,NULL,tmtx);
+        }
+        else {
+            NuHGobjEval(model->hobj,0,NULL,tmtx);
+        }
+        i = NuHGobjRndrMtx(model->hobj,&m,1,NULL,tmtx);
+    }
+    else {
+        i = 0;
+    }
+    return i;
+}
+
+//NGC MATCH
+void DrawMaskFeathers(void) {
+    struct CharacterModel* model;
+    struct mfeathers_s *feathers;
+    int i;
+
+    i = CRemap[11];
+    if (i != -1) {
+        model = &CModel[i];
+        if (model->anmdata[0xe] != NULL) {
+            feathers = &MaskFeathers[0];
+            for (i = 0; i < 4; i++) {
+                if (feathers->time < feathers->duration) {
+                    NuHGobjEvalAnim(model->hobj,model->anmdata[0xe],feathers->time,0,NULL,tmtx);
+                    NuHGobjRndrMtx(model->hobj,&feathers->mM,1,NULL,tmtx);
+                }
+                feathers++;
+            }
+        }
+    }
+    return;
+}
+
+//NGC MATCH
+void DrawTempCharacter(s32 render) {
+    struct CharacterModel* model;
+    struct numtx_s m;
+    static struct numtx_s mtxLOCATOR_168[16];
+    float **dwa;
+    struct nuvec_s v;
+    s32 i;
+
+   
+    if ((((((temp_character != -1) && (temp_character != 0x62)) && (temp_character != 0xb9)) &&
+         ((temp_character != 0xb8 && (temp_character != 0xba)))) &&
+        ((temp_character != 0xbc)))) {
+        if (temp_character != 2 || (Level != 0x19)) {
+            i = (s32)CRemap[temp_character];
+            if((i != -1)) {
+                        model = &CModel[i];
+                        if (Level == 0x25) {
+                            v.x = 5.0f;
+                            v.y = 5.0f;
+                            v.z = 5.0f;
+                            NuMtxSetScale(&m,&v);
+                            v.x = 0.0f;
+                            v.y = 11.0f;
+                            v.z = 6.25f;
+                            NuMtxTranslate(&m,&v);
+                        }              
+                        else {
+                            NuMtxSetIdentity(&m);
+                        }
+                        if (Level == 0x2b) {
+                            if (model->character == 0xbb) {
+                                NuMtxRotateY(&m,0x2000);
+                                m._30 = DISCOXOFFSET;
+                            }
+                            else if (model->character == 0) {
+                                NuMtxRotateY(&m,-0x2000);
+                                m._30 = -DISCOXOFFSET;
+                            }
+                        }
+                        EvalModelAnim(model,&TempAnim,&m,tmtx,&dwa,mtxLOCATOR_168);
+                        if (render != 0) {
+                            NuHGobjRndrMtxDwa(model->hobj,&m,1,NULL,tmtx,dwa);
+                        }
+            }
+        }
+    }
+    return;
+}
+
+//NGC MATCH
+void DrawTempCharacter2(s32 render) {
+    struct CharacterModel* model;
+    struct numtx_s m;
+    static struct numtx_s mtxLOCATOR_172[16];
+    float **dwa;
+    s32 i;
+    short layertab[2] = {0, 1};
+    short* layer;
+    s32 nlayers;
+
+    layer = layertab;
+    if ((temp_character2 != -1)) {
+    i = CRemap[temp_character2];
+        if (i != -1) {
+                nlayers = 1;
+                model = &CModel[i];
+                if (model->character == 0) {
+                    nlayers = 2;
+                }
+                NuMtxSetIdentity(&m);
+                if (Level == 0x2b) {
+                    if (model->character == 0xbb) {
+                        NuMtxRotateY(&m,0x2000);
+                        m._30 = DISCOXOFFSET;
+                    }
+                    else if (model->character == 0) {
+                        NuMtxRotateY(&m,-0x2000);
+                        m._30 = -DISCOXOFFSET;
+                    }
+                }
+                EvalModelAnim(model,&TempAnim2,&m,tmtx,&dwa,mtxLOCATOR_172);
+                if (render != 0) {
+                    NuHGobjRndrMtxDwa(model->hobj,&m,nlayers,layer,tmtx,dwa);
+                }
+        }
+ 
+    }
+    return;
+}
+
 void ProcMenu(Cursor *cursor,nupad_s *pad)
 {
   bool bVar1;

@@ -58,16 +58,54 @@ void AddQuad3DrotXYZ(struct nuvec_s *pos,struct nuvec_s *shape,struct numtl_s *m
   return;
 }
 
-void DrawMask(struct mask *mask)
-{
-/*	DWARF INFO
+extern s32 LIGHTMASK; //game.c
+extern s32 USELIGHTS; //main.c
+extern s32 VEHICLECONTROL; //vehicle.c
 
-	CharacterModel *model; //
-    numtx_s mM; //
-    numtx_s mS; //
-    float** dwa; //
-    int i;
-*/
+//NGC MATCH
+void DrawMask(struct mask_s *mask) {
+    struct CharacterModel *model;
+    struct numtx_s mM;
+    struct numtx_s mS;
+    float **dwa;
+    s32 i;
+    
+    if (mask->active != 0) {
+        i = (s32)CRemap[mask->character];
+        if (i != -1) {
+            model = &CModel[i];
+            mM = mask->mM;
+            mS = mask->mS;
+            EvalModelAnim(model,&mask->anim,&mM,tmtx,&dwa,NULL);
+            if ((USELIGHTS != 0) && (LIGHTMASK != 0)) {
+                SetLights(&(mask->lights).pDir1st->Colour, &(mask->lights).pDir1st->Direction,
+                          &(mask->lights).pDir2nd->Colour,&(mask->lights).pDir2nd->Direction,
+                          &(mask->lights).pDir3rd->Colour,
+                          &(mask->lights).pDir3rd->Direction,&(mask->lights).AmbCol);
+            }
+            NuHGobjRndrMtxDwa(model->hobj,&mM,1,NULL,tmtx,dwa);
+            if (mask->shadow != 2000000.0f) {
+                if (mask->reflect != '\0') {
+                    mM._01 = -mM._01;
+                    mM._11 = -mM._11;
+                    mM._21 = -mM._21;
+                    mM._31 = mask->shadow - (mM._31 - mask->shadow);
+                    NuHGobjRndrMtxDwa(model->hobj,&mM,1,NULL,tmtx,dwa);
+                }
+                if (((((LDATA->flags & 0x1000) == 0) && (VEHICLECONTROL != 2)) &&
+                    ((VEHICLECONTROL != 1 || ((player->obj).vehicle != 0x20)))) &&
+                   (model->shadhdr == 0)) {
+                    NuMtlSetStencilRender(NUSTENCIL_REPLACE_NODRAW);
+                    NuHGobjRndrMtxDwa(model->hobj,&mS,1,NULL,tmtx,dwa);
+                    NuMtlSetStencilRender(NUSTENCIL_NOSTENCIL);
+                }
+            }
+            if ((USELIGHTS != 0) && (LIGHTMASK != 0)) {
+                SetLevelLights();
+            }
+        }
+    }
+    return;
 }
 
 struct nuvec_s tempvec;

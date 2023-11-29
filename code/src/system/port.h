@@ -66,11 +66,21 @@ enum fxidtypes_e
     NOFX = 0
 };
 
+// Size: 0x8
+struct _SHADERTYPE
+{
+    s32 vertshader; // Offset: 0x0, DWARF: 0xD82019
+    s32 pixelShaderHandle; // Offset: 0x4, DWARF: 0xD82046
+};
+
+s32 IsLoadingScreen;
+struct _SHADERTYPE Shaders[35];
 s32 ForceShader;
 static float glassmix;
 static s32 bypassEffectShaders;
 s32 currentLevel;
 enum shadertypes_e defaultShader;
+static struct numtx_s identmtx;
 s32 nobypass;
 s32 NEW_CV_COLOR_TYPE;
 s32 newCV_LIGHTS_OFF;

@@ -5,65 +5,64 @@
 void GS_DrawTriStrip(int nverts,float *vertlist,int stride)
 
 {
-  bool bVar1;
-  int iVar2;
-  uint uVar3;
-
-  if (stride == 0x1c) {
-    if (GS_CurrentVertDesc != 0x81) {
-      GS_CurrentVertDesc = 0x81;
-      GXClearVtxDesc();
-      GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
-      GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
-      GXSetVtxDesc(GX_VA_TEX0,GX_DIRECT);
-    }
-  }
-  else if (GS_CurrentVertDesc != 0x83) {
-    GS_CurrentVertDesc = 0x83;
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS,GX_INDEX16);
-    GXSetVtxDesc(GX_VA_NRM,GX_INDEX16);
-    GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
-    GXSetVtxDesc(GX_VA_TEX0,GX_INDEX16);
-  }
-  uVar3 = stride & 0xff;
-  GXSetArray(GX_VA_POS,vertlist,uVar3);
-  bVar1 = stride != 0x1c;
-  if (bVar1) {
-    GXSetArray(GX_VA_NRM,vertlist + 3,uVar3);
-  }
-  iVar2 = stride >> 2;
-  GXSetArray(GX_VA_TEX0,vertlist + iVar2 + -2,uVar3);
-  if (bVar1) {
-    GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT2,(ushort)nverts);
-  }
-  else {
-    GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT1,(ushort)nverts);
-  }
-  uVar3 = 0;
-  if (nverts != 0) {
-    do {
-      if (bVar1) {
-        ram0xcc008002 = SUB42(vertlist[uVar3 * iVar2 + iVar2 + -3],0);
-        if ((IsStencil == 0) && (ShadowBodge == GX_TEVSTAGE0)) goto joined_r0x800ca7d8;
-LAB_800ca7d0:
-        ram0xcc008002 = (undefined2)ShadowColour;
-      }
-      else {
-        ram0xcc008002 = SUB42(vertlist[uVar3 * 7 + 4],0);
-        if ((IsStencil != 0) || (ShadowBodge != GX_TEVSTAGE0)) goto LAB_800ca7d0;
-joined_r0x800ca7d8:
-        if (GS_MaterialSourceEmissive == 0) {
-          ram0xcc008002 = (undefined2)GS_CurrentMaterialEmissivergba;
+    bool bVar1;
+    int iVar2;
+    uint uVar3;
+    
+    if (stride == 0x1c) {
+        if (GS_CurrentVertDesc != 0x81) {
+            GS_CurrentVertDesc = 0x81;
+            GXClearVtxDesc();
+            GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
+            GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
+            GXSetVtxDesc(GX_VA_TEX0,GX_DIRECT);
         }
-      }
-      _DAT_cc008000 = CONCAT22((short)uVar3,ram0xcc008002);
-      uVar3 = (uint)(short)((short)uVar3 + 1);
-    } while (uVar3 < (uint)nverts);
-  }
-  return;
+    }
+    else if (GS_CurrentVertDesc != 0x83) {
+        GS_CurrentVertDesc = 0x83;
+        GXClearVtxDesc();
+        GXSetVtxDesc(GX_VA_POS,GX_INDEX16);
+        GXSetVtxDesc(GX_VA_NRM,GX_INDEX16);
+        GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
+        GXSetVtxDesc(GX_VA_TEX0,GX_INDEX16);
+    }
+    uVar3 = stride & 0xff;
+    GXSetArray(GX_VA_POS,(int)vertlist,uVar3);
+    bVar1 = stride != 0x1c;
+    if (bVar1) {
+        GXSetArray(GX_VA_NRM,(int)(vertlist + 3),uVar3);
+    }
+    iVar2 = stride >> 2;
+    GXSetArray(GX_VA_TEX0,(int)(vertlist + iVar2 + -2),uVar3);
+    if (bVar1) {
+        GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT2,(ushort)nverts);
+    }
+    else {
+        GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT1,(ushort)nverts);
+    }
+    uVar3 = 0;
+    if (nverts != 0) {
+        do {
+            if (bVar1) {
+                DAT_cc008000_2 = SUB42(vertlist[uVar3 * iVar2 + iVar2 + -3],0);
+                if ((IsStencil == 0) && (ShadowBodge == GX_TEVSTAGE0)) goto joined_r0x800ca7d8;
+LAB_800ca7d0:
+                DAT_cc008000_2 = (undefined2)ShadowColour;
+            }
+            else {
+                DAT_cc008000_2 = SUB42(vertlist[uVar3 * 7 + 4],0);
+                if ((IsStencil != 0) || (ShadowBodge != GX_TEVSTAGE0)) goto LAB_800ca7d0;
+joined_r0x800ca7d8:
+                if (GS_MaterialSourceEmissive == 0) {
+                    DAT_cc008000_2 = SUB42(GS_CurrentMaterialEmissivergba,0);
+                }
+            }
+            _DAT_cc008000 = CONCAT22((short)uVar3,DAT_cc008000_2);
+            uVar3 = (uint)(short)((short)uVar3 + 1);
+        } while (uVar3 < (uint)nverts);
+    }
+    return;
 }
-
 
 void GS_DrawTriList(int nverts,float *vertlist,int stride)
 

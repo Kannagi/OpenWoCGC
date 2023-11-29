@@ -1051,6 +1051,56 @@ LAB_800601c8:
 }
 
 //NGC MATCH
+s32 DrawPanel3DTempCharacter(float x, float y, float z, float scale, u16 xrot, u16 yrot, u16 zrot, s32 rot) {
+    struct numtx_s m;
+    struct nuvec_s s;
+    struct numtx_s *cammtx;
+    struct CharacterModel* model;
+    float *dwa[7];
+    
+    if ((temp_character != 2) && (temp_character != 0x62) && (temp_character != 0xb8) &&
+        (temp_character != 0xb9) && (temp_character != 0xba) && (temp_character != 0xbc) ||
+       (CRemap[temp_character] == -1)) {
+        return 0;
+    }
+    
+    s.x = s.y = s.z = scale;
+    model = &CModel[CRemap[temp_character]];
+    NuMtxSetScale(&m, &s);
+    switch (rot) {
+        case 0:
+            if (xrot != 0) {
+                NuMtxRotateX(&m, xrot);
+            }
+            if (yrot != 0) {
+                NuMtxRotateY(&m, yrot);
+            }
+            if (zrot != 0) {
+                NuMtxRotateY(&m, zrot);
+            }
+            break;
+        case 1:
+            if (yrot != 0) {
+                NuMtxRotateY(&m, yrot);
+            }
+            if (xrot != 0) {
+                NuMtxRotateX(&m, xrot);
+            }
+            if (zrot != 0) {
+                NuMtxRotateX(&m, zrot);
+            }
+            break;
+    }
+    m._30 = x * PANEL3DMULX;
+    m._32 = z;
+    m._31 = y * PANEL3DMULY;
+    cammtx = NuCameraGetMtx();
+    NuMtxMul(&m, &m, cammtx);
+    EvalModelAnim(model, &TempAnim, &m, tmtx, &dwa, NULL);
+    return NuHGobjRndrMtxDwa(model->hobj, &m, 1, NULL, tmtx, *dwa);
+}
+
+//NGC MATCH
 s32 DrawPanel3DObject(s32 object,float x,float y,float z,float scalex,float scaley,float scalez,
                      u16 xrot,u16 yrot,u16 zrot,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot) {
     struct numtx_s m;
@@ -1105,63 +1155,88 @@ s32 DrawPanel3DObject(s32 object,float x,float y,float z,float scalex,float scal
 }
 
 
-//CHECK!
-s32 DrawPanel3DCharacter (s32 character,float x,float y,float z,float scalex,float scaley,float scalez,
-							u16 xrot,u16 yrot,u16 zrot,s32 action,float anim_time,s32 rot)
-{
-  s32 i;
-  struct numtx_s *cammtx;
-  struct nuanimdata_s *animdata; //tmp
-  struct CharacterModel *model;
-  struct numtx_s m;
-  struct nuvec_s s;
-  
+//NGC MATCH
+s32 DrawPanel3DCharacter(s32 character,float x,float y,float z,float scalex,float scaley,float scalez,
+              u16 xrot,u16 yrot,u16 zrot,s32 action,float anim_time,s32 rot) {
+    s32 iVar1;
+    s32 i;
+    struct numtx_s *cammtx;
+    struct CharacterModel *model;
+    struct numtx_s m;
+    struct nuvec_s s;
+    char pad[25];
+    
 
-  if ((((scalex == 0.0f) && (scaley == 0.0f)) && (scalez == 0.0f)) ||
-     ((0xbe < (u32)character || (CRemap[character] == -1)))) {
-    i = 0;
-  }
-  else {
-    model = CModel + CRemap[character];
-    s.x = scalex;
-    s.y = scaley;
-    s.z = scalez;
-    NuMtxSetScale(&m,&s);
-    if (rot == 0) {
-      if (xrot != 0) {
-        NuMtxRotateX(&m,xrot);
-      }
-      if (yrot != 0) {
-        NuMtxRotateY(&m,yrot);
-      }
-      if (zrot != 0) {
-        NuMtxRotateZ(&m,zrot);
-      }
-    }
-    else if (rot == 1) {
-      if (yrot != 0) {
-        NuMtxRotateY(&m,yrot);
-      }
-      if (xrot != 0) {
-        NuMtxRotateX(&m,xrot);
-      }
-      if (zrot != 0) {
-        NuMtxRotateZ(&m,zrot);
-      }
-    }
-    m._30 = x * PANEL3DMULX;
-    m._32 = z;
-    m._31 = y * PANEL3DMULY;
-    cammtx = NuCameraGetMtx();
-    NuMtxMul(&m,&m,cammtx);
-    if ((action < 0x76) &&
-       (animdata = CharacterModel[CRemap[character]].anmdata + action * 4), (animdata != NULL)) {
-      NuHGobjEvalAnim(model->hobj,animdata,anim_time,0,NULL,tmtx);
+    if ((((scalex == 0.0f) && (scaley == 0.0f)) && (scalez == 0.0f)) ||
+       ((0xbe < (uint)character || (CRemap[character] == -1)))) {
+        i = 0;
     }
     else {
-      NuHGobjEval(model->hobj,0,NULL,tmtx);
+        s32 iVar3;
+        model = &CModel[CRemap[character]];
+        if (character == 0x75) {
+            iVar3 = 0x84;
+        } else if (character == 0x77) {
+            iVar3 = 0x88;
+        } else if (character == 0x78) {
+            iVar3 = 0x89;
+        } else if (character == 0x79) {
+            iVar3 = 0x8a;
+        } else if (character == 0x7a) {
+            iVar3 = 0x8b;
+        } else if (character == 0x7b) {
+            iVar3 = 0x8c;
+        } else if (character == 0x7c) {
+            iVar3 = 0x8D;
+        } else if (character == 0x7D) {
+            iVar3 = 0x8E;
+        } else if (character == 0x7E) {
+            iVar3 = 0x8F;
+        } else if (character == 0x7F) {
+            iVar3 = 0x90;
+        } else {
+            iVar3 = -1;
+        }
+        s.x = scalex;
+        s.y = scaley;
+        s.z = scalez;
+        NuMtxSetScale(&m,&s);
+        switch (rot) {
+                case 0:
+                    if (xrot != 0) {
+                        NuMtxRotateX(&m,xrot);
+                    }
+                    if (yrot != 0) {
+                        NuMtxRotateY(&m,yrot);
+                    }
+                    if (zrot != 0) {
+                        NuMtxRotateZ(&m,zrot);
+                    }
+                    break;
+                case 1:
+                    if (yrot != 0) {
+                        NuMtxRotateY(&m,yrot);
+                    }
+                    if (xrot != 0) {
+                        NuMtxRotateX(&m,xrot);
+                    }
+                    if (zrot != 0) {
+                        NuMtxRotateZ(&m,zrot);
+                    }
+                    break;
+        }
+        m._30 = x * PANEL3DMULX;
+        m._32 = z;
+        m._31 = y * PANEL3DMULY;
+        cammtx = NuCameraGetMtx();
+        NuMtxMul(&m,&m,cammtx);
+        if (((uint)action < 0x76) && (model->anmdata[action] != NULL)) {
+            NuHGobjEvalAnim(model->hobj,model->anmdata[action],anim_time,0,NULL,tmtx);
+        }
+        else {
+            NuHGobjEval(model->hobj,0,NULL,tmtx);
+        }
+        i = NuHGobjRndrMtx(model->hobj,&m,1,NULL,tmtx);
     }
-    i = NuHGobjRndrMtx(model->hobj,&m,1,NULL,tmtx);
-  }
-  return i;
+    return i;
 }

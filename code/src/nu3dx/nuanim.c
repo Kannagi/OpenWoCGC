@@ -737,56 +737,58 @@ struct nuvec_s* scale, struct nuvec_s* parentscale, struct numtx_s* T, struct NU
 }
 
 
-//PS2 MATCH 87,26%
-float NuAnimCurveCalcVal2(struct nuanimcurve_s *animcurve,struct nuanimtime_s *atime)
-{
-    struct nuanimkey_s *key;
+//NGC MATCH
+f32 NuAnimCurveCalcVal2(struct nuanimcurve_s* animcurve, struct nuanimtime_s* atime) {
+    struct nuanimkey_s* key;
+    struct nuanimkey_s* prevKey;
+    float dt;
     float time;
+    float f10;
     float fVar2;
     float fVar3;
     float fVar4;
     float fVar5;
-    s32 tbyte;
-    s32 tbyte2;
+    int offset;
     u8* test;
 
     test = (u8*)&animcurve->mask; // ???
     switch (atime->time_byte) {
         case 0:
-            tbyte =  BitCountTable[test[0] & atime->time_mask];
+            offset = BitCountTable[(animcurve->mask >> 0x18) & atime->time_mask];
             break;
         case 1:
-            tbyte =  BitCountTable[test[0]];
-            tbyte += BitCountTable[test[1] & atime->time_mask];
+            offset = BitCountTable[(animcurve->mask >> 0x18)];
+            offset += BitCountTable[test[1] & atime->time_mask];
+            // offset += BitCountTable[((animcurve->mask & 0x00FF0000) >> 0x10) & atime->time_mask];
             break;
         case 2:
-            tbyte =  BitCountTable[test[0]];
-            tbyte += BitCountTable[test[1]];
-            tbyte += BitCountTable[test[2] & atime->time_mask];
+            offset = BitCountTable[(animcurve->mask >> 0x18)];
+            offset += BitCountTable[test[1]];
+            offset += BitCountTable[test[2] & atime->time_mask];
+            // offset += BitCountTable[((animcurve->mask >> 0x8) & 0x000000FF) & atime->time_mask];
             break;
         case 3:
-            tbyte =  BitCountTable[test[0]];
-            tbyte += BitCountTable[test[1]];
-            tbyte += BitCountTable[test[2]];
-            tbyte += BitCountTable[test[3] & atime->time_mask];
+            offset = BitCountTable[(animcurve->mask >> 0x18)];
+            offset += BitCountTable[test[1]];
+            offset += BitCountTable[test[2]];
+            offset += BitCountTable[test[3] & atime->time_mask];
+            // offset += BitCountTable[(animcurve->mask & 0xFF) & atime->time_mask];
+            break;
+        default:
+            offset = 0;
             break;
     }
-    key = animcurve->animkeys;
-    time = key[tbyte-1].time;
-    if ((animcurve->flags & 1) == 0) {
-        time -= key[tbyte].time;
-
-        fVar2 = key[tbyte - 1].d - key[tbyte].d;
-        fVar3 = key[tbyte - 1].c * time;
-        time = key[tbyte].c * time;
-        fVar4 = (atime->time - key[tbyte - 1].time) * key[tbyte - 1].dtime;
-        return fVar4 * (fVar4 * (((fVar4 * (fVar2 + fVar2 + fVar3 + time) + fVar2 * -3.0f) -
-                               (fVar3 + fVar3)) - time) + fVar3) + key[tbyte - 1].d;
-    } else {
-        return key[tbyte-1].d;
-    }
+    prevKey = animcurve->animkeys + offset - 1;
+    key = animcurve->animkeys + offset;
+    fVar4 = (atime->time - prevKey->time) * prevKey->dtime;
+    dt = key->time - prevKey->time;
+    f10 = key->c * dt;
+    fVar3 = prevKey->c * dt;
+    fVar2 = prevKey->d - key->d;
+    return fVar4
+        * (fVar4 * (((fVar4 * (fVar2 + fVar2 + fVar3 + f10) + fVar2 * -3.0f) - (fVar3 + fVar3)) - f10) + fVar3)
+        + prevKey->d;
 }
-
 
 //PS2 Version
 void NuAnimCurveSetApplyToJointBasic (struct nuanimcurveset_s *animcurveset, struct nuanimtime_s *atime,
