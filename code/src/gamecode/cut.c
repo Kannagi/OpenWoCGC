@@ -717,3 +717,65 @@ void NewGameCutAnim(void) {
     }
     return;
 }
+
+//NGC MATCH
+void DrawGameCut(void) {
+    struct numtx_s m;
+    float** dwa;
+    struct CharacterModel* model;
+    u16 yrot;
+    struct nuvec_s v;
+    struct nuvec_s s;
+    int i;
+
+    if (Level == 0x28) {
+        if (CRemap[183] != -1) {
+            model = &CModel[CRemap[183]];
+            NuMtxSetTranslation(&m, &campos_SPACE);
+            EvalModelAnim(model, &CutVortexAnim, &m, tmtx, &dwa, NULL);
+            NuHGobjRndrMtxDwa(model->hobj, &m, 1, NULL, tmtx, dwa);
+        }
+    }
+    if (GameMode != 1) {
+        return;
+    }
+    if (gamecut_finished != 0) {
+        return;
+    }
+    if (CRemap[pCutAnim->character] != -1) {
+        model = CModel + CRemap[pCutAnim->character];
+    } else {
+        model = NULL;
+    }
+    if (model == NULL) {
+        return;
+    }
+    v.x = (model->character == 0xB3 || model->character == 0xB4) ? 0.77f : 1.0f;
+    if (Level == 0x25) {
+        v.x *= HUBHOLOSCALE;
+    }
+    v.y = v.z = v.x;
+    NuMtxSetScale(&m, &v);
+    if (Level == 0x28) {
+        i = pCutAnim->i;
+        s = cutpos_SPACE[i];
+        yrot = cutang_SPACE[i];
+        yrot -= 0x8000;
+        if (model->character == 0x55 || model->character == 0x57 || model->character == 0x56 || model->character == 0x58 || model->character == 2) {
+            s.y = SPACEMASKADJUSTY * v.y + s.y;
+        }
+    } else {
+        i = pCutAnim->i;
+        yrot = cutang_FRONTEND[i];
+        yrot -= 0x8000;
+        s = cutpos_FRONTEND[i];
+        if (model->character == 0xb5) {
+            s.y = FRONTENDCORTEXADJUSTY * v.y + s.y;
+        }
+    }
+    NuMtxRotateY(&m, yrot);
+    NuMtxTranslate(&m, &s);
+    EvalModelAnim(model, &CutAnim, &m, tmtx, &dwa, NULL);
+    NuHGobjRndrMtxDwa(model->hobj, &m, 1, NULL, tmtx, dwa);
+    return;
+}
