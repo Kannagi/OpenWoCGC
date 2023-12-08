@@ -53,24 +53,21 @@ void NuMtlInit(void) {
   return;
 }
 
-void NuMtlClose(void)
+//NGC MATCH
+void NuMtlClose(void) {
+  struct nusysmtl_s *sm;
+  struct nusysmtl_s *next;
 
-{
-  struct numtl_s *list;
-  struct numtl_s *next;
-
-  if (initialised != 0) {
-    list = &smlist->mtl;
-    if (smlist != NULL) {
-      do {
-        next = list->next;
-        NuMtlDestroy(list);
-        list = next;
-      } while (next != NULL);
+    if (initialised_N1 != 0) {
+        sm = smlist;
+        while (sm != NULL) {
+            next = sm->next;
+            NuMtlDestroy(&sm->mtl);
+            sm = next;
+        }
+        initialised_N1 = 0;
     }
-    initialised = 0;
-  }
-  return;
+    return;
 }
 
 

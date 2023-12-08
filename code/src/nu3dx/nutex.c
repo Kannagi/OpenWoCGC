@@ -20,28 +20,19 @@ void NuTexInit() {
 	initialised = 1;
 }
 
-//WIP
+//MATCH NGC
 void NuTexClose(void)
 {
     s32 i;
-    void* temp_r3;
-    void** data;
 
-    //NudxFw_DestroyBackBufferCopy();   empty function
-    i = 0x400;
-    data = &tinfo->tex.bits; //data = &tinfo[0].tex.bits;
-    do {
-        temp_r3 = *data;
-        if (temp_r3 != NULL) {
-            NuMemFree(temp_r3);
-            *data = NULL;
+    NudxFw_DestroyBackBufferCopy();   //empty function
+    for (i = 0; i < 0x400; i++) {
+        if (tinfo[i].tex.bits != NULL) {
+            NuMemFree(tinfo[i].tex.bits);
+            tinfo[i].tex.bits = 0;
         }
-        data += 0x28;
-        i -= 1;
-    } while (i != 0);
-    initialised = i;
-    tpid = i;
-    ntex = i;
+    }
+    initialised_N2 = ntex = tpid = 0;
 	return;
 }
 
