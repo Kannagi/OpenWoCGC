@@ -630,6 +630,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             CV_WORLDVIEW = *(struct _GSMATRIX*) &matWorld;
             CV_CONSTANTS = *(struct _GS_VECTOR4*)makenuvec4(0.0f, 1.0f, 0.0f, 0.0f);
             CV_SHADER_PARAMS = *(struct _GS_VECTOR4 *)makenuvec4(0.2f, 0.8f, 0.03f, 0.5f);
+            NuShaderSetColourConstants(mtl);
             NuShaderSetLightConstants(mtl);
             NuTexSetTexture(1, GetGlassSpecularTexId());
             NudxFw_SetTextureState(1, D3DTSS_TEXCOORDINDEX, 1);
