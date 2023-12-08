@@ -112,24 +112,24 @@ void NuSceneMtlUpdate(struct nuscene_s *nus) {
   return;
 }
 
-
-void ReadNuIFFAnimationLibrary(fileHandle handle, struct nugscn_s* scene)
+//MATCH NGC
+void ReadNuIFFAnimationLibrary(s32 fh, struct nugscn_s* gsc)
 {
     u8 i;
+    u8 narrayelements;
 
-    u8 numAnim = NuFileReadChar(handle);
-    scene->numinstanims = numAnim;
+    narrayelements = gsc->numinstanims = NuFileReadChar(fh);
 
-    if (numAnim > 0)
+    if (narrayelements > 0)
     {
-        scene->instanimdata = NuMemAlloc(numAnim * sizeof(struct nuanimdata_s**));
-        memset(scene->instanimdata, 0, numAnim * sizeof(struct nuanimdata_s**));
+        gsc->instanimdata = NuMemAlloc(narrayelements * sizeof(struct nuanimdata_s**));
+        memset(gsc->instanimdata, 0, narrayelements * sizeof(struct nuanimdata_s**));
 
-        for (i = 0; i < numAnim; i++)
+        for (i = 0; i < narrayelements; i++)
         {
-            if (NuFileReadChar(handle) != 0)
+            if (NuFileReadChar(fh) != 0)
             {
-                scene->instanimdata[i] = NuAnimDataRead(handle);
+                gsc->instanimdata[i] = NuAnimDataRead(fh);
             }
         }
     }

@@ -217,159 +217,148 @@ void NuTexSetTextureStates(struct numtl_s *mtl) {
   return;
 }
 
-s32 NuTexReadBitmapMM(char* fileName, s32 mmlevel, struct nutex_s* tex)
-{
-    s32 palette[256];
+//91% NGC
+s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
+    
+    s32 fh;
     s32 imgsize;
-
-	if (fileName == NULL)
-	{
-		NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999, "assert");
-	}
-	fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
-	if (handle == NULL)
-	{
-		char strBuf[128];
-		sprintf(strBuf, "Cannot open file: %s", fileName);
-		return 0;
-	}
-	if (tex == NULL)
-	{
-		NuFileClose(handle);
-		return 1;
-	}
-	else
-	{
-		memset(tex, 0, sizeof(struct nutex_s));
-		NuFilePos(handle);
-		struct tagBITMAPFILEHEADER bmpHeader;
-		NuFileRead(handle, &bmpHeader.bfType, 14);
-		struct tagBITMAPINFOHEADER bmi;
-		NuFileRead(handle, &bmi, 40);
-		u16 bitsPerPixel = bmi.biBitCount;
-		if (bitsPerPixel == 8)
-		{
-			tex->type = NUTEX_PAL8;
-			s32 palette[0x100]; // 256 colors.
-			NuFileRead(handle, &palette, 0x400);
-			u32 num = 0;
-			for (s32 i = 0; i < 0x100; i++)
-			{
-				u32 color = palette[i];
-				palette[i] = (color & 0x00FF00FF) | ((color & 0xFF0000) >> 24) || ((color & 0xFF) << 24); // Convert RGBA to BGRA.
-
-				//palette[i] = (color >> 0x18) << 8 | (color >> 8) << 0x18 | color & 0xff00ff
-			}
-		}
-		else if (bitsPerPixel == 4)
-		{
-			tex->type = NUTEX_PAL4;
-			u32 palette[0x10]; // 16 colors.
-			NuFileRead(handle, &palette, 0x40);
-			for (s32 i = 0; i < 0x10; i++)
-			{
-				u32 color = palette[i];
-				palette[i] = (color & 0x00FF00FF) | ((color & 0xFF0000) >> 24) || ((color & 0xFF) << 24); // Convert RGBA to BGRA.
-			}
-		}
-		else if (bitsPerPixel == 16) // I don't think this was in here, but makes sense to add it.
-		{
-			tex->type = NUTEX_RGBA16;
-			//palette = 0;
-		}
-		else if (bitsPerPixel == 24)
-		{
-			tex->type = NUTEX_RGB24;
-			//palette = 0;
-		}
-		else if (bitsPerPixel == 32)
-		{
-			tex->type = NUTEX_RGBA32;
-			//palette = 0;
-		}
-		else
-		{
-			NuErrorProlog("OpenCrashWOC/code/nu3dx/nutex.c", 999, "NuTexLoadBitmap:Bad BitCount <%d> on loading bitmap <%s>", bitsPerPixel, fileName);
-		}
-		tex->mmcnt = mmlevel + 1;
-		tex->height = bmi.biHeight;
-		tex->width = bmi.biWidth;
-		s32 size = NuTexPixelSize(tex->type);
-		size *= tex->width;
-
-
-		 /********************new part**********************/
-
-		s32 var1 = size + 7;
-		if(var1 < 0)
-		{
-			var1 = size + 0xe;
-		}
-
-		s32 h = tex->height;
-  		s32 ___N = var1 >> 3;
-  		var1 = 0;
-  		s32 w = tex->width;
-
-		s32 k = 0; //counter
-
-		  do {
-                    imgsize = NuTexImgSize(tex->type,w,h);
-    				h = h >> 1;
-    				var1 = var1 + imgsize;
-    				k = k + -1;
-    				w = w >> 1;
-
-  			} while (k != 0);
-
-		void* bits = NuMemAlloc(var1);
-  		tex->bits = bits;
-
-		  if (palette == 0)
+    void *bits;
+    s32 *palsize;
+    union variptr_u dst;
+    s32 color;
+    s32 colortmp;
+    s32 colortmp2;
+    s32 rowsize;
+    s32 ___N;
+    s32 h;
+    s32 w;
+    s32 m;
+    s32 i;
+    void *__src;
+    s32 maxI;
+    s32 cnt;
+    struct tagBITMAPFILEHEADER bmh;
+    struct tagBITMAPINFOHEADER bmi;
+    
+    if (filename == NULL) {
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutex.c",0x1fa)("assert");
+    }
+    fh = NuFileOpen(filename,NUFILE_READ);
+    if (fh != 0) {
+            if (tex != NULL) 
             {
+                        memset(tex,0,0x1c);
+                        NuFilePos(fh);
+                        NuFileRead(fh,&bmh.bfType,sizeof(struct tagBITMAPFILEHEADER) - 2);
+                        NuFileRead(fh,&bmi, sizeof(struct tagBITMAPINFOHEADER));
+                        switch(bmi.biBitCount){
+                            case 0x20:
+                                tex->type = NUTEX_RGBA32;
+                               rowsize = 0;
+                        m = mmlevel + 1;
+                                break;
+                            case 0x18:
+                                tex->type = NUTEX_RGB24;
+                                rowsize = 0;
+                        m = mmlevel + 1;
+                                
+                            break;
+                            case 4:
+                                tex->type = NUTEX_PAL4;
+                                rowsize = 0x40;
+                                NuFileRead(fh, palette_128, 0x40);
+                        m = mmlevel + 1;
+                                // swapcolors(palette);
+                                for(maxI = 0; maxI < 0x10; maxI++)
+                                {
+                                    color = palette_128[maxI];
+                                    colortmp = color >> 0x18 & 0xFF;
+                                    colortmp2 = (color & 0xff00) >> 8;
+                                    color = (color & ~0xFF000000) | (colortmp2 << 24);
+                                    color = (color & ~0xFF00) | (colortmp << 8);
+                                    palette_128[maxI] = color;
+                                }
+                            break;
+                            case 8:
+                                tex->type = NUTEX_PAL8;
+                                rowsize = 0x400;
+                                NuFileRead(fh, palette_128, 0x400);
+                        m = mmlevel + 1;
+                                // swapcolors(palette_128);
+                                for(maxI = 0; maxI < 0x100; maxI++) 
+                                {
+                                    color = palette_128[maxI];
+                                    colortmp = color >> 0x18 & 0xFF;
+                                    colortmp2 = (color & 0xff00) >> 8;
+                                    color = (color & ~0xFF000000) | (colortmp2 << 24);
+                                    color = (color & ~0xFF00) | (colortmp << 8);
+                                    palette_128[maxI] = color;
+                                }
+                            break;
+                            
+                            default:
+                            NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutex.c",0x22d)
+                                ("NuTexLoadBitmap:Bad BitCount <%d> on loading bitmap <%s>",bmi.biBitCount,filename);
+                            m = mmlevel + 1;   
+                            break;
+                            
+                        }
+                        tex->mmcnt = mmlevel;
+                        tex->height = bmi.biHeight;
+                        tex->width = bmi.biWidth;
+                        i = NuTexPixelSize(tex->type);
+                        maxI = tex->width * i + 7;
+                        if (maxI < 0) {
+                            maxI = i + 0xe;
+                        }
+                        ___N = maxI >> 3;
+                        h = tex->height;
+                        w = tex->width;
+                        cnt = 0;
+                        for (m = 0; m < mmlevel + 1; m++) {
+                            //m--;
+                            imgsize = NuTexImgSize(tex->type, w, h);
+                            cnt += imgsize;
+                            w >>= 1;
+                            h >>= 1;
+                        }// while (m != 0);
+                        bits = NuMemAlloc(cnt);
+                        tex->bits = bits;
+                        if (rowsize != 0) {
+                            palsize = (s32 *)NuMemAlloc(rowsize);
+                            tex->pal = palsize;
+                        }
+                        else {
+                            tex->pal = NULL;
+                        }
+                        bits = tex->bits;
+                        i = NuTexImgSize(tex->type,tex->width,tex->height);
+                        NuFileRead(fh,bits,i);
+                        dst.voidptr = malloc_x(___N);
+                        __src = tex->bits;
+                        i = NuTexImgSize(tex->type,tex->width,tex->height);
+                        bits = &__src[i]  - ___N;
+                        while(bits > __src) {
+                            memcpy(dst.voidptr,__src,___N);
+                            memcpy(__src,bits,___N);
+                            memcpy(bits, dst.voidptr,___N);
+                            __src = ((s32)__src + ___N);
+                            bits = ((s32)bits - ___N);
+                        }
+                        free_x(dst.voidptr);
+                        NuTexImgSize(tex->type,tex->width,tex->height);
+                        if (rowsize != 0) {
+                            memcpy(tex->pal,palette_128,rowsize);
+                        }
+            }
+        NuFileClose(fh);
+    }
+    else {
+        sprintf(strBuf,"Cannot open file: %s",filename);
+        return 0; 
+    }
 
-    			tex->pal = NULL;
-  			}
-
-		else {
-    				s32 palsize = (int *)NuMemAlloc(palette);
-    				tex->pal = palsize;
-  			}
-  		bits = tex->bits;
-
-		imgsize = NuTexImgSize(tex->type,tex->width,tex->height);
-        NuFileRead(handle,bits,imgsize);
-		union variptr_u dst;
-		dst.voidptr = malloc_x(___N);
-		void * __src = tex->bits;
-		imgsize = NuTexImgSize(tex->type,tex->width,tex->height);
-		bits = (void *)((int)__src + (imgsize - ___N));
-
-		  if (__src < bits)
-		  {
-
-			  void* ptr1 = NULL;
-			  void* ptr2 = NULL;
-             do{
-					memcpy(dst.voidptr,__src,___N);
-					ptr2 = (void *)((int)__src + ___N);
-					memcpy(__src,bits,___N);
-					ptr1 = (void *)((int)bits - ___N);
-					memcpy(bits,dst.voidptr,___N);
-					bits = ptr1;
-					__src = ptr2;
-               } while (ptr2 < ptr1);
-		  }
-
-		free_x(dst.voidptr);
-		NuTexImgSize(tex->type,tex->width,tex->height);
-
-		if (palette !=0)
-		{
-			memcpy(tex->pal,palette,sizeof(palette));
-		}
-
-	}
+    return 1;
 }
 
 //MATCH GCN

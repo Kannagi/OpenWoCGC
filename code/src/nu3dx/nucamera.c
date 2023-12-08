@@ -69,98 +69,75 @@ void NuCameraEnableClipping(s32 enable)
     clip_enable = enable;
 }
 
-
-
-void NuCameraCalcFrustrumPlanes(void)	//CHECK
-
-{
-  double div;
-  float fVar1;
-
-  frustrumplanes[2].y = vpmtx._13 - vpmtx._10;
+//MATCH NGC
+void NuCameraCalcFrustrumPlanes(void) {
+  float f;
+  
   frustrumplanes[2].x = vpmtx._03 - vpmtx._00;
+  frustrumplanes[2].y = vpmtx._13 - vpmtx._10;
   frustrumplanes[2].z = vpmtx._23 - vpmtx._20;
   frustrumplanes[2].w = vpmtx._33 - vpmtx._30;
-    fVar1 = NuFsqrt(frustrumplanes[2].z * frustrumplanes[2].z +
-                  frustrumplanes[2].x * frustrumplanes[2].x +
-                  frustrumplanes[2].y * frustrumplanes[2].y);
-  div = (double)fVar1;
-  frustrumplanes[2].x = NuFpDiv(frustrumplanes[2].x,fVar1);
-  frustrumplanes[2].y = NuFpDiv(frustrumplanes[2].y,(float)div);
-  frustrumplanes[2].z = NuFpDiv(frustrumplanes[2].z,(float)div);
-  frustrumplanes[2].w = NuFpDiv(frustrumplanes[2].w,(float)div);
-  frustrumplanes[3].y = vpmtx._13 + vpmtx._10;
+  f = NuFsqrt(frustrumplanes[2].x * frustrumplanes[2].x + frustrumplanes[2].y * frustrumplanes[2].y + frustrumplanes[2].z * frustrumplanes[2].z);
+  frustrumplanes[2].x = NuFpDiv(frustrumplanes[2].x,f);
+  frustrumplanes[2].y = NuFpDiv(frustrumplanes[2].y,f);
+  frustrumplanes[2].z = NuFpDiv(frustrumplanes[2].z,f);
+  frustrumplanes[2].w = NuFpDiv(frustrumplanes[2].w,f);
   frustrumplanes[3].x = vpmtx._03 + vpmtx._00;
+  frustrumplanes[3].y = vpmtx._13 + vpmtx._10;
   frustrumplanes[3].z = vpmtx._23 + vpmtx._20;
   frustrumplanes[3].w = vpmtx._33 + vpmtx._30;
-  fVar1 = NuFsqrt(frustrumplanes[3].z * frustrumplanes[3].z +
-                  frustrumplanes[3].x * frustrumplanes[3].x +
-                  frustrumplanes[3].y * frustrumplanes[3].y);
-  div = (double)fVar1;
-  frustrumplanes[3].x = NuFpDiv(frustrumplanes[3].x,fVar1);
-  frustrumplanes[3].y = NuFpDiv(frustrumplanes[3].y,(float)div);
-  frustrumplanes[3].z = NuFpDiv(frustrumplanes[3].z,(float)div);
-  frustrumplanes[3].w = NuFpDiv(frustrumplanes[3].w,(float)div);
-  frustrumplanes[5].y = vpmtx._13 - vpmtx._11;
+  f = NuFsqrt(frustrumplanes[3].x * frustrumplanes[3].x + frustrumplanes[3].y * frustrumplanes[3].y + frustrumplanes[3].z * frustrumplanes[3].z);
+  frustrumplanes[3].x = NuFpDiv(frustrumplanes[3].x,f);
+  frustrumplanes[3].y = NuFpDiv(frustrumplanes[3].y,f);
+  frustrumplanes[3].z = NuFpDiv(frustrumplanes[3].z,f);
+  frustrumplanes[3].w = NuFpDiv(frustrumplanes[3].w,f);
   frustrumplanes[5].x = vpmtx._03 - vpmtx._01;
+  frustrumplanes[5].y = vpmtx._13 - vpmtx._11;
   frustrumplanes[5].z = vpmtx._23 - vpmtx._21;
   frustrumplanes[5].w = vpmtx._33 - vpmtx._31;
-  fVar1 = NuFsqrt(frustrumplanes[5].z * frustrumplanes[5].z +
-                  frustrumplanes[5].x * frustrumplanes[5].x +
-                  frustrumplanes[5].y * frustrumplanes[5].y);
-  div = (double)fVar1;
-  frustrumplanes[5].x = NuFpDiv(frustrumplanes[5].x,fVar1);
-  frustrumplanes[5].y = NuFpDiv(frustrumplanes[5].y,(float)div);
-  frustrumplanes[5].z = NuFpDiv(frustrumplanes[5].z,(float)div);
-  frustrumplanes[5].w = NuFpDiv(frustrumplanes[5].w,(float)div);
-  frustrumplanes[4].y = vpmtx._13 + vpmtx._11;
+  f = NuFsqrt(frustrumplanes[5].x * frustrumplanes[5].x + frustrumplanes[5].y * frustrumplanes[5].y + frustrumplanes[5].z * frustrumplanes[5].z);
+  frustrumplanes[5].x = NuFpDiv(frustrumplanes[5].x,f);
+  frustrumplanes[5].y = NuFpDiv(frustrumplanes[5].y,f);
+  frustrumplanes[5].z = NuFpDiv(frustrumplanes[5].z,f);
+  frustrumplanes[5].w = NuFpDiv(frustrumplanes[5].w,f);
   frustrumplanes[4].x = vpmtx._03 + vpmtx._01;
+  frustrumplanes[4].y = vpmtx._13 + vpmtx._11;
   frustrumplanes[4].z = vpmtx._23 + vpmtx._21;
   frustrumplanes[4].w = vpmtx._33 + vpmtx._31;
-  fVar1 = NuFsqrt(frustrumplanes[4].z * frustrumplanes[4].z +
-                  frustrumplanes[4].x * frustrumplanes[4].x +
-                  frustrumplanes[4].y * frustrumplanes[4].y);
-  div = (double)fVar1;
-  frustrumplanes[4].x = NuFpDiv(frustrumplanes[4].x,fVar1);
-  frustrumplanes[4].y = NuFpDiv(frustrumplanes[4].y,(float)div);
-  frustrumplanes[4].z = NuFpDiv(frustrumplanes[4].z,(float)div);
-  frustrumplanes[4].w = NuFpDiv(frustrumplanes[4].w,(float)div);
-  frustrumplanes[1].y = vpmtx._13 - vpmtx._12;
+  f = NuFsqrt(frustrumplanes[4].x * frustrumplanes[4].x + frustrumplanes[4].y * frustrumplanes[4].y + frustrumplanes[4].z * frustrumplanes[4].z);
+  frustrumplanes[4].x = NuFpDiv(frustrumplanes[4].x,f);
+  frustrumplanes[4].y = NuFpDiv(frustrumplanes[4].y,f);
+  frustrumplanes[4].z = NuFpDiv(frustrumplanes[4].z,f);
+  frustrumplanes[4].w = NuFpDiv(frustrumplanes[4].w,f);
   frustrumplanes[1].x = vpmtx._03 - vpmtx._02;
+  frustrumplanes[1].y = vpmtx._13 - vpmtx._12;
   frustrumplanes[1].z = vpmtx._23 - vpmtx._22;
   frustrumplanes[1].w = vpmtx._33 - vpmtx._32;
-  fVar1 = NuFsqrt(frustrumplanes[1].z * frustrumplanes[1].z +
-                  frustrumplanes[1].x * frustrumplanes[1].x +
-                  frustrumplanes[1].y * frustrumplanes[1].y);
-  div = (double)fVar1;
-  frustrumplanes[1].x = NuFpDiv(frustrumplanes[1].x,fVar1);
-  frustrumplanes[1].y = NuFpDiv(frustrumplanes[1].y,(float)div);
-  frustrumplanes[1].z = NuFpDiv(frustrumplanes[1].z,(float)div);
-  frustrumplanes[1].w = NuFpDiv(frustrumplanes[1].w,(float)div);
-  frustrumplanes[0].y = vpmtx._13 + vpmtx._12;
+  f = NuFsqrt(frustrumplanes[1].x * frustrumplanes[1].x + frustrumplanes[1].y * frustrumplanes[1].y + frustrumplanes[1].z * frustrumplanes[1].z);
+  frustrumplanes[1].x = NuFpDiv(frustrumplanes[1].x,f);
+  frustrumplanes[1].y = NuFpDiv(frustrumplanes[1].y,f);
+  frustrumplanes[1].z = NuFpDiv(frustrumplanes[1].z,f);
+  frustrumplanes[1].w = NuFpDiv(frustrumplanes[1].w,f);
   frustrumplanes[0].x = vpmtx._03 + vpmtx._02;
+  frustrumplanes[0].y = vpmtx._13 + vpmtx._12;
   frustrumplanes[0].z = vpmtx._23 + vpmtx._22;
   frustrumplanes[0].w = vpmtx._33 + vpmtx._32;
-  fVar1 = NuFsqrt(frustrumplanes[0].z * frustrumplanes[0].z +
-                  frustrumplanes[0].x * frustrumplanes[0].x +
-                  frustrumplanes[0].y * frustrumplanes[0].y);
-  div = (double)fVar1;
-  frustrumplanes[0].x = NuFpDiv(frustrumplanes[0].x,fVar1);
-  frustrumplanes[0].y = NuFpDiv(frustrumplanes[0].y,(float)div);
-  frustrumplanes[0].z = NuFpDiv(frustrumplanes[0].z,(float)div);
-  frustrumplanes[0].w = NuFpDiv(frustrumplanes[0].w,(float)div);
+  f = NuFsqrt(frustrumplanes[0].x * frustrumplanes[0].x + frustrumplanes[0].y * frustrumplanes[0].y + frustrumplanes[0].z * frustrumplanes[0].z);
+  frustrumplanes[0].x = NuFpDiv(frustrumplanes[0].x,f);
+  frustrumplanes[0].y = NuFpDiv(frustrumplanes[0].y,f);
+  frustrumplanes[0].z = NuFpDiv(frustrumplanes[0].z,f);
+  frustrumplanes[0].w = NuFpDiv(frustrumplanes[0].w,f);
+
   return;
 }
 
-//WIP
-/*void NuCameraSet(struct nucamera_s *camera) {
-    //double dVar4;
+//MATCH NGC
+void NuCameraSet(struct nucamera_s *camera) {
     struct numtx_s mM;
     struct numtx_s minv;
     struct numtx_s mri;
-    //float fov;
 
-    global_camera.mtx = camera->mtx;
+    global_camera = *camera;
     FixAxes(&global_camera.mtx);
     if (camfx == NUCAMFX_NONE) {
         NuMtxInv(&vmtx,&global_camera.mtx);
@@ -189,16 +166,13 @@ void NuCameraCalcFrustrumPlanes(void)	//CHECK
     NuMtxInvH(&ivpcsmtx,&vpcsmtx);
     global_reflect.uvmtx = vpcmtx;
     vpc_vport_mtx = vpcmtx;
-    //dVar4 = 0.5;
-    //fov = global_camera.fov;
-    //fov = tan(global_camera.fov * 0.5);
-    zx = tan(global_camera.fov * 0.5f) / global_camera.aspect;
-    zy = tan(global_camera.fov * 0.5f);
+    zx = (float)tan(global_camera.fov * 0.5f) / global_camera.aspect;
+    zy = (float)tan(global_camera.fov * 0.5f);
     GS_SetViewMatrix((struct _GSMATRIX *)&vmtx);
     GS_SetProjectionMatrix((struct _GSMATRIX *)&pmtx);
     NuCameraCalcFrustrumPlanes();
     return;
-}*/
+}
 
 //NGC MATCH
 void NuCameraTransformView(struct nuvec_s *dest,struct nuvec_s *src,s32 n, const struct numtx_s *w) {

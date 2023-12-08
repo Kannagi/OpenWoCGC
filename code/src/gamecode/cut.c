@@ -394,6 +394,94 @@ void DrawCutMovie(void) {
     return;
 }
 
+//97% NGC
+void UpdateGameCut(void) {
+    float dt;
+    struct CharacterModel* model;
+
+    if (((GameMode != 1) && (gamecut_start != 0)) && ((Level == 0x25 || (Level == 0x28)))) {
+        gamecut_hold = 1;
+        new_mode = 1;
+        gamecut = 0;
+        gamecut_start = 0;
+        gamecut_newlevel = -1;
+        gamecut_finished = 0;
+    } else if (GameMode == 1) {
+        if (CutTimer.frame == 0) {
+            InitGameCut();
+            NewGameCutAnim();
+        }
+        if (gamecut_finished == 0) {
+            model = NULL;
+            if (((u16)pCutAnim->character < 0xbf) && (CRemap[pCutAnim->character] != -1)) {
+                model = &CModel[CRemap[pCutAnim->character]];
+            }
+            CutAnim.oldaction = CutAnim.action;
+            CutAnim.newaction = pCutAnim->action;
+            if (model != NULL) {
+                if (((gamecut_hold != 0) && (gamecut_sfx != -1)) && (NuSoundKeyStatus(4) != 1)) {
+                    dt = 0.0f;
+                } else {
+                    dt = 0.5f;
+                    gamecut_hold = 0;
+                }
+                UpdateAnimPacket(model, &CutAnim, dt, 0.0f);
+            }
+            UpdateTimer(&CutTimer);
+            if (fadeval == 0) {
+                if ((Pad[0] != NULL) && ((Pad[0]->oldpaddata & 0x840) != 0)) {
+                    Game.music_volume = music_volume[3];
+                    if (Level == 0x28) {
+                        new_level = gamecut_newlevel;
+                    } else {
+                        new_mode = fadeval;
+                    }
+                }
+            }
+            if ((model == NULL) || ((CutAnim.flags & 1) != 0)) {
+                pCutAnim++;
+                if (pCutAnim->character != -1) {
+                    if (pCutAnim->character != pCutAnim[1].character) {
+                        ResetAnimPacket(&CutAnim, pCutAnim->action);
+                    }
+                    NewGameCutAnim();
+                } else {
+                    gamecut_finished = 1;
+                }
+            }
+        }
+        if (gamecut_finished != 0) {
+            Game.music_volume = music_volume[3];
+            if (Level == 0x28) {
+                if (gamecut_newlevel != -1) {
+                    new_level = gamecut_newlevel;
+                } else {
+                    new_level = 0x25;
+                }
+            } else {
+                new_mode = 0;
+            }
+        }
+        if (Level == 0x28) {
+            if (CRemap[183] != -1) {
+                CutVortexAnim.oldaction = CutVortexAnim.action;
+                CutVortexAnim.newaction = 0x22;
+                UpdateAnimPacket(&CModel[CRemap[183]], &CutVortexAnim, 0.5f, 0.0f);
+            }
+            GameSfxLoop(0xcd, NULL);
+        }
+    }
+    if (gamecut == 5) {
+        gamecut_hack = 1;
+    }
+    if (new_mode == 0) {
+        last_hub = -1;
+        tumble_duration = 0.0f;
+        tumble_time = 0.0f;
+    }
+    return;
+}
+
 //NGC MATCH
 void PlayCutMovie(s32 movie) {
     s32 quit;

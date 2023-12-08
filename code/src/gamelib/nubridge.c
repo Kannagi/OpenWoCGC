@@ -118,3 +118,17 @@ s32 * NuBridgeCreate(struct nuinstance_s **instance,struct nuinstance_s *ipost,s
     }
     return (s32 *)bridge;
 }
+
+//NGC MATCH
+void NuBrdigeDrawRope(struct numtl_s *mtl,struct nuvec_s *rope1,struct nuvec_s *rope2,s32 ropecnt,s32 *ropetab,s32 colour) {
+    s32 *ropeiter;
+    
+    if (*ropetab < ropetab[1]) { 
+        for (ropeiter = ropetab; *ropeiter < ropeiter[1]; ropeiter++) {
+            ropesegment(mtl,rope1 + *ropeiter, ropeiter[1] - *ropeiter,colour);
+            ropesegment(mtl,rope2 + *ropeiter, ropeiter[1] - *ropeiter,colour);
+           
+        }
+    }
+    return;
+}

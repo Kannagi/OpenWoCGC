@@ -1862,144 +1862,155 @@ void Managememcard(void)
 */
 
 
-/*
-void firstscreens(void)		//TODO
+/*	//95% NGC
+void firstscreens(void) {
+    void *bits;
+    s32 texinfo;
+    struct numtl_s *mtl_;
+    struct nutex_s tex;
+    
+    CopyFilesThreadProc(0);
+    bits = malloc_x(0x4000c);
+    NuFileLoadBuffer("gfx\\licnin.s3",bits,0x2000c);
+    tex.width = 0x200;
+    tex.height = 0x200;
+    tex.decal = 0;
+    tex.pal = NULL;
+    tex.bits = bits;
+    tex.mmcnt = 1;
+    tex.type = NUTEX_RGB24;
 
-{
-  void *pixel_dat;
-  int texinfo;
-  numtl_s *mtl_;
-  numtl_s *mtl_2;
-  nusysmtl_s *mat;
-  numtlattrib_s attrib_mtl;
-  nutex_s tex;
+    iss3cmp = 0x20000;
+    texinfo = NuTexCreate(&tex);
+    iss3cmp = 0;
+    mtl_ = NuMtlCreate(1);
 
-  CopyFilesThreadProc(0);
-  pixel_dat = malloc_x(0x4000c);
-  NuFileLoadBuffer("gfx\\licnin.s3",pixel_dat,0x2000c);
-  tex.height = 0x200;
-  tex.decal = 0;
-  tex.pal = (int *)0x0;
-  tex.width = 0x200;
-  tex.mmcnt = 1;
-  tex.type = NUTEX_RGB24;
-  iss3cmp = 0x20000;
-  tex.bits = pixel_dat;
-  texinfo = NuTexCreate(&tex);
-  iss3cmp = 0;
-  mtl_ = NuMtlCreate(1);
-  attrib_mtl = mtl_->attrib;
-  mtl_->tid = texinfo;
-  (mtl_->diffuse).b = 1.0;
-  mtl_->alpha = 0.999;
-  (mtl_->diffuse).r = 1.0;
-  (mtl_->diffuse).g = 1.0;
-  mtl_->attrib = (numtlattrib_s)((uint)attrib_mtl & 0xcc0cffff | 0x16e8000);
-  NuMtlUpdate(mtl_);
-  firstscreenfade(mtl_,1);
-  nuvideo_global_vbcnt = 0;
-  do {
-    texinfo = NuRndrBeginScene(1);
-    if (texinfo != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,mtl_);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
+    mtl_->tid = texinfo;
+    (mtl_->diffuse).r = 1.0f;
+    (mtl_->diffuse).g = 1.0f;
+    (mtl_->diffuse).b = 1.0f;
+    //mtl_->attrib = (struct numtlattrib_s *)((uint)attr & 0xcc0cffff | 0x16e8000);
+    mtl_->attrib.cull = 2;
+    mtl_->attrib.zmode = 3;
+    mtl_->attrib.filter = 4;
+    mtl_->attrib.lighting = 2;
+    mtl_->attrib.colour = 1;
+    mtl_->alpha = 0.999f;
+    mtl_->attrib.utc = 1;
+    mtl_->attrib.vtc = 1;
+    NuMtlUpdate(mtl_);
+    firstscreenfade(mtl_,1);
+    nuvideo_global_vbcnt = 0;
+    do {
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb,0,1.0f);
+            NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl_);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+        Reseter(0);
+        GC_DiskErrorPoll();
+    } while (nuvideo_global_vbcnt < 0x78);
+    nuvideo_global_vbcnt = 0;
+    firstscreenfade(mtl_,-1);
+    NuRndrClear(0xb,0,1.0f);
+    NuRndrSwapScreen(1);
+    if (mtl_->tid != 0) {
+        NuTexDestroy(mtl_->tid);
     }
-    Reseter();
-    GC_DiskErrorPoll();
-  } while (nuvideo_global_vbcnt < 0x78);
-  nuvideo_global_vbcnt = 0;
-  firstscreenfade(mtl_,-1);
-  NuRndrClear(0xb,0,1.0);
-  NuRndrSwapScreen(1);
-  if (mtl_->tid != 0) {
-    NuTexDestroy(mtl_->tid);
-  }
-  NuFileLoadBuffer("gfx\\copyr1.s3",pixel_dat,0x4000c);
-  tex.height = 0x200;
-  tex.width = 0x200;
-  tex.decal = 0;
-  tex.mmcnt = 1;
-  tex.pal = (int *)0x0;
-  tex.type = NUTEX_RGB24;
-  iss3cmp = 0x40000;
-  tex.bits = pixel_dat;
-  texinfo = NuTexCreate(&tex);
-  iss3cmp = 0;
-  mtl_2 = NuMtlCreate(1);
-  attrib_mtl = mtl_2->attrib;
-  mtl_2->tid = texinfo;
-  (mtl_2->diffuse).b = 1.0;
-  mtl_2->alpha = 0.999;
-  (mtl_2->diffuse).r = 1.0;
-  (mtl_2->diffuse).g = 1.0;
-  mtl_2->attrib = (numtlattrib_s)((uint)attrib_mtl & 0xcc0cffff | 0x16e8000);
-  NuMtlUpdate(mtl_2);
-  firstscreenfade(mtl_2,1);
-  nuvideo_global_vbcnt = 0;
-  do {
-    texinfo = NuRndrBeginScene(1);
-    if (texinfo != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,mtl_2);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
+    NuFileLoadBuffer("gfx\\copyr1.s3",bits,0x4000c);
+    tex.width = 0x200;
+    tex.height = 0x200;
+    tex.decal = 0;
+    tex.bits = bits;
+    tex.mmcnt = 1;
+    tex.pal = NULL;
+    tex.type = NUTEX_RGB24;
+    iss3cmp = 0x40000;
+    texinfo = NuTexCreate(&tex);
+    iss3cmp = 0;
+    mtl_ = NuMtlCreate(1);
+
+    mtl_->tid = texinfo;
+    (mtl_->diffuse).r = 1.0f;
+    (mtl_->diffuse).g = 1.0f;
+    (mtl_->diffuse).b = 1.0f;
+    mtl_->attrib.cull = 2;
+    mtl_->attrib.zmode = 3;
+    mtl_->attrib.filter = 0;
+    mtl_->attrib.lighting = 2;
+    mtl_->attrib.colour = 1;
+    mtl_->alpha = 0.999f;
+    mtl_->attrib.utc = 1;
+    mtl_->attrib.vtc = 1;
+    NuMtlUpdate(mtl_);
+    firstscreenfade(mtl_,1);
+    nuvideo_global_vbcnt = 0;
+    do {
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb,0,1.0f);
+            NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl_);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+        Reseter(0);
+        GC_DiskErrorPoll();
+    } while (nuvideo_global_vbcnt < 0x78);
+    nuvideo_global_vbcnt = 0;
+    firstscreenfade(mtl_,-1);
+    NuRndrClear(0xb,0,1.0f);
+    NuRndrSwapScreen(1);
+    if (mtl_->tid != 0) {
+        NuTexDestroy(mtl_->tid);
     }
-    Reseter();
-    GC_DiskErrorPoll();
-  } while (nuvideo_global_vbcnt < 0x78);
-  nuvideo_global_vbcnt = 0;
-  firstscreenfade(mtl_2,-1);
-  NuRndrClear(0xb,0,1.0);
-  NuRndrSwapScreen(1);
-  if (mtl_2->tid != 0) {
-    NuTexDestroy(mtl_2->tid);
-  }
-  NuFileLoadBuffer("gfx\\euro.s3",pixel_dat,0x2000c);
-  tex.height = 0x200;
-  tex.width = 0x200;
-  tex.decal = 0;
-  tex.mmcnt = 1;
-  tex.pal = (int *)0x0;
-  tex.type = NUTEX_RGB24;
-  iss3cmp = 0x20000;
-  texinfo = NuTexCreate(&tex);
-  iss3cmp = 0;
-  mat = (nusysmtl_s *)NuMtlCreate(1);
-  attrib_mtl = (mat->mtl).attrib;
-  (mat->mtl).tid = texinfo;
-  (mat->mtl).diffuse.b = 1.0;
-  (mat->mtl).alpha = 0.999;
-  (mat->mtl).diffuse.r = 1.0;
-  (mat->mtl).diffuse.g = 1.0;
-  (mat->mtl).attrib = (numtlattrib_s)((uint)attrib_mtl & 0xcc0cffff | 0x16e8000);
-  NuMtlUpdate((numtl_s *)mat);
-  firstscreenfade((numtl_s *)mat,1);
-  nuvideo_global_vbcnt = 0;
-  do {
-    texinfo = NuRndrBeginScene(1);
-    if (texinfo != 0) {
-      NuRndrClear(0xb,0,1.0);
-      NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0,0.0,1.0,1.0,-1,(numtl_s *)mat);
-      NuRndrEndScene();
-      NuRndrSwapScreen(1);
+    NuFileLoadBuffer("gfx\\euro.s3",bits,0x2000c);
+    tex.width = 0x200;
+    tex.height = 0x200;
+    tex.decal = 0;
+    tex.mmcnt = 1;
+    tex.pal = NULL;
+    tex.type = NUTEX_RGB24;
+    iss3cmp = 0x20000;
+    texinfo = NuTexCreate(&tex);
+    iss3cmp = 0;
+    mtl_ = NuMtlCreate(1);
+
+    mtl_->tid = texinfo;
+    (mtl_->diffuse).r = 1.0f;
+    (mtl_->diffuse).g = 1.0f;
+    (mtl_->diffuse).b = 1.0f;
+    //mtl_->attrib = (numtlattrib_s *)((uint)attr & 0xcc0cffff | 0x16e8000);
+    mtl_->attrib.cull = 2;
+    mtl_->attrib.zmode = 3;
+    mtl_->attrib.filter = 0;
+    mtl_->attrib.lighting = 2;
+    mtl_->attrib.colour = 1;
+    mtl_->alpha = 0.999f;
+    mtl_->attrib.utc = 1;
+    mtl_->attrib.vtc = 1;
+    NuMtlUpdate(mtl_);
+    firstscreenfade(mtl_,1);
+    nuvideo_global_vbcnt = 0;
+    do {
+        if (NuRndrBeginScene(1) != 0) {
+            NuRndrClear(0xb,0,1.0f);
+            NuRndrRectUV2di(0,0,PHYSICAL_SCREEN_X,PHYSICAL_SCREEN_Y,0.0f,0.0f,1.0f,1.0f,-1,mtl_);
+            NuRndrEndScene();
+            NuRndrSwapScreen(1);
+        }
+        Reseter(0);
+        GC_DiskErrorPoll();
+    } while (nuvideo_global_vbcnt < 0x78);
+    nuvideo_global_vbcnt = 0;
+    firstscreenfade(mtl_,-1);
+    NuRndrClear(0xb,0,1.0f);
+    NuRndrSwapScreen(1);
+    free_x(bits);
+    if (mtl_ != NULL) {
+        if (mtl_->tid != 0) {
+            NuTexDestroy(mtl_->tid);
+        }
+        NuMtlDestroy(mtl_);
     }
-    Reseter();
-    GC_DiskErrorPoll();
-  } while (nuvideo_global_vbcnt < 0x78);
-  nuvideo_global_vbcnt = 0;
-  firstscreenfade((numtl_s *)mat,-1);
-  NuRndrClear(0xb,0,1.0);
-  NuRndrSwapScreen(1);
-  free_x(pixel_dat);
-  if (mat != (nusysmtl_s *)0x0) {
-    texinfo = (mat->mtl).tid;
-    if (texinfo != 0) {
-      NuTexDestroy(texinfo);
-    }
-    NuMtlDestroy(mat);
-  }
-  return;
-}
-*/
+    return;
+}*/
