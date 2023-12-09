@@ -330,7 +330,18 @@ static void AppCutSceneFindCharacters(struct NUGCUTSCENE_s *cutscene)
     return;
 }
 
+//79% NGC
+void SetCutMovieRate(void) {
 
+    CutInst[cutworldix]->rate = 0.5f;
+    if ((cutmovie == 3 || cutmovie == 4) && (cutworldix == 0)) {
+        CutInst[cutworldix]->rate = CutInst[cutworldix]->rate * 0.8f;
+    }
+    if (cutratefrig != 0.0f) {
+        CutInst[cutworldix]->rate = cutratefrig;
+    }
+    return;
+}
 
 //NGC MATCH
 void UpdateCutMovie(void) {
@@ -391,6 +402,23 @@ void StartCutMovie(void) {
 //NGC MATCH
 void DrawCutMovie(void) {
     NuGCutSceneSysRender();
+    return;
+}
+
+//NGC MATCH
+void InitGameCut(void) {
+    
+    cutang_FRONTEND[0] = (u16)NuAtan2D(cutpos_CRASH.x - cutpos_FRONTEND[0].x,cutpos_CRASH.z - cutpos_FRONTEND[0].z);
+    cutang_FRONTEND[1] = (u16)NuAtan2D(cutpos_CRASH.x - cutpos_FRONTEND[1].x,cutpos_CRASH.z - cutpos_FRONTEND[1].z);
+    cutang_SPACE[0] = (u16)NuAtan2D(campos_SPACE.x - cutpos_SPACE[0].x,campos_SPACE.z - cutpos_SPACE[0].z);
+    cutang_SPACE[1] = (u16)NuAtan2D(campos_SPACE.x - cutpos_SPACE[1].x,campos_SPACE.z - cutpos_SPACE[1].z);
+    cutang_SPACE[2] = (u16)NuAtan2D(campos_SPACE.x - cutpos_SPACE[2].x,campos_SPACE.z - cutpos_SPACE[2].z);
+    pCutAnim = (struct pcutanm_s *)SpaceGameCutTab[gamecut][1];
+    ResetAnimPacket(&CutAnim,(int)pCutAnim->action);
+    gamecut_finished = 0;
+    gamecut_hold = 1;
+    gamecut_sfx = -1;
+    ResetAnimPacket(&CutVortexAnim,0x22);
     return;
 }
 

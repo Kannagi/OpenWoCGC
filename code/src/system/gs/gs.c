@@ -378,14 +378,12 @@ void GS_SetBlendSrc2(int enable,int src,int dest)
   return;
 }
 
-float GS_MatProjection[4][4];
-
 void GS_SetProjectionMatrix(struct _GSMATRIX *pMatrix) {
     float pMtx[4][4]; // 0x8(r1)
-    float mMtx[4][3];
+    float mMtx[4][3]; // 0x48(r1)
 
-    //GS_MatProjection = *pMatrix;
-    //C_MTXPerspective((float **)mMtx,40.0f,1.428571f,0.3f,1000.0f);
+    GS_MatProjection = *pMatrix;
+    //C_MTXPerspective((float **)pMtx,40.0f,1.428571f,0.3f,1000.0f);
     //GXSetProjection((const float **)pMtx,GX_PERSPECTIVE);
     return;
 }
