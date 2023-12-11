@@ -35,7 +35,7 @@ void NuWindDraw(struct nugscn_s *scn) {
     return;
 }
 
-//NGC 95%
+//NGC 97%
 s32* NuWindCreate(struct nuinstance_s* instance, struct nuvec4_s* pos, short count, 
                     float wind, float height, s32 collide) {
     struct nuwindgrp_s *grp;
@@ -47,7 +47,6 @@ s32* NuWindCreate(struct nuinstance_s* instance, struct nuvec4_s* pos, short cou
     float minz;
     float maxz;
     s32 lp;
-    char pad[49];
     
     lp = count;
     minx = height;
@@ -55,15 +54,15 @@ s32* NuWindCreate(struct nuinstance_s* instance, struct nuvec4_s* pos, short cou
     mtx = NuWindAllocMtxs(count);
     if ((grp != NULL) && (mtx != NULL)) {
         minx = 10000000.0f;
-        miny = 10000000.0f;
         minz = 10000000.0f; 
-        maxz =  -10000000.0f;
+        miny = 10000000.0f;
         maxy = -10000000.0f;
-        maxx =  -10000000.0f;
+        maxz =  -10000000.0f;
         grp->height = height;
         grp->instance = instance;
         grp->collide = collide;
         grp->mtx = mtx;
+        maxx =  -10000000.0f;
         grp->objcount = count;
         grp->wind = wind;
         for (lp = 0; lp < count; lp++) {
@@ -96,12 +95,11 @@ s32* NuWindCreate(struct nuinstance_s* instance, struct nuvec4_s* pos, short cou
                 if (pos[lp].z > maxz) {
                     maxz = pos[lp].z;
                 }
-        }
-        grp->center.x = (maxx + minx)  / 2;
+        } //while (lp != 0);
+        grp->center.x = (maxx  + minx)  / 2;
         grp->center.y = (maxy + miny) /2;
         grp->center.z = (maxz + minz) /2;
-        grp->radius =  (grp->center.x * grp->center.x) + 
-                            (grp->center.y * grp->center.y) + (grp->center.z * grp->center.z) + 1.0f;
+        grp->radius =  (grp->center.x * grp->center.x) + (grp->center.y * grp->center.y) + (grp->center.z * grp->center.z) + 1.0f;
         return grp;
     }
     else {

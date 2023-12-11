@@ -48,5 +48,8 @@ s32 cutworldix;
 static float cutratefrig;
 s32 logos_played;
 void* SpaceGameCutTab[2][26];
+struct nucolour3_s cutdircol[3];
+struct nuvec_s cutambcol; 
+struct nuvec_s cutdir[3];
 
 #endif // !CUT_H

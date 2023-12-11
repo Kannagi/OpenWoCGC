@@ -1,11 +1,53 @@
 short RO_640460[8];
 
+//NGC MATCH
+static struct NUHGOBJ_s * InstNuGHGRead(union variptr_u *superbuf_ptr,char *path) {
+  s32 ix;
+  
+  for (ix = 0; ix < ghg_inst_count; ix++) {
+        if (strcasecmp(path,ghg_insts[ix].name) == 0) {
+         return ghg_insts[ix].scene;
+        }
+  }
+  ghg_insts[ix].name = path;
+  ghg_insts[ix].scene = NuHGobjRead(superbuf_ptr,path);
+  ghg_inst_count = ghg_inst_count + 1;
+  return ghg_insts[ix].scene;
+}
+
+//NGC MATCH
+void LoadCutSceneCharacters(struct csc_s *name) {
+  
+  while (name->path != NULL) {
+    name->obj = InstNuGHGRead(&superbuffer_ptr,name->path);
+    name++;
+  }
+  return;
+}
+
 //PS2
 void InitCutScenes(void) {
   NuGCutSceneSysInit(cutscene_locatorfns);
   NuSetCutSceneFindCharactersFn(AppCutSceneFindCharacters);
   NuSetCutSceneCharacterRenderFn(AppCutSceneCharacterRender);
   return;
+}
+
+//NGC MATCH
+static struct nuscene_s * InstNuGScnRead(union variptr_u *ptr,union variptr_u *end,char *name) {
+  s32 ix;
+  
+  for (ix = 0; ix < scene_inst_count; ix++) {
+        if (strcasecmp(name,scene_insts[ix].name) == 0) {
+            return (struct nuscene_s *)scene_insts[ix].scene;
+        }
+  }
+  NuMemSetExternal(ptr,end);
+  scene_insts[ix].name = name;
+  scene_insts[ix].scene = (struct nugscn_s *)NuSceneLoad(name);
+  scene_inst_count++;
+  NuMemSetExternal(NULL,NULL);
+  return (struct nuscene_s *)scene_insts[ix].scene;
 }
 
 //NGC MATCH //inline with InitCutScenes??
@@ -894,4 +936,180 @@ void DrawGameCut(void) {
     EvalModelAnim(model, &CutAnim, &m, tmtx, &dwa, NULL);
     NuHGobjRndrMtxDwa(model->hobj, &m, 1, NULL, tmtx, dwa);
     return;
+}
+
+//NGC MATCH
+void MakeDirLightColour(s32 ix,float r,float g,float b) {
+  cutdircol[ix].r = r;
+  cutdircol[ix].g = g;
+  cutdircol[ix].b = b;
+  return;
+}
+
+//NGC MATCH
+void MakeLightDirection(s32 ix,float x,float y,float z) {
+  cutdir[ix].x = x;
+  cutdir[ix].y = y;
+  cutdir[ix].z = z;
+  NuVecNorm(&cutdir[ix],&cutdir[ix]);
+  return;
+}
+
+//70% NGC
+void SetCutSceneLights(void) {
+    
+    switch(cutmovie)
+    {
+        case 1:
+                if (cutworldix == 2) {
+                    cutambcol.x = 0.4f;
+                    cutambcol.y = 0.4f;
+                    cutambcol.z = 0.4f;
+                    MakeDirLightColour(0,0.4f,0.8f,0.4f);
+                    MakeDirLightColour(1,0.4f,0.8f,0.4f);
+                    MakeDirLightColour(2,0.0f,0.0f,0.0f);
+                    MakeLightDirection(0,-0.5f,-1.0f,-0.5f);
+                    MakeLightDirection(1,0.5f,-1.0f,0.5f);
+                    MakeLightDirection(2,0.0f,0.0f,0.0f);          
+                }
+
+        break;
+        case 2:
+                        switch(cutworldix) {
+                            case 3:
+                                return;
+                            case 0:
+                              cutambcol.x = 0.75f;
+                              cutambcol.z = 0.75f;
+                              cutambcol.y = 0.75f;
+                              MakeDirLightColour(0,1.25f,1.0f,0.65);
+                              MakeDirLightColour(1,0.5f,0.5f,0.8f);
+                              MakeDirLightColour(2,0.5f,0.5f,0.8f);
+                              MakeLightDirection(0,-0.5f,1.0f,-0.5f);
+                              MakeLightDirection(1,-0.5f,-1.0f,-0.5f);
+                              MakeLightDirection(2,0.5f,-1.0f,0.5f);
+                            break;
+                            case 2:
+                              cutambcol.x = 0.5f;
+                              cutambcol.y = 0.5f;
+                              cutambcol.z = 0.5f;
+                              MakeDirLightColour(0,1.0f,1.0f,0.5f);
+                              MakeDirLightColour(1,0.35,0.35,0.6);
+                              MakeDirLightColour(2,0.35,0.35,0.5f);
+                              MakeLightDirection(0,-0.5f,1.0f,-0.5f);
+                              MakeLightDirection(1,-0.5f,-1.0f,-0.5f);
+                              MakeLightDirection(2,-1.0f,0.0f,0.0f);
+                            break;
+                            case 1:
+                                  cutambcol.x = 0.25f;
+                                  cutambcol.z = 0.25f;
+                                  cutambcol.y = 0.25f;
+                                  MakeDirLightColour(0,1.0f,0.8f,0.65);
+                                  MakeDirLightColour(1,0.75f,0.75f,0.75f);
+                                  MakeDirLightColour(2,1.5f,1.5f,1.0f);
+                                  MakeLightDirection(0,-0.5f,1.0f,0.5f);
+                                  MakeLightDirection(1,0.5f,1.0f,-0.5f);
+                                  MakeLightDirection(2,-1.0f,0.0f,0.0f);
+                            break;
+                            case 5:
+                                    cutambcol.x = 0.25f;
+                                    cutambcol.y = 0.25f;
+                                    cutambcol.z = 0.25f;
+                                    MakeDirLightColour(0,1.1,1.1,0.9);
+                                    MakeDirLightColour(1,1.1,1.1,0.9);
+                                    MakeDirLightColour(2,0.5f,0.5f,0.5f);
+                                    MakeLightDirection(0,0.25f,-1.0f,0.0f);
+                                    MakeLightDirection(1,-0.5f,1.0f,0.0f);
+                                    MakeLightDirection(2,0.25f,1.0f,0.0f);
+                            break;
+                            case 4:
+                                    cutambcol.x = 0.75f;
+                                    cutambcol.z = 0.75f;
+                                    cutambcol.y = 0.75f;
+                                    MakeDirLightColour(0,0.9,0.9,0.5f);
+                                    MakeDirLightColour(1,0.0f,0.0f,0.0f);
+                                    MakeDirLightColour(2,0.0f,0.0f,0.0f);
+                                    MakeLightDirection(0,-0.5f,1.0f,-0.5f);
+                                    MakeLightDirection(1,0.0f,0.0f,0.0f);
+                                    MakeLightDirection(2,0.0f,0.0f,0.0f);
+                            break;
+                            case 6:
+                                    cutambcol.x = 0.75f;
+                                    cutambcol.z = 0.75f;
+                                    cutambcol.y = 0.75f;
+                                    MakeDirLightColour(0,0.8f,0.8f,0.5f);
+                                    MakeDirLightColour(1,0.0f,0.25f,0.0f);
+                                    MakeDirLightColour(2,0.0f,0.0f,0.0f);
+                                    MakeLightDirection(0,0.0f,0.0f,-0.8f);
+                                    MakeLightDirection(1,0.0f,-1.0f,1.0f);
+                                    MakeLightDirection(2,0.0f,0.0f,0.0f);
+                            break;
+                            case 7:
+                                cutambcol.x = 0.5f;
+                                cutambcol.y = 0.5f;
+                                cutambcol.z = 0.5f;
+                                MakeDirLightColour(0,1.0f,1.0f,0.8f);
+                                MakeDirLightColour(1,0.25f,0.25f,1.0f);
+                                MakeDirLightColour(2,0.0f,0.0f,0.0f);
+                                MakeLightDirection(0,-1.0f,0.75f,-1.0f);
+                                MakeLightDirection(1,1.0f,0.5f,1.0f);
+                                MakeLightDirection(2,0.0f,0.0f,0.0f);  
+                            break;
+                        }
+        break;
+        case 3:
+                if (cutworldix == 0) {
+                cutambcol.x = 0.5f;
+                cutambcol.y = 0.5f;
+                cutambcol.z = 0.5f;
+                MakeDirLightColour(0,0.25f,0.25f,1.75);
+                MakeDirLightColour(1,1.25f,0.5f,0.5f);
+                MakeDirLightColour(2,0.5f,0.75f,0.5f);
+                MakeLightDirection(0,-1.0f,-0.5f,-1.0f);
+                MakeLightDirection(1,1.0f,-0.5f,-1.0f);
+                }
+        break;
+        case 4:
+                switch(cutworldix) {
+                    case 0:
+                          cutambcol.x = 0.5f;
+                          cutambcol.y = 0.5f;
+                          cutambcol.z = 0.5f;
+                          MakeDirLightColour(0,0.25f,0.25f,1.75);
+                          MakeDirLightColour(1,1.25f,0.5f,0.5f);
+                          MakeDirLightColour(2,0.5f,0.75f,0.5f);
+                          MakeLightDirection(0,-1.0f,-0.5f,-1.0f);
+                          MakeLightDirection(1,1.0f,-0.5f,-1.0f);
+                          MakeLightDirection(2,-1.0f,0.5f,1.0f);
+                    break;
+                    case 1:
+                          cutambcol.x = 0.5f;
+                          cutambcol.y = 0.5f;
+                          cutambcol.z = 0.5f;
+                          MakeDirLightColour(0,0.75f,0.65,0.5f);
+                          MakeDirLightColour(1,0.0f,0.15,0.0f);
+                          MakeDirLightColour(2,0.5f,0.5f,0.25f);
+                          MakeLightDirection(0,1.0f,-0.25f,1.0f);
+                          MakeLightDirection(1,0.0f,-1.0f,0.0f);
+                          MakeLightDirection(2,1.0f,-0.5f,-1.0f);
+                    break;
+                    case 2:
+                          cutambcol.x = 0.5f;
+                          cutambcol.z = 0.5f;
+                          cutambcol.y = 0.5f;
+                          MakeDirLightColour(0,1.15,1.15,1.15);
+                          MakeDirLightColour(1,1.0f,1.0f,1.0f);
+                          MakeDirLightColour(2,1.0f,1.0f,1.0f);
+                          MakeLightDirection(0,1.0f,-0.25f,1.0f);
+                          MakeLightDirection(1,0.0f,-1.0f,0.0f);
+                          MakeLightDirection(2,1.0f,-0.5f,-1.0f);
+                  break;   
+                }
+        break;
+        case 0:
+        return;
+    }
+  SetLights(&cutdircol[0],&cutdir[0],&cutdircol[1],&cutdir[1],&cutdircol[2],&cutdir[2],&cutambcol);
+  SetLevelLights();
+  return;
 }

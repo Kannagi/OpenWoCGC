@@ -41,12 +41,15 @@ s32 GetTPID()
 	return tpid;
 }
 
-s32 NuTexCreate(struct nutex_s *nutex)
-{
-  struct D3DTexture *surface;   //replace with SDL_Surface *surface;
+//MATCH NGC
+s32 NuTexCreate(struct nutex_s *nutex) {
+    //replace struct D3DTexture with SDL_Surface *surface;
 
-  //surface = NudxTx_Create(nutex,(uint)(NUTEX_BB < nutex->type));  //look inside this function
-  tinfo[tpid].dds = surface;
+    if (nutex->type > NUTEX_BB) {
+        tinfo[tpid].dds = NudxTx_Create(nutex, 1);
+    } else {
+        tinfo[tpid].dds = NudxTx_Create(nutex, 0);
+    }
   tinfo[tpid].tex.bits = NULL;
   tinfo[tpid].tex.type = nutex->type;
   tinfo[tpid].tex.decal = nutex->decal;
@@ -65,29 +68,14 @@ s32 NuTexGetDecalInfo(s32 tid) {
   return (s32)tinfo[tid + -1].tex.decal;
 }
 
-s32 NuTexCreateFromSurface(struct nutex_s *tex, struct D3DTexture *surface)	//CHECK
-{
-  s32 width;
-  s32 cnt;
-  s32 *pal;
-  s32 height;
-  void *bits;
+//MATCH NGC
+s32 NuTexCreateFromSurface(struct nutex_s *tex, struct D3DTexture *surface) {
+  tinfo[tpid].tex = *tex;
 
-  width = tex->width;
-  height = tex->height;
-  cnt = tex->mmcnt;
-  tinfo[tpid].tex.type = tex->type;
-  tinfo[tpid].tex.width = width;
-  tinfo[tpid].tex.height = height;
-  tinfo[tpid].tex.mmcnt = cnt;
-  bits = tex->bits;
-  pal = tex->pal;
-  //&tinfo[tpid].tex.decal = &tex->decal;
-  tinfo[tpid].tex.bits = bits;
-  tinfo[tpid].tex.pal = pal;
-  tinfo[tpid].tex.bits = NULL;
   tinfo[tpid].dds = surface;
-  return tpid++;
+  tinfo[tpid].tex.bits = NULL;
+  tpid++;
+  return tpid;
 }
 
 void NuTexDestroy(s32 id)
@@ -363,6 +351,7 @@ void NuTexSetTexture(u32 stage,s32 tid) {
   return;
 }
 
+//MATCH GCN
 struct nutex_s * NuTexReadBitmap(char* fileName)
 {
 	struct nutex_s* ret = NuMemAlloc(sizeof(struct nutex_s));
