@@ -65,7 +65,7 @@ struct nulights_s
 };
 
 // Size: 0x40
-struct LgtArcLaserData
+struct lgtarclaserdata_s
 {
     struct nuvec_s start;
     struct nuvec_s target;
@@ -98,15 +98,15 @@ float NuLgtArcV1;
 s32 NuLgtArcLaserFrame;
 s32 NuLgtArcLaserOldCnt;
 s32 NuLgtArcLaserCnt;
-struct LgtArcLaserData NuLgtArcLaserData[16];
+struct lgtarclaserdata_s NuLgtArcLaserData[16];
 
 
 
-extern s32 HazeValue;
-extern f32 NuRndrFogNear;
-extern f32 NuRndrFogFar;
-extern u32 NuRndrFogBlur;
-extern u32 NuRndrFogCol;
+s32 HazeValue;
+static u32 NuRndrFogBlur;
+static u32 NuRndrFogCol;
+static float NuRndrFogFar;
+static float NuRndrFogNear;
 
 
 // NuLightInit

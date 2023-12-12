@@ -10,43 +10,37 @@ s32 tritot;
 s32 stats[15];
 static char mtxused[256];
 
-void InitSkinning(s32 buffsize) //makes primitive
-
-{
+//MATCH GCN
+void InitSkinning(s32 buffsize) {  //makes primitive
   primdefs = (struct primdef_s *)NuMemAlloc(0xc7ce0); // 0xC7CE0 bytes can fit 0x3548 NuPrims perfectly
   primdefs_sorted = (struct primdef_s *)NuMemAlloc(0xc7ce0);
   return;
 }
 
-
-void CloseSkinning(void)
-
-{
+//MATCH GCN
+void CloseSkinning(void) {
   NuMemFree(primdefs);
   NuMemFree(primdefs_sorted);
-  primdefs_sorted = NULL;
   primdefs = NULL;
+  primdefs_sorted = NULL;
   return;
 }
 
-
+//MATCH GCN
 void NuPs2CreateSkin(struct nugobj_s* gobj) {
-    struct nugeom_s* tmp;
-
-    tmp = gobj->geom;
-    if ((tmp != NULL) && (tmp->prim->type == NUPT_NDXTRI)) {
+    if ((gobj->geom != NULL) && (gobj->geom->prim->type == NUPT_NDXTRI)) {
         NuPs2CreateSkinNorm(gobj);
     }
 return;
 }
 
-//76%
+//MATCH GCN
 static void CreateSkinGeom(struct nugeom_s* geom, struct primdef_s* pd, s32 pdcnt) {
 
     s32 amount_prim;
     struct nuprim_s* nextprim;
-    struct nuprim_s* startprim;
     struct nuprim_s* currentprim;
+    struct nuprim_s* startprim;
     struct nuvtx_sk3tc1_s* newvertexbuff;
     struct primdef_s* currpd;
     s32 i;
@@ -56,16 +50,19 @@ static void CreateSkinGeom(struct nugeom_s* geom, struct primdef_s* pd, s32 pdcn
     s32 currentbaseid;
     s32 iVar6;
     s32 j;
+    s32 k;
+    s32 l;
+    s32 q;
 
     if (geom->vtxtype != NUVT_TC1) {
-        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c", 0x69, "CreateSkinGeom : Unknown vertex type!");
+        NuErrorProlog("C:/source/crashwoc/code/nu3dx/nucvtskn.c", 0x69)("CreateSkinGeom : Unknown vertex type!");
     }
 
     currentbaseid = pd[0].baseid;
+    count = 1;
 
     memset(primsize, 0, sizeof(primsize));
 
-    count = 1;
     for (i = 0; i < pdcnt; i++) {
         if (pd[i].baseid != currentbaseid) {
             currentbaseid = pd[i].baseid;
@@ -73,45 +70,47 @@ static void CreateSkinGeom(struct nugeom_s* geom, struct primdef_s* pd, s32 pdcn
         }
         primsize[count] += 3;
     }
-    startprim = NuPrimCreate(primsize[1], NUPT_NDXTRI);
-    nextprim = startprim;
+    
+    startprim = currentprim = NuPrimCreate(primsize[1], NUPT_NDXTRI);;
     for (i = 1; i < count; i++) {
-        nextprim->next = currentprim=NuPrimCreate(primsize[i + 1], NUPT_NDXTRI);
-        nextprim = nextprim->next;
+        currentprim->next = nextprim = NuPrimCreate(primsize[i + 1], NUPT_NDXTRI);
+        currentprim = currentprim->next;
     }
+    
+    currentprim = startprim;
     newvertexbuff = (struct nuvtx_sk3tc1_s*)GS_CreateBuffer(geom->vtxcnt * sizeof(struct nuvtx_sk3tc1_s), 1);
-    for (currentbaseid = 0; currentbaseid < count; currentbaseid++) {
-        currpd = pd;
-        for (i = 0; i < 15; i++) {
-            currentprim->skinmtxlookup[i] = currpd->mtxid[i];
+    currpd = pd;
+    
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < 15; j++) {
+            currentprim->skinmtxlookup[j] = currpd->mtxid[j];
         }
         indexbuffer = (u16*)currentprim->idxbuff;
         for (amount_prim = 0; amount_prim < currentprim->cnt; amount_prim += 3) {
             indexbuffer[amount_prim] = currpd->vid[0];
             indexbuffer[amount_prim + 1] = currpd->vid[1];
             indexbuffer[amount_prim + 2] = currpd->vid[2];
-            for (i = 0; i < 3; i++) {
-                // indexbuffer[amount_prim + i] = currpd->vid[i];
-                // vid = currpd->vid[i];
-                newvertexbuff[currpd->vid[i]].pnt = currpd->vrts[i].pnt;
-                newvertexbuff[currpd->vid[i]].nrm = currpd->vrts[i].nrm;
-                newvertexbuff[currpd->vid[i]].diffuse = currpd->vrts[i].diffuse;
-                newvertexbuff[currpd->vid[i]].tc[0] = currpd->vrts[i].tc[0];
-                newvertexbuff[currpd->vid[i]].tc[1] = currpd->vrts[i].tc[1];
+            for (k = 0; k < 3; k++) {
+                newvertexbuff[currpd->vid[k]].pnt = currpd->vrts[k].pnt;
+                newvertexbuff[currpd->vid[k]].nrm = currpd->vrts[k].nrm;
+                newvertexbuff[currpd->vid[k]].diffuse = currpd->vrts[k].diffuse;
+                newvertexbuff[currpd->vid[k]].tc[0] = currpd->vrts[k].tc[0];
+                newvertexbuff[currpd->vid[k]].tc[1] = currpd->vrts[k].tc[1];
                 for (j = 0; j < 3; j++) {
-                    newvertexbuff[currpd->vid[i]].weights[j] = 0.0f;
-                    newvertexbuff[currpd->vid[i]].indexes[j] = 0.0f;
+                    newvertexbuff[currpd->vid[k]].weights[j] = 0.0f;
+                    newvertexbuff[currpd->vid[k]].indexes[j] = 0.0f;
                 }
-                for (iVar6 = 0, j = 0; j <= 14 && iVar6 < 3; j++) {
-                    if (currpd->weights[i][j] != 0.0f) {
-                        newvertexbuff[currpd->vid[i]].indexes[iVar6] = (float)j;
+                for (j = 0, iVar6 = 0; j < 15 && iVar6 < 3; j++) {
+                    if (currpd->weights[k][j] != 0.0f) {
+                        newvertexbuff[currpd->vid[k]].indexes[iVar6] = (float)j;
                         if (iVar6 < 2) {
-                            newvertexbuff[currpd->vid[i]].weights[iVar6] = currpd->weights[i][j];
+                            newvertexbuff[currpd->vid[k]].weights[iVar6] = currpd->weights[k][j];
                         }
                         iVar6++;
                     }
                 }
             }
+            currpd++;
         }
         currentprim = currentprim->next;
     }

@@ -88,7 +88,7 @@ struct primdef_s
 {
     struct nuvtx_tc1_s vrts[3];
     int vid[3];
-    float weights[15][3];
+    float weights[3][15]; //dwarf orginal: [15][3]
     int mtxid[15];
     int nummtx;
     int sorted;

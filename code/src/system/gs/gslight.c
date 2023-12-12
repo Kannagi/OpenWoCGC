@@ -96,11 +96,9 @@ s32 GS_SetLight(s32 Index,struct _D3DLIGHT8 *pLight)
 }
 
 
-int GS_LightEnable(int Index,int Enable)
-
-{
-  GS_LightList[Index].EnableLight = Enable;
-  return 0;
+s32 GS_LightEnable(s32 Index, s32 Enable) {
+    GS_LightList[Index].EnableLight = Enable;
+    return 0;
 }
 
 
