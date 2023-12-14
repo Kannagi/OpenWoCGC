@@ -972,171 +972,126 @@ void NuRndrFx(s32 paused,struct nuvec_s *playerpos) {
   return;
 }
 
+//40% GCN
+void NuRndrTrail(s32 trailpt,struct trail_s *trail,s32 TRAILCOUNT) {
+    s32 uVar2;
+    s32 uVar5;
+    s32 iVar6;
+    s32 unaff_r15;
+    s32 iVar8;
+    s32 uVar9;
+    s32 iVar10;
+    s32 iVar11;
+    s32 iVar12;
+    s32 iVar13;
 
-/*void NuRndrTrail(int trailpt,struct trail *trail,int TRAILCOUNT)
+    s32 cnt;
+    s32 loop;
+    struct nuvtx_tc1_s *vp [4];
 
-{
-  float fVar1;
-  uint uVar2;
-  undefined4 *puVar3;
-  float fVar4;
-  uint in_r12;
-  uint uVar5;
-  int iVar6;
-  int unaff_r15;
-  uint uVar7;
-  int iVar8;
-  uint uVar9;
-  int iVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  undefined4 *puVar14;
-  undefined4 *puVar15;
-  float *pfVar16;
-  undefined4 *puVar17;
-  nuvec_s local_58;
-  undefined4 *local_4c;
+    
+    //loop = (trailpt + 1) - TRAILCOUNT;
+    iVar8 = 0;
+        //uVar7 = TRAILCOUNT - 1;
+        iVar12 = 0x6c;
+        iVar13 = 0x48;
+        iVar10 = 0x24;
+        iVar11 = 0;
+        uVar2 = -1;
+        for (cnt = 0; cnt < (trailpt + 1) - TRAILCOUNT; cnt++) {
+            uVar9 = trailpt & TRAILCOUNT - 1;
+            if (trail[uVar9].pos1.x != -10000.0f) {
+                uVar9 = -1;
+            }
+            else if (uVar2 == -1) {
+                uVar5 = 0;
+                unaff_r15 = 1;
+            }
+            else {
+                uVar5 = trail[uVar9].intensity;
+                if ((trail[cnt - 2U & TRAILCOUNT - 1].pos1.x == -10000.0f) ||
+                   ((s32)(cnt - 1U) <= (cnt + 1) - TRAILCOUNT)) {
+                    uVar5 = 0;
+                }
+                else if ((trail[cnt - 1U & TRAILCOUNT - 1].pos1.x == -10000.0f) || (unaff_r15 != 0)) {
+                    uVar5 = ((uVar5 >> 0x18) - (uVar5 >> 0x1f)) * 0x800000 & 0xff000000;
+                }
+                vtx_263[iVar11].pnt = trail[uVar2].pos1;
+                //unaff_r15 = 0;
 
-  iVar6 = (trailpt + 1) - TRAILCOUNT;
-  iVar8 = 0;
-  if (iVar6 < trailpt) {
-    uVar7 = TRAILCOUNT - 1;
-    iVar12 = 0x6c;
-    iVar13 = 0x48;
-    iVar10 = 0x24;
-    iVar11 = 0;
-    pfVar16 = (float *)&DAT_801cf13c;
-    uVar2 = 0xffffffff;
-    do {
-      uVar9 = trailpt & uVar7;
-      if (trail[uVar9].pos1.x == -10000.0) {
-        uVar9 = 0xffffffff;
-      }
-      else if (uVar2 == 0xffffffff) {
-        in_r12 = 0;
-        unaff_r15 = 1;
-      }
-      else {
-        uVar5 = trail[uVar9].intensity;
-        if ((trail[trailpt - 1U & uVar7].pos1.x == -10000.0) || ((int)(trailpt - 1U) <= iVar6)) {
-          uVar5 = 0;
+                (vtx_263[cnt].pnt) = trail[uVar9].pos1;
+
+                vtx_263[iVar13].pnt.x = (trail[uVar2].pos2.x - trail[uVar2].pos1.x) * 0.25f + trail[uVar2].pos1.x;
+                
+                vtx_263[iVar13].pnt.y = (trail[uVar2].pos2.y - trail[uVar2].pos1.y) * 0.25f + trail[uVar2].pos1.y;
+                
+                vtx_263[iVar13].pnt.z = (trail[uVar2].pos2.z - trail[uVar2].pos1.z) * 0.25f + trail[uVar2].pos1.z;
+                
+                 vtx_263[iVar12].nrm.x = (trail[uVar9].pos2.x - trail[uVar9].pos1.x) * 0.25f + trail[uVar9].pos1.x;
+                
+                vtx_263[iVar12].nrm.y = (trail[uVar9].pos2.y - trail[uVar9].pos1.y) * 0.25f + trail[uVar9].pos1.y;
+                
+                vtx_263[iVar12].nrm.z = (trail[uVar9].pos2.z - trail[uVar9].pos1.z) * 0.25f + trail[uVar9].pos1.z;
+
+                
+                if (-1 > uVar5) {
+                    vtx_263[iVar11].diffuse = -uVar5;
+                    vtx_263[iVar13].diffuse = 0;
+                }
+                else {
+                    vtx_263[iVar11].diffuse = uVar5 + 0xffffff;
+                    vtx_263[iVar13].diffuse = 0xffffff;
+                }
+                if (uVar5 < 0) {
+                    vtx_263[iVar10].diffuse = -uVar5;
+                    vtx_263[iVar12].diffuse = 0;
+                }
+                else {
+                    vtx_263[iVar10].diffuse = uVar5 + 0xffffff;
+                    vtx_263[iVar12].diffuse = 0xffffff;
+                }
+                vtx_263[iVar11++].pnt = trail[uVar2].pos2;
+                vtx_263[iVar11++].pnt = trail[uVar9].pos2;
+                vtx_263[iVar13].pnt.x =
+                     (trail[uVar2].pos1.x - trail[uVar2].pos2.x) * 0.25f + trail[uVar2].pos2.x;
+                vtx_263[iVar13].pnt.y =
+                     (trail[uVar2].pos1.y - trail[uVar2].pos2.y) * 0.25f + trail[uVar2].pos2.y;
+                vtx_263[iVar13].pnt.z = 
+                     (trail[uVar2].pos1.z - trail[uVar2].pos2.z) * 0.25f + trail[uVar2].pos2.z;
+                vtx_263[iVar12].nrm.x =
+                     (trail[uVar9].pos1.x - trail[uVar9].pos2.x) * 0.25f + trail[uVar9].pos2.x;
+                vtx_263[iVar12].nrm.y =
+                     (trail[uVar9].pos1.y - trail[uVar9].pos2.y) * 0.25f + trail[uVar9].pos2.y;
+                vtx_263[iVar12].nrm.z =
+                     (trail[uVar9].pos1.z - trail[uVar9].pos2.z) * 0.25f + trail[uVar9].pos2.z;
+                if (-1 > (s32)uVar5) {
+                    vtx_263[iVar11].diffuse = 0xfffff - uVar5;
+                }
+                else {
+                    vtx_263[iVar11].diffuse = uVar5;
+                }
+                if (-1 > (s32)uVar5) {
+                    vtx_263[iVar10].diffuse = 0xffffff - uVar5;
+                }
+                else {
+                    vtx_263[iVar10].diffuse = uVar5;
+                }
+                iVar12 = iVar12 + 0x120;
+                iVar13 = iVar13 + 0x120;
+                iVar10 = iVar10 + 0x120;
+                iVar11 = iVar11 + 0x120;
+                iVar8 = iVar8 + 4;
+            }
+            uVar2 = uVar9;
         }
-        else if ((trail[trailpt - 2U & uVar7].pos1.x == -10000.0) || (unaff_r15 != 0)) {
-          uVar5 = (((int)uVar5 >> 0x18) - ((int)uVar5 >> 0x1f)) * 0x800000 & 0xff000000;
-        }
-        fVar4 = trail[uVar2].pos1.y;
-        fVar1 = trail[uVar2].pos1.z;
-        *(float *)((int)&vtx.263 + iVar11) = trail[uVar2].pos1.x;
-        *(float *)((int)&DAT_801cf120 + iVar11) = fVar1;
-        *(float *)((int)&DAT_801cf11c + iVar11) = fVar4;
-        unaff_r15 = 0;
-        fVar1 = trail[uVar9].pos1.y;
-        fVar4 = trail[uVar9].pos1.z;
-        *pfVar16 = trail[uVar9].pos1.x;
-        pfVar16[1] = fVar1;
-        pfVar16[2] = fVar4;
-        fVar1 = trail[uVar2].pos1.x;
-        *(float *)((int)&vtx.263 + iVar13) = (trail[uVar2].pos2.x - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar2].pos1.y;
-        *(float *)((int)&DAT_801cf11c + iVar13) = (trail[uVar2].pos2.y - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar2].pos1.z;
-        *(float *)((int)&DAT_801cf120 + iVar13) = (trail[uVar2].pos2.z - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos1.x;
-        *(float *)((int)&vtx.263 + iVar12) = (trail[uVar9].pos2.x - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos1.y;
-        *(float *)((int)&DAT_801cf11c + iVar12) = (trail[uVar9].pos2.y - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos1.z;
-        *(float *)((int)&DAT_801cf120 + iVar12) = (trail[uVar9].pos2.z - fVar1) * 0.25 + fVar1;
-        if (-1 < (int)in_r12) {
-          *(uint *)((int)&DAT_801cf130 + iVar11) = in_r12 + 0xffffff;
-          *(undefined4 *)((int)&DAT_801cf130 + iVar13) = 0xffffff;
-        }
-        else {
-          *(uint *)((int)&DAT_801cf130 + iVar11) = -in_r12;
-          *(undefined4 *)((int)&DAT_801cf130 + iVar13) = 0;
-        }
-        if (-1 < (int)uVar5) {
-          *(uint *)((int)&DAT_801cf130 + iVar10) = uVar5 + 0xffffff;
-          *(undefined4 *)((int)&DAT_801cf130 + iVar12) = 0xffffff;
-        }
-        else {
-          *(uint *)((int)&DAT_801cf130 + iVar10) = -uVar5;
-          *(undefined4 *)((int)&DAT_801cf130 + iVar12) = 0;
-        }
-        fVar4 = trail[uVar2].pos2.z;
-        fVar1 = trail[uVar2].pos2.y;
-        *(float *)((int)&DAT_801cf1a8 + iVar11) = trail[uVar2].pos2.x;
-        *(float *)((int)&DAT_801cf1b0 + iVar11) = fVar4;
-        *(float *)((int)&DAT_801cf1ac + iVar11) = fVar1;
-        fVar4 = trail[uVar9].pos2.z;
-        fVar1 = trail[uVar9].pos2.y;
-        pfVar16[0x24] = trail[uVar9].pos2.x;
-        pfVar16[0x25] = fVar1;
-        pfVar16[0x26] = fVar4;
-        fVar1 = trail[uVar2].pos2.x;
-        *(float *)((int)&DAT_801cf1a8 + iVar13) = (trail[uVar2].pos1.x - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar2].pos2.y;
-        *(float *)((int)&DAT_801cf1ac + iVar13) = (trail[uVar2].pos1.y - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar2].pos2.z;
-        *(float *)((int)&DAT_801cf1b0 + iVar13) = (trail[uVar2].pos1.z - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos2.x;
-        *(float *)((int)&DAT_801cf1a8 + iVar12) = (trail[uVar9].pos1.x - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos2.y;
-        *(float *)((int)&DAT_801cf1ac + iVar12) = (trail[uVar9].pos1.y - fVar1) * 0.25 + fVar1;
-        fVar1 = trail[uVar9].pos2.z;
-        *(float *)((int)&DAT_801cf1b0 + iVar12) = (trail[uVar9].pos1.z - fVar1) * 0.25 + fVar1;
-        if (-1 < (int)in_r12) {
-          *(uint *)((int)&DAT_801cf1c0 + iVar11) = in_r12;
-          *(undefined4 *)((int)&DAT_801cf1c0 + iVar13) = 0;
-        }
-        else {
-          *(uint *)((int)&DAT_801cf1c0 + iVar11) = 0xfffff - in_r12;
-          *(undefined4 *)((int)&DAT_801cf1c0 + iVar13) = 0xffffff;
-        }
-        if (-1 < (int)uVar5) {
-          *(uint *)((int)&DAT_801cf1c0 + iVar10) = uVar5;
-          *(undefined4 *)((int)&DAT_801cf1c0 + iVar12) = 0;
-        }
-        else {
-          *(uint *)((int)&DAT_801cf1c0 + iVar10) = 0xffffff - uVar5;
-          *(undefined4 *)((int)&DAT_801cf1c0 + iVar12) = 0xffffff;
-        }
-        iVar12 = iVar12 + 0x120;
-        iVar13 = iVar13 + 0x120;
-        pfVar16 = pfVar16 + 0x48;
-        iVar10 = iVar10 + 0x120;
-        iVar11 = iVar11 + 0x120;
-        iVar8 = iVar8 + 8;
-        in_r12 = uVar5;
-      }
-      trailpt = trailpt - 1;
-      uVar2 = uVar9;
-    } while (iVar6 < trailpt);
-  }
-  if (iVar8 != 0) {
-    iVar6 = 0;
-    if (0 < iVar8 + -4) {
-      puVar3 = &vtx.263;
-      puVar14 = &DAT_801cf184;
-      puVar17 = &DAT_801cf13c;
-      local_58.z = (float)&DAT_801cf160;
-      do {
-        iVar6 = iVar6 + 4;
-        puVar15 = (undefined4 *)((int)local_58.z + 0x90);
-        local_58.x = (float)puVar3;
-        local_58.y = (float)puVar17;
-        local_4c = puVar14;
-        NuRndrStrip3d(&local_58,NuLightAddMat,0,4);
-        puVar14 = puVar14 + 0x24;
-        puVar17 = puVar17 + 0x24;
-        puVar3 = puVar3 + 0x24;
-        local_58.z = (float)puVar15;
-      } while (iVar6 < iVar8 + -4);
+    if (iVar8 != 0) {
+            for (iVar6 = 0; iVar6 <= iVar8; iVar6++) {
+                vp[iVar6] = &vtx_263[iVar6];
+                NuRndrStrip3d(&vp[iVar6],NuLightAddMat,0,4);
+            }
     }
-  }
-  return;
-}*/
+    return;
+}
 
 //MATCH GCN
 void NuRndrWaterRip(struct numtl_s *mtl) {
