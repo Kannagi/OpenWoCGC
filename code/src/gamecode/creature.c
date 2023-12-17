@@ -1,6 +1,9 @@
-void ResetPlayer(int set)
+#include "gamecode/creature.h"
 
-{
+s32 gamecut; //cut.c
+
+/*
+void ResetPlayer(int set) {
   bool bVar1;
   float fVar2;
   float fVar3;
@@ -14,7 +17,7 @@ void ResetPlayer(int set)
   creature_s *c;
   creature_s *plr;
   short veh;
-  
+
   if (PLAYERCOUNT == 0) goto LAB_8001763c;
   if (set != 0) {
     if ((Level != 0x11) || (cp_iALONG < 0x6b)) {
@@ -170,11 +173,9 @@ LAB_8001763c:
 }
 
 
-void ResetPlayerMoves(creature_s *c)
-
-{
+void ResetPlayerMoves(creature_s *c) {
   float fVar1;
-  
+
   c->crawl = '\0';
   c->crawl_lock = '\x01';
   c->jump = '\0';
@@ -214,24 +215,20 @@ void ResetPlayerMoves(creature_s *c)
   (c->obj).SCALE = 1.0;
   return;
 }
-
-void RemoveCreature(creature_s *c)
-
-{
-  RemoveGameObject(&c->obj);
+*/
+void RemoveCreature(struct creature_s *c) {
+  //RemoveGameObject(&c->obj);
   c->used = '\0';
   return;
 }
 
-
-void CloseCreatures(void)
-
-{
+/*
+void CloseCreatures(void) {
   NUHGOBJ_s *hgobj;
   int i;
   creature_s *c;
   int j;
-  
+
   i = 0;
   c = Character;
   j = 9;
@@ -280,7 +277,7 @@ void ManageCreatures(void)
   double dVar14;
   double dVar15;
   float fVar16;
-  
+
   pcVar6 = player;
   if ((Level == 0x25) || (fVar16 = AIVISRANGE, (LDATA->flags & 0x202) != 0)) {
     fVar16 = (float)((double)CONCAT44(0x43300000,(uint)LDATA->farclip) - 4503599627370496.0);
@@ -529,7 +526,7 @@ LAB_80017f48:
   }
   return;
 }
-
+*/
 
 //PS2
 float ModelAnimDuration(u32 character,u32 action,float start,float end)
@@ -541,19 +538,19 @@ float ModelAnimDuration(u32 character,u32 action,float start,float end)
     if ((character > 0xBE) || (action > 0x75)){
         return 1.0f;
     }
-    
+
     index = CRemap[character];
     if(index == -1)
-    { 
+    {
         return 1.0f;
     }
-    
+
     model = &CModel[index];
     if(model->anmdata[action] == NULL)
-    { 
+    {
         return 1.0f;
     }
-    
+
     t = model->anmdata[action]->time;
     if ((start >= 1.0f) && (start < t))
     {
@@ -576,19 +573,20 @@ float ModelAnimDuration(u32 character,u32 action,float start,float end)
     return t * (1.0f / model->animlist[action]->speed) * 0.033333335f;
 }
 
+volatile int crash_loaded; //main.c
 
 //95% NGC
 s32 LoadCharacterModel(s32 character, s32 level, s32* cmodel_index, s32 clist_entry, s32* remap) {
     s32 k;
     s32 iVar2;
     struct CharacterModel* model;
-    struct AnimList* anim;
+    struct animlist* anim;
     s32 cnt;
     char path[64];
     struct cdata_s* cdata;
     struct {
         s32 character;
-        struct AnimList animlist[5];
+        struct animlist animlist[5];
     } * space;
 
     model = &CModel[*cmodel_index];
@@ -687,14 +685,14 @@ s32 LoadCharacterModel(s32 character, s32 level, s32* cmodel_index, s32 clist_en
     }
     return 0;
 }
-
+/*
 void PurgeCharacterModels(void)
 
 {
   CharacterModel *Cmodel;
   int i;
   int iVar1;
-  
+
   iVar1 = 0xbf;
   i = 0;
   do {
@@ -710,7 +708,7 @@ void PurgeCharacterModels(void)
   } while (-0x7fdac125 < (int)Cmodel);
   return;
 }
-
+*/
 //92%
 void LoadCharacterModels(void) {
     s32 i;
@@ -723,14 +721,14 @@ void LoadCharacterModels(void) {
     s32 clist_entry;
     s32 remap;
 
-    
+
     if(CModel[0].hobj != NULL)
     {
         clist_entry = 1;
     } else {
         clist_entry = 0;
     }
-    
+
     if (Level == 0x28) {
         space = (struct space_s *)SpaceGameCutTab[0][gamecut * 2];
     }
@@ -748,24 +746,24 @@ void LoadCharacterModels(void) {
                 // j = i << 5;
                 // j &= 0xFFFFFFF0;
                 // character = ((s32*)space)[j];
-                
+
                 character = space[i].character;
             }
             else {
                 character = LDATA->clist[i];
             }
-            
+
             if ((character == 0x1b) || (character == 0x86)) {
                 force_decal = 1;
             }
-            if (LoadCharacterModel(character, Level, &cmodel_index, i, &remap) == 0) 
+            if (LoadCharacterModel(character, Level, &cmodel_index, i, &remap) == 0)
             {
                 break;
             }
             i++;
         }
     }
-    
+
     CrashMoveInfo.JUMPLANDFRAMES   = ModelAnimDuration(0,   0x30, 0.0f, 0.0f) * 60.0f;
     CrashMoveInfo.SLAMWAITFRAMES   = ModelAnimDuration(0,   0x1f, 0.0f, 0.0f) * 60.0f;
     CrashMoveInfo.SOMERSAULTFRAMES = ModelAnimDuration(0,   0x44, 0.0f, 0.0f) * 60.0f;
@@ -779,7 +777,7 @@ void LoadCharacterModels(void) {
     MineCartMoveInfo.JUMPFRAMES0   = ModelAnimDuration(0x89,  99, 0.0f, 0.0f) * 60.0f;
     return;
 }
-
+/*
 void ChangeCharacter(creature_s *c,int character)
 
 {
@@ -788,7 +786,7 @@ void ChangeCharacter(creature_s *c,int character)
   float y;
   bool check;
   float radius;
-  
+
   if (((uint)character < 0xbf) && (CRemap[character] != -1)) {
     cht = (short)character;
     (c->obj).character = cht;
@@ -839,7 +837,7 @@ void PlayerStartPos(creature_s *c,nuvec_s *pos)
   int lev;
   float v000_x;
   float v000_y;
-  
+
   lev = Level;
   hdg = cutang_CRASH;
   v000_y = v000.y;
@@ -913,7 +911,7 @@ int AddCreature(int character,int index,int i_aitab)
   int adv;
   uchar livesD;
   uchar wumpasD;
-  
+
   if (((((uint)index < 9) && ((uint)character < 0xbf)) &&
       ((i_aitab == -1 || (character == AIType[(byte)AITab[i_aitab].ai_type].character)))) &&
      (CRemap[character] != -1)) {
@@ -1044,7 +1042,7 @@ void TerrainFailsafe(obj_s *obj)
 {
   bool check;
   float Y;
-  
+
   Y = SAFEY;
   if (obj->shadow != 2000000.0) {
     return;
@@ -1074,7 +1072,7 @@ int NewCharacterIdle(creature_s *c,CharacterModel *model)
   undefined4 local_208;
   undefined4 local_30;
   uint uStack_2c;
-  
+
   if (GameMode == 1) {
 LAB_80019374:
     iVar5 = 0;
@@ -1188,7 +1186,7 @@ void UpdateCharacterIdle(creature_s *c,int character)
   int i;
   short action;
   float wait;
-  
+
   i = (int)CRemap[character];
   if (i != -1) {
     if (((c->obj).anim.newaction != 0x22) ||
@@ -1256,7 +1254,7 @@ void NewRumble(rumble_s *rumble,int power)
 
 {
   uchar frame;
-  
+
   if ((rumble->frame != 0) &&
      (power <= (int)(((uint)rumble->power * (uint)rumble->frame) / (uint)rumble->frames))) {
     return;
@@ -1291,7 +1289,7 @@ void ProcessCreatures(void)
   nuvec_s pos;
   int i;
   float radius;
-  
+
   if (FRAME == 0) {
     tbslotBegin(app_tbset,5);
   }
@@ -1390,7 +1388,7 @@ void ProcessCreatures(void)
   }
   return;
 }
-
+*/
 //NGC MATCH
 void EvalModelAnim(struct CharacterModel *model,struct anim_s *anim,struct numtx_s *m,struct numtx_s *tmtx, float ***dwa, struct numtx_s *mLOCATOR) {
     short layertab [2] = {0, 1};
@@ -1404,7 +1402,7 @@ void EvalModelAnim(struct CharacterModel *model,struct anim_s *anim,struct numtx
     } else {
         nlayers = 1;
     }
-    
+
     if (anim->blend != 0 &&
         (anim->blend_src_action <= 0x75U && model->fanmdata[anim->blend_src_action]) &&
             (anim->blend_dst_action <= 0x75U && model->fanmdata[anim->blend_dst_action])) {
@@ -1415,31 +1413,31 @@ void EvalModelAnim(struct CharacterModel *model,struct anim_s *anim,struct numtx
     } else {
         *dwa = NULL;
     }
-    
+
     if (anim->blend != 0 &&
             (anim->blend_src_action <= 0x75U && model->anmdata[anim->blend_src_action]) &&
             (anim->blend_dst_action <= 0x75U && model->anmdata[anim->blend_dst_action])) {
-        
-        NuHGobjEvalAnimBlend(model->hobj, model->anmdata[anim->blend_src_action], 
-                anim->blend_src_time, model->anmdata[anim->blend_dst_action], 
-                anim->blend_dst_time, (float)anim->blend_frame / anim->blend_frames, 
+
+        NuHGobjEvalAnimBlend(model->hobj, model->anmdata[anim->blend_src_action],
+                anim->blend_src_time, model->anmdata[anim->blend_dst_action],
+                anim->blend_dst_time, (float)anim->blend_frame / anim->blend_frames,
                 0, NULL, tmtx);
         temp_action = anim->blend_dst_action; // needs to get merged
         temp_time = anim->blend_dst_time;
-        
+
     } else if (anim->blend == 0 &&
             (anim->action <= 0x75U && model->anmdata[anim->action])) {
-        
-        NuHGobjEvalAnim(model->hobj, model->anmdata[anim->action], anim->anim_time, 
+
+        NuHGobjEvalAnim(model->hobj, model->anmdata[anim->action], anim->anim_time,
                 0, NULL, tmtx);
         temp_action = anim->action; // needs to get merged
         temp_time = anim->anim_time;
-        
+
     } else {
         NuHGobjEval(model->hobj, 0, 0, tmtx);
         temp_action = -1;
     }
-    
+
     if (mLOCATOR == NULL) return;
     for(i = 0; i < 0x10; i++) {
         if (model->pLOCATOR[i] != NULL) {
@@ -1450,11 +1448,11 @@ void EvalModelAnim(struct CharacterModel *model,struct anim_s *anim,struct numtx
 
 
 //NGC MATCH
-void StoreLocatorMatrices(struct CharacterModel *model,struct numtx_s *mC,struct numtx_s *tmtx,struct numtx_s *mtx,struct NuVec *mom) {
-  struct NuVec oldpos;
+void StoreLocatorMatrices(struct CharacterModel *model,struct numtx_s *mC,struct numtx_s *tmtx,struct numtx_s *mtx,struct nuvec_s *mom) {
+  struct nuvec_s oldpos;
   s32 i;
   struct numtx_s m;
-  
+
   if (mtx != NULL) {
     for(i = 0; i < 0x10; i++) {
       if (model->pLOCATOR[i] != NULL) {
@@ -1474,7 +1472,7 @@ void StoreLocatorMatrices(struct CharacterModel *model,struct numtx_s *mC,struct
   return;
 }
 
-
+/*
 
 int DrawCharacterModel(CharacterModel *model,anim_s *anim,numtx_s *mC,numtx_s *mS,int render,
                       numtx_s *mR,numtx_s *loc_mtx,nuvec_s *loc_mom,obj_s *obj)
@@ -1496,7 +1494,7 @@ int DrawCharacterModel(CharacterModel *model,anim_s *anim,numtx_s *mC,numtx_s *m
   short *local_58;
   uint uStack_54;
   int numjoints;
-  
+
   iVar5 = 0;
   local_70 = (short *)0x1;
   if (jeep_draw == 0) {
@@ -1681,7 +1679,7 @@ void UpdateAnimPacket(CharacterModel *mod,anim_s *anim,float dt,float xz_distanc
   int iVar6;
   uint uVar7;
   int iVar9;
-  
+
   if (mod == (CharacterModel *)0x0) {
     return;
   }
@@ -1871,7 +1869,7 @@ void DrawCreatures(creature_s *c,int count,int render,int shadow)
   numtx_s local_118;
   CharacterModel *Cmod [2];
   numtx_s local_d0;
-  
+
   if ((((((DRAWCREATURESHADOWS == 0) || (Level == 0x1d)) || (Level == 0x24)) ||
        ((Level == 0x1e && (level_part_2 != 0)))) || (Level == 0x1a)) ||
      ((((LDATA->flags & 0x1000) != 0 || (VEHICLECONTROL == 2)) ||
@@ -2730,7 +2728,7 @@ void MovePlayer(creature_s *plr,nupad_s *pad)
   ushort local_90 [20];
   double local_68;
   uint local_60;
-  
+
   local_60 = (uint)(in_cr0 & 0xf) << 0x1c | (uint)(in_cr1 & 0xf) << 0x18 |
              (uint)(in_cr2 & 0xf) << 0x14 | (uint)(in_cr3 & 0xf) << 0x10 |
              (uint)(unaff_cr4 & 0xf) << 0xc | (uint)(in_cr5 & 0xf) << 8 | (uint)(in_cr6 & 0xf) <<  4
@@ -4563,3 +4561,4 @@ LAB_8001ce44:
   }
   return;
 }
+*/

@@ -1,8 +1,11 @@
 #ifndef PORT_H
 #define PORT_H
 
-#include "gs.h"
 #include "system/gs.h"
+#include "nuxbox/nuxboxtypes.h"
+#include "nu3dx/nuhaze.h"
+#include "nu3dx/nuwater.h"
+#include "nu3dx/nucamera.h"
 
 enum shadertypes_e
 {
@@ -73,6 +76,13 @@ struct _SHADERTYPE
     s32 pixelShaderHandle; // Offset: 0x4, DWARF: 0xD82046
 };
 
+s32 IsGlassObj;
+s32 IsWaterObj;
+enum shadertypes_e currentshader;
+enum shadertypes_e currentvtxtype;
+s32 ShaderHasNormals;
+s32 xytype;
+s32 shaderselected;
 s32 IsLoadingScreen;
 struct _SHADERTYPE Shaders[35];
 s32 ForceShader;
@@ -92,6 +102,28 @@ struct _GS_VECTOR4 CV_LIGHT2_COLOR;
 struct _GS_VECTOR4 CV_LIGHT2_POS;
 struct _GS_VECTOR4 CV_LIGHT3_COLOR;
 struct _GS_VECTOR4 CV_LIGHT3_POS;
-
+struct _GSMATRIX CV_WORLDVIEWPROJ;
+struct _GS_VECTOR4 CV_CONSTANTS;
+struct _GS_VECTOR4 CV_EYE_POSITION;
+struct _GS_VECTOR4 CV_LIGHT_DIRECTION;
+struct _GS_VECTOR4 CV_LIGHT_POSITION;
+struct _GS_VECTOR4 CV_SCREENSPACE_OFFSET;
+struct _GS_VECTOR4 CV_SCREEN_PARAMS;
+struct _GS_VECTOR4 CV_SHADER_PARAMS;
+struct _GSMATRIX CV_WORLDVIEW;
+struct _GSMATRIX33 CV_WORLDVIEWIT;
+struct _GSMATRIX CV_WORLD_0;
+struct _GS_VECTOR4 CV_WOBBLETABLE_START[32];
+static struct numtx_s matView;
+static struct numtx_s matProj;
+static struct numtx_s matWorld;
+static struct numtx_s matWorldView;
+static struct numtx_s matWorldViewProj;
+static struct numtx_s matViewProj;
+static struct numtx_s invWorld;
+static struct numtx_s invWorldView;
+static struct _GSMATRIX GS_LightViewMat;
+static struct _GSMATRIX GS_LightMat;
+static float refract;
 
 #endif // !PORT_H

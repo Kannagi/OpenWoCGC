@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "nu3dxtypes.h"
+#include "system/port.h"
 
 /*
   800b031c 0000b8 800b031c  4 NuHazeCreateDepthTexture 	Global
@@ -11,5 +12,9 @@
   800b0680 000050 800b0680  4 NuHazeSetHazeConstants 	Global
   800b06d0 000028 800b06d0  4 NuLigthSetPolyHazeMat 	Global
 */
+
+struct numtl_s* haze_mtl;
+struct numtl_s* depthMtl;
+
 
 #endif // !NUHAZE_H

@@ -11,6 +11,7 @@ struct ldata_s* LDATA;
 char tbuf[128];
 char LevelFileName[32];
 s32 pause_dir;
+s32 LIGHTMASK;
 unsigned int pausestats_frame;
 
 struct remember {
@@ -96,6 +97,38 @@ struct game_s {
 };
 
 struct game_s Game;
+
+// Size: 0x58
+struct ldata_s {
+    char * filepath;
+    u8 * clist; /* modelList */
+    struct pCHASE * pChase;
+    u32 time[3];
+    short music[2];
+    struct pSFX * pSFX;
+    short nSFX;
+    char pad1;
+    char hub;
+    u16 flags;
+    short character;
+    short vehicle;
+    u16 farclip;
+    struct nuvec_s vSTART;
+    struct nuvec_s vBONUS;
+    float fognear;
+    float fogfar;
+    u8 fogr;
+    u8 fogg;
+    u8 fogb;
+    u8 foga;
+    u8 hazer;
+    u8 hazeg;
+    u8 hazeb;
+    u8 hazea;
+    int totalsize;
+};
+
+struct ldata_s* LDATA;
 
 // Size: 0x14
 struct GTimer

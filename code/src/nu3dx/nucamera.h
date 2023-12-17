@@ -106,7 +106,7 @@ f32 NuCameraDistSqr(struct nuvec_s* point);
 // Fix the axes of a matrix.
 void FixAxes(struct numtx_s* m);
 
-// SetProjectionMatrix
+static void SetProjectionMatrix(struct numtx_s* mtx, float fFOV, float fAspect, float fNearPlane, float fFarPlane);
 
 // Enable or disable camera clipping.
 void NuCameraEnableClipping(s32 enable);

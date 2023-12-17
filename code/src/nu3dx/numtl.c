@@ -58,14 +58,14 @@ void NuMtlClose(void) {
   struct nusysmtl_s *sm;
   struct nusysmtl_s *next;
 
-    if (initialised_N1 != 0) {
+    if (initialised != 0) {
         sm = smlist;
         while (sm != NULL) {
             next = sm->next;
             NuMtlDestroy(&sm->mtl);
             sm = next;
         }
-        initialised_N1 = 0;
+        initialised = 0;
     }
     return;
 }

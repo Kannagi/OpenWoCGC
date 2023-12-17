@@ -1,12 +1,12 @@
 #include "nuvec4.h"
 #include "numtx.h"
 
-void NuVec4Scale(f32 scale, struct nuvec4_s* dest, struct nuvec4_s* v)
+void NuVec4Scale(struct nuvec4_s* v, struct nuvec4_s* dest, f32 k)
 {
-	dest->x = v->x * scale;
-	dest->y = v->y * scale;
-	dest->z = v->z * scale;
-	dest->w = v->w * scale;
+	dest->x = v->x * k;
+	dest->y = v->y * k;
+	dest->z = v->z * k;
+	dest->w = v->w * k;
 }
 
 void NuVec4MtxTransform(struct nuvec4_s* dest, struct nuvec4_s* a, struct Mtx* b)

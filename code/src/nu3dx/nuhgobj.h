@@ -56,9 +56,11 @@ struct NUHGOBJ_s
 };
 
 
+
 static struct NUHGOBJ_s* NuHGobjCreate(void);
 struct NUHGOBJ_s* NuHGobjLoad(char* file);
 static void ReadNuIFFHGobj(s32 handle, struct NUHGOBJ_s *hgobj);
+static void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj);
 
 
 #endif // !NUHGOBJ_H

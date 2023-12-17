@@ -382,7 +382,7 @@ void GS_SetProjectionMatrix(struct _GSMATRIX *pMatrix) {
     float pMtx[4][4]; // 0x8(r1)
     float mMtx[4][3]; // 0x48(r1)
 
-    GS_MatProjection = *pMatrix;
+    //GS_MatProjection = (float [4][4]*)*pMatrix;
     //C_MTXPerspective((float **)pMtx,40.0f,1.428571f,0.3f,1000.0f);
     //GXSetProjection((const float **)pMtx,GX_PERSPECTIVE);
     return;
@@ -500,42 +500,17 @@ void GS_LoadMatrix(struct _GSMATRIX *Matrix)
   //GXSetCurrentMtx(0);
   return;
 }
+*/
 
-void GS_SetViewMatrix(struct _GSMATRIX *a)
-
-{
-   struct _GSMATRIX *p_Var1;
-  struct _GSMATRIX *p_Var2;
-  struct _GSMATRIX *p_Var3;
-  int iVar4;
-  struct _GSMATRIX *p_Var5;
-
-  iVar4 = 0x30;
-  p_Var1 = &GS_MatView;
-  p_Var2 = a;
-  do {
-    p_Var5 = p_Var2;
-    p_Var3 = p_Var1;
-    iVar4 = iVar4 + -0x18;
-    p_Var3->_00 = p_Var5->_00;
-    p_Var3->_01 = p_Var5->_01;
-    p_Var3->_02 = p_Var5->_02;
-    p_Var3->_03 = p_Var5->_03;
-    p_Var3->_10 = p_Var5->_10;
-    p_Var3->_11 = p_Var5->_11;
-    p_Var1 = (struct _GSMATRIX *)&p_Var3->_12;
-    p_Var2 = (struct _GSMATRIX *)&p_Var5->_12;
-  } while (iVar4 != 0);
-  p_Var3->_12 = p_Var5->_12;
-  p_Var3->_13 = p_Var5->_13;
-  p_Var3->_20 = p_Var5->_20;
-  p_Var3->_21 = p_Var5->_21;
-  //SetIdentity(&GS_ViewIdentity);
-  //MatMult(&GS_ViewIdentity,a);
-  //MatReorder(&GS_ViewIdentity);
+//NGC MATCH
+void GS_SetViewMatrix(struct _GSMATRIX *a) {
+  *(struct _GSMATRIX *)GS_MatView = *a;
+  SetIdentity(&GS_ViewIdentity);
+  MatMult(&GS_ViewIdentity,a);
+  MatReorder(&GS_ViewIdentity);
   return;
 }
-*/
+
 void GS_LoadWorldMatrixIdentity(void)
 
 {

@@ -194,7 +194,7 @@ static void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
     s32 nshadow_data;
     s32 bytes;
     struct NUSHADOWDATA_s* shadow_data;
-    
+
     hgobj->num_joints = NuFileReadChar(fh);
     if (hgobj->num_joints != 0) {
         hgobj->joints = NuMemAlloc(hgobj->num_joints * sizeof(struct NUJOINTDATA_s));
@@ -208,7 +208,7 @@ static void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
             NuFileRead(fh, &hgobj->T[i], sizeof(struct numtx_s));
             NuFileRead(fh, &hgobj->INV_WT[i], sizeof(struct numtx_s));
             NuFileRead(fh, &hgobj->joints[i].orient, sizeof(struct numtx_s));
-            NuFileRead(fh, &hgobj->joints[i].locator_offset, sizeof(struct NuVec));
+            NuFileRead(fh, &hgobj->joints[i].locator_offset, sizeof(struct nuvec_s));
             hgobj->joints[i].parent_ix = NuFileReadChar(fh);
             str_ix = NuFileReadInt(fh);
             if (str_ix != 0) {
@@ -283,7 +283,7 @@ static void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
             hgobj->shadow_data[nshadow_data].joint = 0xFF;
             for (i = 0; i < nshadow_data; i++) {
                 shadow_data = &hgobj->shadow_data[i];
-                
+
                 shadow_data->ellipsoids = NULL;
                 shadow_data->shadow_meshes = NULL;
                 shadow_data->cylinders = NULL;
@@ -317,7 +317,7 @@ static void ReadNuIFFHGobjSet(s32 fh, struct NUHGOBJ_s* hgobj) {
                         bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
                         shadow_data->shadow_meshes[j].normals = NuMemAlloc(bytes);
                         NuFileRead(fh, shadow_data->shadow_meshes[j].normals, bytes);
-                        
+
                         bytes = NuFileReadInt(fh) * sizeof(struct nuvec4_s);
                         shadow_data->shadow_meshes[j].verts = NuMemAlloc(bytes);
                         NuFileRead(fh, shadow_data->shadow_meshes[j].verts, bytes);

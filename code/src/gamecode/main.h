@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "../nu.h"
+#include "nu3dx.h"
 #include "gamecode/creature.h"
 #include "gamecode/game.h"
 #include "gamecode/font3d.h"
@@ -14,6 +15,9 @@ s32 SHEIGHT;
 struct nugscn_s* world_scene[32];
 struct nuscene_s* world_scene2[32];
 s32 iss3cmp;
+s32 USELIGHTS;
+struct numtx_s tmtx[256];
+s32 CurrentCausticTexture;
 
 void Text3D2 (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);
 void Text3D (char * txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour);
@@ -60,35 +64,6 @@ struct pCHASE {
     short action[6];
     float scale[6];
     float duration;
-};
-
-struct ldata_s {
-    char * filepath;
-    u8 * cList; /* modelList */
-    struct pCHASE * pChase;
-    u32 time[3];
-    short music[2];
-    struct pSFX * pSFX;
-    short nSFX;
-    char pad1;
-    char hub;
-    u16 flags;
-    short character;
-    short vehicle;
-    u16 farclip;
-    struct nuvec_s vSTART;
-    struct nuvec_s vBONUS;
-    float fognear;
-    float fogfar;
-    u8 fogr;
-    u8 fogg;
-    u8 fogb;
-    u8 foga;
-    u8 hazer;
-    u8 hazeg;
-    u8 hazeb;
-    u8 hazea;
-    int totalsize;
 };
 
 
@@ -251,7 +226,6 @@ struct PData {
 };
 
 typedef struct PlrEvent PlrEvent, *PPlrEvent;
-
 
 struct PlrEvent {
     struct nugspline_s * spl;

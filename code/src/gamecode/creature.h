@@ -3,36 +3,87 @@
 
 #include "../types.h"
 #include "../nu.h"
-#include "gamecode/main.h"
 #include "nu3dx/nu3dxtypes.h"
+#include "nuxbox/nuxboxtypes.h"
+#include "gamecode/font3d.h"
 
+void* SpaceGameCutTab[2][26];
+unsigned char CLetter[191];
+float temp_time;
+s32 temp_action;
 
-
-struct pdir_s {
-    int Index;
-    struct nuvec_s Direction;
-    struct nucolour3_s Colour;
-    float Distance;
+struct MoveInfo {
+    // total size: 0x48
+    float IDLESPEED; // offset 0x0, size 0x4
+    float TIPTOESPEED; // offset 0x4, size 0x4
+    float WALKSPEED; // offset 0x8, size 0x4
+    float RUNSPEED; // offset 0xC, size 0x4
+    float SPRINTSPEED; // offset 0x10, size 0x4
+    float SLIDESPEED; // offset 0x14, size 0x4
+    float CRAWLSPEED; // offset 0x18, size 0x4
+    float DANGLESPEED; // offset 0x1C, size 0x4
+    float WADESPEED; // offset 0x20, size 0x4
+    float JUMPHEIGHT; // offset 0x24, size 0x4
+    float DANGLEGAP; // offset 0x28, size 0x4
+    short JUMPFRAMES0; // offset 0x2C, size 0x2
+    short JUMPFRAMES1; // offset 0x2E, size 0x2
+    short JUMPFRAMES2; // offset 0x30, size 0x2
+    short STARJUMPFRAMES; // offset 0x32, size 0x2
+    short SOMERSAULTFRAMES; // offset 0x34, size 0x2
+    short SPINFRAMES; // offset 0x36, size 0x2
+    short SPINRESETFRAMES; // offset 0x38, size 0x2
+    short SUPERSPINFRAMES; // offset 0x3A, size 0x2
+    short SUPERSPINWAITFRAMES; // offset 0x3C, size 0x2
+    short SLAMWAITFRAMES; // offset 0x3E, size 0x2
+    short SLIDEFRAMES; // offset 0x40, size 0x2
+    short CROUCHINGFRAMES; // offset 0x42, size 0x2
+    short JUMPLANDFRAMES; // offset 0x44, size 0x2
+    short spad; // offset 0x46, size 0x2
 };
 
-struct Nearest_Light_s {
-    int AmbIndex;
-    struct nuvec_s AmbCol;
-    float ambientdist;
-    int CurLoopIndex;
-    struct pdir_s dir1;
-    struct pdir_s dir2;
-    struct pdir_s dir3;
-    struct pdir_s * pDir1st;
-    struct pdir_s * pDir2nd;
-    struct pdir_s * pDir3rd;
-    int glbambindex;
-    int negativeindex;
-    float negativedist;
-    struct pdir_s glbdirectional;
+struct MoveInfo CrashMoveInfo;
+struct MoveInfo CocoMoveInfo;
+struct MoveInfo MineCartMoveInfo;
+
+struct animlist {
+    char * file;
+    short action;
+    u8 blend_in_frames;
+    u8 blend_out_frames;
+    f32 speed;
+    u16 flags;
+    char pad1;
+    char pad2;
+    unsigned long long levbits;
 };
 
+    struct animlist *CrashAnim_CREDITS[2];
+    struct animlist *CrashAnim_MINETUB[5];
+    struct animlist *CrashAnim_ATLASPHERE[11];
+    struct animlist *CrashAnim_MOSQUITO[3];
+    struct animlist *CrashAnim_GLIDER[5];
+    struct animlist *CocoAnim_DROPSHIP[3];
+    struct animlist *CrashAnim_GYRO[7];
 
+struct space_s{
+    s32 character;
+    struct animlist animlist[5];
+};
+
+typedef struct {
+    // total size: 0x34
+    char * path; // offset 0x0, size 0x4
+    char * file; // offset 0x4, size 0x4
+    char * name; // offset 0x8, size 0x4
+    struct animlist * anim; // offset 0xC, size 0x4
+    float radius; // offset 0x10, size 0x4
+    struct nuvec_s min; // offset 0x14, size 0xC
+    struct nuvec_s max; // offset 0x20, size 0xC
+    float scale; // offset 0x2C, size 0x4
+    float shadow_scale; // offset 0x30, size 0x4
+} CharacterData;
+
+CharacterData CData[191];
 
 struct RPos_s {
     char iRAIL;
@@ -62,49 +113,6 @@ struct CharacterModel {
     char pad1;
     char pad2;
     struct NUPOINTOFINTEREST_s * pLOCATOR[16];
-};
-
-struct Moveinfo_s {
-    float IDLESPEED;
-    float TIPTOESPEED;
-    float WALKSPEED;
-    float RUNSPEED;
-    float SPRINTSPEED;
-    float SLIDESPEED;
-    float CRAWLSPEED;
-    float DANGLESPEED;
-    float WADESPEED;
-    float JUMPHEIGHT;
-    float DANGLEGAP;
-    short JUMPFRAMES0;
-    short JUMPFRAMES1;
-    short JUMPFRAMES2;
-    short STARJUMPFRAMES;
-    short SOMERSAULTFRAMES;
-    short SPINFRAMES;
-    short SPINRESETFRAMES;
-    short SUPERSPINFRAMES;
-    short SUPERSPINWAITFRAMES;
-    short SLAMWAITFRAMES;
-    short SLIDEFRAMES;
-    short CROUCHINGFRAMES;
-    short JUMPLANDFRAMES;
-    short spad;
-};
-
-struct anim_s {
-    float anim_time;
-    float blend_src_time;
-    float blend_dst_time;
-    short action;
-    short oldaction;
-    short newaction;
-    short blend_src_action;
-    short blend_dst_action;
-    short blend_frame;
-    short blend_frames;
-    char blend;
-    u8 flags;
 };
 
 
@@ -212,14 +220,6 @@ struct obj_s {
     char direction;
     char kill_contact;
     u8 touch;
-};
-
-
-// Size: 0x8
-struct nuhspecial_s
-{
-    struct nugscn_s* scene; // Offset: 0x0, DWARF: 0x840B
-    struct nuspecial_s* special; // Offset: 0x4, DWARF: 0x8438
 };
 
 struct AI_s {
@@ -341,6 +341,7 @@ struct creature_s {
 
 struct creature_s* player;
 struct creature_s Character[9];
-
+struct CharacterModel CModel[49];
+signed char CRemap[191];
 
 #endif // !CREATURE_H

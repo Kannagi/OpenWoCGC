@@ -10,8 +10,11 @@ static struct numtl_s* lighthaze_mtl;
 static s32 num_divisions;
 static s32 num_wobbles;
 static int wobble_lookup[20][20];
-static struct nuvec_s wobble_table[32]; 
+static struct nuvec_s wobble_table[32];
+struct D3DSurface depthTexture;
+struct D3DSurface* haze_surf;
 
+extern struct numtl_s* DebMat[8]; //debris.c
 
 //MATCH NGC
 void NuHazeInit(void) {
@@ -114,7 +117,7 @@ void NuHazeCreateDepthTexture(void) {
   s32 depth_tid;
   struct nutex_s tex;
   struct numtl_s* ptr;
-  
+
   tex.type = NUTEX_RGBA32;
   depth_tid = NuTexCreateFromSurface(&tex,&depthTexture);
   ptr = NuMtlCreate(1);
@@ -146,9 +149,9 @@ void NuHazeClose(void) {
 //80% NGC
 void NuHazeSetHazeConstants(void) {
   s32 i;
-  
+
   for (i = 0; i < num_wobbles; i++) {
-      CV_WOBBLETABLE_START[i] = *(struct nuvec4_s*)&wobble_table[i];
+      CV_WOBBLETABLE_START[i] = *(struct _GS_VECTOR4*)&wobble_table[i];
   }
   return;
 }

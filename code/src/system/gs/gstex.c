@@ -14,7 +14,7 @@ enum _GXTevStageID maxstage_189 = GX_TEVSTAGE15 | GX_MAX_TEVSTAGE | 0; //GX_TEVS
 //NGC MATCH
 void GS_TexInit(void) {
     s32 i;
-    
+
     if (GS_TexInitFlag == 0) {
         for (i = 0; i < 4; i++) {
             TexStages[4] = 0;
@@ -33,15 +33,15 @@ void GS_TexInit(void) {
 void GS_TexReInit(void) {
     s32 i;
     struct _GS_TEXTURE *GSTex;
-    
-    
+
+
     if (GS_TexInitFlag != 0) {
         GSTex = GS_TexList;
         for (i = 0; i < 4; i++) {
            TexStages[4] = 0;
            GS_TexWrapMode_s[i] = GS_TexWrapMode_t[i] = 1;
         }
-    
+
         for (i = 0; i < 0x400; i++) {
             if (GSTex->Flags == -1) {
                 free((void *)GSTex->TexBits);
@@ -56,19 +56,29 @@ void GS_TexReInit(void) {
 }
 
 /*
-    int nBlkWidth; //
-    int nBlkHeight; //
-    int nOutByte; //
-    unsigned int* pTxtDWords; //
-    int x; //
-    int y; //
-    int w; //
-    int h; //
-    int nBlockY; //
-    int nBlockY; //
+    int x;
+    int y; // r6
+    int w; // r4
+    int h; // r29
+    unsigned int * SrcBuf;
+    int nBlkWidth; // r28
+    int nBlkHeight; // r25
+    int nOutByte; // r12
+
+    // Blocks
+    /* anonymous block*/ //  {
+        // Range: 0x800CC868 -> 0x800CC8E4
+      //  int nBlockY; // r0
+        /* anonymous block */ //{
+            /* Range: 0x800CC884 -> 0x800CC8E4
+            int nBlockX;
+            unsigned int dwCol; // r9
+            unsigned short rgb; // r10
+        }
+    }
 */
 //MATCH GCN
-void GS_TexSwizzleRGB5A3(s32 nWidth,s32 nHeight,s32 *TxtBuf,char *Buf) {
+void GS_TexSwizzleRGB5A3(s32 nWidth,s32 nHeight,s32 *TxtBuf,char *DstBuf) {
     s32 w;
     s32 fixedH;
     s32 h;
@@ -106,8 +116,8 @@ void GS_TexSwizzleRGB5A3(s32 nWidth,s32 nHeight,s32 *TxtBuf,char *Buf) {
                         uVar8 = (uVar9 >> 20) & 0xF | (uVar9 >> 8) & 0xf0 |
                                 ((uVar9 & 0xf0) << 4) | (uVar9 >> 17) & 0x7000;
                     }
-                    Buf[iVar4++] = uVar8 >> 8;
-                    Buf[iVar4++] = uVar8;
+                    DstBuf[iVar4++] = uVar8 >> 8;
+                    DstBuf[iVar4++] = uVar8;
                 }
             }
         }
@@ -115,25 +125,23 @@ void GS_TexSwizzleRGB5A3(s32 nWidth,s32 nHeight,s32 *TxtBuf,char *Buf) {
     return;
 }
 
-
 //NGC MATCH
-void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 MipLevels,u32 rendertargetflag, s32 theirid) {
-    u8 *newbits;
+void GS_TexCreateNU(enum nutextype_e Format,u32 width,u32 height,u8 *bits,u32 MipLevels,u32 RTFlag, s32 theirid) {
+    char *newbits;
     s32 i;
     struct _GS_TEXTURE* pTex;
-    //s32 size;
 
     pTex = GS_TexList;
     if (iss3cmp != 0) {
-        newbits = (void *)malloc(iss3cmp);
+        newbits = (char *)malloc(iss3cmp);
         GS_TexAllocs = GS_TexAllocs + iss3cmp;
-        memcpy(newbits,(void *)((s32)bits + 0xc),iss3cmp);
+        memcpy(newbits,(char *)(bits + 0xc),iss3cmp);
         DCFlushRange(newbits,iss3cmp);
         for (i = 0; i < 0x400; i++, pTex++) {
             if (pTex->Flags != 0) {
                 pTex->Flags = -1;
                 pTex->Pad = 0xe;
-                pTex->Format = type;
+                pTex->Format = Format;
                 pTex->NUID = theirid;
                 pTex->Width = width;
                 pTex->Height = height;
@@ -142,8 +150,8 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
                 break;
             }
         }
-    } else if (type == 0x80) {
-        newbits = (void *)malloc(MipLevels);
+    } else if (Format == 0x80) {
+        newbits = (char *)malloc(MipLevels);
         GS_TexAllocs = GS_TexAllocs + MipLevels;
         memcpy(newbits,bits,MipLevels);
         DCFlushRange(newbits,MipLevels);
@@ -151,7 +159,7 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
             if (pTex->Flags == 0) {
                 pTex->Flags = -1;
                 pTex->Pad = 0xe;
-                pTex->Format = type;
+                pTex->Format = Format;
                 pTex->NUID = theirid;
                 pTex->Width = width;
                 pTex->Height = height;
@@ -160,9 +168,9 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
                 break;
             }
         }
-    } else if (type == 0x81) {
+    } else if (Format == 0x81) {
         s32 size = width * height * 2;
-        newbits = (void *)malloc(size);
+        newbits = (char *)malloc(size);
         GS_TexAllocs = GS_TexAllocs + size;
         DCFlushRange(bits,size);
         memcpy(newbits,bits,size);
@@ -171,7 +179,7 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
             if (pTex->Flags == 0) {
                 pTex->Flags = -1;
                 pTex->Pad = 5;
-                pTex->Format = type;
+                pTex->Format = Format;
                 pTex->NUID = theirid;
                 pTex->Width = width;
                 pTex->Height = height;
@@ -180,9 +188,9 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
                 break;
             }
         }
-    } else if (type == 0x82) {
+    } else if (Format == 0x82) {
         s32 size = width * height * 4;
-        newbits = (void *)malloc(size);
+        newbits = (char *)malloc(size);
         GS_TexAllocs = GS_TexAllocs + size;
         DCFlushRange(bits,size);
         memcpy(newbits,bits,size);
@@ -191,7 +199,7 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
             if (pTex->Flags == 0) {
                 pTex->Flags = -1;
                 pTex->Pad = 6;
-                pTex->Format = type;
+                pTex->Format = Format;
                 pTex->NUID = theirid;
                 pTex->Width = width;
                 pTex->Height = height;
@@ -202,16 +210,16 @@ void GS_TexCreateNU(enum nutextype_e type,u32 width,u32 height, u8 *bits,u32 Mip
         }
     } else {
         s32 size = width * height * 2;
-        newbits = (void *)malloc(size);
+        newbits = (char *)malloc(size);
         GS_TexAllocs = GS_TexAllocs + size;
         DCFlushRange(bits,width * height * 4);
-        GS_TexSwizzleRGB5A3(width,height,(void*)bits,newbits);
+        GS_TexSwizzleRGB5A3(width,height,(s32 *)bits,newbits);
         DCFlushRange(newbits,size);
         for (i = 0; i < 0x400; i++, pTex++) {
             if (pTex->Flags == 0) {
                 pTex->Flags = -1;
                 pTex->Pad = 5;
-                pTex->Format = type;
+                pTex->Format = Format;
                 pTex->Width = width;
                 pTex->NUID = theirid;
                 pTex->Height = height;

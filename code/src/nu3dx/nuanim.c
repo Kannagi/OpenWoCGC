@@ -26,6 +26,10 @@ void buildBitCountTable(void) //check NGC asm	//PS2
         	isBitCountTable = 1;
 }
 
+void okdokey(void) {
+  return;
+}
+
 //PS2 Match
 struct nuanimdata_s * NuAnimDataFixPtrs(struct nuanimdata_s *animdata,s32 address_offset)
 {
@@ -480,7 +484,7 @@ void NuAnimData2CalcTime(struct nuanimdata2_s *animdata,float time,struct nuanim
 }
 
 //NGC 97%
-float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s* atime, enum NUANIMKEYTYPES_e keytype) 
+float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s* atime, enum NUANIMKEYTYPES_e keytype)
 {
     u8 *mask;
     u32 chunk_start_ix;
@@ -490,14 +494,14 @@ float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s*
     struct NUANIMKEYBIG_s *key;
     float val;
     float dt;
-    float fVar8; 
+    float fVar8;
     float fVar11;
     float time;
-    struct NUANIMKEYINTEGER_s* inextkey; 
+    struct NUANIMKEYINTEGER_s* inextkey;
     struct NUANIMKEYINTEGER_s* ikey;
     s32 frame;
     u32 *ixtmp;
-    
+
     if (keytype == NUANIMKEYTYPE_NONE) {
         return animcurve->data.constant;
     }
@@ -505,7 +509,7 @@ float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s*
     chunk_start_ix = atime->chunk;
     //mask = &animcurve->data.curvedata->mask[chunk_start_ix];
     mask = (u8*)&animcurve->data.curvedata->mask[chunk_start_ix];
-    
+
     if (keytype == NUANIMKEYTYPE_BOOLEAN) {
         frame = floor(atime->time_offset); // gcc2_compiled__N108
         frame--;
@@ -536,7 +540,7 @@ float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s*
             offset += BitCountTable[mask[3] & atime->time_mask];
             break;
     }
-    
+
     ixtmp = animcurve->data.curvedata->key_ixs[chunk_start_ix];
     switch(keytype) {
         case NUANIMKEYTYPE_NONE:
@@ -550,7 +554,7 @@ float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s*
                 okdokey();
             }
             val = key->val - nextkey->val;
-            fVar8 = key->grad * (nextkey->time - key->time); 
+            fVar8 = key->grad * (nextkey->time - key->time);
             dt = nextkey->grad * (nextkey->time - key->time);
             time = (atime->time - key->time) * key->dtime;
             return time * (time * (((time * (val + val + fVar8 + dt) + val * -3.0f) - (fVar8 + fVar8)) - dt) + fVar8) + key->val;
@@ -561,7 +565,7 @@ float NuAnimCurve2CalcVal(struct nuanimcurve2_s* animcurve, struct nuanimtime_s*
         case NUANIMKEYTYPE_INTEGER:
             ikey = &((struct NUANIMKEYINTEGER_s *)animcurve->data.curvedata->key_array)[(s32)ixtmp + offset - 1];
             inextkey = &ikey[1];
-             if(atime->time > inextkey->time  || atime->time < ikey->time){ 
+             if(atime->time > inextkey->time  || atime->time < ikey->time){
                 okdokey();
             }
             return ikey->val;

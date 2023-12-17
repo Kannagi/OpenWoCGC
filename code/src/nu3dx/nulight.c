@@ -17,10 +17,6 @@ struct numtl_s* NuLightAddMat;
 
 //Ext var
 s32 HazeValue = 0;
-f32 NuRndrFogNear;
-f32 NuRndrFogFar;
-u32 NuRndrFogBlur;
-u32 NuRndrFogCol;
 
 //NGC MATCH
 void NuLightClose(void) {
@@ -93,7 +89,7 @@ void* NuLightCreate(void) {
 void NuLightUpdate(struct nulight_s *l) {
   struct _D3DLIGHT8 d3dlight;
   s32 id;
-  
+
   d3dlight.Diffuse.b = (l->diffuse).r;
   d3dlight.Diffuse.r = (l->diffuse).b;
   d3dlight.Diffuse.g = (l->diffuse).g;
@@ -124,8 +120,8 @@ void NuLightUpdate(struct nulight_s *l) {
   if (((d3dlight.Direction.x == 0.0f) && (d3dlight.Direction.y == 0.0f)) && (d3dlight.Direction.z == 0.0f)) {
     d3dlight.Direction.x = 1.0f;
   }
-  GS_SetLight(id,&d3dlight);
-  GS_LightEnable(id,1);
+  //GS_SetLight(id,&d3dlight);
+  //GS_LightEnable(id,1);
   return;
 }
 
@@ -140,7 +136,7 @@ struct nulight_s * NuLightGetLight(s32 index) {
 //MATCH NGC
 void NuLightSetAmbientLight(struct nuvec_s *c0) {
   struct nulight_s *curr;
-  
+
   curr = currentlight1;
   if (currentlight1 != NULL) {
     (currentlight1->ambient).r = c0->x;
@@ -167,7 +163,7 @@ void NuLightSetAmbientLight(struct nuvec_s *c0) {
 void NuLightSetDirectionalLights (struct nuvec_s *d0,struct nucolour3_s *c0,struct nuvec_s *d1,struct nucolour3_s *c1,struct nuvec_s *d2,struct nucolour3_s *c2) {
   struct nulight_s *curr;
     float tmp;
-    
+
   if ((currentlight1 != NULL) || (currentlight1 = NuLightCreate(), currentlight1 != NULL)) {
     curr = currentlight1;
     (curr->ambient).r = 0.6f;
@@ -225,7 +221,7 @@ void NuLightSetDirectionalLights (struct nuvec_s *d0,struct nucolour3_s *c0,stru
       (curr->ambient).r = 0.6f;
       (curr->ambient).b = 0.6f;
       (curr->ambient).g = 0.6f;
-      
+
       if (1.0f < c2->r) {
         tmp = 1.0f;
       } else{
@@ -256,7 +252,7 @@ s32 NuLightStoreCurrentLights(void) {
   struct nulight_s *pnVar3;
   s32 i;
   s32 lightsleft;
-  
+
   if (1000 - num_stored_lights < 1) {
     NuErrorProlog("C:/source/crashwoc/code/nu3dx/nulight.c",0x187)("NuLight: Out of light storage space!");
   }
@@ -276,7 +272,7 @@ s32 NuLightStoreCurrentLights(void) {
 
 //NGC MATCH
 void NuLightSetStoredLights(s32 index) {
-  
+
   if (currentlight1 == NULL) {
     currentlight1 = NuLightCreate();
   }
@@ -375,10 +371,10 @@ void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct 
 }
 
 //62% NGC
- void NuLgtArcLaserDraw(s32 paused) {   
+ void NuLgtArcLaserDraw(s32 paused) {
   struct nuvec4_s *pnts;
   struct nuvec_s norm;
-  struct nuvec_s norm2;   
+  struct nuvec_s norm2;
   struct numtx_s *vpcsmtx;
   float fVar1;
   float fVar2;
@@ -400,7 +396,7 @@ void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct 
   float fVar23;
   float local_188;
   struct nuvtx_tltc1_s dxpnts [3];
-  
+
   fVar9 = NuLgtArcV1;
   fVar8 = NuLgtArcV0;
   if (paused != 0) {

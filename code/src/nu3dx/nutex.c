@@ -4,7 +4,8 @@
 struct nusystex_s tinfo[0x400];
 
 //static s32 initialised;
-
+static s32 palette_128[256];
+static char strBuf[128];
 static s32 ntex;
 struct nutex_s tex;
 
@@ -32,7 +33,7 @@ void NuTexClose(void)
             tinfo[i].tex.bits = 0;
         }
     }
-    initialised_N2 = ntex = tpid = 0;
+    initialised = ntex = tpid = 0;
 	return;
 }
 
@@ -198,7 +199,7 @@ void NuTexSetTextureStates(struct numtl_s *mtl) {
 
 //91% NGC
 s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
-    
+
     s32 fh;
     s32 imgsize;
     void *bits;
@@ -218,13 +219,13 @@ s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
     s32 cnt;
     struct tagBITMAPFILEHEADER bmh;
     struct tagBITMAPINFOHEADER bmi;
-    
+
     if (filename == NULL) {
         NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutex.c",0x1fa)("assert");
     }
     fh = NuFileOpen(filename,NUFILE_READ);
     if (fh != 0) {
-            if (tex != NULL) 
+            if (tex != NULL)
             {
                         memset(tex,0,0x1c);
                         NuFilePos(fh);
@@ -240,7 +241,7 @@ s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
                                 tex->type = NUTEX_RGB24;
                                 rowsize = 0;
                         m = mmlevel + 1;
-                                
+
                             break;
                             case 4:
                                 tex->type = NUTEX_PAL4;
@@ -264,7 +265,7 @@ s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
                                 NuFileRead(fh, palette_128, 0x400);
                         m = mmlevel + 1;
                                 // swapcolors(palette_128);
-                                for(maxI = 0; maxI < 0x100; maxI++) 
+                                for(maxI = 0; maxI < 0x100; maxI++)
                                 {
                                     color = palette_128[maxI];
                                     colortmp = color >> 0x18 & 0xFF;
@@ -274,13 +275,13 @@ s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
                                     palette_128[maxI] = color;
                                 }
                             break;
-                            
+
                             default:
                             NuErrorProlog("C:/source/crashwoc/code/nu3dx/nutex.c",0x22d)
                                 ("NuTexLoadBitmap:Bad BitCount <%d> on loading bitmap <%s>",bmi.biBitCount,filename);
-                            m = mmlevel + 1;   
+                            m = mmlevel + 1;
                             break;
-                            
+
                         }
                         tex->mmcnt = mmlevel;
                         tex->height = bmi.biHeight;
@@ -334,7 +335,7 @@ s32 NuTexReadBitmapMM(char *filename,s32 mmlevel,struct nutex_s *tex) {
     }
     else {
         sprintf(strBuf,"Cannot open file: %s",filename);
-        return 0; 
+        return 0;
     }
 
     return 1;

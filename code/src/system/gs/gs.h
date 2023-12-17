@@ -204,8 +204,8 @@ struct _D3DLIGHT8
     f32 attenuation0;
     f32 attenuation1;
     f32 attenuation2;
-    f32 Theta;
-    f32 Phi;
+    f32 theta;
+    f32 phi;
 };
 
 

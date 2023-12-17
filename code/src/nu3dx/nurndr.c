@@ -822,25 +822,25 @@ void NuRndrAddFootPrint(s32 rot,float sizex,float sizez,s32 brightness,struct nu
     s32 i;
     s32 i3;
     s32 i2;
-    
+
 
     tp[0].x = NuTrigTable[((rot + 0x4000) & 0xffffU)] * sizex + NuTrigTable[rot & 0xffff] * sizez;
     tp[0].z = -NuTrigTable[rot & 0xffff] * sizex + NuTrigTable[((rot + 0x4000) & 0xffffU)] * sizez;
-    
+
     tp[1].x = NuTrigTable[((rot + 0x4000) & 0xffffU)] * -sizex + NuTrigTable[rot & 0xffff] * sizez;
     tp[1].z = -NuTrigTable[rot & 0xffff] * -sizex + NuTrigTable[((rot + 0x4000) & 0xffffU)] * sizez;
-    
+
     tp[2].x = NuTrigTable[((rot + 0x4000) & 0xffffU)] * sizex + NuTrigTable[rot & 0xffff] * -sizez;
     tp[2].z = -NuTrigTable[rot & 0xffff] * sizex + NuTrigTable[((rot + 0x4000) & 0xffffU)] * -sizez;
-    
+
     tp[3].x = NuTrigTable[((rot + 0x4000) & 0xffffU)] * -sizex + NuTrigTable[rot & 0xffff] * -sizez;
     tp[3].z = -NuTrigTable[rot & 0xffff] * -sizex + NuTrigTable[((rot + 0x4000) & 0xffffU)] * -sizez;
-    
+
     tp[3].y = 0.0f;
     tp[2].y = 0.0f;
     tp[1].y = 0.0f;
     tp[0].y = 0.0f;
-    
+
     tp[3].w = 0.0f;
     tp[2].w = 0.0f;
     tp[1].w = 0.0f;
@@ -972,6 +972,8 @@ void NuRndrFx(s32 paused,struct nuvec_s *playerpos) {
   return;
 }
 
+static struct nuvtx_tc1_s vtx_263[2048];
+
 //40% GCN
 void NuRndrTrail(s32 trailpt,struct trail_s *trail,s32 TRAILCOUNT) {
     s32 uVar2;
@@ -989,7 +991,7 @@ void NuRndrTrail(s32 trailpt,struct trail_s *trail,s32 TRAILCOUNT) {
     s32 loop;
     struct nuvtx_tc1_s *vp [4];
 
-    
+
     //loop = (trailpt + 1) - TRAILCOUNT;
     iVar8 = 0;
         //uVar7 = TRAILCOUNT - 1;
@@ -1022,18 +1024,18 @@ void NuRndrTrail(s32 trailpt,struct trail_s *trail,s32 TRAILCOUNT) {
                 (vtx_263[cnt].pnt) = trail[uVar9].pos1;
 
                 vtx_263[iVar13].pnt.x = (trail[uVar2].pos2.x - trail[uVar2].pos1.x) * 0.25f + trail[uVar2].pos1.x;
-                
+
                 vtx_263[iVar13].pnt.y = (trail[uVar2].pos2.y - trail[uVar2].pos1.y) * 0.25f + trail[uVar2].pos1.y;
-                
+
                 vtx_263[iVar13].pnt.z = (trail[uVar2].pos2.z - trail[uVar2].pos1.z) * 0.25f + trail[uVar2].pos1.z;
-                
+
                  vtx_263[iVar12].nrm.x = (trail[uVar9].pos2.x - trail[uVar9].pos1.x) * 0.25f + trail[uVar9].pos1.x;
-                
+
                 vtx_263[iVar12].nrm.y = (trail[uVar9].pos2.y - trail[uVar9].pos1.y) * 0.25f + trail[uVar9].pos1.y;
-                
+
                 vtx_263[iVar12].nrm.z = (trail[uVar9].pos2.z - trail[uVar9].pos1.z) * 0.25f + trail[uVar9].pos1.z;
 
-                
+
                 if (-1 > uVar5) {
                     vtx_263[iVar11].diffuse = -uVar5;
                     vtx_263[iVar13].diffuse = 0;
@@ -1056,7 +1058,7 @@ void NuRndrTrail(s32 trailpt,struct trail_s *trail,s32 TRAILCOUNT) {
                      (trail[uVar2].pos1.x - trail[uVar2].pos2.x) * 0.25f + trail[uVar2].pos2.x;
                 vtx_263[iVar13].pnt.y =
                      (trail[uVar2].pos1.y - trail[uVar2].pos2.y) * 0.25f + trail[uVar2].pos2.y;
-                vtx_263[iVar13].pnt.z = 
+                vtx_263[iVar13].pnt.z =
                      (trail[uVar2].pos1.z - trail[uVar2].pos2.z) * 0.25f + trail[uVar2].pos2.z;
                 vtx_263[iVar12].nrm.x =
                      (trail[uVar9].pos1.x - trail[uVar9].pos2.x) * 0.25f + trail[uVar9].pos2.x;
@@ -1166,7 +1168,7 @@ void NuRndrWaterRip(struct numtl_s *mtl) {
 //87% NGC
 void NuRndrShadPolys(struct numtl_s *mtl) {
     s32 s;
-    s32 ind; 
+    s32 ind;
     float size;
     struct nuvec_s pos;
     s32 lp;
@@ -1180,17 +1182,17 @@ void NuRndrShadPolys(struct numtl_s *mtl) {
             vtx[lp].nrm.y = 0.0f;
             vtx[lp].nrm.z = 0.0f;
         }
-        
+
         vtx2[0] = &vtx[0];
         vtx2[1] = &vtx[1];
         vtx2[2] = &vtx[2];
         vtx2[3] = &vtx[3];
-        
-        for (ind = 0; ind < NuRndrShadowCnt; ind++) {           
+
+        for (ind = 0; ind < NuRndrShadowCnt; ind++) {
 
             pos = NuRndrShadPolDat[ind].pos;
             size = NuRndrShadPolDat[ind].size;
-            
+
             vtx[0].diffuse = colour;
             vtx[1].diffuse = colour;
             vtx[2].diffuse = colour;
@@ -1209,7 +1211,7 @@ void NuRndrShadPolys(struct numtl_s *mtl) {
             vtx[3].pnt.x = pos.x + size;
             vtx[3].pnt.y = pos.y + 0.01f;
             vtx[3].pnt.z = pos.z + size;
-            
+
             vtx[0].tc[0] = 0.0f;
             vtx[0].tc[1] = 0.0f;
             vtx[1].tc[0] = 1.0f;
@@ -1218,7 +1220,7 @@ void NuRndrShadPolys(struct numtl_s *mtl) {
             vtx[2].tc[1] = 1.0f;
             vtx[3].tc[0] = 1.0f;
             vtx[3].tc[1] = 1.0f;
-            
+
             NuRndrStrip3d(vtx2, mtl, 0, 4);
         }
         NuRndrShadowCnt = 0;

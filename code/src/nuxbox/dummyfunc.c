@@ -407,26 +407,27 @@ struct _sceDmaTag * CreateDmaParticleSet(void *buffer,int *size) {
     return (struct _sceDmaTag *)buffer;
 }
 
-
+//MATCH NGC
 struct DmaDebTypePointer * CreateDmaPartEffectList(void *buffer,int *size) {
-    int lp;
-    union variptr_u start;
     union variptr_u buff;
+    union variptr_u start;
     struct pDat* PartData;
     struct DmaDebTypePointer* PartStart;
-    //
+    s32 lp;
+
+    start.voidptr = buffer;
     vpDmaTag_RetEx(start);
-    lp = 0;
-    *(float *)((int)buffer + 0x14) = 72.0f;
-    *(float *)((int)buffer + 8) = 0.0f;
-    *(float *)((int)buffer + 0x10) = 56.0f;
-    *(float *)((int)buffer + 0x18) = 200.0f;
-    *(float *)((int)buffer + 0x1c) = 72.0f;
-    do {
-        lp = lp + 1;
-    } while (lp < 0x40);
-    vpDmaTag_Close(buff);
-    *size = (int)start.voidptr - (int)buffer;
+    ((struct DmaDebTypePointer *)buffer)->v0 = 72.0f;
+    ((struct DmaDebTypePointer *)buffer)->grav = 0.0f;
+    ((struct DmaDebTypePointer *)buffer)->u0 = 56.0f;
+    ((struct DmaDebTypePointer *)buffer)->u1 = 200.0f;
+    ((struct DmaDebTypePointer *)buffer)->v1 = 72.0f;
+    PartData = &((struct DmaDebTypePointer *)buffer)->Data[0];
+    for (lp = 0; lp < 64; lp++) {
+        PartData++;
+    }
+    buff.voidptr = PartData;
+    *size = (int)vpDmaTag_Close(buff).voidptr - (int)buffer;
     return (struct DmaDebTypePointer *)buffer;
 }
 */

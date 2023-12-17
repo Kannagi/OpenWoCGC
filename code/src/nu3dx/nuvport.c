@@ -114,3 +114,11 @@ void NuVpGetScalingMtx(struct numtx_s *mtx)
     }
     return;
 }
+
+//NGC MATCH
+void NuVpGetClippingMtx(struct numtx_s *mtx) {
+  if (mtx != NULL) {
+    *mtx = cmtx;
+  }
+  return;
+}

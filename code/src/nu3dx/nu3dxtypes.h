@@ -632,7 +632,7 @@ struct NUJOINTDATA_s {
     char pad[11];
 };
 
-
+// Size: 0x30
 struct NUELLIPSOID_s {
     struct nuvec_s centre;
     struct nuvec_s y_axis;
@@ -640,7 +640,8 @@ struct NUELLIPSOID_s {
     struct nuvec_s z_axis;
 };
 
-struct NUCYLINDERS_s {
+// Size: 0x40
+struct NUCYLINDER_s {
     struct nuvec_s centre;
     struct nuvec_s y_axis;
     struct nuvec4_s x_axis;
@@ -662,6 +663,7 @@ struct NUSHADOWDATA_s {
     u8 nshadow_meshes;
     u8 joint;
 };
+
 // Size: 0x1C
 typedef struct {
     int next;
@@ -726,6 +728,14 @@ struct matchingslot_s
 {
     int batch; // Offset: 0x0, DWARF: 0x7D6971
     int slot; // Offset: 0x4, DWARF: 0x7D6999
+};
+
+struct trail_s
+{
+    struct nuvec_s pos1; // Offset: 0x0
+    struct nuvec_s pos2; // Offset: 0xC
+    s32 intensity; // Offset: 0x18
+    s32 RealIntensity; // Offset: 0x1C
 };
 
 #endif // !NU3DXTYPES_H

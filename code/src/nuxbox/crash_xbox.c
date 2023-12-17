@@ -1,8 +1,10 @@
 #include "../system.h"
 #include "nu.h"
-#include"gamecode/main.h"
+#include "gamecode/creature.h"
+#include "gamecode/main.h"
+#include "gamecode/game.h"
 
-int iss3cmp;
+s32 VEHICLECONTROL; //vehicle.c
 
 void AddQuad3DrotXYZ(struct nuvec_s *pos,struct nuvec_s *shape,struct numtl_s *mtl,struct nuangvec_s *a,float *uvs,u32 colour)
 {
@@ -60,7 +62,10 @@ void AddQuad3DrotXYZ(struct nuvec_s *pos,struct nuvec_s *shape,struct numtl_s *m
 
 extern s32 LIGHTMASK; //game.c
 extern s32 USELIGHTS; //main.c
-extern s32 VEHICLECONTROL; //vehicle.c
+extern signed char CRemap[191]; //creature.c
+extern struct CharacterModel CModel[49]; //creature.c
+extern struct creature_s* player; //creature.c
+extern struct numtx_s tmtx[256];
 
 //NGC MATCH
 void DrawMask(struct mask_s *mask) {
@@ -69,7 +74,7 @@ void DrawMask(struct mask_s *mask) {
     struct numtx_s mS;
     float **dwa;
     s32 i;
-    
+
     if (mask->active != 0) {
         i = (s32)CRemap[mask->character];
         if (i != -1) {
@@ -78,10 +83,10 @@ void DrawMask(struct mask_s *mask) {
             mS = mask->mS;
             EvalModelAnim(model,&mask->anim,&mM,tmtx,&dwa,NULL);
             if ((USELIGHTS != 0) && (LIGHTMASK != 0)) {
-                SetLights(&(mask->lights).pDir1st->Colour, &(mask->lights).pDir1st->Direction,
-                          &(mask->lights).pDir2nd->Colour,&(mask->lights).pDir2nd->Direction,
-                          &(mask->lights).pDir3rd->Colour,
-                          &(mask->lights).pDir3rd->Direction,&(mask->lights).AmbCol);
+            //    SetLights(&(mask->lights).pDir1st->Colour, &(mask->lights).pDir1st->Direction,
+              //            &(mask->lights).pDir2nd->Colour,&(mask->lights).pDir2nd->Direction,
+              //            &(mask->lights).pDir3rd->Colour,
+              //            &(mask->lights).pDir3rd->Direction,&(mask->lights).AmbCol);
             }
             NuHGobjRndrMtxDwa(model->hobj,&mM,1,NULL,tmtx,dwa);
             if (mask->shadow != 2000000.0f) {
@@ -101,7 +106,7 @@ void DrawMask(struct mask_s *mask) {
                 }
             }
             if ((USELIGHTS != 0) && (LIGHTMASK != 0)) {
-                SetLevelLights();
+                //SetLevelLights();
             }
         }
     }
