@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<types.h>
 #include<nu3dx/nu3dxtypes.h>
+#include "nu3dx.h"
 #include<stdbool.h>
 #include<SDL/SDL.h>
 #define GL_BGR 0x80E0
@@ -25,7 +26,7 @@ struct nugscn_s* font3d_scene;
 struct nuscene_s* font3d_scene2;
 char *gerbils;
 int test_SDL_openGL();
-
+struct nucamera_s* pNuCam;
 
 void MAHLoadingMessage(void)
 {
@@ -55,7 +56,8 @@ s32 CopyFilesThreadProc() {
     //InitLevelSfxTables();
     //InitGlobalSfx();
     iStack_c = GetTickCount() - iVar1;
-    sprintf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
+    printf("CopyFilesThreadProc...\n");
+    printf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
     return 0;
 }
 
@@ -106,7 +108,9 @@ int main()
     //from firstscreens function
     CopyFilesThreadProc(0);
     gerbils = malloc_x(0x4000c);
-    NuFileLoadBuffer("gfx\\licnin.s3",gerbils,0x2000c);
+    printf("bits allocated \n");
+    NuFileLoadBuffer("licnin.s3",gerbils,0x2000c);
+    printf(".s3 file loaded \n");
     tex.width = 0x200;
     tex.height = 0x200;
     tex.decal = 0;

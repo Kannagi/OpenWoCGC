@@ -6,19 +6,20 @@ static s32 clip_enable = 1;
 static struct nuvec_s cam_axes = { 1.0f, 1.0f, 1.0f };
 
 
+//MATCH NGC
+struct nucamera_s * NuCameraCreate(void) {
+ struct nucamera_s *cam;
 
-struct nucamera_s * NuCameraCreate(void)
-{
-  struct nucamera_s *cam = (struct nucamera_s *)NuMemAlloc(sizeof(struct nucamera_s));
+  cam = (struct nucamera_s *)NuMemAlloc(sizeof(struct nucamera_s));
   NuMtxSetIdentity(&cam->mtx);
-  cam->nearclip = 0.3;
+  cam->nearclip = 0.3f;
   cam->portalnearclip = 0;
-  cam->farclip = 1000.0;
-  cam->aspect = 0.75;
-  (cam->scale).x = 1.0;
-  cam->fov = 0.75;
-  (cam->scale).z = 1.0;
-  (cam->scale).y = 1.0;
+  cam->farclip = 1000.0f;
+  cam->fov = 0.75f;
+  cam->aspect = 0.75f;
+  (cam->scale).z = 1.0f;
+  (cam->scale).y = 1.0f;
+  (cam->scale).x = 1.0f;
   return cam;
 }
 
@@ -72,7 +73,7 @@ void NuCameraEnableClipping(s32 enable)
 //MATCH NGC
 void NuCameraCalcFrustrumPlanes(void) {
   float f;
-  
+
   frustrumplanes[2].x = vpmtx._03 - vpmtx._00;
   frustrumplanes[2].y = vpmtx._13 - vpmtx._10;
   frustrumplanes[2].z = vpmtx._23 - vpmtx._20;

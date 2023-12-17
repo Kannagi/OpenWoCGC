@@ -7,7 +7,7 @@ u32 nuline;
 
 static void NuErrorFunction(char* msg, ...)
 {
-	sprintf(captxt, "NuError - %s Line %d : ", nufile, nuline);
+	printf(captxt, "NuError - %s Line %d : ", nufile, nuline);
 	puts(captxt);
 	va_list aptr;
 	va_start(aptr, msg);

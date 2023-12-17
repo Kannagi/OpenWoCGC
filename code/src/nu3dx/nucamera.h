@@ -2,8 +2,8 @@
 #define NUCAMERA_H
 
 #include "../types.h"
-#include "nu3dxtypes.h"
 #include "numath.h"
+#include "nu3dx/nu3dxtypes.h"
 
 /*
   800ac788 0003b4 800ac788  4 NuCameraCalcFrustrumPlanes 	Global          See https://github.com/microsoft/DirectX-Graphics-Samples/blob/master/MiniEngine/Core/Math/Frustum.h
@@ -16,6 +16,13 @@
   800ad680 00017c 800ad680  4 SetProjectionMatrix 	Global
   800ad804 0000e4 800ad804  4 NuCameraTransformScreenClip 	Global
 */
+
+
+enum nucamfxmode_s
+{
+    NUCAMFX_REFLECT = 1,
+    NUCAMFX_NONE = 0
+};
 
 // Global camera.
 extern struct nucamera_s global_camera;

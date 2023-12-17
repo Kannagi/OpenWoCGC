@@ -32,50 +32,43 @@ void NuMemSetExternal(union variptr_u* ptr, union variptr_u* end)
 	}
 }
 
-void* NuMemAlloc(s32 size) //CHECK
-{
+//MATCH NGC
+void* NuMemAlloc(s32 size) {
     void* ret;
 
-	// Alloc from main heap if possible
+    // Alloc from main heap if possible
     if (memexternal != NULL) {
-
-
-        //memexternal->ptr->intaddr = (u32*) ROUND_UP((s32) memexternal->ptr->vec4->w, 16);
-
-        if (memexternal->ptr->voidptr != NULL && (s32)&memexternal->ptr->voidptr - (s32)&memexternal->ptr->intaddr < size) {
+        memexternal->ptr->intaddr = (void*) ROUND_UP((u32) memexternal->ptr->voidptr, 16);
+        if (memexternal->end != NULL && (u32)memexternal->end->intaddr - (u32)memexternal->ptr->intaddr < size) {
             return NULL;
         }
-        ret = (void*)&memexternal->ptr;
-        memexternal->ptr->voidptr = (void*) (((s32)&memexternal->ptr) + size);
+        ret = memexternal->ptr->intaddr;
+        memexternal->ptr->intaddr = ((s8*)memexternal->ptr->intaddr) + size;
         return ret;
     }
-	// Main game heap is NULL, fallback on C malloc?
-	else {
+    // Main game heap is NULL, fallback on C malloc?
+    else {
         s32 end;
-
-		// Total used memory
+        // Total used memory
         totalloc += size;
 
-		// Attempt to allocate
+        // Attempt to allocate
         ret = malloc(size);
         if (ret == NULL) {
-            NuErrorProlog("NuMemAlloc : Failed to alloc %d bytes!", size);
-			/*error_func e = NuErrorProlog("OpenCrashWOC/code/nucore/numem.c", 57);
-			e("NuMemAlloc : Failed to alloc %d bytes!", size);*/
+            NuErrorProlog("OpenCrashWOC/code/nucore/numem.c", 57,"NuMemAlloc : Failed to alloc %d bytes!", size);
         }
 
-		// Clear buffer
+        // Clear buffer
         memset(ret, 0, size);
 
-		// Resize heap?
-        end = size + (s32)ret;
+        // Resize heap?
+        end = (s32)ret + size;
         if (end > highallocaddr) {
             highallocaddr = end;
         }
         if (end > peakallocaddr) {
             peakallocaddr = end;
         }
-
         return ret;
     }
 }
@@ -88,7 +81,7 @@ void NuMemFree(void* data)
 void* malloc_x(s32 size)
 {
 	malloced++;
-	printf("\nmalloced: %d\n", malloced);
+	//printf("\nmalloced: %d\n", malloced);
 	return malloc(size);
 }
 

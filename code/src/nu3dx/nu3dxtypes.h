@@ -12,13 +12,6 @@ s32 force_decal;
 s32 force_glass_screencopy_enable;
 
 
-enum nucamfxmode_s
-{
-    NUCAMFX_REFLECT = 1,
-    NUCAMFX_NONE = 0
-};
-
-
 enum gobjtype_s
 {
 	NUGOBJ_FACEON = 1,
