@@ -6,6 +6,7 @@
 #include "numem.h"
 //#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 //#include <memory.h>
 
 #define MAX_FILES 10
@@ -84,7 +85,7 @@ fileHandle NuFileOpen(char* filename, enum nufilemode_e mode);
 void NuFileClose(fileHandle handle);
 
 // Open a file in memory with a given buffer, size, and mode.
-fileHandle NuMemFileOpen(void* buffer, u32 size, u32 mode);
+s32 NuMemFileOpen(void* start, s32 buffsize, enum nufilemode_e mode);
 
 // Data file position.
 s32 NuDatFilePos(fileHandle handle);

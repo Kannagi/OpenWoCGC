@@ -10,7 +10,7 @@ void GC_DiskErrorPoll(void)
     int var1;
     uint var2;
     uint motor [4];
-    
+
     var1 = 0;
     memset(motor,0,0x10);
     var2 = 0;
@@ -104,38 +104,39 @@ LAB_800c67f4:
             GS_EndScene();
             GS_FlipScreen();
             do {
-                    /* WARNING: Do nothing block with infinite loop */
+                    /* WARNING: Do nothing block with infinite loop *//*
             } while( true );
         }
         PrintError = 0;
     } while( true );
 }
+*/
 
 //96%
 s32 GCFileOpen(char *fname) {
     int i;
-    
+
     if (FSStart == 0) {
         memset(&MAHFile,0,0x3c);
         FSStart = 1;
-        DVDInit();
+        //DVDInit();
     }
-    StreamClear();
-    GC_DiskErrorPoll();
-    if (DVDOpen(fname,&MAHFile) == 0) {
+    //StreamClear();
+    //GC_DiskErrorPoll();
+  /*  if (DVDOpen(fname,&MAHFile) == 0) {
         i = 0;
     }
     else{
         fileoffset = 0;
         filelength = MAHFile.length;
         i = 1;
-    }
+    }*/
     return i;
 }
 
 //NGC MATCH
 s32 GCFileSize(s32 fd) {
-    GC_DiskErrorPoll();
+    //GC_DiskErrorPoll();
     return MAHFile.length;
 }
 
@@ -144,8 +145,8 @@ s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
     s32 bVar1;
     u32 uVar2;
     s32 temp;
-    
-    GC_DiskErrorPoll();
+
+    //GC_DiskErrorPoll();
     bVar1 = 0;
     if (nbyte < 0x20) {
         DisplayErrorAndLockup
@@ -174,8 +175,8 @@ s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
                    "GCFileRead Seek offset outside of file");
     }
     temp = nbyte + 0x1fU;
-    DVDReadAsyncPrio(&MAHFile,buf,temp & 0xffffffe0,seekoffset,NULL,2);
-    do {
+    //DVDReadAsyncPrio(&MAHFile,buf,temp & 0xffffffe0,seekoffset,NULL,2);
+  /*  do {
         Reseter(1);
         switch (DVDGetDriveStatus()) {
         case -1:
@@ -184,21 +185,21 @@ s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
         case 5:
         case 4:
         case 6:
-            GC_DiskErrorPoll();
+            //GC_DiskErrorPoll();
         break;
-        case 0:    
+        case 0:
         case 0xb:
             bVar1 = 1;
             break;
         }
-    } while (bVar1 == 0);
+    } while (bVar1 == 0);*/
     return temp & 0xFFFFFFE0;
 }
 
 //MATCH GCN
-struct __sFILE * fopen(const char* _name, const char* _type) {
+struct __sFILE * fopen_NGC(const char* _name, const char* _type) {
     char *pcVar1;
-    
+
     seekoffset = 0;
     strcpy(namesave,_name);
     while( 1 ) {
@@ -212,9 +213,9 @@ struct __sFILE * fopen(const char* _name, const char* _type) {
 }
 
 //MATCH GCN
-u32 fread(void *buffer,u32 size,u32 count,struct __sFILE *stream) {
+u32 fread_NGC(void *buffer,u32 size,u32 count,struct __sFILE *stream) {
     s32 ret;
-    
+
     if (stream != NULL) {
         sprintf(temp,"fd %d size %d count %d offset %d length %d\n",stream,size,count,fileoffset,
                 filelength);
@@ -239,7 +240,7 @@ u32 fread(void *buffer,u32 size,u32 count,struct __sFILE *stream) {
 //extern int thisbytesread; //nufile.c
 
 //MATCH GCN
-s32 fseek(struct __sFILE *__stream, long __off, int __whence) {
+s32 fseek_NGC(struct __sFILE *__stream, long __off, int __whence) {
     switch (__whence) {
     case 0:
         seekoffset = __off;
@@ -259,14 +260,14 @@ s32 fseek(struct __sFILE *__stream, long __off, int __whence) {
 
 //MATCH GCN
 s32 GCFileClose(s32 fd) {
-    GC_DiskErrorPoll();
-    DVDClose(&MAHFile);
+    //GC_DiskErrorPoll();
+    //DVDClose(&MAHFile);
     return 0;
 }
 
 //MATCH GCN
-s32 fclose(struct __sFILE *__stream) {
-    
+s32 fclose_NGC(struct __sFILE *__stream) {
+
     if (__stream == NULL) {
         return 0;
     }
@@ -275,6 +276,3 @@ s32 fclose(struct __sFILE *__stream) {
         return GCFileClose((s32)__stream);
     }
 }
-
-
-*/

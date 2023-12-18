@@ -79,11 +79,12 @@ static void NuMtlInsert(struct nusysmtl_s* sm) {
   struct nusysmtl_s *list;
 
   last = NULL;
-  list = smlist;
+  //list = smlist;
 
   sid = (sm->mtl).alpha_sort * 0x10000 + (sm->mtl).tid;
-  sm->last = sm->next = NULL;
-
+  sm->last = NULL;
+ // sm->next = NULL;
+/*
   for(; list != NULL; last = list, list = list->next) {
     lsid = (list->mtl).alpha_sort * 0x10000 + (list->mtl).tid;
     if(lsid <= sid)
@@ -102,7 +103,7 @@ static void NuMtlInsert(struct nusysmtl_s* sm) {
   if (sm->next != NULL) {
     sm->next->last = sm;
   }
-
+*/
   return;
 }
 
@@ -111,11 +112,9 @@ struct numtl_s* NuMtlCreate(s32 mode) {
   struct nusysmtl_s *sm;
   struct nusysmtl_s *ret;
   s32 i;
-    char pad [3];
 
     sm = NULL;
-  if (0 < mode) {
-    for (i = mode; i != 0; i--) {
+    for (i = 0; i < mode; i++) {
       ret = (struct nusysmtl_s *)malloc_x(0x6c);
       memset(ret,0,0x6c);
       (ret->mtl).alpha = 1.0f;
@@ -128,7 +127,7 @@ struct numtl_s* NuMtlCreate(s32 mode) {
       nummtls++;
       sm = ret;
     }
-  }
+
   return &ret->mtl;
 }
 

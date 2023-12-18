@@ -57,8 +57,29 @@ s32 CopyFilesThreadProc() {
     //InitGlobalSfx();
     iStack_c = GetTickCount() - iVar1;
     printf("CopyFilesThreadProc...\n");
-    printf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
+    sprintf(texBuf,"Filecopy took %.2f seconds", iStack_c / 1000.0f);
     return 0;
+}
+
+int exists_test(const char *fname)
+{
+    FILE *file;
+    s32 d;
+    char name[128] = "";
+
+    //strcpy(name, "/");
+	strcat(name, fname);
+    if ((file = fopen(name, "r")))
+    {
+        printf("fclose F.E. %s \n", name);
+        d = 1;
+        fclose(file);
+    }
+    else{
+        d = 0;
+    }
+    printf("%s exist? %d \n", name, d);
+    return d;
 }
 
 
@@ -90,7 +111,6 @@ int main()
     InitCutScenes();
     */
 
-
     printf("NuTrigTable init...\n");
     NuTrigInit();
     printf("NuTex init...\n");
@@ -101,16 +121,23 @@ int main()
     NuMtlInit();
     printf("NuRndr init...\n");
     NuRndrInitEx();
-    printf("NuLight init...\n");
-    NuLightInit();
-    //pNuCam = NuCameraCreate();
+  /*  printf("NuLight init...\n");
+    NuLightInit();*/
+    pNuCam = NuCameraCreate();
 
     //from firstscreens function
     CopyFilesThreadProc(0);
     gerbils = malloc_x(0x4000c);
     printf("bits allocated \n");
-    NuFileLoadBuffer("licnin.s3",gerbils,0x2000c);
-    printf(".s3 file loaded \n");
+   if (NuFileLoadBuffer("licnin.s3",gerbils,0x2000c) != 0)
+   {
+       printf("licnin.s3 loaded \n");
+   }
+   else {
+       printf("licnin.s3 not loaded \n");
+   }
+
+ /*
     tex.width = 0x200;
     tex.height = 0x200;
     tex.decal = 0;

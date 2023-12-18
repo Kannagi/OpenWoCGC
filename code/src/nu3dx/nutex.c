@@ -14,7 +14,7 @@ void NuTexInit() {
 	if (initialised != 0) {
 		NuTexClose();
 	}
-	//GS_TexReInit();
+	GS_TexReInit();
 	memset(tinfo, 0, sizeof(tinfo));
 	ntex = 0;
 	tpid = 0;

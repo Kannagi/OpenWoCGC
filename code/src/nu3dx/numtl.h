@@ -44,6 +44,7 @@
 // Prototypes
 /**********************************************************/
 struct numtl_s* NuMtlCreate(s32 mode);
+static void NuMtlInsert(struct nusysmtl_s* sm);
 void NuMtlUVAnimation(struct nugobj_s* gobj);
 /**********************************************************/
 

@@ -78,7 +78,7 @@ struct numemfile_s
 {
 	char* start;
 	char* end;
-	char* currposition;
+	char* curr;
 	enum nufilemode_e mode;
 	s32 used;
 };

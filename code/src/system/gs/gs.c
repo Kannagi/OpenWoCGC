@@ -116,7 +116,7 @@ int GS_Init(void)
   //_GXColor GXCol [3];
 
   //GXInvalidateTexAll();
-    //GS_TexInit();
+    GS_TexInit();
   //GXCol[0] = GS_BgColour;
   //GXSetCopyClear(GXCol,0xffffff);
   //i = DEMOGetCurrentBuffer();
