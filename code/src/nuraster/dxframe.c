@@ -4,7 +4,6 @@
 // If the backbuffer has been grabbed this frame.
 s32 backbuffer_grabbed_this_frame = 0;
 int iss3cmp;
-char DebugText[256];
 
 // Back buffer TID.
 s32 backbuffer_tid = 0x207F;

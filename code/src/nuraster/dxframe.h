@@ -3,6 +3,7 @@
 
 #include "../types.h"
 #include "nuraster/nurastertypes.h"
+#include "system/gs/gs.h"
 //#include <d3d11.h>
 
 /*

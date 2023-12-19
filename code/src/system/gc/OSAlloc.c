@@ -1,19 +1,18 @@
 #include "OSAlloc.h"
 
-/*
+
 #define InRange(addr, start, end)                                             \
     ((u8*) (start) <= (u8*) (addr) && (u8*) (addr) < (u8*) (end))
 #define OFFSET(addr, align) (((uintptr_t) (addr) & ((align) -1)))
+#define OSRoundUp32B(x) (((u32) (x) + 32 - 1) & ~(32 - 1))
 
 #define ALIGNMENT 32
 #define MINOBJSIZE 64
 
-#define NULL ((any_t) 0)
-
 void unlink_node(struct Heap *heap, struct ListNode *node)
 {
-    struct ListNode *head = heap->head;  
-        
+    struct ListNode *head = heap->free;
+
         if (node->next != NULL)
             node->next->prev = node->prev;
 
@@ -21,19 +20,19 @@ void unlink_node(struct Heap *heap, struct ListNode *node)
             head = node->next;
         else
             node->prev->next = node->next;
-        heap->head = head;
+        heap->free = head;
 }
 
-void *OSAllocFromHeap(OSHeapHandle handle, u32 size)
+void *OSAllocFromHeap(s32 handle, u32 size)
 {
     struct Heap *heap = &HeapArray[handle];
     s32 sizeAligned = OSRoundUp32B(32 + size);
     struct ListNode *node;
     struct ListNode *oldTail;
     u32 leftoverSpace;
-    
+
     // find first node with enough capacity
-    for (node = heap->head; node != NULL; node = node->next)
+    for (node = heap->free; node != NULL; node = node->next)
     {
         if (sizeAligned <= node->size)
             break;
@@ -51,7 +50,7 @@ void *OSAllocFromHeap(OSHeapHandle handle, u32 size)
     {
         // make a new node out of the remaining space and remove the current node
         struct ListNode *newNode;
-        newNode = (void *)((u8 *)node + sizeAligned);        
+        newNode = (void *)((u8 *)node + sizeAligned);
         node->size = sizeAligned;
         newNode->size = leftoverSpace;
         newNode->prev = node->prev;
@@ -61,20 +60,20 @@ void *OSAllocFromHeap(OSHeapHandle handle, u32 size)
         if (newNode->prev != NULL)
             newNode->prev->next = newNode;
         else
-            heap->head = newNode;
+            heap->free = newNode;
     }
     // add this node to the end?
-    oldTail = heap->tail;
+    oldTail = heap->allocated;
     node->next = oldTail;
     node->prev = NULL;
     if (oldTail != NULL)
         oldTail->prev = node;
-    heap->tail = node;
+    heap->allocated = node;
     return (u8 *)node + 32;
 }
 
-
-size_t OSCheckHeap(OSHeapHandle heap)
+/*
+size_t OSCheckHeap(s32 heap)
 {
     Heap* hd;
     HeapCell* cell;
@@ -126,7 +125,7 @@ size_t OSCheckHeap(OSHeapHandle heap)
 
 
 
-void OSFreeToHeap(OSHeapHandle heap, any_t ptr)
+void OSFreeToHeap(s32 heap, any_t ptr)
 {
     HeapCell* cell = (any_t) ((u8*) ptr - ALIGNMENT);
     Heap* hd = &HeapArray[heap];
@@ -184,16 +183,16 @@ static HeapCell* DLInsert(HeapCell* list, HeapCell* cell)
         return list;
     }
     return cell;
-}
+} */
 
-OSHeapHandle OSSetCurrentHeap(OSHeapHandle heap)
+s32 OSSetCurrentHeap(s32 heap)
 {
-    OSHeapHandle old = __OSCurrHeap;
+    s32 old = __OSCurrHeap;
 
     __OSCurrHeap = heap;
     return old;
 }
-
+/*
 any_t OSInitAlloc(any_t arenaStart, any_t arenaEnd, int maxHeaps)
 {
     u32 totalSize = maxHeaps * sizeof(Heap);
@@ -220,7 +219,7 @@ any_t OSInitAlloc(any_t arenaStart, any_t arenaEnd, int maxHeaps)
     return arenaStart;
 }
 
-OSHeapHandle OSCreateHeap(any_t start, any_t end)
+s32 OSCreateHeap(any_t start, any_t end)
 {
     int i;
     HeapCell* cell = (any_t) OSRoundUp32B(start);

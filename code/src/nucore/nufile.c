@@ -492,30 +492,28 @@ char NuFileReadChar(fileHandle handle)
 	return tmp;
 }
 
-s32 NuFileBeginBlkRead(fileHandle handle, s32 blkType)
-{
-	s32 currBlock = blkcnt;
-	blkcnt++;
-	s32 pos = NuFilePos(handle);
-	if (currBlock < 2 || pos < blkinfo[currBlock - 1].pos + blkinfo[currBlock - 1].hdr.size)
-	{
-		blkinfo[currBlock].pos = pos; //old: blkinfo[currBlock - 1].pos = pos;
-		NuFileRead(handle, blkinfo + currBlock, 8);
-		if (blkinfo[currBlock].hdr.size < 0)
-		{
-			blkinfo[currBlock].hdr.size = -blkinfo[currBlock].hdr.size;
-		}
-		if (blkType != 0 && blkType != blkinfo[currBlock].hdr.blk)
-		{
-			NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 471, "NuFileBeginBlkRead : Block header mismatch!");
-		}
-		return blkinfo[currBlock].hdr.blk;
-	}
-	else
-	{
-		currBlock = 0;
+//NGC MATCH
+s32 NuFileBeginBlkRead(s32 handle, s32 blkType) {
+    s32 pos;
+    s32 bh;
+    
+	bh = blkcnt++;
+	pos = NuFilePos(handle);
+	if (bh > 1 && pos >= blkinfo[bh - 1].pos + blkinfo[bh - 1].hdr.size) {
 		blkcnt--;
 		return 0;
+	}
+	else {
+        pos = NuFilePos(handle);
+		blkinfo[bh].pos = pos;
+		NuFileRead(handle, &blkinfo[bh], 8);
+		if (blkinfo[bh].hdr.size < 0) {
+			blkinfo[bh].hdr.size = -blkinfo[bh].hdr.size;
+		}
+		if (blkType != 0 && blkType != blkinfo[bh].hdr.blk) {
+			NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 0x727,"NuFileBeginBlkRead : Block header mismatch!");
+		}
+		return blkinfo[bh].hdr.blk;
 	}
 }
 

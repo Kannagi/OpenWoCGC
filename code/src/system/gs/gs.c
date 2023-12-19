@@ -57,9 +57,7 @@ void GS_SetAlphaCompare(int Func,int Ref)
   return;
 }
 
-void GS_ARGBTORGBA(u32 *colors,int count)
-
-{
+void GS_ARGBTORGBA(u32 *colors,int count) {
   if (count < 1) {
     return;
   }
@@ -106,54 +104,43 @@ void GS_EndScene(void)
 
 static int GS_ScreenHeight;
 static int GS_ScreenWidth;
+unsigned char DemoStatEnable; //DEMOStats.c
 
+//NGC MATCH
+s32 GS_Init(void) {
+  GXRenderModeObj *rmp;
 
-int GS_Init(void)
-
-{
-  int i;
-  //_GXRenderModeObj *rmp;
-  //_GXColor GXCol [3];
-
-  //GXInvalidateTexAll();
-    GS_TexInit();
-  //GXCol[0] = GS_BgColour;
-  //GXSetCopyClear(GXCol,0xffffff);
-  //i = DEMOGetCurrentBuffer();
-  //GXCopyDisp((void *)i,'\x01');
+  GXInvalidateTexAll();
+  GS_TexInit();
+  //GXSetCopyClear(GS_BgColour,0xffffff);
+  //GXCopyDisp(DEMOGetCurrentBuffer(), 1);
   //rmp = DEMOGetRenderModeObj();
-  //GS_ScreenHeight = (int)rmp->efbHeight;
-  //GS_ScreenWidth = (int)rmp->fbWidth;
+  GS_ScreenWidth = (int)rmp->fbWidth;
+  GS_ScreenHeight = (int)rmp->efbHeight;
   GS_InitVertexDescriptors();
   GS_InitXForm();
-  //DemoStatEnable = '\0';
-  /*GS_FrameBufferCopyPause.width = 0x140;
+  DemoStatEnable = '\0'; //UNUSED
+  GS_FrameBufferCopyPause.width = 0x140;
   GS_FrameBufferCopyPause.height = 0xe0;
-  GS_FrameBufferCopyPause.data = NULL;
   GS_FrameBufferCopyPause.top = 0;
-  GS_FrameBufferCopyPause.left = 0;*/
+  GS_FrameBufferCopyPause.left = 0;
+  GS_FrameBufferCopyPause.data = NULL;
   //CARDInit();
   //GBA_Init();
-  //GS_FrameBufferCopySize =
-       //GXGetTexBufferSize(GS_FrameBufferCopyPause.width._2_2_,GS_FrameBufferCopyPause.height._2_2 _,4
-                        //  ,'\0','\0');
-  //GS_FrameBufferCopyPause.data = (u8 *)malloc(GS_FrameBufferCopySize);
-  /*if (GS_FrameBufferCopyPause.data == NULL) {
-    DisplayErrorAndLockup
-              ("C:/source/crashwoc/code/system/gc/gs.c",0x182,
-               "Out Of Memory - Frame Buffer Copy Pause");
-  }*/
-  //GS_FrameBufferCopydataptr = GS_FrameBufferCopyPause.data;
+  GS_FrameBufferCopySize = GXGetTexBufferSize(GS_FrameBufferCopyPause.width,GS_FrameBufferCopyPause.height,4,'\0','\0');
+  GS_FrameBufferCopyPause.data = (u8 *)malloc(GS_FrameBufferCopySize);
+  if (GS_FrameBufferCopyPause.data == NULL) {
+    DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/gs.c",0x182,"Out Of Memory - Frame Buffer Copy Pause");
+  }
+  GS_FrameBufferCopydataptr = GS_FrameBufferCopyPause.data;
   GS_LoadWorldMatrixIdentity();
   return 0;
 }
 
-//static _GXColor GS_BgColour;
-
 void GS_RenderClear(u64 Flags,u64 Color,float Z,u64 Stencil)
 
 {
-  //_GXColor bgcol [2];
+  GXColor bgcol [2];
 
   if ((Flags & 0xf0) != 0) {
     if (fadeval == 0xff) {
@@ -163,7 +150,7 @@ void GS_RenderClear(u64 Flags,u64 Color,float Z,u64 Stencil)
       //GS_BgColour._2_2_ = CONCAT11((char)Color,(char)(Color >> 0x18));
       //GS_BgColour = (_GXColor)((Color >> 8) << 0x10 | (uint)GS_BgColour._2_2_);
     }
-    //bgcol[0] = GS_BgColour;
+    bgcol[0] = GS_BgColour;
     //GXSetCopyClear(bgcol,0xffffff);
   }
   return;

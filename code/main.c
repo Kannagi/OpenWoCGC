@@ -137,7 +137,7 @@ int main()
        printf("licnin.s3 not loaded \n");
    }
 
- /*
+
     tex.width = 0x200;
     tex.height = 0x200;
     tex.decal = 0;

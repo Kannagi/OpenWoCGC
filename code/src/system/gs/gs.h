@@ -37,6 +37,7 @@
 void GS_SetRenderState(int state, int data);
 void GS_SetBlendSrc(int enable,int src,int dest);
 
+char DebugText[256];
 
 struct nuviewport_s {
     u32 x;
@@ -305,5 +306,18 @@ struct _GS_BUFFER
     unsigned int type; // Offset: 0x4, DWARF: 0xD38891
 };
 
+struct __GS_FrameBufferCopyPause
+{
+    GXTexObj tobj;
+    void * data;
+    s32 top;
+    s32 left;
+    s32 width;
+    s32 height;
+};
 
+struct __GS_FrameBufferCopyPause GS_FrameBufferCopyPause;
+void* GS_FrameBufferCopydataptr;
+u32 GS_FrameBufferCopySize;
 static struct _GS_TEXTURE* GS_TexList;
+static GXColor GS_BgColour;

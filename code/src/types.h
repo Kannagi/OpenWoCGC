@@ -55,6 +55,8 @@ typedef s32 fileHandle;
 
 unsigned long long LBIT;
 
+typedef volatile u16 vu16;
+
 union variptr_u superbuffer_ptr;
 union variptr_u superbuffer_base;
 union variptr_u superbuffer_end;
