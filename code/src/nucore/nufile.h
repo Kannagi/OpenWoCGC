@@ -4,6 +4,7 @@
 #include "types.h"
 #include "nucoretypes.h"
 #include "numem.h"
+#include "system/gc/fs.h"
 //#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

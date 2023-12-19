@@ -6,6 +6,7 @@
 
 unsigned char* filebuffer = NULL;
 s32 blkcnt = 1;
+struct fileinfo_s file_info[16];
 static struct BlockInfo blkinfo[0x400];
 unsigned char* bpointer;
 s32 badGameDisk = 0;
@@ -47,12 +48,18 @@ void NuFileInitEx(int deviceid, int rebootiop)
 s32 NuFileExists(char* filename) {
     FILE* filep; //__sFILE*
     char name[128] = "";
+    char tmp;
 
     //strcpy(name, "/");
+    seekoffset = 0; //fopen NGC
 	strcat(name, filename);
 	filep = fopen(name, "r");
 	printf("check F.E. \n");
 	if (filep != NULL) {
+            //skip SDK check
+        fileoffset = 0;
+        filelength = 1;
+            //
 		fclose(filep);
         printf("file exist! %s \n", filename);
         return 1;
@@ -78,9 +85,10 @@ s32 NuFileOpen(char* file, enum nufilemode_e mode) {
     int f;
     FILE* fp; // r9	//__sFILE*
     FILE** p; //__sFILE**
-    static char name[128] = ""; // 0x80229388
+    char name[128] = ""; // 0x80229388
     void* m;
 
+    printf("F.O. before strcat name %s \n", name);
     if (NuFileGetBadGameDisc() == 0) {
         thisbytesread = 0;
         checkmemfile(file);
@@ -95,21 +103,24 @@ s32 NuFileOpen(char* file, enum nufilemode_e mode) {
         if (mode > NUFILE_APPEND) {
             NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 0x39e,"assert");
         }
-        for (p = fpointers, s = 0; s < MAX_FILES; s++) { //MAX_FILES = 10
+        for (p = fpointers, s = 0; s < 10; s++) {
             m = *p;
-            printf("F.O. check loop \n");
-            if (p == NULL) {
+            if (*p == NULL) {
                     printf("F.O. fopen \n");
                 fp = fopen(name, fmode[mode]);
                 if (fp == NULL) {
                     printf("file null \n");
                     return NULL;
                 }
-                printf("\n bytesleft %d",bytesleft);
+                    //skip SDK check
+                fileoffset = 0;
+                filelength = 1;
+                    //
                 *p = fp;
                 bytesleft = m;
-
-                return s + 1;
+                //printf("bytesleft %d \n",bytesleft);
+                s++;
+                return s;
             }
             p++;
         }
@@ -194,26 +205,25 @@ s32 NuMemFilePos(fileHandle handle)
 	}
 }
 
-s32 NuMemFileRead(fileHandle handle, void* data, s32 size)
-{
-	if (handle < 0x800)
-	{
-		s32 f = handle - 0x400;
-		s32 left = (s32)memfiles[f].end + (1 - (s32)memfiles[f].curr);
-		if (size > left)
-		{
+//NGC MATCH
+s32 NuMemFileRead(s32 handle, void* data, s32 size) {
+    s32 left;
+    
+	if (handle > 0x7ff) {
+		return NuDatFileRead(handle, data, size);
+	}
+	else {
+		handle -= 0x400;
+		left = (s32)memfiles[handle].end - ((s32)memfiles[handle].curr) + 1;
+		if (size > left) {
 			size = left;
 		}
 		if (size != 0)
 		{
-			memcpy(data, memfiles[f].curr, size);
-			memfiles[f].curr = memfiles[f].curr + size;
+			memcpy(data, memfiles[handle].curr, size);
+			memfiles[handle].curr = memfiles[handle].curr + size;
 		}
 		return size;
-	}
-	else
-	{
-		return NuDatFileRead(handle, data, size);
 	}
 }
 
@@ -242,39 +252,46 @@ s32 NuMemFileSeek(fileHandle handle, s32 offset, s32 origin)
 	}
 }
 
-// I completely redid a part of this function, I hope it's right.
-s32 NuFilePos(fileHandle handle)
-{
-	if (handle < 0x400)
-	{
-		s32 ret = thisbytesread;
-		if (fpointers[handle - 1] != NULL)
-		{
-			ret = ftell(fpointers[handle - 1]);
-		}
-		return ret;
-	}
-	else
-	{
+//NGC MATCH
+s32 NuFilePos(s32 handle) {
+    s32 ret;
+    struct fileinfo_s* info;
+
+	if (handle > 0x400) {
 		return NuMemFilePos(handle);
+	}
+	else {
+        handle--;
+        info = &file_info[handle];
+		if (info->use_buff == NULL) {
+		    ret = thisbytesread;
+		}
+        else{
+			ret = ftell(fpointers[handle]); //ret = info->read_pos;
+            printf("NuFilePos buff exist %d \n", ret);
+        }
+		return ret;
 	}
 }
 
-s32 NuFileSeek(fileHandle handle, s32 offset, s32 origin)
+//NGC MATCH
+s32 NuFileSeek(s32 handle, s32 offset, s32 origin)
 {
-	if (handle < 0x400)
+    static s32 forig[] = {0, 1, 2};
+
+	if (handle > 0x3ff)
 	{
-		if (origin == NUFILE_SEEK_CURRENT)
-		{
-		    printf("seek curr...\n");
-			offset -= bytesleft;
-		}
-		bytesleft = 0;
-		return fseek(fpointers[handle - 1], offset, origin);
+		return NuMemFileSeek(handle, offset, origin);
 	}
 	else
 	{
-		return NuMemFileSeek(handle, offset, origin);
+        handle--;
+		if (origin == NUFILE_SEEK_CURRENT)
+		{
+			offset -= bytesleft;
+		}
+		bytesleft = 0;
+		return fseek(fpointers[handle], (long)offset, forig[origin]);
 	}
 }
 
@@ -284,11 +301,12 @@ s32 NuFileSize(char* fileName) {
 	s32 rv = -1;
 	s32 handle;
 
-    printf("checking file size \n");
+    //printf("checking file size \n");
 	if (fileName != NULL && *fileName != 0) {
 	    if (NuFileExists(fileName) != 0) {
 	    printf("file size exist... \n");
             handle = NuFileOpen(fileName, NUFILE_READ);
+            printf("handle check... FileSize %d\n", handle);
             if (handle != NULL)
 			{
 				rv = GCFileSize(handle);
@@ -296,33 +314,37 @@ s32 NuFileSize(char* fileName) {
 			}
         }
 	}
+	printf("return FileSize %d\n", rv);
 	return rv;
 }
 
-void* NuFileLoad(char* fileName)
-{
-	void* dest = NULL;
-	s32 size = NuFileSize(fileName);
-	if (size > 0)
-	{
-		fileHandle handle = NuFileOpen(fileName, NUFILE_READ);
-		if (handle != NULL)
-		{
-			dest = NuMemAlloc(size);
-			if (dest != NULL)
+//NGC MATCH
+void* NuFileLoad(char* fileName) {
+    s32 handle;
+    s32 size;
+	void* mem = NULL;
+
+	size = NuFileSize(fileName);
+	if (size > 0) {
+		handle = NuFileOpen(fileName, NUFILE_READ);
+		if (handle != NULL) {
+			mem = NuMemAlloc(size);
+			if (mem != NULL)
 			{
-				NuFileRead(handle, &dest, size);
+				NuFileRead(handle, mem, size);
 			}
 			NuFileClose(handle);
 		}
 	}
-	return dest;
+	return mem;
 }
 
 //98% NGC
 s32 NuFileLoadBuffer(char* fileName, void* mem, s32 buffsize) {
     s32 handle;
-	s32 size = NuFileSize(fileName);
+	s32 size = 0;
+
+    size = NuFileSize(fileName);
 	if (size == 0) {
 		printf("file size: %d\n", size);
 		NuErrorProlog("OpenCrashWOC/code/nucore/nufile.c", 0x58d) ("File %s does not exist!", fileName);
@@ -334,6 +356,7 @@ s32 NuFileLoadBuffer(char* fileName, void* mem, s32 buffsize) {
 	}
 	if (size != 0) {
         handle = NuFileOpen(fileName, NUFILE_READ);
+        printf("handle check F.O.. %d\n", handle);
 		if (handle != NULL) {
 			printf("filebuffer reading...\n");
 			NuFileRead(handle, mem, size);
@@ -349,13 +372,16 @@ s32 NuFileRead(s32 handle, void* data, s32 size) {
     s32 bytesread;
     u8* pt;
     s32 tbytesread;
+    s32 tmpsize;
 
 	if (handle > 0x3ff) {
 		size = NuMemFileRead(handle, data, size);
 	}
 	else {
+            printf("else NuFileRead...\n");
 		if (currentpointer != handle || handle == -1)
 		{
+		    printf("handle = %d ?...\n", handle);
 			bytesleft = 0;
 			totalbytesread = 0;
 			currentpointer = handle;
@@ -366,17 +392,21 @@ s32 NuFileRead(s32 handle, void* data, s32 size) {
         //GC_DiskErrorPoll();
 		if (bytesleft == 0) {
 			bytesleft = fread(filebuffer, 1, 0x10000, fpointers[handle]);
+			printf("bytesleft check 1: %d...\n", bytesleft);
+                tmpsize = freadcheck_NGC(fpointers[handle], 1, 0x10000);
 			totalbytesread += bytesleft;
 			bpointer = filebuffer;
 		}
 		datacounter += size;
 		if (size <= bytesleft) {
+		    printf("memcpy data 1...\n");
 			memcpy(data, bpointer, size);
 			bpointer = (u8*)((u32)bpointer + size);
 			bytesleft -= size;
 			thisbytesread += size;
 		}
 		else {
+		    printf("memcpy data 2...\n");
 			memcpy(data, bpointer, bytesleft);
 			pt = (u8*)((s32)data + bytesleft);
 			thisbytesread += size;
@@ -385,13 +415,17 @@ s32 NuFileRead(s32 handle, void* data, s32 size) {
 			while (bytesread > 0x10000) {
 				bytesread -= 0x10000;
 				tbytesread = fread(filebuffer, 1, 0x10000, fpointers[handle]);
+                  tmpsize = freadcheck_NGC(fpointers[handle], 1, 0x10000);
 				size += tbytesread;
+                printf("memcpy filebuff 1...\n");
 				memcpy(pt, filebuffer, 0x10000);
 				pt = (u8*)((u32)pt + 0x10000);
 			}
 			bytesleft = 0;
 			if (bytesread > 0) {
 				tbytesread = fread(filebuffer, 1, 0x10000, fpointers[handle]);
+                  tmpsize = freadcheck_NGC(fpointers[handle], 1, 0x10000);
+				printf("memcpy filebuff 2...\n");
 				memcpy(pt, filebuffer, bytesread);
 				size += tbytesread;
 				bytesleft = tbytesread - bytesread;
@@ -399,6 +433,7 @@ s32 NuFileRead(s32 handle, void* data, s32 size) {
 			}
 		}
 	}
+	printf("NuFileRead size: %d...\n", size);
 	return size;
 }
 

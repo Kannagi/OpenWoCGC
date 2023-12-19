@@ -112,6 +112,8 @@ LAB_800c67f4:
 }
 */
 
+
+/*
 //96%
 s32 GCFileOpen(char *fname) {
     int i;
@@ -123,21 +125,22 @@ s32 GCFileOpen(char *fname) {
     }
     //StreamClear();
     //GC_DiskErrorPoll();
-  /*  if (DVDOpen(fname,&MAHFile) == 0) {
+    if (DVDOpen(fname,&MAHFile) == 0) {
         i = 0;
     }
     else{
         fileoffset = 0;
         filelength = MAHFile.length;
         i = 1;
-    }*/
+    }
     return i;
-}
+}*/
 
 //NGC MATCH
 s32 GCFileSize(s32 fd) {
     //GC_DiskErrorPoll();
-    return MAHFile.length;
+    //return MAHFile.length;
+    return filelength;
 }
 
 //86%
@@ -195,6 +198,7 @@ s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
     } while (bVar1 == 0);*/
     return temp & 0xFFFFFFE0;
 }
+/*
 
 //MATCH GCN
 struct __sFILE * fopen_NGC(const char* _name, const char* _type) {
@@ -211,6 +215,7 @@ struct __sFILE * fopen_NGC(const char* _name, const char* _type) {
     currentfd = GCFileOpen(_name);
     return (struct __sFILE *)currentfd;
 }
+*/
 
 //MATCH GCN
 u32 fread_NGC(void *buffer,u32 size,u32 count,struct __sFILE *stream) {
@@ -275,4 +280,37 @@ s32 fclose_NGC(struct __sFILE *__stream) {
         seekoffset = 0;
         return GCFileClose((s32)__stream);
     }
+}
+
+u32 freadcheck_NGC (FILE* handle, u32 size, u32 count) {
+    s32 ret;
+    u32 tmp2;
+        //fread NGC
+        if (handle != 0){
+                ret = size * count;
+                        //GCFileRead
+                                        if (ret > filelength) {
+                                            ret = filelength + (0x20 - (filelength & 0x1fU) & 0x1f);
+                                        }
+                                        tmp2 = filelength - fileoffset;
+                                        if (ret > tmp2) {
+                                            ret = tmp2 + (0x20 - (tmp2 & 0x1f) & 0x1f);
+                                        }
+                        //
+                seekoffset += ret;
+                if (filelength < fileoffset) {
+                    fileoffset = filelength;
+                } else{
+                    fileoffset += ret;
+                }
+                if (ret != -1) {
+                    amread = amread + ret;
+                    printf("ret val: %d\n", ret);
+                    return ret;
+                }
+
+            }
+        printf("ret NULL: %d\n", ret);
+        return 0;
+                    //
 }
