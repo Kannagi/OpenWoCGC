@@ -347,10 +347,8 @@ void SetNearestLights(Nearest_Light_s *l)
   return;
 }
 
-
-nuvec_s * GetLightPosition(int index)
-
-{
+//NGC MATCH
+struct nuvec_s * GetLightPosition(s32 index) {
   return &Lights[index].pos;
 }
 

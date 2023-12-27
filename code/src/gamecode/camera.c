@@ -534,95 +534,78 @@ void RailInfo(RPos_s *RPos,nuvec_s *pos,ushort *yrot,ushort *cam_yrot,uchar *mod
   return;
 }
 
-
-
-float LookUpDownRail(obj_s *obj,ushort yrot,int mode)		//TODO
-
-{
-  bool bVar1;
-  int drot;
-  int iVar2;
-  uint uVar3;
-  double dVar4;
-
-  if (((Level == 8) && ((player->obj).RPos.iRAIL == '\0')) &&
-     ((ushort)(player->obj).RPos.iALONG - 0x2d < 4)) {
-LAB_8000afb8:
-    dVar4 = 1.0;
+//MATCH NGC
+float LookUpDownRail(struct obj_s *obj,u16 yrot,s32 mode) {
+  s32 dir;
+  s32 dyrot;
+  float pos;
+  
+  if (((Level == 8) && ((player->obj).RPos.iRAIL == '\0')) && ((u16)(player->obj).RPos.iALONG - 0x2d <= 3U)) {
+        pos = 1.0f;
   }
-  else {
-    if ((Level == 0x11) && ((mode & 2U) != 0)) goto LAB_8000afb8;
-    if (((Level == 1) && ((player->obj).RPos.iRAIL == '\0')) &&
-       ((uVar3 = (uint)(ushort)(player->obj).RPos.iALONG, uVar3 < 200 || (uVar3 - 0xea < 0x20))))  {
-      dVar4 = -1.25;
+else if ((Level == 0x11) && ((mode & 2U) != 0)) {
+        pos = 1.0f;
     }
-    else if ((Level == 0xc) &&
-            (((player->obj).RPos.iRAIL == '\0' && ((ushort)(player->obj).RPos.iALONG < 0x10)))) {
-LAB_8000b078:
-      dVar4 = -1.0;
+    else if (((Level == 1) && ((player->obj).RPos.iRAIL == '\0')) &&
+       (((u32)(u16)(player->obj).RPos.iALONG < 200 || ((u32)(u16)(player->obj).RPos.iALONG - 0xea < 0x20)))) {
+      pos = -1.25f;
+    }
+    else if ((Level == 0xc) && (((player->obj).RPos.iRAIL == '\0' && ((u16)(player->obj).RPos.iALONG <= 0xf)))) {
+        pos = 0.0f;
     }
     else if (((Level == 7) && ((player->obj).RPos.iRAIL == '\0')) &&
-            ((uVar3 = (uint)(ushort)(player->obj).RPos.iALONG, uVar3 - 0x9e < 0xc ||
-             (uVar3 - 0x6a < 0x24)))) {
-      dVar4 = -1.350000023841858;
+	     (((u32)(u16)(player->obj).RPos.iALONG - 0x9e < 0xc || ((u32)(u16)(player->obj).RPos.iALONG - 0x6a < 0x24)))) {
+      pos = -1.35f;
     }
     else {
-      if ((Level == 0x13) && (Death == 2)) goto LAB_8000b078;
-      dVar4 = 0.0;
+      if ((Level == 0x13) && (Death == 2))
+      pos = 0.0f;
+        else{
+              pos = -1.0f; 
+        }
     }
-  }
-  drot = RotDiff(yrot,obj->hdg);
-  iVar2 = (drot >> 0x1f ^ drot) - (drot >> 0x1f);
-  if (iVar2 < 0x2aab) {
-    bVar1 = false;
+
+  dyrot = RotDiff(yrot,obj->hdg);
+  if ((dyrot >> 0x1f ^ dyrot) - (dyrot >> 0x1f) < 0x2aab) {
+    dir = 0;
   }
   else {
-    if (iVar2 < 0x5556) goto LAB_8000b0dc;
-    bVar1 = true;
+    if ((dyrot >> 0x1f ^ dyrot) - (dyrot >> 0x1f) < 0x5556) {
+        return pos; 
+    }
+    dir = 1;
   }
-  if (((mode & 3U) != 0) && (bVar1)) {
-    dVar4 = (double)(float)(dVar4 - 2.0);
+  if (((mode & 3U) != 0) && (dir == 1)) {
+    pos = (pos - 2.0f);
   }
-LAB_8000b0dc:
-  return (float)dVar4;
+  return pos;
 }
 
 
+//58% NGC
+s32 InSplineArea(struct NuVec* pos, struct nugspline_s* spl) {
+    struct NuVec* p0;
+    struct NuVec* p1;
+    s32 i;
+    s32 j;
 
-int InSplineArea(nuvec_s *pos,nugspline_s *spl)
 
-{
-  float fVar1;
-  float fVar2;
-  int len;
-  nuvec_s *p0;
-  int j;
-  nuvec_s *p1;
-  int i;
-
-  len = (int)spl->len;
-  i = 1;
-  if (1 < len) {
-    p0 = (nuvec_s *)spl->pts;
-    do {
-      p1 = (nuvec_s *)(i * spl->ptsize);
-      i = i + 1;
-      j = i;
-      if (i == len) {
-        j = 1;
-      }
-      j = j * spl->ptsize;
-      fVar2 = *(float *)((int)&p1->x + (int)&p0->x);
-      fVar1 = *(float *)((int)&p1->z + (int)&p0->x);
-      if ((pos->x - fVar2) * (*(float *)((int)&p0->z + j) - fVar1) +
-          (pos->z - fVar1) * (fVar2 - *(float *)((int)&p0->x + j)) < 0.0) {
-        return 0;
-      }
-    } while (i < len);
-  }
-  return 1;
-}
-*/
+    for (i = 1; i < (s32)spl->len; i++) {
+        p0 = (struct NuVec*)spl->pts;
+        p1 = (struct NuVec*)((int)spl->pts + (i * spl->ptsize));
+        j = i + 1;
+        if (i == (s32)spl->len) {
+            j = 1;
+        }
+        j = j * spl->ptsize;
+        if ((pos[i].x - (p1->x + p0->x)) * (p0[j].z - (p1->z + p0->x))
+             + (pos[i].z - (p1->z + p0->x)) * ((p1->x + p0->x) - p0[j].x) >= 0.0f)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}*/
 
 void MoveGameCamera(struct cammtx_s *GameCamera,struct obj_s *obj)
 
@@ -632,40 +615,38 @@ void MoveGameCamera(struct cammtx_s *GameCamera,struct obj_s *obj)
 
 }
 
-
-void GetALONG(struct nuvec_s *pos,struct RPos_s *rpos,int iRAIL,int iALONG,int info)
-
-{
+//MATCH NGC
+void GetALONG(struct nuvec_s *pos,struct RPos_s *rpos,s32 iRAIL,s32 iALONG,s32 info) {
   if (rpos == NULL) {
     rpos = &TempRPos;
   }
-  if (nRAILS == 0) {
-    temp_iRAIL = -1;
-    temp_iALONG = -1;
+  if (nRAILS != 0) {
+    ComplexRailPosition(pos,iRAIL,iALONG,rpos,0);
   }
   else {
-    //ComplexRailPosition(pos,iRAIL,iALONG,rpos,0);
+    temp_iALONG = -1;
+    temp_iRAIL = -1;
   }
   return;
 }
 
-
-int FurtherALONG(int iRAIL0,int iALONG0,float fALONG0,int iRAIL1,int iALONG1,float fALONG1)
-
-{
-  if ((((iRAIL0 != -1) && (iRAIL1 != -1)) && (Rail[iRAIL0].type == Rail[iRAIL1].type)) &&
-     (iRAIL1 <= iRAIL0)) {
-    if (iRAIL1 < iRAIL0) {
-      return 1;
+//72% NGC
+s32 FurtherALONG(s32 iRAIL0,s32 iALONG0,float fALONG0,s32 iRAIL1,s32 iALONG1,float fALONG1) {
+    if (iRAIL0 == -1) {
+        return 0;
     }
-    if (iALONG1 <= iALONG0) {
-      if (iALONG0 <= iALONG1) {
-        return (fALONG1 < fALONG0);
+  if ((((iRAIL0 != -1) && (iRAIL1 != -1)) && (Rail[iRAIL0].type == Rail[iRAIL1].type)) && (iRAIL0 >= iRAIL1)) {
+        if (iRAIL0 > iRAIL1) {
+            return 1;
+        }
+      if (iALONG0 >= iALONG1) {
+          if (iALONG0 <= iALONG1) {
+            return (fALONG0 > fALONG1);
+          }
       }
-      return 1;
-    }
+      return 0;
   }
-  return 0;
+  return 1;
 }
 
 

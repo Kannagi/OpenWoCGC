@@ -279,7 +279,7 @@ extern s32 VEHICLECONTROL; //vehicle.c
 s32 PHYSICAL_SCREEN_X, PHYSICAL_SCREEN_Y;
 
 
-//96% NGC
+//MATCH NGC
 void SetupShaders(struct nugeomitem_s* geomitem) {
 
     static struct numtx_s matView;
@@ -290,7 +290,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     static struct numtx_s matViewProj;
     static struct numtx_s invWorld;
     static struct numtx_s invWorldView;
-
+    
     struct nurndritem_s* rndritem;
     struct numtx_s *cammtx;
     struct nuvec_s eyepos;
@@ -303,24 +303,20 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     s32 num_bumplights;
     s32 i;
 
-    u32 uVar15; //check temp
-    u32 uVar16; //check temp
-
     rndritem = &geomitem->hdr;
     lightcol = lbl_80123138;
-    uVar16 = 0;
-    uVar15 = 2;
-
+    mtl = NULL;
+    num_bumplights = 2;
+    
     if (currentLevel == 2) {
         if (VEHICLECONTROL == 0) {
-            defaultShader = 0;
+            defaultShader = NO_SHADER;
         }
         else {
             defaultShader = WATERCAUSTICS;
         }
     }
-
-    uVar16 = 0;
+    
     IsGlassObj = 0;
     IsWaterObj = 0;
     DBTimerStart(0x24);
@@ -334,9 +330,9 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     mtl = geomitem->geom->mtl;
     vtxtype = geomitem->geom->vtxtype;
     if (mtl != NULL) {
-        uVar15 = mtl->attrib.lighting;
+        num_bumplights = mtl->attrib.lighting;
     }
-    if (uVar15 != 2) {
+    if (num_bumplights != 2) {
         NuLightSetStoredLights((s32)(geomitem->hdr).lights_index);
     }
     if ((shader != 0x80) && (vtxtype != Shaders[shader].vertshader)) {
@@ -346,7 +342,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
         UnSetupShaders(currentshader);
         NuSetShaderState(shader, vtxtype);
     }
-
+ 
     matView = *NuCameraGetViewMtx();
     matProj = *NuCameraGetProjectionMtx();
     if ((geomitem->mtx == NULL) || (shader == SNOWCLOUD)) {
@@ -361,10 +357,10 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     NuMtxInv(&invWorldView, &matWorldView);
     NuMtxMulH(&matWorldViewProj, &matWorldView, &matProj);
     NuMtxMulH(&matViewProj, &matView, &matProj);
-
+    
     GS_LightViewMat = *(struct _GSMATRIX*) &matView;
     GS_LightMat = *(struct _GSMATRIX*) &matWorldView;
-
+        
     NuMtxTranspose(&matWorldViewProj, &matWorldViewProj);
     NuMtxTranspose(&matViewProj, &matViewProj);
     NuMtxTranspose(&matWorldView, &matWorldView);
@@ -375,6 +371,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     switch(shader) {
         case NO_SHADER:
         break;
+        
         case GLASS: // 3
             IsGlassObj = 1;
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
@@ -389,10 +386,14 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_TexSetWrapModet(0, GX_CLAMP);
             GS_TexSetWrapModes(1, GX_CLAMP);
             GS_TexSetWrapModet(1, GX_CLAMP);
-
+            
             NuTexSetTexture(0, GetGlassSpecularTexId());
             if (mtl != NULL) {
-                NuTexSetTexture(1, (mtl->tid < 1) ? GetGlassSpecularTexId() : mtl->tid);
+                if (mtl->tid < 1) {
+                    NuTexSetTexture(1, GetGlassSpecularTexId());
+                } else {
+                    NuTexSetTexture(1, mtl->tid);
+                }
             }
             else {
                 NuTexSetTexture(1, GetGlassSpecularTexId());
@@ -400,6 +401,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_SetBlendSrc(1,4,5);
             GS_SetTevBlend(1);
         break;
+        
         case WATER: // 1
             IsWaterObj = WATER;
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
@@ -412,6 +414,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_TexSetWrapModet(1, GX_REPEAT);
             GS_SetTevModulate(GX_TEVSTAGE1);
         break;
+        
         case BRDFGOLD: // 10
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*)&matWorldViewProj;
             cammtx = NuCameraGetMtx();
@@ -436,21 +439,24 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NudxFw_SetTextureState(2, D3DTSS_MINFILTER, 2);
             NudxFw_SetTextureState(2, D3DTSS_MIPFILTER, 2);
         break;
+        
         case LIGHTHAZE: // 8
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_SCREEN_PARAMS = *(struct _GS_VECTOR4 *)makenuvec4(PHYSICAL_SCREEN_X - 1,PHYSICAL_SCREEN_Y - 1, 0.0f, 0.0f);
-            CV_CONSTANTS = *(struct _GS_VECTOR4*)makenuvec4(0.0f, 0.0f, 0.0f, 0.0f);
+            CV_CONSTANTS = *(struct _GS_VECTOR4*)makenuvec4(0.0f, 0.0f, 0.0f, 0.0f);   
             NuTexSetTexture(1, haze_mtl->tid);
             GS_TexSetWrapModes(1, GX_CLAMP);
             GS_TexSetWrapModet(1, GX_CLAMP);
             NudxFw_SetTextureState(1, D3DTSS_TEXCOORDINDEX, 1);
         break;
+        
         case DEPTHBLEND: // 6
             NuTexSetTexture(1, depthMtl->tid);
             GS_TexSetWrapModes(1, GX_CLAMP);
             GS_TexSetWrapModet(1, GX_CLAMP);
             NudxFw_SetTextureState(1, D3DTSS_TEXCOORDINDEX, 0);
         break;
+        
         case SNOWCLOUD: // 5
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             memcpy(&CV_LIGHT_POSITION, &geomitem->mtx->_30, sizeof(struct _GS_VECTOR4));
@@ -464,6 +470,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NudxFw_SetTextureState(3, D3DTSS_COLOROP, 2);
             NuMtxSetIdentity(geomitem->mtx);
         break;
+        
         case WATERCAUSTICS: // 4
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_WORLDVIEW = *(struct _GSMATRIX*) &matWorld;
@@ -480,6 +487,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_TexSetWrapModet(1, GX_REPEAT);
             GS_SetTevModulate(GX_TEVSTAGE1);
         break;
+        
         case HEATHAZE: // 2
             CV_SHADER_PARAMS = *(struct _GS_VECTOR4 *)makenuvec4(mtl->fx1.f32, 0.0f, 0.0f, 0.0f);
             CV_SCREENSPACE_OFFSET = *(struct _GS_VECTOR4 *)makenuvec4(0.53125f, 0.53125f, 0.53125f, 0.0f);
@@ -488,6 +496,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NuHazeSetHazeConstants();
             GS_SetTevModulate(GX_TEVSTAGE1);
         break;
+        
         case SPECULAR: // 7
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_WORLDVIEW = *(struct _GSMATRIX*) &matWorld;
@@ -504,6 +513,9 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NuShaderSetColourConstants(mtl);
             NuShaderSetLightConstants(mtl);
         break;
+        
+        case BLENDSKIN: // 15
+        case BLENDSKIN2: // 16
         case BLENDSKINFUR: // 19
         case BLENDSKINFUR2: // 20
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matViewProj;
@@ -512,6 +524,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NuShaderSetColourConstants(mtl);
             NuShaderSetLightConstants(mtl);
         break;
+        
         case BLENDSKINGLASS: // 17
         case BLENDSKINGLASS2: // 18
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matViewProj;
@@ -529,12 +542,13 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NuTexSetTexture(0, 0);
             GS_SetBlendSrc(1, 2, 4);
         break;
-        case BUMPMAP: // 21
+        
+        case BUMPMAP: // 21 
             if (geomitem->instancelights_index[0] == -1) {
                 ResetShaders();
                 return;
             }
-
+            
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             NuShaderSetColourConstants(mtl);
             NudxFw_SetTextureState(1, D3DTSS_TEXCOORDINDEX, 0);
@@ -548,38 +562,39 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NudxFw_SetRenderState(0x5d, 1);
             lightcol = mtl->next->diffuse;
             lights = 0;
-
+            
             for (i = 0; i < 3; i++) {
                 if (geomitem->instancelights_index[i] != -1) {
                     lights++;
                 }
             }
-
+            
             if (lights == 0) {
                 lightpos.x = 10.0;
                 lightpos.y = 10.0;
                 lightpos.z = 10.0;
-
+                
                 matView = *NuCameraGetViewMtx();
                 NuVecMtxTransform(&lightpos, (struct nuvec_s *)&matView._30, &invWorld);
                 CV_LIGHT_POSITION = *(struct _GS_VECTOR4*)makenuvec4(lightpos.x, lightpos.y, lightpos.z, 0.0f);
             }
             else {
                 for (i = 0; i < lights; i++) {
-                 //   lightpos = *(struct nuvec_s *) GetLightPosition((s32)geomitem->instancelights_index[i]);
+                   // lightpos = *(struct nuvec_s *) GetLightPosition((s32)geomitem->instancelights_index[i]);
                     NuVecMtxTransform(&lightpos, &lightpos, &invWorld);
                     CV_LIGHT_POSITION = *(struct _GS_VECTOR4*)makenuvec4(lightpos.x, lightpos.y, lightpos.z, 0.0f);
-
+                    
                     if (i != lights) {
                         NuRndrItem(rndritem);
                     }
-
+                    
                     if (i == 0) {
                         GS_SetBlendSrc(1, 4, 5);
                     }
                 }
             }
         break;
+        
         case BUMPMAPPOINTLIGHT: // 22
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             NuShaderSetColourConstants(mtl);
@@ -595,28 +610,25 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NudxFw_SetRenderState(D3DRS_SPECULARENABLE, 1);
             lightcol = mtl->next->diffuse;
             currentLevel = 0x1b;
-          //  lightpos = *(struct nuvec_s *)GetBugPosition();
-          //  GS_SetPointLighting(&invWorld, &lightpos, &lightcol);
+            lightpos = *(struct nuvec_s *)GetBugPosition();
+            //GS_SetPointLighting(&invWorld, &lightpos, &lightcol);
             NuVecMtxTransform(&lightpos, &lightpos, &invWorld);
             CV_LIGHT_POSITION = *(struct _GS_VECTOR4 *)makenuvec4(lightpos.x, lightpos.y, lightpos.z, 0.0f);
         break;
-
-        case BLENDSKIN: // 15
-        case BLENDSKIN2: // 16
-        break;
-
+    
         case POINTLIGHT: // 24
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             NuShaderSetColourConstants(mtl);
             CV_CONSTANTS = *(struct _GS_VECTOR4*)makenuvec4(0.0f, 1.0f, 2.0, 0.0f);
             CV_SHADER_PARAMS = *(struct _GS_VECTOR4 *)makenuvec4(3.0f, 2.5, 0.0f, 3.0f);
             currentLevel = 0x1b;
-            //lightpos = *(struct nuvec_s *)GetBugPosition();
+            lightpos = *(struct nuvec_s *)GetBugPosition();
             NuVecMtxTransform(&lightpos, &lightpos, &invWorld);
-         //   GS_SetPointLighting(&invWorld, &lightpos, &lightcol);
+            //GS_SetPointLighting(&invWorld, &lightpos, &lightcol);
             CV_LIGHT_POSITION = *(struct _GS_VECTOR4 *)makenuvec4(lightpos.x, lightpos.y, lightpos.z, 0.0f);
             CV_AMBIENT_COLOR = *(struct _GS_VECTOR4 *)makenuvec4(0.2f, 0.2f, 0.2f, 0.2f);
         break;
+        
         case BLENDSKINPOINTLIGHT: // 25
         case BLENDSKIN2POINTLIGHT: // 26
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matViewProj;
@@ -626,13 +638,13 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NuShaderSetLightConstants(mtl);
             CV_SHADER_PARAMS = *(struct _GS_VECTOR4 *)makenuvec4(3.0f, 2.5, 2.0, 3.0f);
             currentLevel = 0x1b;
-            //lightpos = *(struct nuvec_s *)GetBugPosition();
+            lightpos = *(struct nuvec_s *)GetBugPosition();
         // break;
-
+    
             CV_LIGHT_POSITION = *(struct _GS_VECTOR4 *)makenuvec4(lightpos.x, lightpos.y, lightpos.z, 0.0f);
             CV_AMBIENT_COLOR = *(struct _GS_VECTOR4 *)makenuvec4(0.2f, 0.2f, 0.2f, 0.2f);
         break;
-
+        
         case DYNAMICWATER: // 27
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_WORLD_0 = *(struct _GSMATRIX*) &matWorld;
@@ -658,6 +670,7 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             NudxFw_SetTextureState(3, D3DTSS_MAGFILTER, 2);
             NudxFw_SetTextureState(3, D3DTSS_MIPFILTER, 2);
         break;
+        
         case XRAYGLASS: // 33
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_CONSTANTS = *(struct _GS_VECTOR4*)makenuvec4(0.0f, 0.5f, 0.8f, 1.0f);
@@ -665,18 +678,19 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_TexSetWrapModet(0,GX_CLAMP);
             GS_TexSetWrapModes(1,GX_CLAMP);
             GS_TexSetWrapModet(1,GX_CLAMP);
-
+            
             if (mtl != NULL && mtl->tid > 0) {
                 NuTexSetTexture(0, mtl->tid);
             }
             else {
                 NuTexSetTexture(0, 0);
             }
-
+            
             NudxFw_SetRenderState(D3DRS_SPECULARENABLE, 0);
             GS_SetAlphaCompare(7, 0);
             GS_SetBlendSrc2(1, 4, 1);
         break;
+        
         case 0x80:
             CV_WORLDVIEWPROJ = *(struct _GSMATRIX*) &matWorldViewProj;
             CV_WORLDVIEW = *(struct _GSMATRIX*) &matWorld;
@@ -693,9 +707,9 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
             GS_SetTevBlend(1);
         break;
     }
-
+    
     DBTimerEnd(0x24);
-    return;
+    return;   
 }
 
 //92% NGC

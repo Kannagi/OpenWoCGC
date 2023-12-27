@@ -1687,31 +1687,24 @@ void HandlePauseRender(int pause_count)
   old_pause_state.234 = Paused;
   return;
 }
+*/
 
-void SetLevel(void)
-
-{
-  float farclip;
-  int lev;
-
-  lev = Level;
-  LDATA = LData + Level;
-  LBIT = gcc2_compiled.(0,1,Level);
-  if (pNuCam != (nucamera_s *)0x0) {
-    if (LData[lev].farclip < 10) {
-      farclip = 1000.0;
+//PS2 MATCH
+void SetLevel(void) {
+    LBIT = 1L << (u64)Level; //NGC //LBIT = __ashldi3(0,1);
+  LDATA = &LData[Level];
+  if (pNuCam != NULL) {
+    if (LDATA->farclip > 9) {
+      pNuCam->farclip = (float) LDATA->farclip;
     }
     else {
-      farclip = (float)((double)CONCAT44(0x43300000,LData[lev].farclip ^ 0x80000000) -
-                       (double)0x4330000080000000);
+     pNuCam->farclip = 1000.0f;
     }
-    pNuCam->farclip = farclip;
   }
-  LBIT._0_4_ = (undefined4)(LBIT >> 0x20);
-  AIVISRANGE = 25.0;
+  AIVISRANGE = 25.0f;
   return;
 }
-*/
+
 //NGC MATCH
 void firstscreenfade(struct numtl_s *mat,s32 dir) {
     s32 s;
