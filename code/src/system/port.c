@@ -241,7 +241,7 @@ struct nuvec_s* GetPlayerPosition(void) {
     return &(player->obj).pos;
 }
 
-//90% NGC
+//95% NGC
 void UnSetupShaders(enum shadertypes_e shader) {
 
     NuTexSetTexture(1,0);
@@ -250,27 +250,26 @@ void UnSetupShaders(enum shadertypes_e shader) {
     NudxFw_SetTextureState(1,D3DTSS_COLOROP,1);
     NudxFw_SetTextureState(2,D3DTSS_COLOROP,1);
     NudxFw_SetTextureState(3,D3DTSS_COLOROP,1);
-    switch (shader) {
-    case 3:
-    //case 0x10:
+    switch (shader) {     
+    case NO_SHADER:
+    //case BLENDSKIN2:
+        return;
+    case GLASS:
         NudxFw_SetRenderState(0x5D, 0);
         GS_SetBlendSrc(1, 1, 0);
         return;
-    case 5:
+    case SNOWCLOUD:
         NudxFw_SetRenderState(0x6C, 0);
         NudxFw_SetRenderState(0x6D, 0);
         return;
-    case 0x10:
-    case 0x15:
-    case 0x16:
-    case 7:
+    case SPECULAR:
+    case BUMPMAP:
+    case BUMPMAPPOINTLIGHT:
         NudxFw_SetRenderState(0x5D, 0);
         return;
-    case 33:
+    case XRAYGLASS:
         NudxFw_SetRenderState(0x5D, 0);
         GS_SetBlendSrc(1, 1, 0);
-        return;
-    default:
         return;
     }
 }
@@ -712,15 +711,16 @@ void SetupShaders(struct nugeomitem_s* geomitem) {
     return;   
 }
 
-//92% NGC
+//MATCH NGC
 short NuShaderAssignShader(struct nugeom_s* geom) {
     enum shadertypes_e shader = NO_SHADER;
-    s32 skinned; // ?
-    s32 blended = 0; // r8
+    int skinned; // ?
+    int blended; // r8
     struct numtl_s* mtl;
-    u32 fxid;
+    uint fxid;
 
     skinned = 0;
+    blended = 0;
 
     if (nurndr_forced_mtl) {
         mtl = nurndr_forced_mtl;
@@ -738,9 +738,11 @@ short NuShaderAssignShader(struct nugeom_s* geom) {
         blended = 1;
     }
 
-    if (skinned) {
-        if (blended == 0)
+    if (!skinned) {
+        if (blended != 0)  {
             goto off248;
+        }
+          
         switch (fxid) {
             case 1:
                 shader = GLASS;
@@ -790,17 +792,15 @@ short NuShaderAssignShader(struct nugeom_s* geom) {
             }
             goto off248;
         }
-        if (blended != 0) {
+    }
+        else if (blended == 0) {
             switch (fxid) {
                 case 1:
-                    shader = 0x11;
-                    break;
                 case 3:
                     shader = 0x11;
                     break;
                 case 0x88:
-                    shader = 0x10;
-                    break;
+                    shader = 0xf;
                 default:
                     shader = 0xf;
                     break;
@@ -822,17 +822,18 @@ short NuShaderAssignShader(struct nugeom_s* geom) {
             }
         }
     off248:
-        if ((defaultShader == 0) || (defaultShader == 0x18)) {
-            switch (shader) {
-                case BLENDSKIN:
-                    shader = 0x19;
-                    break;
-                case BLENDSKIN2:
-                    shader = 0x1a;
-                    break;
+        if ((defaultShader != 0) ) {
+            if (defaultShader == 0x18){
+                switch (shader) {
+                    case BLENDSKIN:
+                        shader = 0x19;
+                        break;
+                    case BLENDSKIN2:
+                        shader = 0x1a;
+                        break;
+                }
             }
         }
-    }
     if ((bypassEffectShaders != 0)
         && (((
             ((((shader == 0xB) || (shader == 0x15)) || (shader == 0x16))
@@ -852,7 +853,6 @@ short NuShaderAssignShader(struct nugeom_s* geom) {
     }
     return shader;
 }
-
 
 
 /* //ASM GCN

@@ -1647,7 +1647,6 @@ Exit:
 void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,float xz_distance) {
   float fVar2; //temp
   float t;
-  char bVar4; //temp
   
   if (mod == NULL) {
     return;
@@ -1659,7 +1658,7 @@ void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,fl
         anim->blend_frame++;
         if (anim->blend_frames == anim->blend_frame) {
           anim->blend = '\0';
-          anim->action = anim->blend_dst_action;
+          anim->action = (s16)anim->blend_dst_action;
           anim->anim_time = anim->blend_dst_time;
         }
   }
@@ -1694,11 +1693,11 @@ void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,fl
               }
               anim->action = 0;
               anim->anim_time = 1.0f;
-    }
-    else {
-        anim->action = anim->newaction;
-        anim->blend = '\0';
-    }
+        }
+        else {
+          anim->action = anim->newaction;
+          anim->blend = '\0';
+        }
 LAB_8001fcbc:
   anim->flags = '\0';
   if (anim->blend != '\0') {
@@ -1727,6 +1726,7 @@ LAB_8001fcbc:
         if ((mod->animlist[anim->blend_dst_action]->flags & 0x10) != 0) {
           t *= xz_distance * 10.0f;
         }
+        //t = anim->blend_dst_time + t;
         anim->blend_dst_time = anim->blend_dst_time + t;
         fVar2 = mod->anmdata[anim->blend_dst_action]->time;
         if (anim->blend_dst_time <= fVar2) {
@@ -1748,6 +1748,7 @@ LAB_8001fcbc:
         if ((mod->animlist[anim->action]->flags & 0x10) != 0) {
           t *= xz_distance * 10.0f;
         }
+        //t = anim->anim_time + t;
         anim->anim_time = anim->anim_time + t;
         fVar2 = mod->anmdata[anim->action]->time;
         if (t <= fVar2) {
@@ -1758,11 +1759,12 @@ LAB_8001fcbc:
           anim->anim_time -= (fVar2 - 1.0f);
           return;
         }
+        anim->anim_time = fVar2;
         anim->flags = 1;
   }
-  anim->anim_time = fVar2;
   return;
 }
+
 
 void DrawCreatures(creature_s *c,int count,int render,int shadow)
 
