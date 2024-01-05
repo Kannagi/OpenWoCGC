@@ -385,25 +385,28 @@ union variptr_u vpDmaTag_Close(union variptr_u ptr)
   return (union variptr_u)ptr.voidptr;
 }
 
-struct _sceDmaTag * CreateDmaParticleSet(void *buffer,int *size) {
+//78% NGC
+struct _sceDmaTag * CreateDmaParticleSet(void *buffer,s32 *size) {
     s32 lp;
-    struct debris_s *temp;
     union variptr_u buff;
-    union variptr_u start;
+    struct debris_s *temp;
 
+    buff.voidptr = buffer;
     vpDmaTag_RetEx(buff);
-    for (lp = 0; lp < 0x20; lp++){
-        temp[lp].x = 1.0f;
-        temp[lp].y = 2.0f;
-        temp[lp].z = 3.0f;
-        temp[lp].mx = 4.0f;
-        temp[lp].my = 5.0f;
-        temp[lp].mz = 6.0f;
-        temp[lp].time = -1.0f;
-        temp[lp].etime = 128.0f;
+    //lp = 0x20;
+    temp = (struct debris_s*)buff.voidptr;
+    for (lp = 0; lp < 0x20; lp++, temp++){
+        temp->x = 1.0f;
+        temp->y = 2.0f;
+        temp->z = 3.0f;
+        temp->mx = 4.0f;
+        temp->my = 5.0f;
+        temp->mz = 6.0f;
+        temp->time = -1.0f;
+        temp->etime = 128.0f;
     }
-    vpDmaTag_Close(buff);
-    *size = (int)buff.voidptr - (int)buffer;
+    buff.voidptr = temp;
+    *size = (s32)vpDmaTag_Close(buff).voidptr - (s32)buffer;
     return (struct _sceDmaTag *)buffer;
 }
 

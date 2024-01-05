@@ -140,6 +140,79 @@ struct GTimer
     float fsec; // Offset: 0x10, DWARF: 0x273F2E
 };
 
+// Size: 0xC
+struct hdata_s
+{
+    signed char level[6]; // Offset: 0x0
+    signed char i_spl[2]; // Offset: 0x6
+    unsigned char barrier; // Offset: 0x8
+    unsigned char i_gdeb; // Offset: 0x9
+    short sfx; // Offset: 0xA
+};
+
+// Size: 0x30
+struct award_s
+{
+    float time; // Offset: 0x0
+    unsigned short yrot; // Offset: 0x4
+    unsigned short got; // Offset: 0x6
+    signed char level; // Offset: 0x8
+    signed char wait; // Offset: 0x9
+    char pad1; // Offset: 0xA
+    char pad2; // Offset: 0xB
+    struct nuvec_s oldpos0; // Offset: 0xC
+    struct nuvec_s oldpos1; // Offset: 0x18
+    struct nuvec_s newpos; // Offset: 0x24
+};
+
+// Size: 0x18
+struct spltab_s
+{
+    struct nugspline_s* spl; // Offset: 0x0
+    char* name; // Offset: 0x4
+    short min; // Offset: 0x8
+    short max; // Offset: 0xA
+    unsigned long long levbits; // Offset: 0x10
+};
+
+// Size: 0x90
+struct mfeathers_s
+{
+    struct numtx_s mM; // Offset: 0x0, DWARF: 0x27115A
+    struct numtx_s mS; // Offset: 0x40, DWARF: 0x271181
+    float time; // Offset: 0x80, DWARF: 0x2711A8
+    float duration; // Offset: 0x84, DWARF: 0x2711CF
+    float shadow; // Offset: 0x88, DWARF: 0x2711FA
+    char pad1; // Offset: 0x8C, DWARF: 0x271223
+    char pad2; // Offset: 0x8D, DWARF: 0x27124A
+    char pad3; // Offset: 0x8E, DWARF: 0x271271
+    char pad4; // Offset: 0x8F, DWARF: 0x271298
+};
+
+struct mfeathers_s MaskFeathers[4];
+struct spltab_s SplTab[73];
+struct award_s Award[3];
+struct hdata_s HData[6];
 struct GTimer PauseTimer;
+struct GTimer GameTimer;
+s32 probecol;
+s32 probeon;
+struct nuangvec_s proberot;
+s32 probetime;
+s32 probey;
+struct anim_s TempAnim;
+struct anim_s TempAnim2;
+struct Nearest_Light_s TempLights;
+struct Nearest_Light_s TempLights2;
+s32 temp_character;
+s32 temp_character_action;
+s32 temp_character2;
+s32 temp_character2_action;
+s32 temp_hub;
+s32 temp_hublevel;
+s32 tumble_character;
+f32 tumble_item_addtime;
+s32 i_award;
+s32 qseed;
 
 #endif // !GAME_H

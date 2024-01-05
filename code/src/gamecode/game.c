@@ -1,4 +1,135 @@
 //MATCH NGC
+void InitProbe(void) {
+  probecol = 0;
+  probeon = 0;
+  probey = 0;
+  probetime = 0;
+  proberot.x = 0;
+  proberot.y = 0;
+  proberot.z = 0;
+  return;
+}
+
+//MATCH NGC
+void ResetTempCharacter(s32 character,s32 action) {
+  temp_character = character;
+  temp_character_action = action;
+  ResetAnimPacket(&TempAnim,action);
+  ResetLights(&TempLights);
+  return;
+}
+
+//MATCH NGC
+void ResetTempCharacter2(s32 character,s32 action) {
+  temp_character2 = character;
+  temp_character2_action = action;
+  ResetAnimPacket(&TempAnim2,action);
+  ResetLights(&TempLights2);
+  return;
+}
+
+//MATCH NGC
+void UpdateTempCharacter(void) {
+  struct CharacterModel* model;
+  s32 i;
+
+  if (temp_character2 != -1) {
+    i = CRemap[temp_character2];
+    if (i == -1) {
+      return;
+    }
+    TempAnim2.oldaction = TempAnim2.action;
+    model = &CModel[i];
+    if (((u16)TempAnim2.action < 0x76) && ((u16)TempAnim2.newaction < 0x76)) {
+      UpdateAnimPacket(model,&TempAnim2,0.5f,0.0f);
+    }
+  }
+  if (temp_character != -1) { 
+      i = CRemap[temp_character];
+    if (i != -1) {
+      TempAnim.oldaction = TempAnim.action;
+      if ((temp_character == 2) &&
+         (((TempAnim.flags & 1) != 0 ||
+          ((Pad[0] != NULL && ((Pad[0]->oldpaddata & 0x840) != 0)))))) {
+        if ((Level == 0x26) && (Game.lives = '\x04', 0 <= cortex_gameover_i)) {
+          if (cortex_gameover_i < 2) {
+            new_level = 0x25;
+            just_continued = 1;
+          }
+          else if (cortex_gameover_i < 7) {
+            new_level = 0x23;
+          }
+        }
+        if ((TempAnim.flags & 1) != 0) {
+          if (TempAnim.action == 0x73) {
+            gameover_hack = 1;
+          }
+          TempAnim.newaction = 0x22;
+          TempAnim.flags = '\0';
+        }
+      }
+      if ((tempanim_waitaudio != 0) && (NuSoundKeyStatus(4) == 1)) {
+        TempAnim.newaction = tempanim_nextaction;
+        tempanim_waitaudio = 0;
+        if (Pad[0] != NULL) {
+          Pad[0]->rdy = 0.0f;
+        }
+      }
+        model = &CModel[i];
+      if (((u16)TempAnim.action < 0x76) && ((u16)TempAnim.newaction < 0x76)) {
+        UpdateAnimPacket(model,&TempAnim,0.5f,0.0f);
+      }
+    }
+  }
+  return;
+}
+
+//98%
+s32 Draw3DObject(s32 object,struct nuvec_s *pos,u16 xrot,u16 yrot,u16 zrot,float scalex,
+                float scaley,float scalez,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot) {
+  struct numtx_s m;
+  struct nuvec_s s;
+  s32 i;
+  
+  if (((scn == NULL) || (obj == NULL)) || ((scalex == 0.0f && ((scaley == 0.0f && (scalez == 0.0f))) || Level != 0x25))) {
+          i = 0;
+  }
+  else {
+    s.x = scalex;
+    s.y = scaley;
+    s.z = scalez;
+    NuMtxSetScale(&m,&s);
+    switch(rot) {
+                case 0:
+                    if (xrot != NULL) {
+                        NuMtxRotateX(&m,(s32)xrot);
+                    }
+                    if (yrot != NULL) {
+                        NuMtxRotateY(&m,(s32)yrot);
+                    }
+                    if (zrot != NULL) {
+                        NuMtxRotateZ(&m,(s32)zrot);
+                    }
+                    break;
+                case 1:
+                    if (yrot != NULL) {
+                        NuMtxRotateY(&m,(s32)yrot);
+                    }
+                    if (xrot != NULL) {
+                        NuMtxRotateX(&m,(s32)xrot);
+                    }
+                    if (zrot != NULL) {
+                        NuMtxRotateZ(&m,(s32)zrot);
+                    }
+                    break;
+    }
+    NuMtxTranslate(&m,pos);
+    return NuRndrGScnObj(scn->gobjs[obj->instance->objid],&m);
+  }
+  return i;
+}
+
+//MATCH NGC
 s32 Draw3DCharacter(struct nuvec_s *pos,u16 xrot,u16 yrot,u16 zrot,struct CharacterModel *model,
                     s32 action,float scale,float anim_time, s32 rot) {
     s32 i;
@@ -69,6 +200,131 @@ s32 Draw3DCharacter(struct nuvec_s *pos,u16 xrot,u16 yrot,u16 zrot,struct Charac
         i = 0;
     }
     return i;
+}
+
+//NGC MATCH
+void NewMask(struct mask_s *mask,struct nuvec_s *pos) {
+  
+  if ((CRemap[3] != -1) && ((LBIT & 0x3e00000) == 0)) {
+    if (mask->active < 2) {
+      if (mask->active == 0) {
+        if (pos != NULL) {
+          (mask->pos) = *pos;
+        }
+        mask->character = 3;
+        mask->scale = 0.8f;
+        ResetLights(&mask->lights);
+      }
+      mask->active++;
+    }
+    else {
+      mask->active = 0x296;
+      GameMusic(0xa2,0);
+    }
+    GameSfx(0x3d,pos);
+  }
+  return;
+}
+
+//NGC MATCH
+void MakeMaskMatrix(struct mask_s *mask,struct numtx_s *mM,struct numtx_s *mS,struct numtx_s *mLOCATOR,float scale) {
+  double dVar1;
+  struct nuvec_s s;
+  u16 yrot;
+  
+  if (mM != NULL) {
+    s.x = s.y = s.z = scale * mask->scale;
+    NuMtxSetScale(mM,&s);
+    yrot = mask->yrot - 0x8000 & 0xffff;
+    if (mask->active > 2) {
+         if (mLOCATOR != NULL) {
+           NuMtxMulR(mM,mM,mLOCATOR);
+          (mask->pos).x = mLOCATOR->_30;
+          (mask->pos).y = mLOCATOR->_31;
+          (mask->pos).z = mLOCATOR->_32;       
+         }
+         else {
+              NuMtxRotateX(mM,(int)(NuTrigTable[(GameTimer.frame & 0xf) * 0x1000] * 8192.0f) & 0xffff);
+              NuMtxRotateZ(mM,(int)((NuTrigTable[((GameTimer.frame & 0xf) * 0x1000 + 0x4000) & 0x3c000 / 4]) * 8192.0f) & 0xffff);
+              NuMtxRotateY(mM,yrot);
+          }
+    }
+    else {
+      NuMtxRotateX(mM,(uint)mask->xrot);
+      NuMtxRotateY(mM,yrot);
+    }
+    NuMtxTranslate(mM,&mask->pos);
+    if ((mS != NULL) && (mask->shadow != 2000000.0f)) {
+      ScaleFlatShadow(&s,(mask->pos).y,mask->shadow,1.0f);
+      NuMtxSetScale(mS,&s);
+      NuMtxRotateY(mS,yrot);
+      NuMtxRotateZ(mS,mask->surface_zrot);
+      NuMtxRotateX(mS,mask->surface_xrot);
+      mS->_30 = (mask->pos).x;
+      mS->_31 = mask->shadow + 0.025f;
+      mS->_32 = (mask->pos).z;
+    }
+  }
+  return;
+}
+
+void ResetMaskFeathers(void) {
+  memset(MaskFeathers,0,0x240);
+  return;
+}
+
+//NGC MATCH
+void AddMaskFeathers(struct mask_s * mask) {
+  struct mfeathers_s *feathers;
+  s32 i;
+  
+  feathers = &MaskFeathers[i_maskfeathers];
+    feathers->mM = mask->mM;
+    feathers->mS = mask->mS;
+  i = CRemap[11];
+  feathers->time = 0.0f;
+  feathers->shadow = mask->shadow;
+  if ((i != -1) && (CModel[i].anmdata[0xe] != NULL)) {
+    feathers->duration = CModel[i].anmdata[0xe]->time - 1.0f;
+  }
+  else {
+    feathers->duration = 30.0f;
+  }
+  i_maskfeathers++;
+  if (i_maskfeathers != 4) {
+    return;
+  }
+  i_maskfeathers = 0;
+  return;
+}
+
+//NGC MATCH
+void LoseMask(struct obj_s *obj) {
+  
+  GameSfx(1,&obj->pos);
+  AddMaskFeathers(obj->mask);
+  obj->mask->active--;
+  obj->invincible = 0xb4;
+  (obj->mom).z = 0.0f;
+  (obj->mom).x = 0.0f;
+  NewBuzz(&player->rumble,0x1e);
+  NewRumble(&player->rumble,0x7f);
+  return;
+}
+
+//NGC MATCH
+void UpdateMaskFeathers(void) {
+  struct mfeathers_s *feathers;
+  s32 i;
+  
+  feathers = MaskFeathers;
+  for (i = 0; i < 4; i++) {
+    if ((feathers->time < feathers->duration) && (feathers->time += 0.5f, feathers->time > feathers->duration)) {
+      feathers->time = feathers->duration;
+    }
+    feathers++;
+  }
+  return;
 }
 
 //NGC MATCH
@@ -184,6 +440,106 @@ void DrawTempCharacter2(s32 render) {
     }
     return;
 }
+
+//NGC MATCH
+s32 HubFromLevel(s32 level) {
+  s32 j;
+  s32 i;
+  
+  if (level == -1) {
+    return -1;
+  }
+  for (i = 0; i < 6; i++) {
+    for (j = 0; j < 6; j++) {
+      if (HData[i].level[j] == level) {
+        temp_hublevel = j;
+        temp_hub = i;
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+//NGC MATCH
+void ResetAwards(void) {
+  s32 i;
+  
+  for (i = 0; i < 3; i++) {
+    Award[i].time = 1.0f;
+  }
+  return;
+}
+
+//NGC MATCH
+s32 ActiveAwards(void) {
+  struct award_s *awards;
+  s32 i;
+  
+  awards = Award;
+  for (i = 0; i < 3; i++) {
+    if (awards->time < 1.0f) {
+      return 1;
+    }
+    awards = awards + 1;
+  }
+  return 0;
+}
+
+//NGC MATCH
+s32 qrand(void) {
+  qseed = qseed * 0x24cd + 1U & 0xffff;
+  return qseed;
+}
+
+//NGC MATCH
+s32 RotDiff(u16 a0,u16 a1) {
+  s32 diff;
+  
+  diff = a1 - a0;
+  if (0x8000 < diff) {
+    return diff + -0x10000;
+  }
+  if (-0x8001 < diff) {
+    return diff;
+  }
+  return diff + 0x10000;
+}
+
+//NGC MATCH
+u16 SeekRot(u16 a0,u16 a1,s32 shift) {
+  s32 d;
+  
+  d = a1 - a0;
+  if (d > 0x8000) {
+    d = d + -0x10000;
+  }
+  else {
+    if (d < -0x8000) {
+      d = d + 0x10000;
+    }
+  }
+  return a0 + (d >> shift);
+}
+
+//91%
+u16 TurnRot(u16 a0,u16 a1,s32 rate) {
+  s32 d;
+  
+  if (a1 != a0) {
+    d = RotDiff(a0,a1);
+    if (d > 0) {
+      if (d > rate) {
+       return a0 + rate & 0xffff;
+      }
+    }
+    if (d < -rate) {
+        return a0 - rate & 0xffff;
+    }
+  }
+  return a1;
+}
+
 
 void ProcMenu(Cursor *cursor,nupad_s *pad)
 {
@@ -1853,11 +2209,11 @@ s32 ResetHGobjAnim(struct nuhspecial_s *obj)
   return 0;
 }
 
-s32 FinishHGobjAnim(nuhspecial_s *obj)
-{
-  if (((obj->special != NULL) &&
-      (obj->special->instance != NULL)) && (obj->special->instance->anim != NULL)) {
-    (obj->special->instance->anim)->playing = (obj->special->instance->anim)->playing & 0x7fffffff;
+//NGC MATCH
+s32 FinishHGobjAnim(struct nuhspecial_s *obj) { 
+  if (((obj->special != NULL) && (obj->special->instance != NULL)) &&
+     (obj->special->instance->anim != NULL)) {
+    (obj->special->instance->anim)->playing = (obj->special->instance->anim)->playing & 2;
     obj->special->instance->anim->ltime = world_scene[0]->instanimdata[obj->special->instance->anim->anim_ix]->time;
     return 1;
   }
@@ -3609,4 +3965,24 @@ LAB_80036da0:
     //DrawMenuEntry(cursor,c,&x,&y,(int*)i);
   //  return;
 }
+
+//NGC MATCH
+float DistanceToLine(struct nuvec_s* pos, struct nuvec_s* p0, struct nuvec_s* p1) {
+  s32 a;
+  
+  a = NuAtan2D(p1->x - p0->x,p1->z - p0->z);
+  return NuFabs(((pos->x - p0->x) * (NuTrigTable[(((-a & 0xffff) + 0x4000) & 0x3fffc  / 4)]) +
+                                 (pos->z - p0->z) * NuTrigTable[-a & 0xffff]));
+}
+
+//NGC MATCH
+float RatioBetweenEdges(struct nuvec_s *pos,struct nuvec_s *pL0,struct nuvec_s *pL1,struct nuvec_s *pR0,struct nuvec_s *pR1) {
+  float dL;
+  float dR;
+  
+  dL = DistanceToLine(pos,pL0,pL1);
+  dR = DistanceToLine(pos,pR0,pR1);
+  return (dL / (dL + dR));
+}
+
 

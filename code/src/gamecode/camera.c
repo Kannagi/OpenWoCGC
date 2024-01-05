@@ -393,145 +393,114 @@ void MoveRailPosition(struct nuvec_s *dst,struct RPos_s *rpos,float distance,int
 
 }
 /*
+//70% NGC
+void RailInfo(struct RPos_s* RPos, struct nuvec_s* pos, u16* yrot, u16* cam_yrot, u8* mode) {
+    struct rail_s* rail;
+    struct nuvec_s* pL;
+    struct nuvec_s* pR;
+    struct nuvec_s* pC;
+    struct nuvec_s* p0;
+    struct nuvec_s* p1;
+    struct nuvec_s v0; // r1+0x8
+    struct nuvec_s v1; // r1+0x18
+    struct nuvec_s mid; // r1+0x28
+    struct nuvec_s vC; // r1+0x38
+    float local_48;
+    int i0;
+    int iVar5;
+    int iVar7;
+    int iVar10;
+    int iVar11;
+    int iVar12;
+    u16 a;
+    float fVar1;
+    float fVar2;
+    float dVar13;
+    float dVar15;
+    float dVar16;
+    float fVar17;
 
-void RailInfo(RPos_s *RPos,nuvec_s *pos,ushort *yrot,ushort *cam_yrot,uchar *mode)	//TODO
-
-{
-  float fVar1;
-  float fVar2;
-  int iVar3;
-  uint uVar4;
-  int iVar5;
-  char *pcVar6;
-  int iVar7;
-  char *pcVar8;
-  char *pcVar9;
-  int iVar10;
-  int iVar11;
-  int iVar12;
-  double dVar13;
-  double dVar14;
-  double dVar15;
-  double dVar16;
-  float fVar17;
-  nuvec_s local_70;
-  nuvec_s local_48;
-
-  iVar3 = (int)RPos->iRAIL;
-  if ((iVar3 != -1) && (iVar12 = (int)RPos->iALONG, iVar12 != -1)) {
-    iVar11 = iVar12 + 1;
-    if ((iVar11 == Rail[iVar3].edges) && (Rail[iVar3].circuit != '\0')) {
-      iVar11 = 0;
-    }
-    if (pos != (nuvec_s *)0x0) {
-      iVar7 = (int)(Rail[iVar3].pCAM)->ptsize;
-      pcVar9 = (Rail[iVar3].pCAM)->pts;
-      iVar5 = iVar11 * iVar7;
-      iVar7 = iVar12 * iVar7;
-      pos->x = (*(float *)(pcVar9 + iVar5) - *(float *)(pcVar9 + iVar7)) * RPos->fALONG +
-               *(float *)(pcVar9 + iVar7);
-      pos->y = (*(float *)(pcVar9 + iVar5 + 4) - *(float *)(pcVar9 + iVar7 + 4)) * RPos->fALONG +
-               *(float *)(pcVar9 + iVar7 + 4);
-      pos->z = (*(float *)(pcVar9 + iVar5 + 8) - *(float *)(pcVar9 + iVar7 + 8)) * RPos->fALONG +
-               *(float *)(pcVar9 + iVar7 + 8);
-    }
-    if (yrot != (ushort *)0x0) {
-      iVar7 = iVar12 * (Rail[iVar3].pLEFT)->ptsize;
-      pcVar9 = (Rail[iVar3].pLEFT)->pts;
-      pcVar6 = (Rail[iVar3].pRIGHT)->pts;
-      iVar5 = iVar12 * (Rail[iVar3].pRIGHT)->ptsize;
-      dVar14 = 0.5;
-      fVar17 = (*(float *)(pcVar9 + iVar7) + *(float *)(pcVar6 + iVar5)) * 0.5;
-      fVar1 = (*(float *)(pcVar9 + iVar7 + 8) + *(float *)(pcVar6 + iVar5 + 8)) * 0.5;
-      iVar5 = NuAtan2D(*(float *)(pcVar6 + iVar5) - *(float *)(pcVar9 + iVar7),
-                       *(float *)(pcVar6 + iVar5 + 8) - *(float *)(pcVar9 + iVar7 + 8));
-      iVar7 = iVar11 * (Rail[iVar3].pRIGHT)->ptsize;
-      pcVar6 = (Rail[iVar3].pRIGHT)->pts;
-      pcVar9 = (Rail[iVar3].pLEFT)->pts;
-      iVar10 = iVar11 * (Rail[iVar3].pLEFT)->ptsize;
-      dVar16 = (double)(*(float *)(pcVar9 + iVar10) + *(float *)(pcVar6 + iVar7)) * dVar14;
-      dVar15 = (double)(*(float *)(pcVar9 + iVar10 + 8) + *(float *)(pcVar6 + iVar7 + 8)) * dVar14 ;
-      iVar7 = NuAtan2D(*(float *)(pcVar6 + iVar7) - *(float *)(pcVar9 + iVar10),
-                       *(float *)(pcVar6 + iVar7 + 8) - *(float *)(pcVar9 + iVar10 + 8));
-      uVar4 = RotDiff((ushort)iVar5,(ushort)iVar7);
-      local_48._0_8_ = (double)CONCAT44(0x43300000,uVar4 ^ 0x80000000);
-      uVar4 = (iVar5 + (int)(RPos->fALONG * (float)(local_48._0_8_ - 4503601774854144.0))) - 0x400 0;
-      *yrot = (ushort)uVar4;
-      if (mode != (uchar *)0x0) {
-        if (pos == (nuvec_s *)0x0) {
-          *mode = '\0';
+    if (RPos->iRAIL != -1 && RPos->iALONG != -1) {
+        iVar12 = RPos->iALONG;
+        rail = &Rail[RPos->iRAIL];
+        iVar11 = iVar12 + 1;
+        if ((iVar11 == rail->edges) && (rail->circuit != 0)) {
+            iVar11 = 0;
         }
-        else {
-          uVar4 = uVar4 & 0xffff;
-          dVar15 = (double)((((float)dVar15 - fVar1) * RPos->fALONG + fVar1) - pos->z);
-          fVar1 = NuTrigTable[uVar4];
-          fVar2 = *(float *)((int)NuTrigTable + ((uVar4 + 0x4000) * 4 & 0x3fffc));
-          dVar16 = (double)((((float)dVar16 - fVar17) * RPos->fALONG + fVar17) - pos->x);
-          fVar17 = NuFsqrt((float)(dVar16 * dVar16 + (double)(float)(dVar15 * dVar15)));
-          fVar17 = fVar1 * (float)(dVar16 * (double)(1.0 / fVar17)) +
-                   fVar2 * (float)(dVar15 * (double)(1.0 / fVar17));
-          if (fVar17 <= 0.866) {
-            if (-0.866 <= fVar17) {
-              dVar13 = (double)fVar17;
-              NuFabs(fVar17);
-              if (dVar14 <= dVar13) {
-                *mode = '\0';
-              }
-              else {
-                iVar5 = NuAtan2D((float)dVar16,(float)dVar15);
-                iVar5 = RotDiff((ushort)iVar5,*yrot);
-                if (iVar5 < 1) {
-                  *mode = '\b';
-                }
-                else {
-                  *mode = '\x04';
-                }
-              }
-            }
-            else {
-              *mode = '\x02';
-            }
-          }
-          else {
-            *mode = '\x01';
-          }
+        if (pos != NULL) {
+            p0 = rail->pCAM->pts + (iVar12 * rail->pCAM->ptsize);
+            p1 = rail->pCAM->pts + (iVar11 * rail->pCAM->ptsize);
+            pos->x = (p1->x - p0->x) * RPos->fALONG + p0->x;
+            pos->y = (p1->y - p0->y) * RPos->fALONG + p0->y;
+            pos->z = (p1->z - p0->z) * RPos->fALONG + p0->z;
         }
-      }
+        if (yrot != NULL) {
+            pL = (rail->pLEFT)->pts + (iVar12 * (rail->pLEFT)->ptsize);
+            pR = (rail->pRIGHT)->pts + (iVar12 * (rail->pRIGHT)->ptsize);
+            v0.x = (pL->x + pR->x) * 0.5f;
+            v0.z = (pL->z + pR->z) * 0.5f;
+            iVar5 = NuAtan2D(pR->x - pL->x, pR->z - pL->z);
+            pL = (rail->pLEFT)->pts + (iVar11 * (rail->pLEFT)->ptsize);
+            pR = (rail->pRIGHT)->pts + (iVar11 * (rail->pRIGHT)->ptsize);
+            v1.x = (pL->x + pR->x) * 0.5f;
+            v1.z = (pL->z + pR->z) * 0.5f;
+            iVar7 = NuAtan2D(pR->x - pL->x, pR->z - pL->z);
+            a = (iVar5 + (s32)(RPos->fALONG * RotDiff(iVar5, iVar7))) - 0x4000;
+            *yrot = a;
+            if (mode != NULL) {
+                if (pos != NULL) {
+                    dVar15 = (((dVar15 - fVar1) * RPos->fALONG + fVar1) - pos->z);
+                    fVar1 = NuTrigTable[a];
+                    fVar2 = NuTrigTable[(s32)(a + 0x4000) * 4 & 0x3fffc];
+                    dVar16 = (((dVar16 - fVar17) * RPos->fALONG + fVar17) - pos->x);
+                    fVar17 = NuFsqrt((dVar16 * dVar16 + (dVar15 * dVar15)));
+                    fVar17 = fVar1 * (dVar16 * (1.0f / fVar17)) + fVar2 * (dVar15 * (1.0f / fVar17));
+                    if (fVar17 > 0.866f) {
+                        *mode = 1;
+                    } else {
+                        if (-0.866f > fVar17) {
+                            *mode = 2;
+                        } else {
+                            if (NuFabs(fVar17) < 0.5f) {
+                                if (RotDiff(NuAtan2D(dVar16, dVar15), *yrot) > 0) {
+                                    *mode = 4;
+                                } else {
+                                    *mode = 8;
+                                }
+                            } else {
+                                *mode = 0;
+                            }
+                        }
+                    }
+                } else {
+                    *mode = 0;
+                }
+            }
+        }
+        if (cam_yrot != NULL) {
+            iVar5 = iVar12 * (rail->pLEFT)->ptsize;
+            iVar7 = iVar12 * (rail->pRIGHT)->ptsize;
+            iVar12 = iVar12 * (rail->pCAM)->ptsize;
+            pL = (rail->pLEFT)->pts + iVar5;
+            pR = (rail->pRIGHT)->pts + iVar7;
+            pC = (rail->pCAM)->pts + iVar12;
+            vC = *pC;
+            if ((Level == 6) || (Level == 0x22)) {
+                vC.x += 5.0f;
+            }
+            iVar12 = NuAtan2D(v0.x - vC.x, v0.z - vC.z);
+            pL = (rail->pLEFT)->pts + (iVar11 * (rail->pLEFT)->ptsize);
+            pR = (rail->pRIGHT)->pts + (iVar11 * (rail->pRIGHT)->ptsize);
+            pC = (rail->pCAM)->pts + (iVar11 * (rail->pCAM)->ptsize);
+            vC = *pC;
+            if ((Level == 6) || (Level == 0x22)) {
+                vC.x += 5.0f;
+            }
+            i0 = NuAtan2D(v0.x - vC.x, v0.z - vC.z);
+            *cam_yrot = (iVar12 + (s32)(RPos->fALONG * RotDiff(iVar12, i0)));
+        }
     }
-    if (cam_yrot != (ushort *)0x0) {
-      iVar5 = iVar12 * (Rail[iVar3].pLEFT)->ptsize;
-      pcVar8 = (Rail[iVar3].pLEFT)->pts;
-      pcVar9 = (Rail[iVar3].pRIGHT)->pts;
-      iVar7 = iVar12 * (Rail[iVar3].pRIGHT)->ptsize;
-      pcVar6 = (Rail[iVar3].pCAM)->pts;
-      iVar12 = iVar12 * (Rail[iVar3].pCAM)->ptsize;
-      local_70.x = *(float *)(pcVar6 + iVar12);
-      if ((Level == 6) || (Level == 0x22)) {
-        local_70.x = local_70.x + 5.0;
-      }
-      iVar12 = NuAtan2D((*(float *)(pcVar8 + iVar5) + *(float *)(pcVar9 + iVar7)) * 0.5 - local_70 .x
-                        ,(*(float *)(pcVar8 + iVar5 + 8) + *(float *)(pcVar9 + iVar7 + 8)) * 0.5 -
-                         *(float *)(pcVar6 + iVar12 + 8));
-      iVar5 = iVar11 * (Rail[iVar3].pRIGHT)->ptsize;
-      pcVar9 = (Rail[iVar3].pLEFT)->pts;
-      pcVar8 = (Rail[iVar3].pRIGHT)->pts;
-      iVar7 = iVar11 * (Rail[iVar3].pLEFT)->ptsize;
-      pcVar6 = (Rail[iVar3].pCAM)->pts;
-      iVar11 = iVar11 * (Rail[iVar3].pCAM)->ptsize;
-      local_70.x = *(float *)(pcVar6 + iVar11);
-      if ((Level == 6) || (Level == 0x22)) {
-        local_70.x = local_70.x + 5.0;
-      }
-      iVar3 = NuAtan2D((*(float *)(pcVar9 + iVar7) + *(float *)(pcVar8 + iVar5)) * 0.5 - local_70. x,
-                       (*(float *)(pcVar9 + iVar7 + 8) + *(float *)(pcVar8 + iVar5 + 8)) * 0.5 -
-                       *(float *)(pcVar6 + iVar11 + 8));
-      uVar4 = RotDiff((ushort)iVar12,(ushort)iVar3);
-      local_48._0_8_ = (double)CONCAT44(0x43300000,uVar4 ^ 0x80000000);
-      *cam_yrot = (ushort)iVar12 +
-                  (short)(int)(RPos->fALONG * (float)(local_48._0_8_ - 4503601774854144.0));
-    }
-  }
-  return;
+    return;
 }
 
 //MATCH NGC
