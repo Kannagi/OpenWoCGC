@@ -214,5 +214,6 @@ s32 tumble_character;
 f32 tumble_item_addtime;
 s32 i_award;
 s32 qseed;
+char akuaku_advice_played[13];
 
 #endif // !GAME_H

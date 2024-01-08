@@ -2248,6 +2248,614 @@ struct NUPOINTOFINTEREST_s *ptr;
 */
 }
 
+//NGC MATCH
+void DefaultGame(void) {
+  Game.vibration = 0x1;
+  Game.sfx_volume = 0x64;
+  Game.music_volume = 'F';
+  Game.screen_x = '\0';
+  Game.screen_y = '\0';
+  Game.language = '\0';
+  return;
+}
+
+//NGC MATCH
+void NewGame(void) {
+  s32 save[7];
+  
+  save[0] = Game.vibration;
+  save[2] = Game.sfx_volume;
+  save[3] = Game.music_volume;
+  save[4] = Game.screen_x;
+  save[5] = Game.screen_y;
+  save[6] = Game.language;
+  memset(&Game,0,0x414);
+  Game.vibration = save[0];
+  Game.sfx_volume = save[2];
+  Game.music_volume = save[3];
+  Game.screen_x = save[4];
+  Game.screen_y = save[5];
+  Game.language = save[6];
+  NewLanguage(save[6]);
+  memcpy(Game.name, "MIDGET  ", 9);
+  DefaultTimeTrialNames(1);
+  Game.lives = '\x04';
+  Game.hub[0].flags = '\x01';
+  Mask.active = (u16)Game.mask;
+  Hub = -1;
+  return;
+}
+
+//NGC MATCH
+void StartTransporter(struct obj_s *cyl,struct nuvec_s *pos) {
+  cyl->oldpos = *pos;
+  cyl->pos = cyl->oldpos;
+  cyl->mom = v000;
+  cyl->RADIUS = 0.5f;
+  cyl->old_SCALE = 1.0f;
+  cyl->SCALE = 1.0f;
+  cyl->radius = 0.5f;
+   cyl->scale = 1.0f;
+   cyl->top = 0.0f;
+  cyl->bot = -1.0f;
+  cyl->hdg = 0;
+  return;
+}
+
+//NGC MATCH
+void FinishTransporter(struct obj_s *cyl,struct obj_s *obj) {
+  cyl->oldpos = cyl->pos;
+  cyl->mom = v000;
+  cyl->dyrot = 0;
+  (obj->pos).y = (obj->oldpos).y = (cyl->top * cyl->SCALE + (cyl->pos).y) - obj->bot * obj->SCALE;
+  return;
+}
+
+//NGC MATCH
+void TransporterGo(void) {
+  GameSfx(0x82,&(player->obj).pos);
+  NewBuzz(&player->rumble,6);
+  return;
+}
+
+//NGC MATCH
+void ResetAkuAkuAdvice(void) {
+    s32 i;
+
+  for (i = 0; i < 0xd; i++) {
+    akuaku_advice_played[i] = '\0';
+  }
+  return;
+}
+
+void ResetItems(void) {
+  plr_items = 0;
+  plr_bonusgem.count = 0;
+  plr_crystal.count = 0;
+  plr_crategem.draw = 0;
+  plr_crategem.count = 0;
+  plr_bonusgem.draw = 0;
+  plr_crystal.draw = 0;
+  return;
+}
+
+//NGC MATCH
+void ResetGemPath(void) {
+  u8 bits;
+  s32 open;
+  
+  gempath_begun = 0;
+  GemPath = 0;
+    switch (Level) {
+    case 0xc:
+        bits = 1;
+        break;
+    case 0x21:
+        bits = 2;
+        break;
+    case 0xe:
+        bits = 4;
+        break;
+    case 4:
+        bits = 8;
+        break;
+    case 0x14:
+        bits = 0x10;
+        break;
+    default:
+        bits = 0;
+        break;
+    }
+    if ((Game.gembits & bits) == 0) {
+        open = 0;
+    } else{
+        open = 1;    
+    }
+    gempath_open = open;
+  if (ObjTab[101].obj.special != NULL) {
+     (ObjTab[101].obj.special)->instance->flags.visible = ((1 - gempath_open));
+  }
+  return;
+}
+
+//NGC MATCH
+void ResetDeath(void) {
+  struct rail_s* rail;
+
+  death_begun = 0;
+  Death = 0;
+  rail = &Rail[6];
+
+  if ((((rail->type != -1) && (Level == 0x25)) && (Hub == 5)) &&
+     ((last_level != 0x26 && (last_level != -1)))) {
+    StartTransporter(&death_obj,(struct nuvec_s *)(&(rail->pINPLAT)->pts[((rail->pINPLAT)->len + -1) * (s32)(rail->pINPLAT)->ptsize]));
+    Death = 2;
+    death_begun = 1;
+  }
+  return;
+}
+
+void ResetBonus(void) {
+    Bonus = 0;
+}
+
+//NGC MATCH
+void ResetGame(void) {
+  s32 i;
+  
+  memset(&Cursor,0,0x80);
+  for(i = 0; i < 0x2c; i++) {
+    if (0x3de < LData[i].farclip - 10U) {
+      LData[i].farclip = 1000;
+    }
+  }
+  for(i = 0; i < 0x23; i++) {
+    LData[i].hub = HubFromLevel(i);
+  }
+
+  for(i = 0; i < 1; i++) {
+    Mask[i].character = 3;
+  }
+  ResetTimer(&GlobalTimer);
+  InitProbe();
+  return;
+}
+
+void ResetKabooms(void) {
+  memset(Kaboom,0,0xa20);
+  i_kaboom = 0;
+  return;
+}
+
+//NGC MATCH
+void OpenGame(void) {
+  s32 i;
+  s32 j;
+  s32 k;
+  
+  for (k = 0; k < 0x23; k++) {
+    Game.level[k].flags = 0;
+  }
+  for (k = 0; k < 6; k++) {
+    Game.hub[k].flags = 0xff;
+    Game.hub[k].crystals = '\0';
+    if (k < 5) {
+      for (i = 0, j = 0; i < 6; i++, j++) {
+        if (HData[k].level[i] != -1) {
+          if (j < 5) {
+            Game.level[HData[k].level[i]].flags = 0x1f;
+            Game.hub[k].crystals = Game.hub[k].crystals + '\x01';
+          }
+          else {
+            Game.level[HData[k].level[i]].flags = 0x800;
+          }
+        }
+      }
+    }
+    else {
+      for (i = 0; i < 5; i++) {
+        if (HData[k].level[i] != -1) {
+          Game.level[HData[k].level[i]].flags = 0x17;
+        }
+      }
+    }
+  }
+  Game.level[1].flags = Game.level[1].flags | 0x40;
+  Game.level[17].flags = Game.level[17].flags | 0x80;
+  Game.level[7].flags = Game.level[7].flags | 0x100;
+  Game.level[19].flags = Game.level[19].flags | 0x200;
+  Game.level[10].flags = Game.level[10].flags | 0x400;
+  Game.level[4].flags = Game.level[4].flags | 0x20;
+  Game.level[12].flags = Game.level[12].flags | 0x20;
+  Game.level[14].flags = Game.level[14].flags | 0x20;
+  Game.level[5].flags = Game.level[5].flags | 0x20;
+  Game.level[20].flags = Game.level[20].flags | 0x20;
+  Game.level[33].flags = Game.level[33].flags | 0x20;
+  Game.level[27].flags = Game.level[27].flags | 0x20;
+  Game.level[28].flags = Game.level[28].flags | 0x20;
+  Game.level[29].flags = Game.level[29].flags | 0x20;
+  Game.level[32].flags = Game.level[32].flags | 0x20;
+  Game.level[9].flags = Game.level[9].flags | 0x20;
+  Game.powerbits = 0xff;
+  Game.cutbits = (u32)-1;
+  CalculateGamePercentage(&Game);
+  ResetBonus();
+  ResetDeath();
+  ResetGemPath();
+  return;
+}
+
+//NGC MATCH
+void InitGameMode(s32 mode) {
+  ResetTimer(&GameTimer);
+  finish_frame = 0;
+  ResetTimer(&PauseTimer);
+  pausestats_frame = 0;
+  ResetTimer(&MenuTimer);
+  ResetTimeTrial();
+  if (force_menu != -1) {
+    NewMenu(&Cursor,force_menu,-1,-1);
+    force_menu = -1;
+  }
+  else {
+    if ((LDATA->flags & 1) != 0) {
+      start_time = 3.0f;
+      NewMenu(&Cursor,-1,-1,-1);
+    }
+    else {
+      start_time = 0.0f;
+    }
+  }
+  new_mode = -1;
+  new_level = -1;
+  ResetPlayer(1);
+  ResetTubs();
+  plr_lives.count = (short)Game.lives;
+  plr_lives.draw = plr_lives.count;
+  switch (Level) {                        
+    case 0x25:
+        if (GameMode == 1) {
+            InitGameCut();
+            return;
+        }
+        return;
+    case 0x17:
+        ResetDRAINDAMAGE();
+        return;
+    case 0x19:
+        ResetCRUNCHTIME();
+        return;
+    case 0x28:
+        InitGameCut();
+        break;
+  }
+  return;
+}
+
+//NGC MATCH
+void InitPositions(void) {
+  struct nuvec_s* p0;
+  struct nuvec_s* p1;
+  
+  pos_START = NULL;
+  SAFEY = -1000.0f;
+  if ((SplTab[0].spl != NULL) && (0 < (SplTab[0].spl)->len)) {
+    pos_START = (struct nuvec_s *)(SplTab[0].spl)->pts;
+  }
+  if (((Level == 0x1c) && (SplTab[29].spl != NULL)) && (SplTab[45].spl != NULL)) {
+    p0 = (struct nuvec_s*)(SplTab[29].spl)->pts;
+    p1 = (struct nuvec_s*)(SplTab[45].spl)->pts;
+    start_pos.x = (p0->x + p1->x) * 0.5f;
+    start_pos.y = (p0->y + p1->y) * 0.5f;
+    start_pos.z = (p0->z + p1->z) * 0.5f;
+    pos_START = &start_pos;
+    return;
+  }
+  if ((((LDATA->vSTART).x != 0.0f) || ((LDATA->vSTART).y != 0.0f)) || ((LDATA->vSTART).z != 0.0f)) {
+     pos_START = &LDATA->vSTART;
+  }
+  return;
+}
+
+//NGC MATCH
+void InitLevel(void) {
+  s32 lp;
+  s32 y;
+  s32 menu;
+  s32 level;
+  struct nuvec_s start;
+  struct nuvec_s end;
+  struct nuinstance_s *ipost;
+  struct nuinstance_s *instgrp[24];
+  
+  InitPositions();
+  ResetTempCharacter(-1,-1);
+  menu = -1;
+  ResetTempCharacter2(-1,-1);
+  y = -1;
+  level = -1;
+  tempanim_waitaudio = 1;
+    switch(Level) {
+        case 0x22:
+        break;
+            case 0x23:
+                          NewGame();
+                          y = 0;
+                          Hub = -1;
+                          menu = 0;
+                          ResetTempCharacter(0x60,0x2b);
+                          Demo = 0;
+            break;
+            case 0x25:
+                      CalculateGamePercentage(&Game);
+                      ResetTempCharacter(2,0x22);
+                      hub_vr_level = 0xffffffff;
+                      loadsave_frame = 0x3d;
+                      warp_level = 0xffffffff;
+            break;
+            case 0x27:
+                        menu = 0x13;
+                        level = 0x25;
+            break;
+
+            case 0x29:
+                        menu = 0x13;
+                        level = 0x2b;
+            break;
+            case 0x26:
+                        ResetTempCharacter(2,0x22);
+                        menu = 0x14;
+                        tempanim_nextaction = 0x73;
+                        y = 0;
+                        gamesfx_channel = 4;
+                        tempanim_waitaudio = 1;
+                        cortex_gameover_i = -1;      
+            break;
+            case 0x2b:
+                        InitCredits();
+                        menu = 0x23;
+                        ResetTempCharacter(0xbb,0x22);
+                        level = 0x2b;
+                        ResetTempCharacter2(0,0x22);
+            break;
+            case 0xd:
+                ResetTempCharacter(0x62,0x22);
+            break;
+            case 0x1a:
+                ResetTempCharacter(0xb8,0x22);
+            break;
+            case 0x12:
+                ResetTempCharacter(0xb9,0x22);
+            break;
+            case 0x1e:
+                        ResetTempCharacter(0xba,0x22);
+            break;
+            case 0x18:
+                ResetTempCharacter(0xbc,0x22);
+            break;
+            case 0x15:
+                ResetTempCharacter(0xbc,0x22);
+            break;
+            case 0x16:
+                ResetTempCharacter(0xbc,0x22);
+            break;
+            case 0x19:
+                ResetTempCharacter(2,0x22);
+            break;
+            case 0x13:
+                        if ((ObjTab[145].obj.special != NULL) && (ObjTab[146].obj.special != NULL)) {
+                          for (lp = 0; lp < 0x18; lp++) {
+                            if (lp & 1) {
+                                instgrp[lp] = ObjTab[145].obj.special->instance;
+                            } else{
+                              instgrp[lp] = ObjTab[146].obj.special->instance;
+                            }
+                          }
+                          start.x = 36.3721f;
+                          start.y = -0.1f;
+                          start.z = 140.7f;
+                          end.x = 36.49f;
+                          end.y = -0.1f;
+                          end.z = 146.84f;
+                          NuBridgeCreate(instgrp,NULL,&start,&end,1.2f,-0x4200,0.3f,0.075f,
+                                         -0.01f,4.0f,10,1.0f,0.5f,3,-0x7f7f7f80);
+                          start.x = 206.1f;
+                          start.y = 0.0f;
+                          start.z = 249.8f;
+                          end.x = 213.25f;
+                          end.y = 0.0f;
+                          end.z = 249.8f;
+                          NuBridgeCreate(instgrp,NULL,&start,&end,1.2f,0,0.25f,0.08f,-0.005f, 7.0f
+                                         ,0xc,1.0f,0.5f,3,-0x7f7f7f80);
+                        }
+            break;
+            case 8:
+                        if (ObjTab[155].obj.special != NULL) {
+                          if (ObjTab[158].obj.special != NULL) {
+                            ipost = (ObjTab[158].obj.special)->instance;
+                          } else{
+                              ipost = NULL;
+                          }
+                          for (lp = 0; lp < 0x18; lp++) {
+                            instgrp[lp] = (ObjTab[155].obj.special)->instance;
+                          }
+                          start.x = -79.875f;
+                          start.y = -14.2f;
+                          start.z = 22.7f;
+                          end.x = -79.875f;
+                          end.y = -14.2f;
+                          end.z = 26.0f;
+                          NuBridgeCreate(instgrp,ipost,&start,&end,1.2f,-0x4000,0.18f,0.1f,-0.01f,4.0f,7,1.08f,
+                                         0.5f,3,-0x7f7f7f80);
+                          start.x = 52.5f;
+                          start.y = -33.7f;
+                          start.z = -73.45f;
+                          end.x = 63.9f;
+                          end.y = -33.7f;
+                          end.z = -73.14f;
+                          NuBridgeCreate(instgrp,ipost,&start,&end,1.2f,0,0.4,0.05,-0.004,8.0,0x11,1.08f,0.5f
+                                         ,3,-0x7f7f7f80);
+                          start.x = 70.0;
+                          start.y = -33.7f;
+                          start.z = -73.12f;
+                          end.x = 77.0;
+                          end.y = -33.7f;
+                          end.z = -73.3f;
+                          NuBridgeCreate(instgrp,ipost,&start,&end,1.2f,0,0.25f,0.075f,-0.008f,4.0f,10,1.08f,0.5f
+                                         ,3,-0x7f7f7f80);
+                        }
+            break;
+            case 1:
+                        if (((ObjTab[159].obj.special != NULL)) && (ObjTab[160].obj.special != NULL)) {
+                          ipost = NULL;
+                          if (ObjTab[161].obj.special != NULL) {
+                            ipost = (ObjTab[161].obj.special)->instance;
+                          }
+                          for (lp = 0; lp < 0x18; lp++) {
+                            if (lp == (lp / 3) * 3) {
+                                instgrp[lp] = ObjTab[159].obj.special->instance;
+                            } else{
+                              instgrp[lp] = ObjTab[160].obj.special->instance;
+                            }
+                          }
+                          start.x = -1.31f;
+                          start.y = 18.6f;
+                          start.z = 16.23f;
+                          end.x = -7.14f;
+                          end.y = 18.6f;
+                          end.z = 14.8f;
+                          NuBridgeCreate(instgrp,ipost,&start,&end,1.2f,31000,0.12f,0.1f,-0.01f,4.0f,7,1.12f, 0.9f
+                                         ,3,-0x7fffcfa8);
+                          start.x = -8.47f;
+                          start.y = 18.6f;
+                          start.z = 14.4f;
+                          end.x = -13.17f;
+                          end.y = 18.6f;
+                          end.z = 10.09f;
+                          NuBridgeCreate(instgrp,ipost,&start,&end,1.2f,25000,0.12f,0.1f,-0.01f,4.0f,7,1.12f, 0.9f
+                                         ,3,-0x7fffcfa8);
+                        }
+            break;
+        }
+  if ((LBIT & 0x3e00000) != 0) {
+    Mask->active = 0;
+  }
+  ai_lookpos = v000;
+  Cursor.menu = -1;
+  NewMenu(&Cursor,menu,y,level);
+  VEHICLECONTROL = 0;
+  if ((Level == 6) || (Level == 0x1d)) {
+    VEHICLECONTROL = 1;
+  }
+  else if (Level == 0x22) {
+    VEHICLECONTROL = 2;
+  }
+  else {
+    VEHICLECONTROL = 0;
+  }
+  level_part_2 = 0;
+  SKELETALCRASH = 0;
+  if (Level != 0x25) {
+    new_hub_flags = '\0';
+    new_lev_flags = 0;
+  }
+  ResetItems();
+  boss_dead = 0;
+  COMPLEXPLAYERSHADOW = (s32)(Level == 0xc);
+  bonusgem_ok = (u32)(Level != 5);
+  ResetGemPath();
+  hubleveltext_level = -1;
+  hubleveltext_pos = 0.0f;
+  tumble_moveduration = 1.0f;
+  tumble_duration = 1.0f;
+  tumble_time = 1.0f;
+  HubLevelText = NULL;
+  InitBugAreas();
+  bonus_restart = 0;
+  plr_invisibility_time = 5.0f;
+  in_finish_range = 0;
+  LivesLost = 0;
+  if ((LBIT & 0x3e00000) != 0) {
+    Mask->active = 0;
+  }
+  ResetAkuAkuAdvice();
+  return;
+}
+
+//NGC MATCH
+void UpdateLevel(void) {
+  s32 sfx;
+  s32 i;
+
+  for (i = 0; i < 5; i++) {
+    lev_ambpos[i] = (player->obj).pos;
+  }
+  sfx = -1;
+    switch ((s32) Level) {
+    case 5:
+        sfx = 0xB5;
+        break;
+    case 0x17:
+        UpdateDRAINDAMAGE();
+    case 0x26:
+        sfx = 0xB9;
+        break;
+    case 0x19:
+        sfx = UpdateCRUNCHTIME();
+        break;
+    case 2:
+        if ((s32) VEHICLECONTROL == 0) {
+            sfx = 0xB4;
+        }
+        break;
+    case 8:
+        gamesfx_effect_volume = 0x3FFF;
+        GameSfxLoop(0xB7, 0);
+    case 29:
+    case 33:
+    case 20:
+    case 16:
+    case 9:
+    case 12:
+    case 7:
+    case 4:
+    case 0:
+        sfx = 0xB3;
+        break;
+    case 0xe:
+        sfx = 0xC0;
+        break;
+    case 0x13:
+        sfx = 0xBC;
+        break;
+    }
+  if (sfx != -1) {
+    gamesfx_effect_volume = 0x1fff;
+    GameSfxLoop(sfx,NULL);
+  }
+  return;
+}
+
+//NGC MATCH
+void DrawLevel(void) {
+    switch (Level) {                          
+    case 0x25:
+        HubDrawItems();
+        return;
+    case 0x19:
+        DrawCRUNCHTIME();
+        return;
+    case 0x17:
+        DrawDRAINDAMAGE();
+        return;
+    }
+}
+
+void ResetLevel(void) {
+  ResetVehicleLevel(1);
+  return;
+}
+
 void DrawNameInputTable(struct Cursor *cursor,float x0,float y0)
 {
   s32 align;
@@ -2331,18 +2939,17 @@ void DrawNameInputTable(struct Cursor *cursor,float x0,float y0)
   return;
 }
 
-
-void DrawMenuEntry(Cursor *cursor,char *txt,float *x,float *y,s32 *i)
-{
+//NGC MATCH
+void DrawMenuEntry(struct cursor_s *cursor,char *txt,float *x,float *y,s32 *i) {
   s32 align;
   s32 col;
   float size;
   
-  //col = *i;
-  if ((cursor->y_min <= i) && (i <= cursor->y_max)) {
+  if ((*i >= cursor->y_min) && (*i <= cursor->y_max)) {
+    col = *i;
     align = 1;
     size = dme_sy * 0.6f;
-    if (i == cursor->y) {
+    if (col == cursor->y) {
       col = 0;
       if (5 < GlobalTimer.frame % 0xc) {
         col = 3;
@@ -2355,26 +2962,25 @@ void DrawMenuEntry(Cursor *cursor,char *txt,float *x,float *y,s32 *i)
     Text3D(txt,*x,*y + dme_yadj,1.0f,size * dme_sx,size * dme_symul,size,align,col);
   }
   NextMenuEntry(y,i);
-  dme_symul = 1.0f;
-  dme_yadj = 0.0f;
   dme_sx = 1.0f;
   dme_sy = 1.0f;
+  dme_symul = 1.0f;
+  dme_yadj = 0.0f;
   return;
 }
 
-
-void DrawMenuEntry2(struct Cursor *cursor,char *txt0,char *txt1,float *x,float *y,int *i)
-{
+//NGC MATCH
+void DrawMenuEntry2(struct cursor_s *cursor,char *txt0,char *txt1,float *x,float *y,s32 *i) {
   s32 align;
   s32 col;
   float sx2;
   float size;
  
-  if ((cursor->y_min <= i) && (i <= cursor->y_max)) {
+  if ((*i >= cursor->y_min) && (*i <= cursor->y_max)) {
     align = 1;
-    size = dme_sy * 0.6000000238418579f;
+    size = dme_sy * 0.6f;
     sx2 = size;
-    if (i == cursor->y) {
+    if (*i == cursor->y) {
       col = 0;
       if (5 < GlobalTimer.frame % 0xc) {
         col = 3;
@@ -2384,22 +2990,21 @@ void DrawMenuEntry2(struct Cursor *cursor,char *txt0,char *txt1,float *x,float *
     else {
       col = 2;
     }
-    Text3D(txt0,*x,*y,1.0,(sx2 * dme_sy),size,size,align,col);
+    Text3D(txt0,*x,*y,1.0f,(sx2 * dme_sy),size,size,align,col);
     size = MENUDY * dme_sy + *y;
     *y = size;
-    Text3D(txt1,*x,size,1.0,(sx2 * dme_sx),sx2,sx2,align,col);
+    Text3D(txt1,*x,size,1.0f,(sx2 * dme_sx),sx2,sx2,align,col);
   }
   NextMenuEntry(y,i);
-  dme_sy = 1.0f;
   dme_sx = 1.0f;
+  dme_sy = 1.0f;
   return;
 }
 
-void NextMenuEntry(float *y,s32 *i)
-
-{
-  *y = MENUDY * dme_sy + *y;
-  *i = *i + 1;
+//NGC MATCH
+void NextMenuEntry(float *y, s32 *i) {
+  *y += MENUDY * dme_sy;
+  *i += 1;
   return;
 }
 
@@ -2722,11 +3327,9 @@ LAB_80031a24:
   return;
 }
 
-
-void DrawNODATAAVAILABLE(void)
-
-{
-  Text3D(tNODATAAVAILABLE[(uint)Game.language * 2],0.0,0.0,1.0,0.6,0.6,0.6,1,0);
+//NGC MATCH
+void DrawNODATAAVAILABLE(void) {
+  Text3D(tNODATAAVAILABLE[Game.language][0],0.0f,0.0f,1.0f,0.6f,0.6f,0.6f,1,0);
   return;
 }
 
