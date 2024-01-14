@@ -1,8 +1,9 @@
+
 // Size: 0xB4C, DWARF: 0x73CED2
 struct Bridge_s
 {
-    struct NuVec pos[2][24]; // Offset: 0x0, DWARF: 0x73CEE4
-    struct NuVec vel[2][24]; // Offset: 0x240, DWARF: 0x73CF0C
+    struct NuVec pos[24][2]; // Offset: 0x0, DWARF: 0x73CEE4
+    struct NuVec vel[24][2]; // Offset: 0x240, DWARF: 0x73CF0C
     struct numtx_s mtx[24]; // Offset: 0x480, DWARF: 0x73CF34
     struct nuinstance_s* instance[24]; // Offset: 0xA80, DWARF: 0x73CF5C
     struct nuinstance_s* ipost; // Offset: 0xAE0, DWARF: 0x73CF89
@@ -26,31 +27,19 @@ struct Bridge_s
 };
 
 
-/*
-   nuvec_s dir; // 0x8(r1)
-    nuvec_s dir90; // 0x18(r1)
-    // Size: 0xB4C
-    struct Bridge_s* bridge; // r30
-    int lp; // r25
-    float t; // f31
-*/
+#define SQR(x) ((x)*(x))
 
-s32 * NuBridgeCreate(struct nuinstance_s **instance,struct nuinstance_s *ipost,struct NuVec *start,
-            struct NuVec *end,float width,short yang,float tension,float damp,float gravity,float plrweight,
-                    s32 sections,float postw,float posth,s32 postint,s32 colour) {
-    struct NuVec dir; // 0x8(r1)
-    struct NuVec dir90; // 0x18(r1)
-    struct Bridge_s *bridge;
-    //s32 id;
+//NGC MATCH
+s32* NuBridgeCreate(struct nuinstance_s** instance,struct nuinstance_s* ipost,struct nuvec_s* start,struct nuvec_s* end,float width,
+    short yang,float tension,float damp,float gravity,float plrweight,s32 sections,float postw,float posth,s32 postint,s32 colour) {
+ 
+    struct nuvec_s dir; // 0x8(r1)
+    struct nuvec_s dir90; // 0x18(r1)
+    struct Bridge_s* bridge;
     s32 lp;
-    //s32 iVar8;
-    //struct Bridge_s *bridgeptr;
-    //struct numtx_s *mtx;
     float t;
-    //char pad[55];
 
-
-    if (0x18 < sections) {
+    if (sections > 24) {
         printf("to many sections/n");
     }
     NuBridgeOn(1);
@@ -60,63 +49,66 @@ s32 * NuBridgeCreate(struct nuinstance_s **instance,struct nuinstance_s *ipost,s
         bridge->damp = damp;
         bridge->gravity = gravity;
         bridge->ipost = ipost;
-        //lp = 0;
         bridge->plrweight = plrweight;
         bridge->postw = postw;
         bridge->posth = posth;
-        bridge->postint = (char)postint;
+        bridge->postint = postint;
         bridge->colour = colour;
-        bridge->sections = (char)sections;
+        bridge->sections = sections;
         bridge->width = width;
+        
         (bridge->center).x = (end->x + start->x) * 0.5f;
         (bridge->center).y = (end->y + start->y) * 0.5f;
         (bridge->center).z = (end->z + start->z) * 0.5f;
-        bridge->inrange = '\0';
-        bridge->radius =
-             end->z - start->z * 0.5f * end->z - start->z * 0.5f + end->x - start->x * 0.5f * end->x - start->x * 0.5f + end->y - start->y * 0.5f * end->y - start->y * 0.5f + 1.0f;
-        t = -end->z - start->z * (1.0f / NuFsqrt(end->x - start->x * end->x - start->x + end->z - start->z * end->z - start->z));
+        
+        dir.x = end->x - start->x;
+        dir.y = end->y - start->y;
+        dir.z = end->z - start->z;
+
+        bridge->radius = SQR(dir.x * 0.5f) + SQR(dir.y * 0.5f) + SQR(dir.z * 0.5f) + 1.0f;
+        bridge->inrange = 0;
+
+        t = 1.0f / NuFsqrt(SQR(dir.x) + SQR(dir.z));
+        dir90.x = -dir.z * t;
+        dir90.y = 0.0f;
+        dir90.z = dir.x * t;
         bridge->yang = yang;
-       // if (0 < sections) {
-            //dVar15 = 4503601774854144.0;
-            //iVar8 = 0;
-            //mtx = bridge->mtx;
-            //bridgeptr = bridge;
-            for (lp = 0; lp < sections; lp++) {
-                //id = instance[lp];
-                bridge->instance[lp] = instance[lp];
-                if (instance[lp] == NULL) {
-                    bridge->plat[lp] = -1;
-                }
-                else {
-                    bridge->plat[lp] = (short)NewPlatInst(&bridge->mtx[lp],NuBridgeLookupInstanceIndex(instance[lp]));
-                    PlatInstRotate(bridge->plat[lp],1);
-                }
-                NuMtxSetIdentity(&bridge->mtx[lp]);
-                NuMtxPreRotateY(&bridge->mtx[lp],bridge->yang);
-                //lp = lp + 1;
-                bridge->mtx[lp]._30 = (end->x - start->x * lp) / sections + start->x;
-                bridge->mtx[lp]._31 = (end->y - start->y * lp) / sections + start->y;
-                bridge->mtx[lp]._32 = (end->z - start->z * lp) / sections + start->z;
-                //mtx = mtx + 1;
-                bridge[lp].pos[0]->x = ((end->x - start->x * lp) / sections + start->x) - ((t * width) * 0.5f);
-                bridge[lp].pos[0]->y = (end->y - start->y * lp) / sections + start->y;
-                bridge[lp].pos[0]->z = ((end->z - start->z * lp) / sections + start->z) - (((end->x - start->x * (1.0f / t)) * width) * 0.5f);
-                bridge[lp].pos[1]->x = ((t * width) * 0.5f + ((end->x - start->x * lp) / sections + start->x));
-                bridge[lp].pos[1]->y = (end->y - start->y * lp) / sections + start->y;
-                bridge[lp].pos[1]->z = (((end->x - start->x * (1.0f / t)) * width) * 0.5f + ((end->z - start->z * lp) / sections + start->z));
-                bridge[lp].vel[0]->x = 0.0f;
-                //bridgeptr = (struct Bridge_s *)(bridgeptr->pos + 2);
-                bridge[lp].vel[0]->y = 0.0f;
-                bridge[lp].vel[0]->z = 0.0f;
-                bridge[lp].vel[1]->x = 0.0f;
-                bridge[lp].vel[1]->y = 0.0f;
-                bridge[lp].vel[1]->z = 0.0f;
-                bridge[lp].hit = 0;
-                //iVar8 = iVar8 + 0x18;
-            } //while (lp < sections);
-        //}
+        
+        for (lp = 0; lp < sections; lp++) {
+            bridge->instance[lp] = instance[lp];
+            if (bridge->instance[lp]) {
+                bridge->plat[lp] = NewPlatInst(&bridge->mtx[lp], NuBridgeLookupInstanceIndex(instance[lp]));
+                PlatInstRotate(bridge->plat[lp], 1);
+            } else {
+                bridge->plat[lp] = -1;
+            }
+            
+            NuMtxSetIdentity(&bridge->mtx[lp]);
+            NuMtxPreRotateY(&bridge->mtx[lp], bridge->yang);
+            
+            bridge->mtx[lp]._30 = ((dir.x * lp) / (sections - 1)) + start->x;
+            bridge->mtx[lp]._31 = ((dir.y * lp) / (sections - 1)) + start->y;
+            bridge->mtx[lp]._32 = ((dir.z * lp) / (sections - 1)) + start->z;
+            
+            bridge->pos[lp][0].x = ((dir.x * lp) / (sections - 1) + start->x) - (dir90.x * width * 0.5f);
+            bridge->pos[lp][0].y = (dir.y * lp) / (sections - 1) + start->y;
+            bridge->pos[lp][0].z = ((dir.z * lp) / (sections - 1) + start->z) - (dir90.z * width * 0.5f);
+            
+            bridge->pos[lp][1].x = ((dir.x * lp) / (sections - 1) + start->x) + (dir90.x * width * 0.5f);
+            bridge->pos[lp][1].y = (dir.y * lp) / (sections - 1) + start->y;
+            bridge->pos[lp][1].z = ((dir.z * lp) / (sections - 1) + start->z) + (dir90.z * width * 0.5f);
+            
+            bridge->vel[lp][0].x = 0.0f;
+            bridge->vel[lp][0].y = 0.0f;
+            bridge->vel[lp][0].z = 0.0f;
+            
+            bridge->vel[lp][1].x = 0.0f;
+            bridge->vel[lp][1].y = 0.0f;
+            bridge->vel[lp][1].z = 0.0f;
+            bridge->hit = 0;
+        }
     }
-    return (s32 *)bridge;
+    return (s32*)bridge;
 }
 
 //NGC MATCH
@@ -128,6 +120,98 @@ void NuBrdigeDrawRope(struct numtl_s *mtl,struct nuvec_s *rope1,struct nuvec_s *
             ropesegment(mtl,rope1 + *ropeiter, ropeiter[1] - *ropeiter,colour);
             ropesegment(mtl,rope2 + *ropeiter, ropeiter[1] - *ropeiter,colour);
            
+        }
+    }
+    return;
+}
+
+//NGC MATCH
+void NuBridgeDraw(struct nugscn_s *scn,struct numtl_s *mtl) {
+    s32 iVar7;
+    s32 i;
+    s32 lp;
+    struct Bridge_s *bridge;
+    struct numtx_s m;
+    struct nuvec4_s v;
+    struct nuvec4_s vp [2];
+    struct nuvec_s rope1 [512];
+    struct nuvec_s rope2 [512];
+    s32 ropecnt;
+    s32 ropetab [8];
+    
+    if (NuBridgeProc != 0) {
+        iVar7 = 0;
+        ropecnt = 0;
+        bridge = &Bridges;
+        ropetab[iVar7] = ropecnt;
+        
+        for (i = 0; i < BridgeFree; i++) {
+            //i = i + 1;
+            if (bridge->inrange) {
+                bridge->onscreen = FALSE;
+                NuMtxSetRotationY(&m, bridge->yang);
+                
+                vp[0].x = 0.0f;
+                vp[0].y = 0.0f;
+                vp[0].z = -bridge->postw;
+                vp[0].w = 1.0f;
+                
+                vp[1].x = 0.0f;
+                vp[1].y = 0.0f;
+                vp[1].z = bridge->postw;
+                vp[1].w = 1.0f;
+                
+                for (lp = 0; lp < bridge->sections; lp++) {
+                    
+                    if ((bridge->instance[lp] != 0) && (NuRndrGScnObj(scn->gobjs[bridge->instance[lp]->objid], &bridge->mtx[lp]) != 0)) {
+                        bridge->onscreen = TRUE;
+                    }
+                    
+                    if ((lp == (lp / bridge->postint) * bridge->postint) && (bridge->ipost != NULL)) {
+                        NuVec4MtxTransformVU0(&v, &vp[0], &bridge->mtx[lp]);
+                        if (ropecnt < 512) {
+                            rope1[ropecnt].x = v.x;
+                            rope1[ropecnt].y = v.y + bridge->posth;
+                            rope1[ropecnt].z = v.z;
+                        }
+                        
+                        m._30 = v.x;
+                        m._31 = v.y;
+                        m._32 = v.z;
+                        NuRndrGScnObj(scn->gobjs[bridge->ipost->objid], &m);
+                        
+                        v.x = 0.0f;
+                        v.y = 0.0f;
+                        v.z = 1.0f;
+                        v.w = 1.0f;
+                        NuVec4MtxTransformVU0(&v, &vp[1], &bridge->mtx[lp]);
+                        
+                        if (ropecnt < 512) {
+                            rope2[ropecnt].x = v.x;
+                            rope2[ropecnt].y = v.y + bridge->posth;
+                            rope2[ropecnt].z = v.z;
+                            ropecnt++;
+                        }
+                        
+                        m._30 = v.x;
+                        m._31 = v.y;
+                        m._32 = v.z;
+                        NuRndrGScnObj(scn->gobjs[bridge->ipost->objid], &m);
+                    }
+                }
+                
+                if (ropetab[iVar7] != ropecnt) {
+                    ropetab[iVar7 + 1] = ropecnt;
+                    iVar7++;
+                }
+            }
+            bridge++;
+        }
+        
+        ropetab[iVar7 + 1] = ropecnt;
+        if (1 < ropecnt) {
+            ropemat = m;
+            NuBrdigeDrawRope(mtl, rope1, rope2, ropecnt, ropetab, Bridges->colour);
         }
     }
     return;

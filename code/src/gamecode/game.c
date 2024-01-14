@@ -84,6 +84,131 @@ void UpdateTempCharacter(void) {
   return;
 }
 
+//MATCH NGC
+void UpdateScreenWumpas(void) {
+  struct nuvec_s v[2];
+  struct newwumpa_s *anew;
+  struct wscr_s *scr;
+  s32 i;
+  
+  scr = WScr;
+  for (i = 0; i < 0x20; i++) {
+        if (0.0f < scr->timer) {
+          scr->timer = scr->timer - 0.016666668f;
+              if (scr->timer < 0.0f) {
+                scr->timer = 0.0f;
+                    if (sw_hack != 0) {
+                      mg_wumpatot++;
+                      GameSfx(0x19,NULL);
+                    }
+                    else {
+                          if (scr->bonus != '\0') {
+                            plr_bonus_wumpas.count++;
+                          }
+                          else {
+                            plr_wumpas.count++;
+                          }
+                    }
+              }
+        }
+    scr++;
+  }
+  anew = NewWumpa;
+  for (i = 0; i < 0x20; i++, anew++) {
+        if (anew->active != '\0') {
+              if (anew->delay == '\0') {
+                if (anew->transformed == '\0') {
+                  anew->transformed = '\x01';
+                  NuCameraTransformScreenClip(&anew->screen_pos,&anew->world_pos,1,NULL);
+                  v[0].x = (anew->world_pos).x + GameCam[0].vX.x * 0.1f;
+                  v[0].y =  (anew->world_pos).y + GameCam[0].vX.y * 0.1f;
+                  v[0].z = (anew->world_pos).z + GameCam[0].vX.z * 0.1f;
+                  NuCameraTransformScreenClip(&v[1],v,1,NULL);
+                  anew->screen_scale = (NuFabs((anew->screen_pos).x - v[1].x) * 3.636363f);
+                }
+                scr = &WScr[i_screenwumpa];
+                scr->pos = anew->screen_pos;
+                scr->scale = anew->screen_scale;
+                scr->timer = 0.25f;
+                    if (anew->bonus != '\0') {
+                      scr->xs = BONUSWUMPAOBJSX;
+                      scr->ys = BONUSPANELSY;
+                      scr->bonus = '\x01';
+                    }
+                    else {
+                      scr->xs = WUMPAOBJSX;
+                      scr->ys = PANELSY;
+                      scr->bonus = '\0';
+                      force_panel_wumpa_update = 0x3c;
+                    }
+                i_screenwumpa++;
+                if (i_screenwumpa == 0x20) {
+                  i_screenwumpa = 0;
+                }
+                anew->count--;
+                if (anew->count == '\0') {
+                  anew->active = '\0';
+                  continue;
+                }
+                anew->delay = '\f';
+              }
+              else {
+                anew->delay--;
+              }
+        }
+  }
+    sw_hack = 0;
+    return;
+}
+
+//NGC MATCH
+void AddTempWumpa(float x,float y,float z,struct cratesarray_s *crate,s32 n) {
+  struct wumpa_s* wumpa; 
+  u16 a;
+  float d;
+  s32 i;
+
+  if ((TimeTrial == 0)) {
+    for (i = 0; i < n; i++) {
+      wumpa = &Wumpa[i_tempwumpa + 0x100];
+      wumpa->pos0.x = x;
+      wumpa->pos0.y = y;
+      wumpa->pos0.z = z;
+      if (n > 1) {
+        a = qrand();
+        d = (qrand() * 0.000015259022f) * 0.25f;
+        wumpa->pos1.x = wumpa->pos0.x + NuTrigTable[a & 0xffff] * (d);
+        wumpa->pos1.y = wumpa->pos0.y;
+        wumpa->pos1.z = wumpa->pos0.z + NuTrigTable[((a & 0xffff) + 0x4000) & 0x3fffc / 4] * d;
+      }
+      else {
+        wumpa->pos1 = wumpa->pos0;
+      }
+      wumpa->pos = wumpa->pos0;
+      wumpa->shadow = NewShadowMask(&wumpa->pos1,0.0,-1);
+      wumpa->iRAIL = crate->iRAIL;
+      wumpa->iALONG = crate->iALONG;
+      wumpa->fALONG = crate->fALONG;
+      wumpa->active = '\x01';
+      wumpa->time = 0.0f;
+      if (wumpa->shadow != 2000000.0f) {
+        wumpa->surface_type = (char)ShadowInfo();
+        FindAnglesZX(&ShadNorm);
+        wumpa->surface_xrot = temp_xrot;
+        wumpa->surface_zrot = temp_zrot;
+      }
+      else {
+        wumpa->surface_type = -1;
+      }
+      i_tempwumpa++;
+      if (i_tempwumpa == 0x40) {
+        i_tempwumpa = 0;
+      }
+    }
+  }
+  return;
+}
+
 //98%
 s32 Draw3DObject(s32 object,struct nuvec_s *pos,u16 xrot,u16 yrot,u16 zrot,float scalex,
                 float scaley,float scalez,struct nugscn_s *scn,struct nuspecial_s *obj,s32 rot) {
@@ -486,6 +611,148 @@ s32 ActiveAwards(void) {
   return 0;
 }
 
+//NGC 99%
+s32 AddAward(s32 hub,s32 level,u16 got) {
+  s32 i0;
+  struct award_s* award;
+  struct nugspline_s *spl;
+  struct nuvec_s* p0;
+  struct nuvec_s* p1;
+  s32 i;
+  s32 j;
+  s32 ang;
+  
+  if (((hub != -1) && (level != -1)) && (HData[hub].i_spl[1] != -1)) {
+    spl = SplTab[HData[hub].i_spl[1]].spl;
+    if (spl == NULL) {
+      return 0;
+    }
+    HubFromLevel(level);
+      i0 = temp_hublevel;
+    if (i0 == -1) {
+        return 0;
+    } else{
+        if ((got & 7) != 0) {
+           ang = 2;
+        } else if ((got & 8) != 0) {
+          ang = 1;
+        } else if ((got & 0x10) != 0) {
+          ang = 0;
+        } else{
+           ang = 3;
+        }
+      award = &Award[i_award];
+        i = ang * 2;
+      i +=  (i0 * 8); 
+      j = (i + 1);
+      i *= spl->ptsize;
+      j *= spl->ptsize;
+      p0 = (struct nuvec_s*)  &spl->pts[i];
+      p1 = (struct nuvec_s*) &spl->pts[j];
+      award->time = 0.0f;
+      award->yrot = (u16) NuAtan2D(p1->x - p0->x,p1->z - p0->z);
+      award->level = (char)level;
+      award->got = got;
+      award->newpos = *p0;
+      award->wait = 1;
+      i_award++;
+      if (i_award == 3) {
+        i_award = 0;
+      }
+    }
+  } else{
+      return 0;
+  }
+  return 1;
+}
+
+//NGC 98% (float)
+void DrawAwards(void) {
+    struct award_s* award;
+    struct nuvec_s pos;
+    float f;
+    float scale;
+    float t;
+    s32 uVar2;
+    s32 i;
+    s32 i_obj;
+    s32 i_chr;
+
+    award = Award;
+    for (i = 0; i < 3; i++) {
+        t = award->time;
+        if (t < 1.0f) {
+            if (award->wait != 0) {
+                pos = award->oldpos0;
+                t =
+                    (((player->obj).anim.anim_time - (tumble_item_starttime + 1.0f))
+                     / (tumble_item_addtime - (tumble_item_starttime + 1.0f)));
+                if (t > 1.0f) {
+                    t = 1.0f;
+                }
+                if (t < 0.333f) {
+                    scale = 0.0f;
+                } else {
+                    scale = ((t - 0.333f) / 0.667f);
+                }
+            } else {
+                if (t < 0.666f) {
+                    scale = 1.0f;
+                    pos = award->oldpos0;
+                } else {
+                    scale = 1.0f;
+                    f = (t - 0.666f) / 0.33399999f;
+                    pos.x = (award->newpos.x - award->oldpos0.x) * f + award->oldpos0.x;
+                    pos.y = (award->newpos.y - award->oldpos0.y) * f + award->oldpos0.y;
+                    pos.z = (award->newpos.z - award->oldpos0.z) * f + award->oldpos0.z;
+                }
+            }
+            i_obj = -1;
+            i_chr = -1;
+            if ((award->got & 4) != 0) {
+                i_obj = 1;
+            } else if ((award->got & 2) != 0) {
+                i_obj = 2;
+            } else if ((award->got & 1) != 0) {
+                i_obj = 3;
+            } else {
+                if (award->got == 8) {
+                    i_obj = 0xc1;
+                } else if (award->got == 0x10) {
+                    i_obj = 0xc2;
+                } else if (award->got == 0x20) {
+                    i_obj = 0xc3;
+                } else if (award->got == 0x40) {
+                    i_obj = 0xc4;
+                } else if (award->got == 0x80) {
+                    i_obj = 0xc5;
+                } else if (award->got == 0x100) {
+                    i_obj = 0xc6;
+                } else if (award->got == 0x200) {
+                    i_obj = 200;
+                } else if (award->got == 0x400) {
+                    i_obj = 199;
+                }
+            }
+            if (i_obj != -1) {
+                f = (scale * 0.76999998f);
+                if (ObjTab[i_obj].obj.special != NULL) {
+                    Draw3DObject(
+                        i_obj, &pos, 0, award->yrot, 0, f, f, f, ObjTab[i_obj].obj.scene, ObjTab[i_obj].obj.special, 0
+                    );
+                }
+            } else if (i_chr != -1) {
+                f = (scale * 0.76999998f);
+                if (CRemap[i_chr] != -1) {
+                    Draw3DCharacter(&pos, 0, award->yrot, 0, &CModel[CRemap[i_chr]], -1, f, 1.0f, 0);
+                }
+            }
+        }
+        award++;
+    }
+    return;
+}
+
 //NGC MATCH
 s32 qrand(void) {
   qseed = qseed * 0x24cd + 1U & 0xffff;
@@ -538,6 +805,46 @@ u16 TurnRot(u16 a0,u16 a1,s32 rate) {
     }
   }
   return a1;
+}
+
+//NGC MATCH
+s32 AheadOfCheckpoint(s32 iRAIL,s32 iALONG,float fALONG) {
+if ((cp_iRAIL == -1) || (cp_iALONG == -1))
+{
+    return 1;
+}
+  if (((iRAIL == -1)) ||  (((iALONG == -1 || (Rail[iRAIL].type != 0)) || (iRAIL > cp_iRAIL)))) {
+      return 1;
+  }
+    if (iRAIL < cp_iRAIL) {
+      return 0;
+    }
+    if (iALONG > cp_iALONG) { 
+        return 1; 
+    } else if (iALONG >= cp_iALONG) {
+        return (fALONG > cp_fALONG);
+    } else if (iALONG >= cp_iALONG) {
+        // This just creates the final return expression
+        return (fALONG > cp_fALONG);
+    } 
+
+    return 0;
+}
+
+//NGC MATCH
+void ResetLoadSaveCharacter(void) {
+  tumble_action = -1;
+  tumble_duration = 0.0f;
+  tumble_time = 0.0f;
+  last_level = -1;
+  last_hub = -1;
+  Hub = -1;
+  (player->obj).hdg = 0x8000;
+  if (pos_START != NULL) {
+    (player->obj).pos = *pos_START;
+    (player->obj).shadow = NewShadowMaskPlat(&(player->obj).pos,0.0f,-1);
+  }
+  return;
 }
 
 
@@ -2319,6 +2626,42 @@ void TransporterGo(void) {
 }
 
 //NGC MATCH
+void DrawTransporters(void) {
+  s32 i;
+
+  i = 4;
+  if ((TimeTrial == 0) && (ChaseActive() == -1)) {
+    if ((ObjTab[i].obj.special != NULL) && ((Rail[5].type != -1 && (VEHICLECONTROL != 1)))) {
+      Draw3DObject(4,&bonus_obj[0].pos,0,bonus_obj[0].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
+                   ObjTab[i].obj.special,0);
+      Draw3DObject(4,&bonus_obj[1].pos,0,bonus_obj[1].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
+                   ObjTab[i].obj.special,0);
+    }
+    if ((Level != 0x25) || ((Game.hub[5].flags & 1) != 0)) {
+      i = 5;
+      if (LostLife != 0) {
+        i = 6;
+      }
+      if (((ObjTab[i].obj.special != NULL) && (Rail[6].type != -1)) &&
+         ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
+        Draw3DObject(i,&death_obj.pos,0,death_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
+                     ObjTab[i].obj.special,0);
+      }
+      i = 8;
+      if (gempath_open != 0) {
+        i = 7;
+      }
+      if (((ObjTab[i].obj.special != NULL) && (Rail[7].type != -1)) &&
+         ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
+        Draw3DObject(i,&gempath_obj.pos,0,gempath_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
+                     ObjTab[i].obj.special,0);
+      }
+    }
+  }
+  return;
+}
+
+//NGC MATCH
 void ResetAkuAkuAdvice(void) {
     s32 i;
 
@@ -2853,6 +3196,20 @@ void DrawLevel(void) {
 
 void ResetLevel(void) {
   ResetVehicleLevel(1);
+  return;
+}
+
+//NGC MATCH
+void CleanLetters(char *txt) {
+    while (*txt != '\0') {
+      if (*txt == '_') {
+        *txt = ' ';
+      }
+      *txt++;
+      if (Game.language == 'c') {
+        *txt++;
+      }
+    }
   return;
 }
 
@@ -4570,12 +4927,102 @@ LAB_80036da0:
 }
 
 //NGC MATCH
+void MakeTimeI(s32 time,s32 hours,char *txt) {
+  s32 t;
+  
+  if (time < 0) {
+    time = 0;
+  }
+  t = time / 3;
+  if (hours != 0) {
+    temp_hours = t / 360000;
+    temp_minutes = t / 6000 - temp_hours * 0x3c;
+  }
+  else {
+    temp_minutes = t / 6000;
+
+  }
+  temp_hundredths = t % 100;
+  temp_tenths = temp_hundredths / 10;
+  temp_seconds = (t / 100) % 0x3c;
+  if ((txt != NULL) && (sprintf(txt,"%i:%c%c.%c%c",temp_minutes,temp_seconds / 10 + 0x30,temp_seconds % 10 + 0x30,
+              temp_tenths + 0x30,temp_hundredths % 10 + 0x30), Game.language == 'c')) {
+    AddSpacesIntoText(txt,1);
+  }
+  return;
+}
+
+//NGC MATCH
+void MakeLevelTimeString(struct time_s *time,char *txt) {
+  char *__format;
+  char time_string [64];
+  
+  MakeTimeI(time->itime,0,time_string);
+  if (Game.language == 'c') {
+    __format = "%s  %s";
+  }
+  else {
+    __format = "%s %s";
+  }
+  sprintf(txt,__format,time,time_string);
+  return;
+}
+
+//NGC MATCH
+void InitSplineTable(void) {
+  s32 i;
+  
+  if (world_scene[0] != NULL) {
+    for (i = 0; i < 0x49; i++) {
+      SplTab[i].spl = NULL;
+      if (((SplTab[i].levbits >> Level) & 1) != 0) {
+        SplTab[i].spl = NuSplineFind(world_scene[0],SplTab[i].name);
+        if (SplTab[i].spl != NULL) {
+          if ((SplTab[i].min > 0) && (SplTab[i].spl->len < SplTab[i].min)) {
+            SplTab[i].spl = NULL;
+          }
+          else {
+            if ((SplTab[i].max > 0) && ((SplTab[i].max >= SplTab[i].min  && (SplTab[i].spl->len > SplTab[i].max)))) {
+              SplTab[i].spl = 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  else {
+    for (i = 0; i < 0x49; i++) {
+      SplTab[i].spl = NULL;
+    }
+  }
+  return;
+}
+
+//NGC MATCH
 float DistanceToLine(struct nuvec_s* pos, struct nuvec_s* p0, struct nuvec_s* p1) {
   s32 a;
   
   a = NuAtan2D(p1->x - p0->x,p1->z - p0->z);
   return NuFabs(((pos->x - p0->x) * (NuTrigTable[(((-a & 0xffff) + 0x4000) & 0x3fffc  / 4)]) +
                                  (pos->z - p0->z) * NuTrigTable[-a & 0xffff]));
+}
+
+//NGC MATCH
+s32 LineCrossed(float xold,float zold,float xnew,float znew,float x0,float z0,float x1,float z1) {
+
+s32 rv;
+
+  if (!(0.0f <= (xnew - x0) * (z1 - z0) + (znew - z0) * (x0 - x1)) &&
+     ((xold - x0) * (z1 - z0) + (zold - z0) * (x0 - x1) >= 0.0f)) {
+      rv = 1;
+    if (!((xnew - xold) * (z0 - zold) + (znew - zold) * (xold - x0) >= 0.0f && ((xnew - x1) * (zold - z1) + (znew - z1) * (x1 - xold) >= 0.0f))) {
+    }else {
+        rv = 2;
+    }
+      return rv;
+  }
+   else 
+  return 0;
 }
 
 //NGC MATCH
@@ -4588,4 +5035,216 @@ float RatioBetweenEdges(struct nuvec_s *pos,struct nuvec_s *pL0,struct nuvec_s *
   return (dL / (dL + dR));
 }
 
+//NGC MATCH
+float RatioAlongLine(struct nuvec_s* pos, struct nuvec_s* p0, struct nuvec_s* p1) {
+    float z;
+    float z1;
+    float dx;
+    float dz;
+    float siny;
+    float cosy;
+    u16 yrot;
 
+    dx = p1->x - p0->x;
+    dz = p1->z - p0->z;
+    yrot = -NuAtan2D(dx, dz);
+    siny = NuTrigTable[yrot];
+    cosy = NuTrigTable[(yrot + 0x4000) & 0xffff];
+    z = -((pos->x - p0->x) * siny) + ((pos->z - p0->z) * cosy);
+    if (z <= 0.0f) {
+        return 0.0f;
+    }
+    z1 = -(dx * siny) + (dz * cosy);
+    if (z >= z1) {
+        return 1.0f;
+    } else {
+        return z / z1;
+    }
+}
+
+//NGC MATCH
+u16 SplinePointAngle(struct nugspline_s *spl,int i) {
+  struct nuvec_s *p0;
+  struct nuvec_s *p1;
+  float dx;
+  float dz;
+    
+  p0 = (struct nuvec_s *)(spl->pts + i * spl->ptsize);
+  dx = dz = 0.0f;
+  if (i > 0) {
+    p1 = (struct nuvec_s *)(spl->pts + (i - 1) * spl->ptsize);
+    dx = (p0->x - p1->x) + 0.0f;
+    dz = (p0->z - p1->z) + 0.0f;
+  }
+  if (i < spl->len - 1) {
+    p1 = (struct nuvec_s *)(spl->pts + (i + 1) * spl->ptsize);
+    dx = dx + (p1->x - p0->x);
+    dz = dz + (p1->z - p0->z);
+  }
+  return (u16)NuAtan2D(dx,dz);
+}
+
+//NGC MATCH
+s32 NearestSplinePoint(struct nuvec_s *pos,struct nugspline_s *spl) {
+  s32 index;
+  s32 i;
+  s32 d;
+  s32 d0;
+  
+  index = -1;
+  if ((spl != NULL)) {
+    for (i = 0; i < spl->len; i++) {
+      d = NuVecDistSqr(pos,(spl->pts + i * spl->ptsize),NULL);
+      if ((index == -1) || (d < d0)) {
+        index = i;
+        d0 = d;
+      }
+    }
+  }
+  return index;
+}
+
+//NGC MATCH
+void PointAlongSpline(struct nugspline_s *spl,float ratio,struct nuvec_s *dst,u16 *angle,u16 *tilt) {
+  struct nuvec_s *p0;
+  struct nuvec_s *p1;
+  u32 i;
+  u32 j;
+  u32 l;
+  u16 a;
+  float f;
+  s32 d;
+  
+  if (angle != NULL) {
+    *angle = 0;
+  }
+  if (tilt != NULL) {
+    *tilt = 0;
+  }
+  if (spl != NULL) {
+    if ((1.0f < ratio)) {
+        ratio = 1.0f;
+    } else if (ratio < 0.0f) {
+        ratio = 0.0f;
+    }
+    l = (s32)(ratio * (float)((u32)(spl->len + -1) * 0x10000));
+    i = l >> 0x10;
+    iTEMP = i;
+    p0 = (struct nuvec_s *)(spl->pts + i * (int)spl->ptsize);
+    *dst = *p0;
+    if (angle != NULL) {
+      a = SplinePointAngle(spl,i);
+      *angle = a;
+    }
+    if (tilt != NULL) {
+      a = SplinePointTilt(spl,i);
+      *tilt = a;
+    }
+    if ((i < spl->len - 1U) && (l &= 0xffff, l != 0)) {
+      j = i + 1;
+      p1 = (struct nuvec_s *)(spl->pts + j * spl->ptsize);
+      f = (float)l * 0.000015258789f;
+      dst->x = (((p1->x) - p0->x) * f + dst->x);
+      dst->y = (((p1->y) - p0->y) * f + dst->y);
+      dst->z = (((p1->z) - p0->z) * f + dst->z);
+      if (((angle == NULL) & 1) == 0) {
+        a = SplinePointAngle(spl,j);
+        d = RotDiff(*angle,a);
+        *angle += (u16)(f * d);
+      }
+      if (tilt != NULL) {
+        a = SplinePointTilt(spl,j);
+        d = RotDiff(*tilt,a);
+        *tilt += (u16)(f * d);
+      }
+    }
+  }
+  return;
+}
+
+//NGC MATCH
+void DrawParallax(void) {
+  static struct numtx_s m_513;
+  struct nuvec_s s;
+  
+  s.x = s.y = s.z = pNuCam->farclip * 0.1f * 0.5f;
+  NuMtxSetScale(&m_513,&s);
+  m_513._30 = (pCam->m)._30;
+  m_513._31 = (pCam->m)._31;
+  m_513._32 = (pCam->m)._32;
+  if (ObjTab[9].obj.special != NULL) {
+    NuRndrGScnObj((ObjTab[9].obj.scene)->gobjs[(ObjTab[9].obj.special)->instance->objid],&m_513);
+  }
+  if (ObjTab[10].obj.special != NULL) {
+    NuRndrGScnObj((ObjTab[10].obj.scene)->gobjs[(ObjTab[10].obj.special)->instance->objid],&m_513);
+  }
+  return;
+}
+
+//NGC MATCH
+void GameRayCast(struct nuvec_s *src,struct nuvec_s *dir,float d,struct nuvec_s *dst) {
+  struct nuvec_s end;
+  struct nuvec_s v;
+  float ratio;
+  float length;
+  
+  ratio = 1.0f;
+  end.x = dir->x * d + src->x;
+  end.y = dir->y * d + src->y;
+  end.z = dir->z * d + src->z;
+  length = NuVecDist(&end,src,NULL);
+  if ((RayIntersectSphere(src,&end,&GameCam->pos,ratio) != 0) && (temp_ratio < ratio)) {
+    temp_ratio -= (ratio / length);
+    if (0.0f <= temp_ratio) {
+      plr_target_found = 0;
+      ratio = temp_ratio;
+    }
+  }
+  if ((CrateRayCast(src,&end) != 0) && (temp_ratio < ratio)) {
+    plr_target_found = 1;
+    ratio = temp_ratio;
+  }
+  if ((CreatureRayCast(src,&end) != 0) && (temp_ratio < ratio)) {
+    plr_target_found = 1;
+    ratio = temp_ratio;
+  }
+  if ((WumpaRayCast(src,&end,ratio) != 0) && (temp_ratio < ratio)) {
+    temp_ratio = (temp_ratio - (0.1f / length));
+    if (0.0f <= temp_ratio) {
+      plr_target_found = 1;
+      ratio = temp_ratio;
+    }
+  }
+  if (1.0f > ratio) {
+    dst->x = (end.x - src->x) * ratio + src->x;
+    dst->y = (end.y - src->y) * ratio + src->y;
+    dst->z = (end.z - src->z) * ratio + src->z;
+  }
+  else {
+    *dst = end;
+  }
+  NuVecSub(&v,dst,src);
+  if (NewRayCast(src,&v,0.0f) != 0) {
+    NuVecAdd(plr_target_pos + 1,plr_target_pos,&v);
+    plr_target_found = 0;
+  }
+  return;
+}
+
+//NGC MATCH
+s32 InLoadSaveZone(struct creature_s *plr) {
+  float x;
+  float z;
+  
+  if ((((plr->obj).ground != '\0') && ((plr->obj).idle_gametime > 0.0f)) && (NuVecDistSqr(&(plr->obj).pos,&loadsavepos,NULL) < 9.0f)) {
+    x = (plr->obj).pos.x;
+    z = (plr->obj).pos.z;
+    if (((0.0f <= ((x - vLSZ[0].x) * (vLSZ[1].z - vLSZ[0].z) + (z - vLSZ[0].z) * (vLSZ[0].x - vLSZ[1].x))) &&
+        (0.0f <= ((x - vLSZ[1].x) * (vLSZ[2].z - vLSZ[1].z) + (z - vLSZ[1].z) * (vLSZ[1].x - vLSZ[2].x)))) &&
+       ((0.0f <= ((x - vLSZ[2].x) * (vLSZ[3].z - vLSZ[2].z) + (z - vLSZ[2].z) * (vLSZ[2].x - vLSZ[3].x)) &&
+        (0.0f <= ((x - vLSZ[3].x) * (vLSZ[0].z - vLSZ[3].z) + (z - vLSZ[3].z) * (vLSZ[3].x - vLSZ[0].x)))))) {
+      return 1;
+    }
+  }
+  return 0;
+}

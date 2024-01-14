@@ -599,42 +599,46 @@ void GetALONG(struct nuvec_s *pos,struct RPos_s *rpos,s32 iRAIL,s32 iALONG,s32 i
   return;
 }
 
-//72% NGC
+//MATCH NGC
 s32 FurtherALONG(s32 iRAIL0,s32 iALONG0,float fALONG0,s32 iRAIL1,s32 iALONG1,float fALONG1) {
     if (iRAIL0 == -1) {
         return 0;
     }
-  if ((((iRAIL0 != -1) && (iRAIL1 != -1)) && (Rail[iRAIL0].type == Rail[iRAIL1].type)) && (iRAIL0 >= iRAIL1)) {
-        if (iRAIL0 > iRAIL1) {
-            return 1;
-        }
-      if (iALONG0 >= iALONG1) {
-          if (iALONG0 <= iALONG1) {
-            return (fALONG0 > fALONG1);
-          }
-      }
-      return 0;
+  if ((((iRAIL0 == -1) || (iRAIL1 == -1)) || (Rail[iRAIL0].type != Rail[iRAIL1].type)) || (iRAIL0 < iRAIL1)) {
+            return 0;
   }
+    if (iRAIL0 > iRAIL1) { 
+        return 1; 
+    } 
+    if (iALONG0 < iALONG1) { 
+        return 0; 
+    } else if (iALONG0 <= iALONG1) {
+        return (fALONG0 > fALONG1);
+    } else if (iALONG0 <= iALONG1) {
+        return (fALONG0 > fALONG1);
+    } 
   return 1;
 }
 
-
-int FurtherBEHIND(int iRAIL0,int iALONG0,float fALONG0,int iRAIL1,int iALONG1,float fALONG1)
-
-{
-  if ((((iRAIL0 != -1) && (iRAIL1 != -1)) && (Rail[iRAIL0].type == Rail[iRAIL1].type)) &&
-     (iRAIL0 <= iRAIL1)) {
-    if (iRAIL0 < iRAIL1) {
-      return 1;
+//MATCH NGC
+s32 FurtherBEHIND(s32 iRAIL0,s32 iALONG0,float fALONG0,s32 iRAIL1,s32 iALONG1,float fALONG1) {
+    if (iRAIL0 == -1) {
+        return 0;
     }
-    if (iALONG0 <= iALONG1) {
-      if (iALONG1 <= iALONG0) {
-        return (fALONG0 < fALONG1);
-      }
-      return 1;
-    }
+  if ((((iRAIL0 == -1) || (iRAIL1 == -1)) || (Rail[iRAIL0].type != Rail[iRAIL1].type)) || (iRAIL0 > iRAIL1)) {
+            return 0;
   }
-  return 0;
+    if (iRAIL0 < iRAIL1) { 
+        return 1; 
+    }
+    if (iALONG0 > iALONG1) { 
+        return 0; 
+    } else if (iALONG0 >= iALONG1) {
+        return (fALONG0 < fALONG1);
+    } else if (iALONG0 >= iALONG1) {
+        return (fALONG0 < fALONG1);
+    } 
+  return 1;
 }
 
 /*

@@ -3,6 +3,7 @@
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+#define ALIGN4(n) (((n) + 3) & ~3)
 
 int maxblend_cntcnt;
 int maxblend_cnt;
@@ -100,20 +101,24 @@ s32 NuRndrGScnObj(struct nugobj_s *gobj,struct numtx_s *wm) {
   return NuRndrGobj(gobj,wm,NULL);
 }
 
-void * NuScratchAlloc32(s32 size)	//TODO
-{
-	/*
-	DWARF
-
-		s32 cnt;
-		nuinstance_s* i;
-		nuspecial_s* sp;
-		nuinstanim_s* instanim;
-	*/
-}
-
-static int* ps2_scratch_free;	// --> point to PS2_SCRATCH_BASE
+static s32* ps2_scratch_free;	// --> point to PS2_SCRATCH_BASE
 unsigned char PS2_SCRATCH_BASE[16384];
+
+//MATCH NGC
+void* NuScratchAlloc32(s32 size) {
+s32 old;
+s32 sizeAligned;
+s32 addrAligned;
+
+    old = ps2_scratch_free;
+    sizeAligned = ALIGN4(size);
+    addrAligned = ALIGN4(ps2_scratch_free);
+
+    ps2_scratch_free = addrAligned + sizeAligned;
+    *(s32 *)(addrAligned + sizeAligned) = old;
+    ps2_scratch_free += 4;
+    return (void *)addrAligned;
+}
 
 //MATCH NGC
 void NuScratchRelease(void) {

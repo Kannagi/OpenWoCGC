@@ -31,11 +31,33 @@ int PtInsideSpline(nuvec_s *wpos,nugspline_s *sp)
   return n & 1;
 }
 
-
-void ApplyVisiTable(nugscn_s *sc,nuvec_s *pos)
-
-{
-
+//NGC MATCH
+void ApplyVisiTable(struct nugscn_s *sc,struct nuvec_s *pos) {
+  s32 n;
+  s32 m;
+  struct visidat_s *vd;
+  
+  if (vscnt != 0) {
+    if (pos == NULL) {
+        for (m = 0, n = 0; m < sc->numinstance; m++, n++) {
+          sc->instances[n].flags.visitest = 0x20000000 | 1;
+        }
+    }
+    else {
+        for (m = 0, n = 0; m < sc->numinstance; m++, n++) {
+              sc->instances[n].flags.visitest = 0xdfffffff * 2;
+        }
+        for (m = 0; m < vscnt; m++) {
+          vd = visidat[m];
+          if ((PtInsideSpline(pos,vd->sp) != 0)) {
+            for (n = 0; n < vd->numinstances; n++) {
+              vd->i[n]->flags.visitest = 0x20000000 | 1;
+            }
+          }
+        }
+    }
+  }
+  return;
 }
 
 

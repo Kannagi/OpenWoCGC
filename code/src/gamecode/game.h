@@ -51,16 +51,17 @@ struct hub_s {
     char pad2;
 };
 
-struct time {
-    char name[4];
-    u32 itime;
+// Size: 0x8
+struct time_s {
+    char name[4]; // offset 0x0
+    u32 itime; // offset 0x4
 };
 
 struct level_s {
     u16 flags;
     char pad1;
     char pad2;
-    struct time time[3];
+    struct time_s time[3];
 };
 
 // Size: 0x414
@@ -215,5 +216,10 @@ f32 tumble_item_addtime;
 s32 i_award;
 s32 qseed;
 char akuaku_advice_played[13];
+s32 temp_minutes;
+s32 temp_hours;
+s32 temp_tenths;
+s32 temp_hundredths;
+s32 temp_seconds; 
 
 #endif // !GAME_H
