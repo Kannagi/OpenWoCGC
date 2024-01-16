@@ -85,79 +85,88 @@
 1676131306 /home/samy/Documents/OpenWoCGC-main/git/code/src/nusound/nusoundtypes.h
 	"../types.h"
 
-1676154360 source:d:\documenti\github\engine\openwocgc\code\main.c
+1700931460 source:d:\documenti\github\engine\openwocgc\code\main.c
 	<stdlib.h>
 	<stdio.h>
+	<types.h>
+	<nu3dx/nu3dxtypes.h>
+	<stdbool.h>
+	<SDL/SDL.h>
 	<elf_systypes.h>
+	<GL/gl.h>
 
 1676145251 source:d:\documenti\github\engine\openwocgc\code\src\nusound\nusound.c
 	"nusound.h"
 
-1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound\nusound.h
-	"../types.h"
+1676209064 d:\documenti\github\engine\openwocgc\code\src\nusound\nusound.h
+	"types.h"
 	"nusoundtypes.h"
 
-1676148283 d:\documenti\github\engine\openwocgc\code\src\types.h
+1700921659 d:\documenti\github\engine\openwocgc\code\src\types.h
 	"elf_systypes.h"
+	<stdbool.h>
 	"numath/numathtypes.h"
 
-1676145251 d:\documenti\github\engine\openwocgc\code\src\elf_systypes.h
+1700877988 d:\documenti\github\engine\openwocgc\code\src\elf_systypes.h
 	"types.h"
 
-1676156774 d:\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
+1700876860 d:\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
 	"types.h"
+	"stddef.h"
 
 1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound\nusoundtypes.h
 	"../types.h"
 
-1676145251 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.c
+1700861120 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.c
 	"nuerror.h"
 
-1676145251 d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.h
+1700861120 d:\documenti\github\engine\openwocgc\code\src\nucore\nuerror.h
 	"../types.h"
 	"nucoretypes.h"
 	<stdarg.h>
 
-1676152173 d:\documenti\github\engine\openwocgc\code\src\nucore\nucoretypes.h
+1700920865 d:\documenti\github\engine\openwocgc\code\src\nucore\nucoretypes.h
 	"types.h"
+	"stddef.h"
 
-1676152798 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.c
+1700861667 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.c
 	"nufile.h"
 	"nuerror.h"
 
-1676153002 d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.h
+1676215216 d:\documenti\github\engine\openwocgc\code\src\nucore\nufile.h
 	"types.h"
 	"nucoretypes.h"
 	"numem.h"
+	<stdio.h>
 
-1676145251 d:\documenti\github\engine\openwocgc\code\src\nucore\numem.h
+1676209064 d:\documenti\github\engine\openwocgc\code\src\nucore\numem.h
 	"types.h"
 	"nucore/nucoretypes.h"
 
-1676151719 source:d:\documenti\github\engine\openwocgc\code\src\nucore\numem.c
+1700861879 source:d:\documenti\github\engine\openwocgc\code\src\nucore\numem.c
 	"numem.h"
 	"nuerror.h"
 	"nucoretypes.h"
 
-1676153479 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.c
+1700922193 source:d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.c
 	"nufpar.h"
 	"nufile.h"
 
-1676153227 d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.h
+1700921387 d:\documenti\github\engine\openwocgc\code\src\nucore\nufpar.h
 	"types.h"
 	"nucore/nucoretypes.h"
 
-1676154274 source:d:\documenti\github\engine\openwocgc\code\src\numath\nutrig.c
+1688483892 source:d:\documenti\github\engine\openwocgc\code\src\numath\nutrig.c
 	"nutrig.h"
 	<math.h>
 
 1676155785 d:\documenti\github\engine\openwocgc\code\src\numath\nutrig.h
 	"../types.h"
 
-1676155196 source:d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.c
+1700877038 source:d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.c
 	"nu_asm.h"
 
-1676155182 d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.h
+1700877038 d:\documenti\github\engine\openwocgc\code\src\numath\nu_asm.h
 	"../types.h"
 	"numathtypes.h"
 	<numath.h>
@@ -176,52 +185,52 @@
 1676145251 d:\documenti\github\engine\openwocgc\code\src\numath\nufloat.h
 	"../types.h"
 
-1676156343 d:\documenti\github\engine\openwocgc\code\src\numath\numtx.h
+1700861562 d:\documenti\github\engine\openwocgc\code\src\numath\numtx.h
 	"../types.h"
 	"numathtypes.h"
 
-1676154924 d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.h
+1700877038 d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.h
 	"../types.h"
 	"numathtypes.h"
 
-1676154840 d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.h
+1700861305 d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.h
 	"../types.h"
 	"numathtypes.h"
 
-1676145251 d:\documenti\github\engine\openwocgc\code\src\numath\nurand.h
+1700921737 d:\documenti\github\engine\openwocgc\code\src\numath\nurand.h
 	"../types.h"
 
-1676155715 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.h
+1700861562 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.h
 	"../types.h"
 	"numathtypes.h"
 
-1676155072 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.h
+1700877038 d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.h
 	"../types.h"
 	"numathtypes.h"
 
 1676145251 source:d:\documenti\github\engine\openwocgc\code\src\numath\nufloat.c
 	"nufloat.h"
 
-1676155081 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.c
+1700877038 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuplane.c
 	"nuplane.h"
 
-1676145251 source:d:\documenti\github\engine\openwocgc\code\src\numath\nurand.c
+1700923446 source:d:\documenti\github\engine\openwocgc\code\src\numath\nurand.c
 	"nurand.h"
 
-1676155219 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.c
+1700877038 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec4.c
 	"nuvec4.h"
 	"numtx.h"
 
-1676155368 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.c
+1700861493 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuquat.c
 	"nuquat.h"
 	"nu_asm.h"
 
-1676155860 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.c
+1700861562 source:d:\documenti\github\engine\openwocgc\code\src\numath\nuvec.c
 	"nuvec.h"
 	"nu_asm.h"
 	"nutrig.h"
 
-1676156374 source:d:\documenti\github\engine\openwocgc\code\src\numath\numtx.c
+1700861562 source:d:\documenti\github\engine\openwocgc\code\src\numath\numtx.c
 	<nu3dx/nucamera.h>
 	"numtx.h"
 	"nu_asm.h"
@@ -229,26 +238,30 @@
 	"nuvec.h"
 	"nufloat.h"
 
-1676156982 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.h
+1700922999 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.h
 	"../types.h"
 	"nu3dxtypes.h"
 	"numath.h"
 
-1676156285 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nu3dxtypes.h
+1700881218 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nu3dxtypes.h
 	"types.h"
+	<string.h>
+	"system/gxtype.h"
+	"system/gs.h"
+	"gamecode/camera.h"
 
-1676157139 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.c
+1700923057 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.c
 	<nucore/numem.h>
 	"nucamera.h"
+	"numath/numtx.h"
 
-1676216890 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/main.c
+1676205972 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/main.c
 	<stdlib.h>
 	<stdio.h>
 	<types.h>
-	<stdbool.h>
-	<SDL/SDL.h>
 	<elf_systypes.h>
 	<GL/gl.h>
+	<SDL/SDL.h>
 
 1676190941 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/elf_systypes.h
 	"types.h"
@@ -332,15 +345,14 @@
 	"nucoretypes.h"
 	<stdarg.h>
 
-1676216890 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.c
+1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.c
 	"nufile.h"
 	"nuerror.h"
 
-1676216890 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.h
+1676190601 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufile.h
 	"types.h"
 	"nucoretypes.h"
 	"numem.h"
-	<stdio.h>
 
 1676190601 source:/home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nucore/nufpar.c
 	"nufpar.h"
@@ -401,4 +413,1207 @@
 
 1676131306 /home/samy/Documents/OpenWoCGC-main/git/OpenWoCGC/code/src/nusound/nusoundtypes.h
 	"../types.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_config.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_platform.h
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\begin_code.h
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\close_code.h
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_endian.h
+	"SDL_stdinc.h"
+	<endian.h>
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_keysym.h
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209064 d:\documenti\github\engine\openwocgc\code\include\sdl\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1700869693 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nutex.c
+	"nutex.h"
+	"../system.h"
+
+1700869693 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nutex.h
+	"../types.h"
+	"../nucore.h"
+	"nu3dxtypes.h"
+	"nuraster/nurastertypes.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nucore.h
+	"nucore/nuerror.h"
+	"nucore/nufile.h"
+	"nucore/nufpar.h"
+	"nucore/numem.h"
+
+1700861935 d:\documenti\github\engine\openwocgc\code\src\system.h
+	"system/gs.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\system\gs.h
+	"gs/gs.h"
+	"gs/gsinit.h"
+	"gs/gslight.h"
+	"gs/gsprim.h"
+	"gs/gstex.h"
+
+1700876215 d:\documenti\github\engine\openwocgc\code\src\system\gs\gs.h
+	"stdio.h"
+	"nuraster/nurastertypes.h"
+	"system/gxtype.h"
+
+1700928662 d:\documenti\github\engine\openwocgc\code\src\system\gs\gsinit.h
+	"system/gs.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\system\gs\gslight.h
+
+1700872579 d:\documenti\github\engine\openwocgc\code\src\system\gs\gsprim.h
+	"system/gs.h"
+
+1685979560 d:\documenti\github\engine\openwocgc\code\src\system\gs\gstex.h
+	"types.h"
+	"nu3dx/nu3dxtypes.h"
+	"nuraster/nurastertypes.h"
+
+1700925750 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nugobj.c
+	<nu3dx/nugobj.h>
+
+1700870462 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nugobj.h
+	"../types.h"
+	"numath/numathtypes.h"
+	"nu3dxtypes.h"
+	"../nucore/nuerror.h"
+
+1700872701 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\numtl.c
+	"numtl.h"
+
+1700873121 d:\documenti\github\engine\openwocgc\code\src\nu3dx\numtl.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nu3dx/nurndr.h"
+
+1676232073 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuhgobj.c
+	"nuhgobj.h"
+	<nu.h>
+
+1700936701 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuhgobj.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nu3dx/nuscene.h"
+
+1700861976 d:\documenti\github\engine\openwocgc\code\src\nu.h
+	"nu3dx.h"
+	"nucore.h"
+	"numath.h"
+	"nuraster.h"
+	"nusound.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nu3dx.h
+	"nu3dx/numtl.h"
+	"nu3dx/nulight.h"
+
+1700869349 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nulight.h
+	"../types.h"
+	"nu3dx/nu3dxtypes.h"
+	"system/gs/gs.h"
+	"nu3dx/numtl.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nuraster.h
+	"nuraster/dxframe.h"
+
+1700933529 d:\documenti\github\engine\openwocgc\code\src\nuraster\dxframe.h
+	"../types.h"
+	"nuraster/nurastertypes.h"
+
+1700862404 d:\documenti\github\engine\openwocgc\code\src\nuraster\nurastertypes.h
+	"nu3dx/nu3dxtypes.h"
+	"types.h"
+	"system/gxtype.h"
+	"system/gs.h"
+
+1676145251 d:\documenti\github\engine\openwocgc\code\src\nusound.h
+	"nusound/nusound.h"
+
+1700880327 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuscene.h
+	"../types.h"
+	<nucore/nufile.h>
+	"nu3dx/nugobj.h"
+	<stdlib.h>
+	"nu3dxtypes.h"
+	"nu3dx/nutxanm.h"
+
+1700881065 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuscene.c
+	"nuscene.h"
+	"nu3dxtypes.h"
+	"types.h"
+
+1700933378 source:d:\documenti\github\engine\openwocgc\code\src\nuraster\dxframe.c
+	"dxframe.h"
+
+1700926630 source:d:\documenti\github\engine\openwocgc\code\src\system\gs\gsinit.c
+	"gsinit.h"
+
+1700929338 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nurndr.c
+	"nurndr.h"
+	"../system.h"
+
+1700925932 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nurndr.h
+	"../types.h"
+	"nu3dx/nu3dxtypes.h"
+	"nu3dx/nucvtskin.h"
+	"nu3dx/nuanim.h"
+	"nu3dx/nuhgobj.h"
+
+1700872743 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucvtskin.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nugobj.h"
+
+1700870796 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nulight.c
+	"nulight.h"
+
+1700869519 source:d:\documenti\github\engine\openwocgc\code\src\system\gs\gs.c
+	"gs.h"
+	"types.h"
+
+1700870107 source:d:\documenti\github\engine\openwocgc\code\src\system\gs\gstex.c
+	"gstex.h"
+
+1700923471 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nucvtskin.c
+	"nucvtskin.h"
+
+1700926761 d:\documenti\github\engine\openwocgc\code\src\system\gxtype.h
+	"types.h"
+
+1700868287 source:d:\documenti\github\engine\openwocgc\code\src\gamecode\main.c
+	"../nu.h"
+	"gamecode/main.h"
+
+1700933492 d:\documenti\github\engine\openwocgc\code\src\gamecode\main.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/creature.h"
+	"gamecode/game.h"
+	"gamecode/font3d.h"
+	"gamecode/camera.h"
+	"nuxbox/nuxboxtypes.h"
+
+1700869059 d:\documenti\github\engine\openwocgc\code\src\gamecode\creature.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700868287 d:\documenti\github\engine\openwocgc\code\src\gamecode\game.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1700866041 d:\documenti\github\engine\openwocgc\code\src\gamecode\font3d.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1700868887 d:\documenti\github\engine\openwocgc\code\src\gamecode\camera.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1700867679 d:\documenti\github\engine\openwocgc\code\src\nuxbox\nuxboxtypes.h
+	"types.h"
+	"../nu.h"
+
+1700869294 source:d:\documenti\github\engine\openwocgc\code\src\gamecode\camera.c
+	"gamecode/camera.h"
+
+1700870706 source:d:\documenti\github\engine\openwocgc\code\src\system\gs\gsbuffer.c
+	"gsbuffer.h"
+
+1700870575 d:\documenti\github\engine\openwocgc\code\src\system\gs\gsbuffer.h
+	"stdio.h"
+	"nuraster/nurastertypes.h"
+	"system/gs/gs.h"
+
+1700933505 source:d:\documenti\github\engine\openwocgc\code\src\system\crashlib.c
+	"system/crashlib.h"
+
+1700933505 d:\documenti\github\engine\openwocgc\code\src\system\crashlib.h
+	"gs.h"
+	"nuraster/dxframe.h"
+	"gamecode/main.h"
+
+1700872457 source:d:\documenti\github\engine\openwocgc\code\src\system\gs\gsprim.c
+	"gsprim.h"
+
+1700875467 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuanim.h
+	"../types.h"
+	"nu3dxtypes.h"
+
+1700875939 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuanim.c
+	"nuanim.h"
+	"../system.h"
+
+1700927885 source:d:\documenti\github\engine\openwocgc\code\src\system\skinned.c
+	"system/skinned.h"
+
+1700877336 source:d:\documenti\github\engine\openwocgc\code\src\nuxbox\crash_xbox.c
+	"../system.h"
+	"nu.h"
+	"gamecode/main.h"
+
+1700879497 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nutxanm.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nucore/nucoretypes.h"
+
+1700878901 source:d:\documenti\github\engine\openwocgc\code\src\nuxbox\dummyfunc.c
+	"../system.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700880148 source:d:\documenti\github\engine\openwocgc\code\src\gamecode\inst.c
+	"gamecode/inst.h"
+
+1700880979 d:\documenti\github\engine\openwocgc\code\src\gamecode\inst.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+	"nu3dx/nu3dxtypes.h"
+	"nu3dx/nuanim.h"
+
+1700880909 source:d:\documenti\github\engine\openwocgc\code\src\gamecode\listman.c
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700925268 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nutxanm.c
+	"nutxanm.h"
+	"../system.h"
+
+1700926334 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuwater.c
+	"nuwater.h"
+	"../system.h"
+
+1700926269 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuwater.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"gamecode/main.h"
+	"nu3dx/nurndr.h"
+
+1700926442 source:d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuglass.c
+	"nuglass.h"
+	"../system.h"
+
+1700926419 d:\documenti\github\engine\openwocgc\code\src\nu3dx\nuglass.h
+	"../types.h"
+	"nu3dxtypes.h"
+
+1700933296 source:d:\documenti\github\engine\openwocgc\code\src\system\port.c
+	"system/port.h"
+
+1700933296 d:\documenti\github\engine\openwocgc\code\src\system\port.h
+	"gs.h"
+	"system/gs.h"
+
+1700927868 d:\documenti\github\engine\openwocgc\code\src\system\skinned.h
+	"gs.h"
+	"system/gs.h"
+
+1700880150 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\inst.c
+	"gamecode/inst.h"
+
+1700880980 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\inst.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+	"nu3dx/nu3dxtypes.h"
+	"nu3dx/nuanim.h"
+
+1703026137 c:\d_drive\documenti\github\engine\openwocgc\code\src\types.h
+	"elf_systypes.h"
+	<stdbool.h>
+	"numath/numathtypes.h"
+
+1702781298 c:\d_drive\documenti\github\engine\openwocgc\code\src\elf_systypes.h
+	"types.h"
+
+1700876862 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\numathtypes.h
+	"types.h"
+	"stddef.h"
+
+1700861978 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu.h
+	"nu3dx.h"
+	"nucore.h"
+	"numath.h"
+	"nuraster.h"
+	"nusound.h"
+
+1702775138 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx.h
+	"nu3dx/numtl.h"
+	"nu3dx/nulight.h"
+	"nu3dx/nucamera.h"
+
+1702911711 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\numtl.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nu3dx/nurndr.h"
+
+1702775189 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nu3dxtypes.h
+	"types.h"
+	<string.h>
+	"system/gxtype.h"
+	"system/gs.h"
+	"gamecode/camera.h"
+
+1703026240 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gxtype.h
+	"types.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs.h
+	"gs/gs.h"
+	"gs/gsinit.h"
+	"gs/gslight.h"
+	"gs/gsprim.h"
+	"gs/gstex.h"
+
+1703016672 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gs.h
+	"stdio.h"
+	"nuraster/nurastertypes.h"
+	"system/gxtype.h"
+
+1700862406 c:\d_drive\documenti\github\engine\openwocgc\code\src\nuraster\nurastertypes.h
+	"nu3dx/nu3dxtypes.h"
+	"types.h"
+	"system/gxtype.h"
+	"system/gs.h"
+
+1700928664 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsinit.h
+	"system/gs.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gslight.h
+
+1700872580 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsprim.h
+	"system/gs.h"
+
+1685979562 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gstex.h
+	"types.h"
+	"nu3dx/nu3dxtypes.h"
+	"nuraster/nurastertypes.h"
+
+1700868888 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\camera.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1702773068 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\main.h
+	"../types.h"
+	"../nu.h"
+	"nu3dx.h"
+	"gamecode/creature.h"
+	"gamecode/game.h"
+	"gamecode/font3d.h"
+	"gamecode/camera.h"
+	"nuxbox/nuxboxtypes.h"
+
+1702772428 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\creature.h
+	"../types.h"
+	"../nu.h"
+	"nu3dx/nu3dxtypes.h"
+	"nuxbox/nuxboxtypes.h"
+	"gamecode/font3d.h"
+
+1702771762 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\game.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1702771699 c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\font3d.h
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+
+1702770586 c:\d_drive\documenti\github\engine\openwocgc\code\src\nuxbox\nuxboxtypes.h
+	"types.h"
+	"../nu.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700925934 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nurndr.h
+	"../types.h"
+	"nu3dx/nu3dxtypes.h"
+	"nu3dx/nucvtskin.h"
+	"nu3dx/nuanim.h"
+	"nu3dx/nuhgobj.h"
+
+1702380364 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nucvtskin.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nugobj.h"
+
+1700870464 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nugobj.h
+	"../types.h"
+	"numath/numathtypes.h"
+	"nu3dxtypes.h"
+	"../nucore/nuerror.h"
+
+1700861122 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nuerror.h
+	"../types.h"
+	"nucoretypes.h"
+	<stdarg.h>
+
+1702780854 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nucoretypes.h
+	"types.h"
+	"stddef.h"
+
+1700875468 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuanim.h
+	"../types.h"
+	"nu3dxtypes.h"
+
+1702767853 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuhgobj.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nu3dx/nuscene.h"
+
+1700880328 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuscene.h
+	"../types.h"
+	<nucore/nufile.h>
+	"nu3dx/nugobj.h"
+	<stdlib.h>
+	"nu3dxtypes.h"
+	"nu3dx/nutxanm.h"
+
+1702921876 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nufile.h
+	"types.h"
+	"nucoretypes.h"
+	"numem.h"
+	"system/gc/fs.h"
+	<stdio.h>
+	<stdlib.h>
+
+1702911474 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\numem.h
+	"types.h"
+	"nucore/nucoretypes.h"
+	<stdlib.h>
+
+1700879498 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nutxanm.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"nucore/nucoretypes.h"
+
+1702424065 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nulight.h
+	"../types.h"
+	"nu3dx/nu3dxtypes.h"
+	"system/gs/gs.h"
+	"nu3dx/numtl.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore.h
+	"nucore/nuerror.h"
+	"nucore/nufile.h"
+	"nucore/nufpar.h"
+	"nucore/numem.h"
+
+1700921388 c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nufpar.h
+	"types.h"
+	"nucore/nucoretypes.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath.h
+	"numath/nu_asm.h"
+	"numath/nufloat.h"
+	"numath/numtx.h"
+	"numath/nuplane.h"
+	"numath/nuquat.h"
+	"numath/nurand.h"
+	"numath/nutrig.h"
+	"numath/nuvec.h"
+	"numath/nuvec4.h"
+
+1700877040 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nu_asm.h
+	"../types.h"
+	"numathtypes.h"
+	<numath.h>
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nufloat.h
+	"../types.h"
+
+1700861564 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\numtx.h
+	"../types.h"
+	"numathtypes.h"
+
+1700877040 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuplane.h
+	"../types.h"
+	"numathtypes.h"
+
+1700861306 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuquat.h
+	"../types.h"
+	"numathtypes.h"
+
+1700921738 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nurand.h
+	"../types.h"
+
+1676155786 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nutrig.h
+	"../types.h"
+
+1700861564 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuvec.h
+	"../types.h"
+	"numathtypes.h"
+
+1702768048 c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuvec4.h
+	"../types.h"
+	"numathtypes.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\nuraster.h
+	"nuraster/dxframe.h"
+
+1703016694 c:\d_drive\documenti\github\engine\openwocgc\code\src\nuraster\dxframe.h
+	"../types.h"
+	"nuraster/nurastertypes.h"
+	"system/gs/gs.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\nusound.h
+	"nusound/nusound.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\src\nusound\nusound.h
+	"types.h"
+	"nusoundtypes.h"
+
+1676145252 c:\d_drive\documenti\github\engine\openwocgc\code\src\nusound\nusoundtypes.h
+	"../types.h"
+
+1700880910 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\listman.c
+	"../types.h"
+	"../nu.h"
+	"gamecode/main.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700926444 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuglass.c
+	"nuglass.h"
+	"../system.h"
+
+1700926420 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuglass.h
+	"../types.h"
+	"nu3dxtypes.h"
+
+1703004754 c:\d_drive\documenti\github\engine\openwocgc\code\src\system.h
+	"system/gs.h"
+
+1700925752 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nugobj.c
+	<nu3dx/nugobj.h>
+
+1700925270 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nutxanm.c
+	"nutxanm.h"
+	"../system.h"
+
+1702768691 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuvport.c
+	"nuvport.h"
+	"../system.h"
+
+1700936788 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuvport.h
+	"../types.h"
+	"nu3dx/nucamera.h"
+	"nu3dxtypes.h"
+
+1702775227 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.h
+	"../types.h"
+	"numath.h"
+	"nu3dx/nu3dxtypes.h"
+
+1700926336 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuwater.c
+	"nuwater.h"
+	"../system.h"
+
+1700926270 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuwater.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"gamecode/main.h"
+	"nu3dx/nurndr.h"
+
+1702774178 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nuerror.c
+	"nuerror.h"
+
+1702970719 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nufile.c
+	"nufile.h"
+	"nuerror.h"
+
+1700922194 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\nufpar.c
+	"nufpar.h"
+	"nufile.h"
+
+1702911514 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nucore\numem.c
+	"numem.h"
+	"nuerror.h"
+	"nucoretypes.h"
+
+1700877040 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nu_asm.c
+	"nu_asm.h"
+
+1676145252 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nufloat.c
+	"nufloat.h"
+
+1700877040 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuplane.c
+	"nuplane.h"
+
+1700861494 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuquat.c
+	"nuquat.h"
+	"nu_asm.h"
+
+1700923448 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nurand.c
+	"nurand.h"
+
+1688483894 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nutrig.c
+	"nutrig.h"
+	<math.h>
+
+1700861564 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuvec.c
+	"nuvec.h"
+	"nu_asm.h"
+	"nutrig.h"
+
+1702768110 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\nuvec4.c
+	"nuvec4.h"
+	"numtx.h"
+
+1703016672 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nuraster\dxframe.c
+	"dxframe.h"
+
+1676145252 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nusound\nusound.c
+	"nusound.h"
+
+1700870708 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsbuffer.c
+	"gsbuffer.h"
+
+1700870576 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsbuffer.h
+	"stdio.h"
+	"nuraster/nurastertypes.h"
+	"system/gs/gs.h"
+
+1700926632 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsinit.c
+	"gsinit.h"
+
+1702926409 source:c:\d_drive\documenti\github\engine\openwocgc\code\main.c
+	<stdlib.h>
+	<stdio.h>
+	<types.h>
+	<nu3dx/nu3dxtypes.h>
+	"nu3dx.h"
+	<stdbool.h>
+	<SDL/SDL.h>
+	<elf_systypes.h>
+	<GL/gl.h>
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_config.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_platform.h
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\begin_code.h
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\close_code.h
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_endian.h
+	"SDL_stdinc.h"
+	<endian.h>
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_keysym.h
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1676209066 c:\d_drive\documenti\github\engine\openwocgc\code\include\sdl\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1702768528 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuanim.c
+	"nuanim.h"
+	"../system.h"
+
+1702382313 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nucvtskin.c
+	"nucvtskin.h"
+
+1702057110 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuscene.c
+	"nuscene.h"
+	"nu3dxtypes.h"
+	"types.h"
+
+1702137369 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\numath\numtx.c
+	<nu3dx/nucamera.h>
+	"numtx.h"
+	"nu_asm.h"
+	"nutrig.h"
+	"nuvec.h"
+	"nufloat.h"
+
+1702664625 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nuxbox\dummyfunc.c
+	"../system.h"
+	"nu3dx/nu3dxtypes.h"
+
+1702764799 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\crashlib.c
+	"system/crashlib.h"
+
+1700933506 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\crashlib.h
+	"gs.h"
+	"nuraster/dxframe.h"
+	"gamecode/main.h"
+
+1702775675 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nucamera.c
+	<nucore/numem.h>
+	"nucamera.h"
+	"numath/numtx.h"
+
+1701098422 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gsprim.c
+	"gsprim.h"
+
+1702910206 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nutex.c
+	"nutex.h"
+	"../system.h"
+
+1700869694 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nutex.h
+	"../types.h"
+	"../nucore.h"
+	"nu3dxtypes.h"
+	"nuraster/nurastertypes.h"
+
+1702773031 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nuxbox\crash_xbox.c
+	"../system.h"
+	"nu.h"
+	"gamecode/creature.h"
+	"gamecode/main.h"
+	"gamecode/game.h"
+
+1702767798 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuhgobj.c
+	"nuhgobj.h"
+	<nu.h>
+
+1702768079 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nurndr.c
+	"nurndr.h"
+	"../system.h"
+
+1703027362 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gs.c
+	"gs.h"
+	"types.h"
+
+1702770033 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nulight.c
+	"nulight.h"
+
+1702926432 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\numtl.c
+	"numtl.h"
+
+1702910407 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gs\gstex.c
+	"gstex.h"
+
+1702773103 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\port.c
+	"system/port.h"
+	"gamecode/main.h"
+
+1702772855 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\port.h
+	"system/gs.h"
+	"nuxbox/nuxboxtypes.h"
+	"nu3dx/nuhaze.h"
+	"nu3dx/nuwater.h"
+	"nu3dx/nucamera.h"
+
+1702772857 c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuhaze.h
+	"../types.h"
+	"nu3dxtypes.h"
+	"system/port.h"
+
+1702769982 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gsmatrix.c
+	"gs.h"
+
+1702773031 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\gamecode\creature.c
+	"gamecode/creature.h"
+
+1702772944 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\nu3dx\nuhaze.c
+	"nuhaze.h"
+	"../system.h"
+
+1702772970 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\syserror.c
+	"system/gs.h"
+
+1702926208 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\fs.c
+	"fs.h"
+
+1702781299 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\fs.h
+	"system.h"
+
+1703010691 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxbump.c
+	"system/gc/GXBump.h"
+
+1703011628 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxbump.h
+	"system.h"
+	"system/gxtype.h"
+	"system/gc/GXTexture.h"
+	"system/gc/__GXInit.h"
+
+1703011514 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxtexture.h
+	"system.h"
+	"system/gxtype.h"
+	"system/gc/GXBump.h"
+
+1703010091 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\__gxinit.h
+	"system.h"
+	"system/gxtype.h"
+
+1703010026 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxinit.h
+	"system.h"
+	"system/gxtype.h"
+
+1703013712 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxtexture.c
+	"system/gc/GXTexture.h"
+
+1703024481 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxinit.c
+	"system/gc/__GXInit.h"
+
+1703010711 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxtev.c
+	"system/gxtype.h"
+	"system/gc/GXTexture.h"
+
+1703012084 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\__gxinit.c
+	"system/gc/GXTexture.h"
+
+1703027156 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\demoinit.c
+	"system/gc/__GXInit.h"
+	"system/gc/OSAlloc.h"
+
+1703016103 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\gxframebuf.c
+	"system/gc/__GXInit.h"
+
+1703017017 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\xboxlibs.c
+	"system/xboxlibs.h"
+
+1703016922 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\xboxlibs.h
+	"gs.h"
+	"system/gs.h"
+	"system/gc/OSAlloc.h"
+
+1703025645 c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\osalloc.h
+	"system.h"
+	"system/gxtype.h"
+	"system/gc/GXBump.h"
+
+1703027216 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\osalloc.c
+	"OSAlloc.h"
+
+1703027186 source:c:\d_drive\documenti\github\engine\openwocgc\code\src\system\gc\osinterrupt.c
+	"OSAlloc.h"
 

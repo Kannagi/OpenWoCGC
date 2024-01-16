@@ -85,6 +85,168 @@ void UpdateTempCharacter(void) {
 }
 
 //MATCH NGC
+void InitWumpa(void) {
+  s32 i;
+  
+  memset(Wumpa,0,0x5f00);
+  WUMPACOUNT = 0;
+  if ((LDATA->flags & 0x80) != 0) {
+    LoadWumpa();
+  }
+  for (i = 0; i < 0x140; i++) {
+    Wumpa[i].iRAIL = -1;
+    Wumpa[i].iALONG = -1;
+  }
+  for (i = 0; i < 8; i++) {
+    WInfo[i].angle = 0;
+    WInfo[i].spin = 0x666;
+    WInfo[i].scale = 0.75f;
+  }
+  ResetWumpa();
+  return;
+}
+
+//93.88% NGC
+void ResetWumpa(void) {
+    struct wumpa_s* wump;
+    s32 i;
+    s32 gempath_reset = 0;
+
+    if ((Rail[7].type == 3)
+        && (AheadOfCheckpoint((s32)gempath_RPos.iRAIL, (s32)gempath_RPos.iALONG, gempath_RPos.fALONG) != 0))
+    {
+        gempath_reset = 1;
+    }
+    wump = Wumpa;
+    for (i = 0; i < WUMPACOUNT; i++, wump++) {
+        GetALONG(&wump->pos0, NULL, -1, -1, 1);
+        wump->pos1 = wump->pos0;
+        wump->iRAIL = temp_iRAIL;
+        wump->iALONG = temp_iALONG;
+        wump->fALONG = temp_fALONG;
+        wump->pos = wump->pos0;
+        wump->shadow = NewShadowMask(&wump->pos, 0.0, -1);
+        if (wump->shadow != 2000000.0f) {
+            wump->surface_type = (char)ShadowInfo();
+            FindAnglesZX(&ShadNorm);
+            wump->surface_xrot = temp_xrot;
+            wump->surface_zrot = temp_zrot;
+        } else {
+            wump->surface_type = -1;
+            wump->surface_xrot = 0;
+            wump->surface_zrot = 0;
+        }
+        if (wump->iRAIL != -1 && Rail[wump->iRAIL].type == 1 && Bonus == 4) {
+            if (wump->active != 2) {
+                wump->active = 0;
+            }
+        } else {
+            //missing branch, gempath_reset condition
+            if ((wump->iRAIL != -1 && Rail[wump->iRAIL].type == 3 && gempath_reset)
+                || (AheadOfCheckpoint(wump->iRAIL, wump->iALONG, wump->fALONG) != 0)) {
+                wump->active = 2;
+            } else if (wump->active != 2) {
+                wump->active = 0;
+            }
+        }
+    }
+    for (i; i < 0x140; i++) {
+        wump->active = 0;
+        wump++;
+    }
+    for (i = 0; i < 0x20; i++) {
+        NewWumpa[i].active = 0;
+    }
+    for (i = 0; i < 0x20; i++) {
+        WScr[i].timer = 0.0f;
+    }
+    return;
+}
+
+//MATCH NGC
+void FlyWumpa(struct wumpa_s* wumpa) {
+  (wumpa->mom).x = 0.0f;
+  (wumpa->mom).y = 0.0f;
+  (wumpa->mom).z = 0.1666667f;
+  NuVecRotateX(&wumpa->mom,&wumpa->mom,-0x400);
+  NuVecRotateY(&wumpa->mom,&wumpa->mom,qrand());
+  wumpa->time = 0.0f;
+  wumpa->destroy = '\0';
+  wumpa->active = '\x03';
+  wumpa->duration = 2.0f;
+  wumpa->fired = '\0';
+  GameSfx(0x2a,&wumpa->pos);
+  return;
+}
+
+//MATCH NGC
+s32 WipeWumpa(struct RPos_s *rpos) {
+  s32 i;
+  struct wumpa_s* wumpa;
+  
+  if (TimeTrial != 0) {
+      return 0;
+  } else{
+    wumpa = Wumpa;
+    for (i = 0; i < 0x140; i++) {
+      if ((((u8)wumpa->active == 1) || ((u8)wumpa->active == 2)) &&
+         (FurtherALONG(rpos->iRAIL,rpos->iALONG,rpos->fALONG,wumpa->iRAIL,wumpa->iALONG,wumpa->fALONG) != 0)) {
+        FlyWumpa(wumpa);
+        return 1;
+      }
+      wumpa++;
+    }
+  }
+    return 0;
+}
+
+//MATCH NGC
+void WumpaHitTerrain(struct wumpa_s *wmp) {
+  float f;
+  struct nuvec_s ray;
+  
+  f = wmp->duration * 60.0f;
+  ray.x = (wmp->mom).x * f;
+  ray.y = (wmp->mom).y * f;
+  ray.z = (wmp->mom).z * f;
+  f = NuVecMag(&ray);
+  if (NewRayCast(&wmp->pos,&ray,0.0f) != 0) {
+    wmp->duration *= (NuVecMag(&ray) / f);
+  }
+  return;
+}
+
+//MATCH NGC
+void AddFlyingWumpa(struct nuvec_s *src,struct nuvec_s *dir,struct nuvec_s *dst,s32 destroy) {
+  struct wumpa_s* wumpa;
+
+  wumpa = &Wumpa[i_tempwumpa + 0x100];
+  wumpa->pos1 = *src;
+  wumpa->pos0 = wumpa->pos1;
+  wumpa->pos = wumpa->pos0;
+  wumpa->shadow = 2000000.0f;
+  wumpa->active = '\x03';
+  wumpa->time = 0.0f;
+  wumpa->duration = 2.0f;
+  wumpa->surface_type = -1;
+  NuVecScale(&wumpa->mom,dir,0.1666667f);
+  WumpaHitTerrain(wumpa);
+  if (destroy == 3) {
+    destroy = 2;
+    wumpa->fired = '\x02';
+  }
+  else {
+    wumpa->fired = '\x01';
+  }
+  wumpa->destroy = (char)destroy;
+  i_tempwumpa++;
+  if (i_tempwumpa == 0x40) {
+    i_tempwumpa = 0;
+  }
+  return;
+}
+
+//MATCH NGC
 void UpdateScreenWumpas(void) {
   struct nuvec_s v[2];
   struct newwumpa_s *anew;
@@ -2771,6 +2933,73 @@ void ResetKabooms(void) {
 }
 
 //NGC MATCH
+void AddKaboom(s32 type,struct nuvec_s *pos,float radius) {
+  struct kaboom_s* kaboom;
+  float speed;
+  s32 sfx;
+
+  sfx = -1;
+  kaboom = &Kaboom[i_kaboom];
+  kaboom->time = 0.0f;
+  kaboom->type = (u16)type;
+  kaboom->pos = *pos;
+    switch (type) {
+    case 1:
+    case 2:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 1.25f;
+        speed = 3.0f;
+        break;
+    case 0x4:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 1.25f;
+        speed = 3.0f;
+        JudderGameCamera(GameCam,0.2,NULL);
+        break;
+    case 0x8:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 1.75f;
+        speed = 4.1999998f;
+        JudderGameCamera(GameCam,0.4,NULL);
+        break;
+    case 0x10:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 3.0f;
+        speed = 7.5f;
+        JudderGameCamera(GameCam,0.3f,&kaboom->pos);
+        break;
+    case 0x80:
+        sfx = 0x3b;
+    case 0x100:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 1.0f;
+        speed = 3.0f;
+        JudderGameCamera(GameCam,0.3f,&kaboom->pos);
+        break;
+    case 0x40:
+    case 0x20:
+        kaboom->radius0 = 0.0f;
+        kaboom->radius1 = 50.0f;
+        speed = 15.0f;
+        kaboom->i = temp_pCrate->index;
+        kaboom->yrot = temp_pGroup->angle;
+        break;
+    }
+  if (radius > 0.0f) {
+    kaboom->radius1 = radius;
+  }
+  i_kaboom++;
+  kaboom->duration = (kaboom->radius1 - kaboom->radius0) / speed;
+  if (i_kaboom == 0x48) {
+    i_kaboom = 0;
+  }
+  if (sfx != -1) {
+    GameSfx(sfx,&kaboom->pos);
+  }
+  return;
+}
+
+//NGC MATCH
 void OpenGame(void) {
   s32 i;
   s32 j;
@@ -3690,13 +3919,29 @@ void DrawNODATAAVAILABLE(void) {
   return;
 }
 
+//NGC MATCH
+char* MakeEditText(char* txt) {
+    s32 j;
+    s32 k = 0;
 
+    edit_txt[k++] = '#';
+    edit_txt[k++] = 'g';
 
-
-
-
-
-
+    for (j = 0; txt[j] != '\0'; j++) {
+        if ((Game.language == 'c' && j == (i_nameinput + i_nameinput)) 
+            || (Game.language != 'c' && (j == i_nameinput))) {
+            edit_txt[k++] = '#';
+            edit_txt[k++] = GlobalTimer.frame % 0xc < 6 ? 'o' : 'b';
+        } else if ((Game.language == 'c' && j == (i_nameinput + 1) * 2) ||
+                (Game.language != 'c' && j == (i_nameinput + 1))) {
+            edit_txt[k++] = '#';
+            edit_txt[k++] = 'g';
+        }
+        edit_txt[k++] = *(txt + j);
+    }
+    edit_txt[k] = '\0';
+    return edit_txt;
+}
 
 
 
@@ -3711,7 +3956,7 @@ s8* GetStringIdx(s32, s32);                              /* extern */
 s32 ParseNintendoErrorCode();                       /* extern */
 void Text3D(char* txt, float x, float y, float z, float scalex, float scaley, float scalez, int align, int colour); /* extern */
 char* MakeEditText(char* txt);
-extern struct nupad_s* Pad[2];
+extern struct nupad_s* Pad[3]; //Pad[2] dwarf
 extern struct game_s Game;
 extern struct game_s* game;
 extern s32 GameMode;
@@ -4926,6 +5171,74 @@ LAB_80036da0:
   //  return;
 }
 
+//98% NGC
+void BonusTiming (struct creature_s* plr) {
+    s32 dead;
+
+    dead = 0;
+    if ((Bonus == 2) && ((plr->obj).dead != 0)) {
+        dead = 1;
+    }
+    if (((Bonus != 3) && (Bonus != 4)) && (!dead)) {
+        return;
+    }
+    bonus_finish_frame++;
+    if (bonus_wumpa_delay != 0) {
+        bonus_wumpa_delay--;
+        if (plr_bonus_wumpas.count == 0) {
+            bonus_wumpa_wait = 0.5f;
+        } else if (bonus_wumpa_wait > 0.0f) {
+            bonus_wumpa_wait -= 0.01666667f;
+            if (bonus_wumpa_wait < 0.0f) {
+                bonus_wumpa_wait = 0.0f;
+            }
+        }
+    } else {
+        if (plr_bonus_wumpas.count != 0) {
+            bonus_wumpa_delay = 6;
+            if (dead == 0) {
+                plr_wumpas.count++;
+                AddPanelDebris(BONUSWUMPAOBJSX, BONUSPANELSY, 0, 1.0f, 1);
+            } else {
+                AddPanelDebris(BONUSWUMPAOBJSX, BONUSPANELSY, 1, 1.0f, 1);
+                GameSfx(0x19, NULL);
+            }
+            plr_bonus_wumpas.count--;
+        }
+        if (plr_bonus_wumpas.count == 0) {
+            bonus_wumpa_wait = 0.5f;
+        } else if (bonus_wumpa_wait > 0.0f) { // this isn't correct?
+            bonus_wumpa_wait -= 0.01666667f;
+            if (bonus_wumpa_wait < 0.0f) {
+                bonus_wumpa_wait = 0.0f;
+            }
+        }
+    }
+    plr_bonus_wumpas.draw = plr_bonus_wumpas.count;
+    if (bonus_life_delay != 0) {
+        bonus_life_delay--;
+        if (bonus_lives == 0) {
+            bonus_lives_wait = 0.5f;
+        }
+    } else if (bonus_lives != 0) {
+        bonus_life_delay = 90;
+        if (!dead) {
+            AddPanelDebris(BONUSLIVESOBJSX, BONUSPANELSY, 4, BONUSLIFESCALE, 1);
+        }
+        bonus_lives--;
+        if (bonus_lives == 0) {
+            bonus_lives_wait = 0.5f;
+        }
+    } else if (bonus_lives == 0 && bonus_lives_wait > 0.0f) {
+        bonus_lives_wait -= 0.01666667f;
+        if (bonus_lives_wait < 0.0f) {
+            bonus_lives_wait = 0.0f;
+        }
+    }
+    return;
+}
+
+
 //NGC MATCH
 void MakeTimeI(s32 time,s32 hours,char *txt) {
   s32 t;
@@ -4969,6 +5282,102 @@ void MakeLevelTimeString(struct time_s *time,char *txt) {
 }
 
 //NGC MATCH
+void ResetTimer(struct GTimer *t) {
+  t->frame = 0;
+  t->itime = 0;
+  t->isec = 0;
+  t->ftime = 0.0f;
+  t->fsec = 0.0f;
+  return;
+}
+
+//NGC MATCH
+void UpdateTimer(struct GTimer* t) {
+  t->frame++;
+  t->itime+= 5;
+  t->isec+= 5;
+  if (299 < t->isec) {
+    t->isec-= 0x12C;
+  }
+  t->ftime+= 0.01666667f;
+  t->fsec+= 0.01666667f;
+  if (t->fsec >= 1.0f) {
+    t->fsec-= 1.0f;
+  }
+  return;
+}
+
+//NGC MATCH
+void StartTimeTrial(struct nuvec_s *pos, s32 off) {
+  TimeTrial = 1;
+  ResetCheckpoint(-1, -1, 0.0f, NULL);
+  GameSfx(0x4c, NULL);
+  if (off != 0) {
+    ClockOff();
+  }
+  NuCameraTransformScreenClip(&TTScrPos, pos, 1, NULL);
+  TTScrPos.z = (1.0f - TTScrPos.z) * (TEXTZMUL / 0.1f);
+  if (ObjTab[101].obj.special != NULL) {
+    (ObjTab[101].obj.special)->instance->flags.visible = 1 | 0x80000000;
+  }
+  if (Level == 0x1d) {
+    tt_sx = -0.1f;
+  }
+  else if (((LDATA->flags & 0x200) != 0) || (Level == 0x1c)) {
+    tt_sx = 0.0f;
+  }
+  else {
+    tt_sx = 0.49f;
+  }
+  tt_sy = -0.8f;
+  return;
+}
+
+//NGC MATCH
+void ResetTimeTrial(void) {
+s32 tmp;
+    
+  TimeTrial = 0;
+  ResetTimer(&TimeTrialTimer);
+  timetrial_frame = 0;
+  tmp = 0;
+  TimeTrialWait = 0;
+  if (PLAYERCOUNT != 0) {
+   // clock_ok = plr_items ? 0 : 1;
+    tmp = !plr_items; //??
+  } else{
+      tmp = 0;
+  }
+    clock_ok = tmp;
+  return;
+}
+
+//NGC MATCH
+void ClockOff(void) {
+  s32 i;
+  
+  for(i = 1; i < 9; i++) {
+    if ((Character[i].on != '\0') && ((Character[i].obj).character == 0x76)) {
+      KillItem(&Character[i].obj);
+    }
+  }
+  clock_ok = 0;
+  return;
+}
+
+//NGC MATCH
+struct creature_s * FindClock(void) {
+  s32 i;
+
+  for(i = 1; i < 9; i++) {
+      if(Character[i].on != '\0' && ((Character[i].obj).character == 0x76)){
+          return &Character[i];
+      }
+  }
+  return NULL;
+}
+
+//NGC MATCH
 void InitSplineTable(void) {
   s32 i;
   
@@ -4993,6 +5402,29 @@ void InitSplineTable(void) {
   else {
     for (i = 0; i < 0x49; i++) {
       SplTab[i].spl = NULL;
+    }
+  }
+  return;
+}
+
+//NGC MATCH
+void InitObjectTable(void) {
+  //struct nugscn_s* scene;
+  s32 i;
+  s32 j;
+
+  for (i = 0; i < 0xc9; i++) {
+    ObjTab[i].obj.special = NULL;
+    if ((((ObjTab[i].levbits >> Level) & 1) != 0) && (*ObjTab[i].scene != NULL)) {
+      if (NuSpecialFind(*ObjTab[i].scene,&ObjTab[i].obj,ObjTab[i].name) != 0) {
+        (ObjTab[i].obj.special)->instance->flags.visible = ObjTab[i].visible;
+        for (j = 0; j < 0x1a; j++) {
+          if ((((Font3DObjTab[j].flags) & 2) != 0) && ((Font3DObjTab[j].i) == i)) {
+            ObjTab[i].font3d_letter = (char)j + 0x61;
+            j = 0x1a;
+          }
+        }
+      }
     }
   }
   return;
@@ -5082,6 +5514,59 @@ u16 SplinePointAngle(struct nugspline_s *spl,int i) {
     dz = dz + (p1->z - p0->z);
   }
   return (u16)NuAtan2D(dx,dz);
+}
+
+//NGC MATCH
+u16 SplinePointTilt(struct nugspline_s *spl,s32 i) {
+  struct nuvec_s *p0;
+  struct nuvec_s *p1;
+  float dx;
+  float dz;
+  float dy;
+  float d;
+  
+    dx = 0.0f;
+    dy = 0.0f;
+    dz = 0.0f;
+  p0 = (struct nuvec_s *)(spl->pts + (i * spl->ptsize));
+  if (i > 0) {
+    p1 = (struct nuvec_s *)(spl->pts + ((i - 1) * spl->ptsize));
+    dx = (p0->x - p1->x) + 0.0f;
+    dy = (p0->y - p1->y) + 0.0f;
+    dz = (p0->z - p1->z) + 0.0f;
+  }
+  if (i < spl->len - 1) {
+      p1 = (struct nuvec_s *)(spl->pts + ((i + 1) * spl->ptsize));
+    dx +=  p1->x - p0->x;
+    dy +=  p1->y - p0->y;
+    dz +=  p1->z - p0->z;
+  }
+  d = NuFsqrt((dx * dx + (dz * dz)));
+  return (u16)NuAtan2D(dy,d);
+}
+
+//NGC MATCH
+float SplineDistance(struct nugspline_s *spl) {
+  struct nuvec_s *p0;
+  struct nuvec_s *p1;
+  struct nuvec_s v;
+  s32 i;
+  float d;
+  
+  if ((spl == NULL) || (spl->len < 2)) {
+    return 0.0f;
+  }
+  else {
+    p0 = (struct nuvec_s *)spl->pts;
+    d = 0.0f;
+    for (i = 0; i < (spl->len - 1); i++) {
+        p1 = (struct nuvec_s *)(spl->pts + ((i + 1) * spl->ptsize));
+        NuVecSub(&v,p1,p0);
+        d += NuVecMag(&v);
+        p0 = p1;
+    }
+  }
+  return d;
 }
 
 //NGC MATCH

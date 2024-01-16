@@ -53,32 +53,87 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/elf_systypes.h" />
+		<Unit filename="src/gamecode/camera.h" />
+		<Unit filename="src/gamecode/creature.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/gamecode/creature.h" />
+		<Unit filename="src/gamecode/font3d.h" />
+		<Unit filename="src/gamecode/game.h" />
+		<Unit filename="src/gamecode/inst.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/gamecode/inst.h" />
+		<Unit filename="src/gamecode/listman.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/gamecode/main.h" />
 		<Unit filename="src/gamelib/edbits.h" />
 		<Unit filename="src/gamelib/edfile.h" />
 		<Unit filename="src/gamelib/gcutscn.h" />
 		<Unit filename="src/gamelib/glutils.h" />
-		<Unit filename="src/newstructs_TBADDED.h" />
 		<Unit filename="src/nu.h" />
 		<Unit filename="src/nu3dx.h" />
 		<Unit filename="src/nu3dx/nu3dxtypes.h" />
+		<Unit filename="src/nu3dx/nuanim.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuanim.h" />
 		<Unit filename="src/nu3dx/nucamera.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/nu3dx/nucamera.h" />
+		<Unit filename="src/nu3dx/nucvtskin.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nucvtskin.h" />
+		<Unit filename="src/nu3dx/nuglass.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuglass.h" />
+		<Unit filename="src/nu3dx/nugobj.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nugobj.h" />
+		<Unit filename="src/nu3dx/nuhaze.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuhaze.h" />
+		<Unit filename="src/nu3dx/nuhgobj.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuhgobj.h" />
+		<Unit filename="src/nu3dx/nulight.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nulight.h" />
+		<Unit filename="src/nu3dx/numtl.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/numtl.h" />
+		<Unit filename="src/nu3dx/nurndr.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nurndr.h" />
+		<Unit filename="src/nu3dx/nuscene.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuscene.h" />
+		<Unit filename="src/nu3dx/nutex.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nutex.h" />
+		<Unit filename="src/nu3dx/nutxanm.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nutxanm.h" />
+		<Unit filename="src/nu3dx/nuvport.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuvport.h" />
+		<Unit filename="src/nu3dx/nuwater.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nu3dx/nuwater.h" />
 		<Unit filename="src/nucore.h" />
 		<Unit filename="src/nucore/nucoretypes.h" />
@@ -137,6 +192,9 @@
 		</Unit>
 		<Unit filename="src/numath/nuvec4.h" />
 		<Unit filename="src/nuraster.h" />
+		<Unit filename="src/nuraster/dxframe.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/nuraster/dxframe.h" />
 		<Unit filename="src/nuraster/nurastertypes.h" />
 		<Unit filename="src/nusound.h" />
@@ -145,14 +203,89 @@
 		</Unit>
 		<Unit filename="src/nusound/nusound.h" />
 		<Unit filename="src/nusound/nusoundtypes.h" />
+		<Unit filename="src/nuxbox/crash_xbox.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/nuxbox/dummyfunc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/nuxbox/nuxboxtypes.h" />
 		<Unit filename="src/system.h" />
+		<Unit filename="src/system/crashlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/crashlib.h" />
+		<Unit filename="src/system/gc/DEMOInit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXBump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXBump.h" />
+		<Unit filename="src/system/gc/GXFrameBuf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXInit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXInit.h" />
+		<Unit filename="src/system/gc/GXTev.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXTexture.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/GXTexture.h" />
+		<Unit filename="src/system/gc/OSAlloc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/OSAlloc.h" />
+		<Unit filename="src/system/gc/OSInterrupt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/__GXInit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/__GXInit.h" />
+		<Unit filename="src/system/gc/fs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gc/fs.h" />
 		<Unit filename="src/system/gc/gcInit.h" />
 		<Unit filename="src/system/gs.h" />
+		<Unit filename="src/system/gs/gs.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/system/gs/gs.h" />
+		<Unit filename="src/system/gs/gsbuffer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gs/gsbuffer.h" />
+		<Unit filename="src/system/gs/gsinit.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/system/gs/gsinit.h" />
 		<Unit filename="src/system/gs/gslight.h" />
+		<Unit filename="src/system/gs/gsprim.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/system/gs/gsprim.h" />
+		<Unit filename="src/system/gs/gstex.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/system/gs/gstex.h" />
+		<Unit filename="src/system/gsmatrix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/gxtype.h" />
+		<Unit filename="src/system/port.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/port.h" />
+		<Unit filename="src/system/skinned.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/skinned.h" />
 		<Unit filename="src/system/ss/ss.h" />
 		<Unit filename="src/system/ss/ssam.h" />
 		<Unit filename="src/system/ss/ssdtk.h" />
@@ -161,6 +294,13 @@
 		<Unit filename="src/system/ss/sssp.h" />
 		<Unit filename="src/system/ss/sstrack.h" />
 		<Unit filename="src/system/ss/sstypes.h" />
+		<Unit filename="src/system/syserror.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/xboxlibs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/system/xboxlibs.h" />
 		<Unit filename="src/types.h" />
 		<Extensions />
 	</Project>
