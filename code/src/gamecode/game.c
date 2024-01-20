@@ -828,6 +828,59 @@ s32 AddAward(s32 hub,s32 level,u16 got) {
   return 1;
 }
 
+//NGC MATCH
+void UpdateAwards(void) {
+  float fVar5;
+  struct award_s* award; 
+  float old_time;
+  s32 i;
+
+    award = Award;
+  for(i = 0; i < 3; i++) {
+    old_time = award->time;
+    if (old_time < 1.0f) {
+      if (award->wait) {
+        if (!tumble_character) {
+          NuVecAdd(&award->oldpos0,(struct nuvec_s *)&player->mtxLOCATOR[3][1]._30,
+                   (struct nuvec_s *)&player->mtxLOCATOR[4][0]._30);
+          NuVecScale(&award->oldpos0,&award->oldpos0,0.5f);
+        }
+        else {
+            award->oldpos0 = *(struct nuvec_s*)&(player->mtxLOCATOR[1][1]._30);
+        }
+        award->oldpos1.x = award->oldpos0.x;
+        fVar5 = award->oldpos0.y;
+        award->oldpos1.y = (tumble_character == 1) ? fVar5 + 1.0f : fVar5 + 0.5f;
+        award->oldpos1.z = award->oldpos0.z;
+        if ((player->obj).anim.anim_time >= tumble_item_addtime) {
+          award->wait = 0;
+          GameSfx(0x26,NULL);
+          AddGameDebris(0xa1, &award->oldpos1);
+        }
+      }
+      else {
+        old_time += 0.016666668f;
+        award->time = old_time;
+        if (old_time >= 1.0f) {
+           award->time = 1.0f;
+          new_lev_flags = (new_lev_flags | award->got);
+            new_lev_flags ^=  award->got;
+          Game.level[award->level].flags = Game.level[award->level].flags | award->got;
+          CalculateGamePercentage(&Game);
+          AddGameDebris(0xa1, &award->newpos);
+        }
+        else {
+          if (old_time < 0.666f) {
+            award->oldpos0.y = ((award->oldpos1).y - award->oldpos0.y) * 0.1f + award->oldpos0.y;
+          }
+        }
+      }
+    }
+      award++;
+  }
+  return;
+}
+
 //NGC 98% (float)
 void DrawAwards(void) {
     struct award_s* award;
@@ -906,7 +959,7 @@ void DrawAwards(void) {
             } else if (i_chr != -1) {
                 f = (scale * 0.76999998f);
                 if (CRemap[i_chr] != -1) {
-                    Draw3DCharacter(&pos, 0, award->yrot, 0, &CModel[CRemap[i_chr]], -1, f, 1.0f, 0);
+                    F(&pos, 0, award->yrot, 0, &CModel[CRemap[i_chr]], -1, f, 1.0f, 0);
                 }
             }
         }
@@ -1007,6 +1060,31 @@ void ResetLoadSaveCharacter(void) {
     (player->obj).shadow = NewShadowMaskPlat(&(player->obj).pos,0.0f,-1);
   }
   return;
+}
+
+//NGC MATCH
+void DefaultTimeTrialNames(s32 all) {
+  char *txt;
+  s32 i;
+  s32 j;
+  
+  for (i = 0; i < 0x23; i++) {
+        for (j = 0; j < 3; j++) {
+        txt = Game.level[i].time[j].name;
+          if (all != 0) {
+              strcpy(txt,PlaceName3[j][Game.language]);
+          }
+            else if (*txt == '1') {
+              strcpy(txt,PlaceName3[0][Game.language]);
+            }
+            else if (*txt == '2') {
+              strcpy(txt,PlaceName3[1][Game.language]);
+            }
+            else if (*txt == '3') {
+              strcpy(txt,PlaceName3[2][Game.language]);
+            }
+        }
+  }
 }
 
 
@@ -2791,34 +2869,28 @@ void TransporterGo(void) {
 void DrawTransporters(void) {
   s32 i;
 
-  i = 4;
+    i = 4;
   if ((TimeTrial == 0) && (ChaseActive() == -1)) {
-    if ((ObjTab[i].obj.special != NULL) && ((Rail[5].type != -1 && (VEHICLECONTROL != 1)))) {
-      Draw3DObject(4,&bonus_obj[0].pos,0,bonus_obj[0].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
-                   ObjTab[i].obj.special,0);
-      Draw3DObject(4,&bonus_obj[1].pos,0,bonus_obj[1].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
-                   ObjTab[i].obj.special,0);
-    }
-    if ((Level != 0x25) || ((Game.hub[5].flags & 1) != 0)) {
-      i = 5;
-      if (LostLife != 0) {
-        i = 6;
-      }
-      if (((ObjTab[i].obj.special != NULL) && (Rail[6].type != -1)) &&
-         ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
-        Draw3DObject(i,&death_obj.pos,0,death_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
-                     ObjTab[i].obj.special,0);
-      }
-      i = 8;
-      if (gempath_open != 0) {
-        i = 7;
-      }
-      if (((ObjTab[i].obj.special != NULL) && (Rail[7].type != -1)) &&
-         ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
-        Draw3DObject(i,&gempath_obj.pos,0,gempath_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,
-                     ObjTab[i].obj.special,0);
-      }
-    }
+        if ((ObjTab[i].obj.special != NULL) && ((Rail[5].type != -1 && (VEHICLECONTROL != 1)))) {
+          Draw3DObject(4,&bonus_obj[0].pos,0,bonus_obj[0].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,ObjTab[i].obj.special,0);
+          Draw3DObject(4,&bonus_obj[1].pos,0,bonus_obj[1].hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,ObjTab[i].obj.special,0);
+        }
+        if ((Level != 0x25) || ((Game.hub[5].flags & 1) != 0)) {
+              i = 5;
+              if (LostLife != 0) {
+                i = 6;
+              }
+              if (((ObjTab[i].obj.special != NULL) && (Rail[6].type != -1)) && ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
+                Draw3DObject(i,&death_obj.pos,0,death_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,ObjTab[i].obj.special,0);
+              }
+              i = 8;
+              if (gempath_open != 0) {
+                i = 7;
+              }
+              if (((ObjTab[i].obj.special != NULL) && (Rail[7].type != -1)) && ((VEHICLECONTROL != 1 || ((player->obj).vehicle == 0x44)))) {
+                Draw3DObject(i,&gempath_obj.pos,0,gempath_obj.hdg,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,ObjTab[i].obj.special,0);
+              }
+        }
   }
   return;
 }
@@ -2933,6 +3005,67 @@ void ResetKabooms(void) {
 }
 
 //NGC MATCH
+void DrawNextVehicle(s32 render) {
+  struct vtog_s *tog;
+  struct CharacterModel* model;
+  struct nuvec_s pos;
+  s32 i;
+  s32 vehicle;
+  struct anim_s anim;
+  float y;
+  
+  vehicle = (s32)(player->obj).vehicle;
+  if (vehicle != -1) {
+      i = CRemap[vehicle];
+        if(i != -1) {
+                model = &CModel[i];
+                if ((Level == 0x16) && ((VEHICLECONTROL == 0 || (vtog_time < vtog_duration)))) {
+                  pos = AshesMechInPos;
+                  y = NewShadow(&pos,0.0f);
+                  if (y != 2000000.0f) {
+                    pos.y = y;
+                    FindAnglesZX(&ShadNorm);
+                  }
+                  else {
+                    temp_xrot = temp_zrot = 0;
+                  }
+                  NuMtxSetRotationY(&mTEMP,vtog_angle + 0x8000);
+                  NuMtxRotateZ(&mTEMP,temp_zrot);
+                  NuMtxRotateX(&mTEMP,temp_xrot);
+                  NuMtxTranslate(&mTEMP,&pos);
+                  ResetAnimPacket(&anim,0x62);
+                  DrawCharacterModel(model,&anim,&mTEMP,NULL,render,NULL,NULL,NULL,NULL);
+                }
+                tog = VTog;
+                for(i = 0; i < 6; i++) {
+                  if (((Level != 0xf) || (i < 2)) &&
+                     (((vtog_time < vtog_duration && ((vtog_blend != 0 && (tog == pVTog)))) ||
+                      ((best_cRPos != NULL && (((VEHICLECONTROL != 1 && ((tog)->pTRIGGER != NULL)) &&
+                        (FurtherALONG((s32)(tog)->iRAIL,(s32)(tog)->iALONG,(tog)->fALONG,(s32)best_cRPos->iRAIL,
+                                              (s32)best_cRPos->iALONG,best_cRPos->fALONG) != 0)))))))) {
+                    if ((tog)->type != '\0') {
+                      return;
+                    }
+                    NuMtxSetIdentity(&mTEMP);
+                    NuMtxRotateY(&mTEMP,(tog)->yrot + 0x8000);
+                    NuMtxRotateZ(&mTEMP,(uint)(tog)->zrot);
+                    NuMtxRotateX(&mTEMP,(uint)(tog)->xrot);
+                    pos.x = ((tog)->pos).x;
+                    pos.y = ((tog)->pos).y - CData[vehicle].min.y * CData[vehicle].scale;
+                    pos.z = ((tog)->pos).z;
+                    NuMtxTranslate(&mTEMP,&(tog)->pos);
+                    ResetAnimPacket(&(tog)->anim,vtog_action);
+                    DrawCharacterModel(model,&(tog)->anim,&mTEMP,NULL,render,NULL,NULL,NULL,NULL);
+                    return;
+                  }
+                  tog++;
+                }
+        }
+  }
+  return;
+}
+
+//NGC MATCH
 void AddKaboom(s32 type,struct nuvec_s *pos,float radius) {
   struct kaboom_s* kaboom;
   float speed;
@@ -2997,6 +3130,446 @@ void AddKaboom(s32 type,struct nuvec_s *pos,float radius) {
     GameSfx(sfx,&kaboom->pos);
   }
   return;
+}
+
+
+//NGC MATCH (check if)
+void UpdateKabooms(void) {
+  struct wumpa_s *wmp;
+  struct cratesarray_s *crate;
+  struct obj_s *obj;
+  struct crategrp_s *group;
+  struct kaboom_s *kaboom;
+  float r;
+  float r2;
+  s32 type;
+  s32 i;
+  s32 j;
+  s32 k;
+  s32 key;
+  struct nuvec_s local_88;
+  struct nuvec_s local_78;
+  
+  kaboom = Kaboom;
+  for (i = 0; i < 0x48; i++) {
+    if ((kaboom->time < kaboom->duration) && ((kaboom->type & 0x40) == 0)) {
+      group = CrateGroup;
+      r = ((kaboom->radius1 - kaboom->radius0) * (kaboom->time / kaboom->duration) + kaboom->radius0);
+      r2 = (r * r);
+        for (j = 0; j < CRATEGROUPCOUNT; j++) {
+          if (((!(kaboom->pos.x < (group->minclip.x - r)) && !(kaboom->pos.x > (group->maxclip.x + r))) &&
+               !(kaboom->pos.z < (group->minclip.z - r)) && !(kaboom->pos.z > group->maxclip.z + r) &&
+               !(kaboom->pos.y < (group->minclip.y - r))) && !(kaboom->pos.y > (group->maxclip.y + r))) {
+            crate = &Crate[group->iCrate];
+              for (k = 0; k < group->nCrates; k++) {
+                if (crate->on != '\0') {
+                  type = GetCrateType(crate,0);
+                  if ((type == 0x13) && ((kaboom->type & 0xc) == 0)) {
+                    NewCrateAnimation(crate,0x13,0x58,0);
+                    GameSfx(0x39,&crate->pos);
+                  }
+                      //check
+                  else if (kaboom->type != 0x20 || type != 0 || crate->type3 == -1 || kaboom->i == -1 || crate->trigger != kaboom->i) {
+                   if (kaboom->type != 0x20 && type != 0) {
+                      local_88.x = (crate->pos).x;
+                      local_88.y = ((crate->pos).y + 0.25f);
+                      local_88.z = (crate->pos).z;
+                      NuVecSub(&local_78,&kaboom->pos,&local_88);
+                      if ((local_78.x * local_78.x + local_78.y * local_78.y + local_78.z * local_78.z) < r2) {
+                        if (kaboom->type == 0x20) {
+                          crate->newtype = crate->type3;
+                          if (crate->type3 == '\x03') {
+                            NewCrateAnimation(crate,3,0x22,1);
+                          }
+                          if (crate->newtype != '\0') {
+                            crate->appeared = '\x01';
+                          }
+                        }
+                        else if (type == 0xe) {
+                          if ((crate->action == -1) &&
+                             (NewCrateAnimation(crate,0xe,0x35,0) == 0)) {
+                            StartExclamationCrateSequence(group,crate);
+                          }
+                        }
+                        else if (type == 0x11) {
+                          if ((crate->action == -1) &&
+                             (NewCrateAnimation(crate,0x11,0x35,0) == 0)) {
+                            DestroyAllNitroCrates(group,crate);
+                          }
+                        }
+                        else {
+                          if (CrateOff(group,crate,(uint)kaboom->type,0) != 0) {
+                            HopCratesAbove(group,crate,CRATEHOPSPEED);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                crate++;
+              }
+          }
+          group++;
+        }
+      if (kaboom->type != 0x20) {
+        r = 0.5f;
+        for (j = 0; j < 0x40; j++) {
+          obj = pObj[j];
+          if ((((((obj != NULL) && (obj->dead == '\0')) && (obj->invisible == '\0')) &&
+               ((obj->character != 0xb1 && (((obj->flags & 1) == 0 || ((kaboom->type & 0x18c) == 0)))))) &&
+              (((obj->flags & 4) == 0 ||  ((((kaboom->type & 0x10) == 0 &&
+                 ((kaboom->type != 4 || ((obj->vulnerable & 4) != 0)))) &&
+                ((kaboom->type != 8 || ((obj->vulnerable & 8) != 0)))))))) &&
+             ((((obj->flags & 0x10) == 0 || ((kaboom->type & 0xc) != 0)) && ((obj->flags & 8) == 0)))) {
+            local_88.x = (obj->pos).x;
+            local_88.y = (((obj->bot + obj->top) * obj->SCALE) * r + (obj->pos).y);
+            local_88.z = (obj->pos).z;
+            NuVecSub(&local_78,&local_88,&kaboom->pos);
+            if ((local_78.x * local_78.x + local_78.y * local_78.y + local_78.z * local_78.z) < r2) {
+              if ((obj->flags & 1) != 0) {
+                KillPlayer(obj,6);
+              }
+              else {
+                if ((obj->flags & 0x10) != 0) {
+                  PickupItem(obj);
+                }
+                else {
+                  if ((obj->flags & 0x40004) == 0x40004) {
+                    obj->kill_contact = '\x01';
+                  }
+                  else {
+                    FlyGameObject(obj,NuAtan2D(local_78.x,local_78.z) & 0xffff);
+                    KillGameObject(obj,1);
+                  }
+                }
+              }
+            }
+          }
+        }
+        if ((kaboom->type != 0x20) && (TimeTrial == 0)) {
+          wmp = Wumpa;
+          for (j = 0; j < 0x140; j++) {
+            if (((wmp->active == '\x02') || ((wmp->active == '\x01' && ((kaboom->type & 0xc) == 0)))) &&
+               (NuVecSub(&local_78,&kaboom->pos,&wmp->pos),
+               (local_78.x * local_78.x + local_78.y * local_78.y + local_78.z * local_78.z) < r2)) {
+              if ((kaboom->type & 0xc) != 0) {
+                if ((player->obj).dead == '\0') {
+                  AddScreenWumpa((wmp->pos).x,(wmp->pos).y,(wmp->pos).z,1);
+                }
+                wmp->active = '\0';
+                key = -1;
+                AddFiniteShotDebrisEffect(&key,GDeb[130].i,&wmp->pos,1);
+              }
+              else {
+                FlyWumpa(wmp);
+              }
+            }
+            wmp++;
+          }
+        }
+      }
+      kaboom->time += 0.01666667f;
+      if (kaboom->time > kaboom->duration) {
+        kaboom->time = kaboom->duration;
+      }
+    }
+    kaboom++;
+  }
+}
+
+
+//NGC MATCH
+void CheckFinish(struct obj_s* obj) {
+    u16 old_hub_flags;
+    u16 old_lev_flags;
+    struct nuvec_s objmid;
+    struct nuvec_s v;
+    float d;
+    s32 iVar1;
+
+    if (Level == 0x25) {
+        return;
+    }
+    if (obj->dead) {
+        return;
+    }
+    if (Hub == -1) {
+        return;
+    }
+    objmid.x = (obj->pos).x;
+    objmid.y = obj->pos.y + (obj->bot + obj->top) * obj->SCALE * 0.5f;
+    objmid.z = (obj->pos).z;
+    if (obj->finished == 0) {
+        new_hub_flags = 0;
+        new_lev_flags = 0;
+        finish_type = 0;
+
+        old_hub_flags = Game.hub[Hub].flags;
+        old_lev_flags = Game.level[Level].flags;
+        switch (Level) {
+            default:
+                if (Level == 0x24) {
+                    iVar1 = GetCurrentLevelObjectives();
+                    if (iVar1 != 0) {
+                        return;
+                    }
+                    VEHICLECONTROL = iVar1;
+                    ResetPlayer(1);
+                    level_part_2 = 0;
+                    return;
+                }
+                objmid.y += 0.5f;
+                d = FindNearestCreature(&objmid, 0xb1, &v);
+                if (d > FINISHRADIUSLEVEL * FINISHRADIUSLEVEL) {
+                    in_finish_range = 0;
+                    return;
+                }
+                in_finish_pos = v;
+                finish_newpos = v;
+                in_finish_range = 0x3c;
+                finish_oldpos = (obj->pos);
+                finish_type = 1;
+                finish_frames = 0x3c;
+                break;
+            case 0xd:
+            case 0x12:
+            case 0x1a:
+                if (((TimeTrial == 0) && ((Game.level[Level].flags & 0x10) == 0))
+                    && (((plr_items & 2) == 0 && (plr_crates.count >= DESTRUCTIBLECRATECOUNT)))) {
+                    PickupCrateGem();
+                }
+                if (FlyingLevelCompleteTimer != 0.0f) {
+                    return;
+                }
+                finish_newpos = (obj->pos);
+                if ((Game.level[Level].flags & 8) == 0) {
+                    PickupCrystal();
+                }
+                finish_frames = 0x3c;
+                break;
+            case 0x15:
+            case 0x16:
+            case 0x17:
+            case 0x18:
+            case 0x19:
+                if ((((((Level != 0x18) && (Level != 0x16)) && (Level != 0x15)) || (ChrisBigBossDead != 0))
+                     && ((Level != 0x19 && (Level != 0x17)))) && (GetCurrentLevelObjectives() == 0)) {
+                    if ((Game.hub[Hub].flags & 4) == 0) {
+                        if ((boss_dead < 1) && (boss_dead = 1, Level == 0x18)) {
+                            PickupPower(0xa2);
+                        }
+                    } else {
+                        boss_dead = 2;
+                    }
+                }
+                if (boss_dead < 2) {
+                    return;
+                }
+                if (Cursor.menu != -1) {
+                    return;
+                }
+                in_finish_range++;
+                if (in_finish_range < 0x3c) {
+                    return;
+                }
+                finish_newpos = (obj->pos);
+                finish_frames = 0x3c;
+                if ((Game.hub[Hub].flags & 6) == 2) {
+                    Game.hub[Hub].flags = Game.hub[Hub].flags | 4;
+                    Game.hub[Hub + 1].flags = Game.hub[Hub + 1].flags | 1;
+                }
+                break;
+            case 0x24:
+                if (TimeTrial != 0) {
+                    return;
+                }
+                if (Game.level[Level].flags & 0x10) {
+                    return;
+                }
+                if ((plr_items & 2) != 0) {
+                    return;
+                }
+                if (plr_crates.count < DESTRUCTIBLECRATECOUNT) {
+                    return;
+                }
+                PickupCrateGem();
+                return;
+                break;
+            case 3:
+                if ((((TimeTrial == 0) && ((Game.level[Level].flags & 0x10) == 0)) && ((plr_items & 2) == 0))
+                    && (plr_crates.count >= DESTRUCTIBLECRATECOUNT)) {
+                    PickupCrateGem();
+                }
+                if (SmokeyFinished == 0) {
+                    return;
+                }
+                if (in_finish_range == 0) {
+                    GameSfx(0x69, &(player->obj).pos);
+                }
+                if (((TimeTrial == 0) && (SmokeyPosition == 1))
+                    && (((Game.level[Level].flags & 8) == 0 && ((plr_items & 1) == 0)))) {
+                    PickupCrystal();
+                }
+                in_finish_range++;
+                if (in_finish_range < 0x3c) {
+                    return;
+                }
+                finish_newpos = (obj->pos);
+                finish_frames = 0x3c;
+                break;
+            case 0x1c:
+                if ((((TimeTrial == 0) && ((Game.level[Level].flags & 0x10) == 0)) && ((plr_items & 2) == 0))
+                    && (plr_crates.count >= DESTRUCTIBLECRATECOUNT)) {
+                    PickupCrateGem();
+                }
+                if (PlrTub.laps < MAXLAPS) {
+                    return;
+                }
+                in_finish_range++;
+                if (in_finish_range < 0x3c) {
+                    return;
+                }
+                finish_newpos = (obj->pos);
+                if (TimeTrial == 0) {
+                    if ((PlrTub.place == '\x01') && ((Game.level[Level].flags & 0x20) == 0)) {
+                        PickupBonusGem(4);
+                    }
+                }
+                finish_frames = 0x3c;
+                break;
+            case 0x1d:
+                if (((TimeTrial == 0) && ((Game.level[Level].flags & 0x10) == 0))
+                    && (((plr_items & 2) == 0 && (plr_crates.count >= DESTRUCTIBLECRATECOUNT)))) {
+                    PickupCrateGem();
+                }
+                if (i_ring < RINGCOUNT) {
+                    return;
+                }
+                in_finish_range++;
+                if (in_finish_range < 0x3c) {
+                    return;
+                }
+                finish_newpos = (obj->pos);
+                if (TimeTrial == 0) {
+                    if ((carpet_place == 2) && ((Game.level[Level].flags & 0x20) == 0)) {
+                        PickupBonusGem(4);
+                    }
+                }
+                finish_frames = 0x3c;
+                break;
+        }
+        if ((((Level == 3) && (1 < SmokeyPosition)) || ((Level == 0x1d && (carpet_place == 1))))
+            || ((Level == 0x1c && ('\x01' < PlrTub.place)))) {
+            obj->finished = '\x02';
+        } else {
+            obj->finished = '\x01';
+        }
+        AddWarpDebris(obj, NULL);
+        gamesfx_effect_volume = 0x7ffe;
+        GameSfx(0x1e, &obj->pos);
+        if ((plr_items & 1) != 0) {
+            Game.level[Level].flags = Game.level[Level].flags | 8;
+            if ((Game.hub[Hub].crystals < 5) && (Game.hub[Hub].crystals++, Game.hub[Hub].crystals == '\x05')) {
+                Game.hub[Hub].flags = Game.hub[Hub].flags | 2;
+            }
+        }
+        if ((LBIT & 0x3e00000) != 0) {
+            Game.level[Level].flags |= 0x800;
+        } else {
+            if (TimeTrial != 0) {
+                TimeTrialWait = 0;
+                if (obj->finished == 1) {
+                    NewLevelTime(TimeTrialTimer.itime);
+                    if (TimeTrialTimer.itime < LDATA->time[2]) {
+                        (Game.level[Level]).flags |= 7;
+                    } else if (TimeTrialTimer.itime < LDATA->time[1]) {
+                        (Game.level[Level]).flags |= 3;
+                    } else if (TimeTrialTimer.itime < LDATA->time[0]) {
+                        (Game.level[Level]).flags |= 1;
+                    }
+                    if ((u32)finish_frames < 0xb4) {
+                        finish_frames = 0xb4;
+                    }
+                } else {
+                    finish_frames = 0x3c;
+                }
+            } else {
+                if ((plr_items & 2) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x10;
+                }
+                if ((plr_items & 4) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x20;
+                }
+                if ((plr_items & 8) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x40;
+                }
+                if ((plr_items & 0x20) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x80;
+                }
+                if ((plr_items & 0x10) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x100;
+                }
+                if ((plr_items & 0x40) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x200;
+                }
+                if ((plr_items & 0x80) != 0) {
+                    Game.level[Level].flags = Game.level[Level].flags | 0x400;
+                }
+            }
+        }
+        new_hub_flags = Game.hub[Hub].flags ^ old_hub_flags;
+        new_lev_flags = Game.level[Level].flags ^ old_lev_flags;
+        Game.level[Level].flags ^= new_lev_flags;
+        if (obj->finished == 0) {
+            return;
+        }
+    }
+    finish_frame++;
+    if (finish_frame != finish_frames) {
+        return;
+    }
+    if (obj->finished == 1) {
+        if (((LBIT & 0x3e00000) != 0) && ((new_lev_flags & 0x800) != 0)) {
+            new_lev_flags = new_lev_flags ^ 0x800;
+            Game.level[Level].flags = Game.level[Level].flags | 0x800;
+        }
+        if (TimeTrial != 0) {
+            if (newleveltime_slot < 3) {
+                if ((new_lev_flags & 7) != 0) {
+                    GameSfx(0x26, NULL);
+                    AddPanelDebris(TT_RELICX, TT_RELICY, 6, 0.125, 0x10);
+                }
+                NewMenu(&Cursor, 0x11, 0, -1);
+            } else {
+                NewMenu(&Cursor, 0x10, 0, -1);
+            }
+            JudderGameCamera(GameCam, 0.3, NULL);
+            GameSfx(0x3c, NULL);
+            return;
+        }
+        if (Level == 0x19) {
+            CalculateGamePercentage(&Game);
+            if (Game.gems > 0x2d) {
+                cutmovie = 4;
+                Game.cutbits |= 0x10000000;
+            } else {
+                cutmovie = 3;
+                Game.cutbits |= 0x8000000;
+            }
+            new_level = 0x2b;
+            return;
+        } else
+            new_level = 0x25;
+    } else {
+        if (TimeTrial != 0) {
+            NewMenu(&Cursor, 0x10, 0, -1);
+        }
+        else if ((Level == 0x1D || Level == 0x1C || Level == 3) && new_lev_flags == 0) {
+            NewMenu(&Cursor, 0x12, 0, -1);
+        } else
+            new_level = 0x25;
+    }
+    return;
 }
 
 //NGC MATCH
@@ -5171,6 +5744,150 @@ LAB_80036da0:
   //  return;
 }
 
+//99% NGC
+void GameTiming(void) {
+  s32 i;
+  s32 tmp;
+  
+  if (pause_dir == 1) {
+    Paused = Paused + 1;
+    if (Paused == 0x1e) {
+      pause_dir = 0;
+    }
+  }
+ else if (pause_dir == 2) {
+    Paused--;
+    if (Paused == 0) {
+      pause_dir = Paused;
+      NewMenu(&Cursor,-1,-1,-1);
+      ResumeGame();
+    }
+}
+if  (Paused != 0) {
+  if (Paused == 0x1e) {
+    UpdateTimer(&PauseTimer);
+    pausestats_frame++;
+  }
+} else{
+      UpdateTimer(&GameTimer);
+      if (force_panel_wumpa_update != 0) {
+        force_panel_wumpa_update--;
+      }
+      if (force_panel_crate_update != 0) {
+        force_panel_crate_update--;
+      }
+      if (force_panel_lives_update != 0) {
+        force_panel_lives_update--;
+      }
+      if (force_panel_items_update != 0) {
+        force_panel_items_update--;
+      }
+      if (((Pad[0] != NULL) && ((Pad[0]->rdy & 0x10) != 0)) && (GameMode != 1)) {
+        force_panel_wumpa_update = 0x3c;
+        if ((TimeTrial == 0) && (LDATA->hub != -1)) {
+          force_panel_crate_update = 0x3c;
+        }
+        force_panel_lives_update = 0x3c;
+        force_panel_items_update = 0x3c;
+      }
+      UpdatePanelItem(&plr_wumpas,force_panel_wumpa_update,1);
+      UpdatePanelItem(&plr_crates,force_panel_crate_update,0);
+      UpdatePanelItem(&plr_lives,force_panel_lives_update,1);
+      UpdatePanelItem(&plr_crystal,force_panel_items_update,1);
+      UpdatePanelItem(&plr_crategem,force_panel_items_update,1);
+      UpdatePanelItem(&plr_bonusgem,force_panel_items_update,1);
+      if ((check_time < check_duration) && (check_time+= 0.01666667f, check_time >= check_duration)) {
+        check_time = check_duration;
+        point_time = 0.0f;
+      }
+      if ((point_time < point_duration) &&
+         (point_time += 0.01666667f, point_time >= point_duration)) {
+        point_time = point_duration;
+      }
+      if ((0.0f < start_time) && (start_time-= 0.01666667f, start_time < 0.0f)) {
+        start_time = 0.0f;
+      }
+      if (TimeTrial != 0) {
+        if (TimeTrialWait > 0.0f) {
+          if (timetrial_frame == (timetrial_frame / 0xf) * 0xf) {
+            GameSfx(0x4e,NULL);
+          }
+          TimeTrialWait-= 0.01666667f;
+          if (TimeTrialWait < 0.0f) {
+            TimeTrialWait = 0.0f;
+          }
+        }
+        else {
+          if (((player->obj).finished == '\0') && (FlyingLevelExtro == 0)) {
+            UpdateTimer(&TimeTrialTimer);
+          }
+        }
+        timetrial_frame++;
+      }
+      if (Bonus == 2) {
+        bonus_frame++;
+      }
+      PANELWUMPAYROT = PANELWUMPAYROT - 0x666;
+      panel_head_xrot = 0;
+      PANELCRATEYROT = PANELCRATEYROT - 0x222;
+      panel_head_yrot = 0;
+      if ((Level != 0x1a && GameTimer.frame == 0xb4) || (Level == 0x1a && GameTimer.frame == 0x1e)) {
+            i = -1;
+            if ((Level == 0xd) || (Level == 0x1a)) {
+              i = 0xb3;
+            }
+            if (i != -1) {
+              gamesfx_channel = -1;
+              GameSfx(i,NULL);
+            }
+      }
+      tmp = 0;
+      if ((TimeTrial != 0) && ((player->obj).finished == '\x01')) {
+        tmp = 0x2c - (finish_frame % 0x3c); //(s32)(finish_frame % 0x3c < 0x2d);
+      }
+        tt_flash = tmp;
+      if (advice_wait != 0) {
+        advice_wait--;
+      }
+    }
+  UpdateTimer(&MenuTimer);
+  UpdateTimer(&GlobalTimer);
+  GameAudioUpdate();
+  return;
+}
+
+//NGC MATCH
+s32 PlayerObjectAnimCollision(struct obj_s *obj,struct nuspecial_s *special,float radius) {
+  float r;
+  float dx;
+  float dz;
+  struct nuvec_s pos;
+  
+  if ((((obj != NULL) && (special != NULL)) && (special->instance != NULL)) &&
+     ((special->instance->flags.visible < 0 && (obj->dead == '\0')))) {
+    if (special->instance->anim != NULL) {
+      pos.x = (special->instance->anim->mtx)._30;
+      pos.y = (special->instance->anim->mtx)._31;
+      pos.z = (special->instance->anim->mtx)._32;
+    }
+    else {
+      pos.x = (special->instance->mtx)._30;
+      pos.y = (special->instance->mtx)._31;
+      pos.z = (special->instance->mtx)._32;
+    }
+    if (!(obj->objbot > (pos.y + radius)) && !(obj->objtop < pos.y - radius)) {
+      dx = pos.x - (obj->pos).x;
+      dz = pos.z -(obj->pos).z;
+      r = obj->RADIUS + radius;
+      if (dx * dx + dz * dz > r * r) {
+        return 0;
+      }
+      return 1;
+    }
+  }
+  return 0;
+}
+
 //98% NGC
 void BonusTiming (struct creature_s* plr) {
     s32 dead;
@@ -5664,6 +6381,53 @@ void DrawParallax(void) {
     NuRndrGScnObj((ObjTab[10].obj.scene)->gobjs[(ObjTab[10].obj.special)->instance->objid],&m_513);
   }
   return;
+}
+
+//NGC MATCH
+s32 RayIntersectSphere(struct nuvec_s *p0,struct nuvec_s *p1,struct nuvec_s *pos,float radius) {
+  struct nuvec_s ray;
+  struct nuvec_s v;
+  struct nuvec_s local_60;
+  struct nuvec_s local_70;
+  float ratio;
+  float dp0;
+  float dp1;
+
+  ratio = 1.0f;
+    local_60.x = (p0->x < p1->x) ? p0->x : p1->x;
+  if (!((pos->x + radius) < local_60.x)) {
+    local_60.y = (p0->y < p1->y) ? p0->y : p1->y;
+    if (!((pos->y + radius) < local_60.y)) {
+        local_60.z = (p0->z < p1->z) ? p0->z : p1->z;
+      if (!((pos->z + radius) < local_60.z)) {
+          local_70.x = (p0->x > p1->x) ? p0->x : p1->x;
+        if (!((pos->x - radius) > local_70.x)) {
+            local_70.y = (p0->y > p1->y) ? p0->y : p1->y;
+          if (!((pos->y - radius) > local_70.y)) {
+              local_70.z = (p0->z > p1->z) ? p0->z : p1->z;
+            if (!((pos->z - radius) > local_70.z)) {
+              NuVecSub(&ray,p1,p0);
+              NuVecSub(&v,pos,p0);
+              dp0 = NuVecDot(&ray,&v);
+              dp1 = NuVecDot(&ray,&ray);
+              if ((0.0f <= dp0) && (dp0 <= dp1)) {
+                dp0 = dp0 / dp1;
+                v.x = ((p1->x - p0->x) * dp0 + p0->x);
+                v.y = ((p1->y - p0->y) * dp0 + p0->y);
+                v.z = ((p1->z - p0->z) * dp0 + p0->z);
+                NuVecSub(&v,pos,&v);
+                if (v.x * v.x + v.y * v.y + v.z * v.z < (radius * radius)) {
+                  ratio = dp0;
+                }
+              }
+              temp_ratio = ratio;
+            }
+          }
+        }
+      }
+    }
+  }
+  return (ratio < 1.0f);
 }
 
 //NGC MATCH
