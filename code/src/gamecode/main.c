@@ -124,11 +124,9 @@ void ResetSuperBuffer2(void) {
     return;
 }
 
-
-void DebrisMalloc(void)
-
-{
-  if (debbuffer == (char *)0x0) {
+//debris.c (gamelib)
+void DebrisMalloc(void) {
+  if (debbuffer == NULL) {
     debbuffer = (char *)malloc_x(0x93400);
   }
   return;
@@ -1118,27 +1116,21 @@ void DrawFade(void) {
   return;
 }
 
-void InitParticleSystem(void)
-
-{
-  int check;
-
+//NGC MATCH
+void InitParticleSystem(void) {
   edppDestroyAllParticles();
   edppDestroyAllEffects();
   if ((LDATA->flags & 0x10) != 0) {
     sprintf(tbuf,"%s.ptl",LevelFileName);
-    check = NuFileExists(tbuf);
-    if (check != 0) {
+    if (NuFileExists(tbuf) != 0) {
       edppLoadEffects(tbuf,'\x01');
     }
     sprintf(tbuf,"stuff\\general.ptl");
-    check = NuFileExists(tbuf);
-    if (check != 0) {
+    if (NuFileExists(tbuf) != 0) {
       edppMergeEffects(tbuf,'\0');
     }
     sprintf(tbuf,"%s.cpt",LevelFileName);
-    check = NuFileExists(tbuf);
-    if (check != 0) {
+    if (NuFileExists(tbuf) != 0) {
       edppMergeEffects(tbuf,'\x05');
     }
   }
@@ -1444,19 +1436,16 @@ void DrawWorld(void) {
   return;
 }
 
-void PauseRumble(void)
-
-{
+//NGC MATCH
+void PauseRumble(void) {
   if (Pad[0] != NULL) {
     NuPs2PadSetMotors(Pad[0],0,0);
   }
   return;
 }
 
-
-void PauseGame(void)
-
-{
+//NGC MATCH
+void PauseGame(void) {
   pause_dir = 1;
   NewMenu(&Cursor,5,0,-1);
   ResetTimer(&PauseTimer);
@@ -1466,9 +1455,7 @@ void PauseGame(void)
   return;
 }
 
-void ResumeGame(void)
-
-{
+void ResumeGame(void) {
   ResumeGameAudio();
   return;
 }
@@ -1569,47 +1556,40 @@ void DoInput(void)
 }
 */
 
-void TBCODESTART(int i,char *txt)
-
-{
-  u32 len;
-
-  if (((FRAME == 0) && (i_tb_code == i)) && (len = strlen(txt), len < 0x10)) {
-    strcpy((char *)tbtxt[8],txt);
+//NGC MATCH
+void TBCODESTART(s32 i,char *txt) {
+  if (((FRAME == 0) && (i_tb_code == i)) && (strlen(txt) < 0x10)) {
+    strcpy(tbtxt[8],txt);
     tbslotBegin(app_tbset,8);
   }
   return;
 }
 
-void TBCODEEND(int i)
-
-{
+//NGC MATCH
+void TBCODEEND(s32 i) {
   if ((FRAME == 0) && (i_tb_code == i)) {
     tbslotEnd(app_tbset,8);
   }
   return;
 }
 
-void TBDRAWSTART(int i,char *txt)
-
-{
-  u32 len;
-
-  if ((i_tb_draw == i) && (len = strlen(txt), len < 0x10)) {
-    strcpy((char *)tbtxt[0xb],txt);
+//NGC MATCH
+void TBDRAWSTART(s32 i,char *txt) {
+  if ((i_tb_draw == i) && (strlen(txt) < 0x10)) {
+    strcpy(tbtxt[0xb],txt);
     tbslotBegin(app_tbset,0xb);
   }
   return;
 }
 
-void TBDRAWEND(int i)
-
-{
+//NGC MATCH
+void TBDRAWEND(s32 i) {
   if (i_tb_draw == i) {
     tbslotEnd(app_tbset,0xb);
   }
   return;
 }
+
 /*
 void InitPauseRender(void)
 
@@ -1637,57 +1617,51 @@ void InitPauseRender(void)
 }
 */
 
-void ClosePauseRender(void)
-
-{
+//NGC MATCH
+void ClosePauseRender(void) {
   if (pause_src_mtl != NULL) {
     NuMtlDestroy(pause_src_mtl);
   }
   if (pause_rndr_mtl != NULL) {
     NuMtlDestroy(pause_rndr_mtl);
   }
-  pause_rndr_mtl = NULL;
   pause_src_mtl = NULL;
+  pause_rndr_mtl = NULL;
   return;
 }
 
-/*
-void HandlePauseRender(int pause_count)
+//NGC MATCH
+void HandlePauseRender(int pause_count) {
+  static s32 old_pause_state;
+  s32 vp_x;
+  s32 vp_y;
+  struct nuviewport_s *vp;
 
-{
-  int x;
-  int y;
-  int iVar1;
-  nuviewport_s *vp;
-  double local_18;
-
-  local_18 = (double)CONCAT44(0x43300000,pause_count ^ 0x80000000);
-  x = (int)(((float)(local_18 - (double)0x4330000080000000) * 27.0) / 30.0);
-  y = (int)(((float)(local_18 - (double)0x4330000080000000) * 19.0) / 30.0);
-  if ((pause_rndr_on != 0) && (iVar1 = NuRndrBeginScene(1), iVar1 != 0)) {
+  vp_x = (s32)((float)pause_count * 27.0f / 30.0f);
+  vp_y = (s32)((float)pause_count * 19.0f / 30.0f);
+  if ((pause_rndr_on != 0) && (NuRndrBeginScene(1) != 0)) {
     vp = NuVpGetCurrentViewport();
-    NuRndrClear(0xb,0,1.0);
-    NuRndrRectUV2di(x,y,vp->width - x,vp->height - y,0.0,0.0,1.0,1.0,-1,pause_rndr_mtl);
+    NuRndrClear(0xb,0,1.0f);
+    NuRndrRectUV2di(vp_x,vp_y,vp->width - vp_x,vp->height - vp_y,0.0f,0.0f,1.0f,1.0f,-1,pause_rndr_mtl);
     NuRndrEndScene();
   }
   if (Paused != 0) {
-    if (old_pause_state.234 == 0) {
+    if (old_pause_state == 0) {
       NudxFw_MakeBackBufferCopy(1);
       GS_CopyFBToPause();
       pause_rndr_on = 1;
     }
     if (Paused != 0) {
-      old_pause_state.234 = Paused;
-      return;
+        goto block_end;
     }
   }
-  if (old_pause_state.234 != 0) {
+  if (old_pause_state != 0) {
     pause_rndr_on = 0;
   }
-  old_pause_state.234 = Paused;
+block_end:
+  old_pause_state = Paused;
   return;
 }
-*/
 
 //PS2 MATCH
 void SetLevel(void) {
@@ -1783,20 +1757,18 @@ void LoadGBABG(void)
   return;
 }
 
-
-void UnLoadGBABG(void)
-
-{
-  if (GBABG_Ptr != (void *)0x0) {
+//NGC MATCH
+void UnLoadGBABG(void) {
+  if (GBABG_Ptr != NULL) {
     free_x(GBABG_Ptr);
   }
-  GBABG_Ptr = (void *)0x0;
-  if (GBABG_mtl != (numtl_s *)0x0) {
+  GBABG_Ptr = NULL;
+  if (GBABG_mtl != NULL) {
     if (GBABG_mtl->tid != 0) {
       NuTexDestroy(GBABG_mtl->tid);
     }
-    NuMtlDestroy((nusysmtl_s *)GBABG_mtl);
-    GBABG_mtl = (numtl_s *)0x0;
+    NuMtlDestroy(GBABG_mtl);
+    GBABG_mtl = NULL;
   }
   return;
 }
@@ -1804,18 +1776,17 @@ void UnLoadGBABG(void)
 
 /*
 
-void Reseter(void)
-
-{
-  int iVar1;
-
-  iVar1 = OSGetResetButtonState();
-  if (iVar1 == 0) {
-    if (reset.256 != 0) {
+//NGC MATCH
+void Reseter(void) {
+  if (OSGetResetButtonState() != 0) {
+    reset_256 = 1;
+  }
+  else {
+    if (reset_256 != 0) {
       OSReport("SS_StopAllSFX\n");
       SS_StopAllSFX();
       OSReport("SS_TrackStop\n");
-      SS_TrackStop(0xffffffff);
+      SS_TrackStop(-1);
       OSReport("GXAbortFrame\n");
       OSReport("GXDrawDone\n");
       GXDrawDone();
@@ -1829,18 +1800,13 @@ void Reseter(void)
       OSResetSystem(0,1,0);
     }
   }
-  else {
-    reset.256 = 1;
-  }
   return;
 }
 
-
-void Managememcard(void)
-
-{
+//NGC MATCH
+void Managememcard(void) {
   SS_StopAllSFX();
-  SS_TrackStop(0xffffffff);
+  SS_TrackStop(-1);
   GXDrawDone();
   VISetBlack(1);
   VIFlush();

@@ -6,6 +6,12 @@ s32 screendump;
 s32 save_paused;
 s32 editor_active;
 
+//NGC MATCH
+void MaxVP(void) {
+  NuVpSetSize(MAXVPSIZEX,MAXVPSIZEY);
+  return;
+}
+
 //PS2
 void GameVP(void)
 {
@@ -26,6 +32,178 @@ void GameVP(void)
     return;
 }
 
+//NGC MATCH
+s32 NextLetter(u8 *txt,struct nuspecial_s **obj) {    
+  if (txt == NULL) {
+    return 1;
+  }
+  if (obj != NULL) {
+    obj[1] = NULL;
+    obj[0] = NULL;
+  }
+  if ((Font3DRemap[*txt] != -1) && (obj != NULL)) {
+    *obj = Font3DTab[Font3DRemap[*txt]].obj.special;
+  }
+  return 1;
+}
+
+//NGC MATCH
+void BigOutOf(float x,float y,float scale,int value,int total) {
+    char *txt;
+    float x0;
+    float y0;
+    float x1;
+    float y1;
+
+  if (Game.language == 'c') {
+    txt = "/ ";
+  }
+  else {
+    txt = "/";
+  }
+  Text3D(txt,x,y,1.0f,(scale + scale),(scale + scale),(scale + scale),1,0);
+  x0 = font3d_xleft;
+  y0 = font3d_ytop;
+  x1 = font3d_xright;
+  y1 = font3d_ybottom;
+  sprintf(tbuf,"%i",value);
+  if (Game.language == 'c') {
+    AddSpacesIntoText(tbuf,1);
+  }
+  Text3D(tbuf,((x0 - x) * 0.5f + x),((y0 - y) * 0.5f + y),1.0f,scale,scale,scale,0x10,0);
+  sprintf(tbuf,"%i",total);
+  if (Game.language == 'c') {
+    AddSpacesIntoText(tbuf,1);
+  }
+  Text3D(tbuf,((x1 - x) * 0.5f + x),((y1 - y) * 0.5f + y),1.0f,scale,scale,scale,4,0);
+  return;
+}
+
+//NGC MATCH
+void ResetPanelDebris(void) {
+  struct pdeb_s *deb;
+  s32 i;
+  
+  deb = PDeb;
+  for (i = 0; i < 0x20; i++, deb++) {
+    deb->active = 0;
+  }
+  return;
+}
+
+//NGC MATCH
+void AddPanelDebris(float x,float y,int type,float scale,int count) {
+  struct pdeb_s* deb;
+  float f;
+  s32 i;
+  u32 uVar6;
+
+  i = count;
+  do {
+        if ((u32)type < 7) {
+              deb = &PDeb[i_pdeb];
+              deb->info = &PDebInfo[type];
+              uVar6 = deb->info->i_objtab;
+              if ((uVar6 == 0x11) && (LDATA->character == 1)) {
+                uVar6 = 0x12;
+              }
+                if ((uVar6 < 0xc9) && (ObjTab[uVar6].obj.special != NULL)) {
+                        deb->type = (s8)type;
+                        deb->xrot = 0;
+                        deb->yrot = 0;
+                        deb->zrot = 0;
+                           switch ((s8)type) {
+                              case '\x01':
+                                    deb->mom.x = (( ((float)qrand()) * 0.000015259022f) * 0.5f) * 0.016666668f;
+                                    deb->mom.y = ( ((float)qrand()) * 0.000015259022f + 2.0f) * 0.016666668f;
+                                    deb->pos.x = (x + (deb->mom.x + deb->mom.x));
+                                    deb->pos.y = (y + 0.05f) + deb->mom.y;
+                            break;
+                            case '\x02':
+                            case '\x03':
+                            case '\x04':
+                            case '\x05':
+                                    deb->pos.x = x;
+                                    deb->pos.y = y;
+                                    deb->oldpos = deb->pos;
+                                    deb->oldscale = scale;
+                            break;
+                            case '\x06':
+                                  deb->zrot = (qrand() / 2) + 0xc000;
+                                  f = ( ((float)qrand()) * 0.000015259022f) * 0.016666668f;
+                                  deb->mom.x  = NuTrigTable[deb->zrot] * f;
+                                  deb->mom.y =  NuTrigTable[(deb->zrot + 0x4000) & 0x3fffc / 4] * f;
+                                  deb->pos.x = x + (deb->mom.x + deb->mom.x);
+                                  deb->pos.y = y + (deb->mom.y + deb->mom.y);
+                            break;
+                          default:
+                                  deb->mom.x = 0.0f;
+                                  deb->mom.y = 0.0f;
+                                  deb->pos.x = x;
+                                  deb->pos.y = y;
+                          break;
+                          }
+                        deb->active = '\x01';
+                        i_pdeb++;
+                        deb->i_objtab = (short)uVar6;
+                        deb->time = 0.0f;
+                        if (i_pdeb == 0x20) {
+                          i_pdeb = 0;
+                        }
+                }
+        }
+  i--;
+  } while(i > 0);
+    return;
+}
+
+//NGC MATCH
+void UpdatePanelItem(struct plritem_s* item, int force_update, int use_change) {
+
+    if (item->frame == 30) {
+        if (item->wait != 0) {
+            item->wait--;
+        }
+        if (force_update != 0) {
+            item->wait = 60;
+        }
+        if (item->delay != 0) {
+            item->delay--;
+        } else {
+            if (item->draw < item->count) {
+                item->draw++;
+                if ((item == &plr_wumpas) || (item == &plr_bonus_wumpas)) {
+                    GameSfx(0x19, NULL);
+                    item->delay = 6;
+                }
+                item->wait = 60;
+            } else if (item->draw > item->count) {
+                item->wait = 60;
+                item->draw = item->count;
+            }
+        }
+        if (item->draw == item->count && item->wait == 0) {
+            item->frame--;
+        }
+        return;
+    }
+    
+    if (force_update || (use_change && item->draw != item->count && (new_mode == -1) && (new_level == -1))) {
+        if (item->frame < 30) {
+            item->frame += 2;
+            if (item->frame > 30) {
+                item->frame = 30;
+            }
+        }
+        return;
+    }
+    if (item->draw != item->count) {
+        item->draw = item->count;
+    }
+    if (item->frame > 0) {
+        item->frame--;
+    }
+}
 
 //70.85% NGC
 void DrawPanel(void) {
@@ -1201,4 +1379,26 @@ s32 DrawPanel3DCharacter(s32 character,float x,float y,float z,float scalex,floa
         i = NuHGobjRndrMtx(model->hobj,&m,1,NULL,tmtx);
     }
     return i;
+}
+
+//NGC MATCH
+void DrawPanelDebris(void) {
+  s32 i;
+  struct pdeb_s *deb;
+  float f;
+
+  deb = PDeb;
+  for (i = 0; i < 0x20; i++, deb++) {
+    if (deb->active != '\0') {
+      if (deb->type == 5 || deb->type == 4 || deb->type == 3 || deb->type == 2) {
+        if ((0.25f <= deb->time) && (deb->time < 1.0f)) {
+          f = (float)fmod((deb->time - 0.25f),0.25f);
+          if ((0.0625f <= f) && (f < 0.1875f)) continue;
+        }
+      }
+      DrawPanel3DObject(deb->i_objtab,(deb->pos).x,(deb->pos).y,1.0f,deb->scale,deb->scale,deb->scale,deb->xrot,
+                        deb->yrot,deb->zrot,ObjTab[deb->i_objtab].obj.scene,ObjTab[deb->i_objtab].obj.special,1);
+    }
+  }
+    return;
 }

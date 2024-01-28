@@ -330,44 +330,51 @@ s32 NuLgtRand(void) {
   return NuLgtSeed;
 }
 
-//95% NGC
+//MATCH NGC
 void NuLgtArcLaser(s32 type,struct nuvec_s *start,struct nuvec_s *target,struct nuvec_s *lasdir,float sizew,float sizel,float sizewob,float arcsize,s32 col) {
-  s32 lp;
-  u32 a;
-  u32 b;
-  u32 col2;
-
-  a = (u32)col >> 0x17 & 0x1fe;
-  if (0xff < a) {
-    a = 0xff;
-  }
-  b = (col & 0xffU) << 1;
-  a =  a << 0x18;
-  if (0xff < b) {
-    b = 0xff;
-  }
-    b = b << 0x10;
-    col2 = a | 0xffff | b;
-  if (NuLgtArcLaserCnt < 0x10) {
-    NuLgtArcLaserData[NuLgtArcLaserCnt].type = type;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].start = *start;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].target = *target;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].lasdir = *lasdir;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].sizew = sizew;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].sizel = sizel;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].sizewob = sizewob;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].arcsize = arcsize;
-    NuLgtArcLaserData[NuLgtArcLaserCnt].col = col2;
-    if (((NuLgtArcLaserFrame & 1U) == 0) || (NuLgtArcLaserData[NuLgtArcLaserCnt].seed == 0)) {
-      NuLgtArcLaserData[NuLgtArcLaserCnt].seed = NuLgtRand();
+    s32 lp;
+    u32 col2;
+    u32 a;
+    u32 r;
+    u32 g;
+    u32 b;
+    
+    a = (col >> 0x17) & 0x1fe;
+    
+    if (0xff < a) {
+        a = 0xff;
     }
-    for (lp = 0; lp < 6; lp++) {
-      NuLgtRand();
+    
+    b = (col & 0xff) << 1;
+    
+    col2 = a << 0x18;
+    
+    if (0xff < b) {
+        b = 0xff;
     }
-    NuLgtArcLaserCnt++;
+    
+    col2 |= 0xFFFF;
+    col2 |= (b << 0x10);
+    
+    if (NuLgtArcLaserCnt < 16) {
+        NuLgtArcLaserData[NuLgtArcLaserCnt].type = type;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].start = *start;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].target = *target;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].lasdir = *lasdir;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].sizew = sizew;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].sizel = sizel;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].sizewob = sizewob;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].arcsize = arcsize;
+        NuLgtArcLaserData[NuLgtArcLaserCnt].col = col2;
+        if (((NuLgtArcLaserFrame & 1U) == 0) || (NuLgtArcLaserData[NuLgtArcLaserCnt].seed == 0)) {
+            NuLgtArcLaserData[NuLgtArcLaserCnt].seed = NuLgtRand();
+        }
+        for (lp = 0; lp < 6; lp++) {
+            NuLgtRand();
+        }
+        NuLgtArcLaserCnt++;
+    }
     return;
-  }
-  return;
 }
 
 //62% NGC

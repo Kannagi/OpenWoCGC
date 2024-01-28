@@ -85,6 +85,139 @@ void UpdateTempCharacter(void) {
 }
 
 //MATCH NGC
+void HubStart(struct obj_s *obj,s32 hub,s32 level,struct nuvec_s* pos) {
+  struct nuvec_s* p0;
+  struct nuvec_s* p1;
+  float y;
+  float t;
+  s32 i;
+  s32 j;
+  
+  if ((level != -1) && ((new_lev_flags & 0x800) != 0)) {
+    new_lev_flags = new_lev_flags ^ 0x800;
+    Game.level[level].flags = Game.level[level].flags | 0x800;
+    CalculateGamePercentage(&Game);
+  }
+  tumble_action = -1;
+  temp_lev_flags = 0;
+  i = HData[hub].i_spl[0];
+  tumble_duration = 0.0f;
+  tumble_time = 0.0f;
+  if ((i == -1) || (SplTab[i].spl == NULL)) {
+    *pos = v000;
+  }
+  else {
+    HubFromLevel(level);
+    p0 = (struct nuvec_s *)(SplTab[i].spl->pts + ((temp_hublevel * 2 + 2) * SplTab[i].spl->ptsize) );
+    tumble_oldpos = *p0;
+    j = (temp_hublevel * 2 + 3) * (s32)SplTab[i].spl->ptsize;
+    p1 = (struct nuvec_s *)(SplTab[i].spl->pts + j);
+    pos->x = p0->x + ((p1->x - p0->x) + (p1->x - p0->x));
+    pos->y = p0->y;
+    pos->z = p0->z + ((p1->z - p0->z) + (p1->z - p0->z));
+    y = NewShadowMaskPlat(pos,0.0f,-1);
+    if (y != 2000000.0f) {
+      pos->y = y;
+    }
+    tumble_newpos.x = pos->x;
+    tumble_newpos.y = pos->y - obj->bot * obj->SCALE;
+    tumble_newpos.z = pos->z;
+    *pos = tumble_newpos;
+    tumble_hdg = (short)NuAtan2D(p1->x - p0->x, p1->z - p0->z);
+    tumble_action = (new_lev_flags != 0) ? 0x56 : 0x55;
+    tumble_time = 0.0f;
+    tumble_duration = ModelAnimDuration(tumble_character,tumble_action,tumble_time,tumble_time);
+    if (tumble_character == 1) {
+      t = 25.0f;
+      tumble_item_starttime = 46.0f;
+      tumble_item_addtime = 90.0f;
+    }
+    else {
+      if (tumble_action == 0x56) {
+        t = 19.0f;
+      }
+      else {
+        t = 25.0f;
+      }
+      tumble_item_starttime = 32.0f;
+      tumble_item_addtime = 50.0f;
+    }
+    tumble_moveduration = ModelAnimDuration(tumble_character,tumble_action,0.0f,t);
+    tumble_cycleduration = ModelAnimDuration(tumble_character,tumble_action,0.0f,tumble_item_starttime);
+  }
+  return;
+}
+
+//MATCH NGC
+void HubMoveVR(void) {
+    struct nuvec_s* p0;
+    struct nuvec_s* p1;
+    struct nuvec_s pos;
+    u32 j;
+    u32 i;
+    float dx;
+    float dy;
+    float dz;
+    float f;
+    float xz;
+    u16 xrot;
+    u16 yrot;
+    struct nugspline_s* spl;
+    u32 k;
+
+    if (hub_vr_level == -1) {
+        hub_vr_scale = 0.0f;
+        hub_vr_newscale = 0.0f;
+        hub_vr_scale = 0.0f;
+    } else if (hub_vr_scale > hub_vr_newscale) {
+        hub_vr_scale -= 0.03333334f;
+        if (hub_vr_scale < hub_vr_newscale) {
+            hub_vr_scale = hub_vr_newscale;
+        }
+    } else if ((hub_vr_scale < hub_vr_newscale)) {
+        hub_vr_scale += 0.03333334f;
+        if (hub_vr_scale > hub_vr_newscale) {
+            hub_vr_scale = hub_vr_newscale;
+        }
+    }
+    
+    if (((Hub != -1) && (HData[Hub].i_spl[0] != -1)) && (best_cRPos != NULL)) {
+        spl = SplTab[HData[Hub].i_spl[0]].spl;
+        if (spl != NULL) {
+            k = 1 << 18;
+            i = (s32)(best_cRPos->fACROSS * k);
+            j = i / 65536;
+            p0 = (struct nuvec_s*)&spl->pts[(j + 14) * spl->ptsize];
+            pos.x = p0->x;
+            pos.y = p0->y;
+            pos.z = p0->z;
+            if ((j < 4) && (i = i & 0xffff, i != 0)) {
+                p1 = (struct nuvec_s*)&spl->pts[(j + 15) * spl->ptsize];
+                f = (i) / 65536.0f;
+                pos.x += (p1->x - p0->x) * f;
+                pos.y += (p1->y - p0->y) * f;
+                pos.z += (p1->z - p0->z) * f;
+            }
+            hub_vr_pos.x += (pos.x - hub_vr_pos.x) * 0.1f;
+            hub_vr_pos.y += (pos.y - hub_vr_pos.y) * 0.1f;
+            hub_vr_pos.z += (pos.z - hub_vr_pos.z) * 0.1f;
+            hub_vr_newscale = ((HubLevel_available != 0) && (HubLevel >= 0)) && (HubLevel <= 4) ? 1.0f : 0.0f;
+            dx = ((player->obj).pos.x - hub_vr_pos.x);
+            dy = ((player->obj).top * (player->obj).SCALE + (player->obj).pos.y) - hub_vr_pos.y;
+            dz = ((player->obj).pos.z - hub_vr_pos.z);
+            
+            xz = NuFsqrt((dx * dx + (dz * dz)));
+            yrot = panel_head_yrot - NuAtan2D(dy, xz);
+            xrot = panel_head_xrot + NuAtan2D(dx, dz);
+            
+            hub_vr_xrot = SeekRot(hub_vr_xrot, yrot, 2);
+            hub_vr_yrot = SeekRot(hub_vr_yrot, xrot, 2);
+        }
+    }
+    return;
+}
+
+//MATCH NGC
 void InitWumpa(void) {
   s32 i;
   
@@ -103,6 +236,55 @@ void InitWumpa(void) {
     WInfo[i].scale = 0.75f;
   }
   ResetWumpa();
+  return;
+}
+
+//NGC MATCH
+void LoadWumpa(void) {
+  s32 fh;
+  s32 i;
+  void* fbuff;
+  s32 fsize;
+  
+  sprintf(tbuf,"%s.wmp",LevelFileName);
+  if (NuFileExists(tbuf) != 0) {
+    fbuff = Chase;
+    fsize = NuFileLoadBuffer(tbuf,fbuff,0x7fffffff);
+    fh = NuMemFileOpen(fbuff,fsize,NUFILE_READ);
+    if (fh != 0) {
+      WUMPACOUNT = NuFileReadInt(fh);
+      if (0x100 < WUMPACOUNT) {
+        WUMPACOUNT = 0x100;
+      }
+        for (i = 0; i < WUMPACOUNT; i++) {
+          (Wumpa[i].pos0).x = NuFileReadFloat(fh);
+          (Wumpa[i].pos0).y = NuFileReadFloat(fh);
+          (Wumpa[i].pos0).z = NuFileReadFloat(fh);
+        }
+      NuFileClose(fh);
+    }
+  }
+  return;
+}
+
+//NGC MATCH
+void AddScreenWumpa(float x,float y,float z,s32 count) {  
+  if (count < 1) {
+    count = 1;
+  }
+  NewWumpa[i_newwumpa].world_pos.x = x;
+  NewWumpa[i_newwumpa].world_pos.y = y;
+  NewWumpa[i_newwumpa].world_pos.z = z;
+  NewWumpa[i_newwumpa].count = (u8)count;
+  NewWumpa[i_newwumpa].delay = '\0';
+  NewWumpa[i_newwumpa].transformed = '\0';
+  NewWumpa[i_newwumpa].bonus = ((Bonus == 2) || (sw_hack != 0)) ? 1 : 0;
+  NewWumpa[i_newwumpa].active = '\x01';
+  i_newwumpa++;
+  if (i_newwumpa == 0x20) {
+    i_newwumpa = 0;
+  }
+  sw_hack = 0;
   return;
 }
 
@@ -161,6 +343,46 @@ void ResetWumpa(void) {
         WScr[i].timer = 0.0f;
     }
     return;
+}
+
+//MATCH NGC
+s32 HitWumpa(struct obj_s* obj, s32 destroy) {
+    float objtop;
+    float objbot;
+    float dx;
+    float dz;
+    float r2;
+    struct wumpa_s* wumpa;
+    s32 i;
+    s32 key;
+
+    if (TimeTrial == 0) {
+        objtop = (obj->pos).y + obj->top * obj->SCALE;
+        objbot = (obj->pos).y + obj->bot * obj->SCALE;
+        wumpa = Wumpa;
+        r2 = (obj->RADIUS + 0.1f);
+        r2 *= r2;
+        for (i = 0; i < 0x140; i++, wumpa++) {
+            if ((wumpa->active == 1) || (wumpa->active == 2)) {
+                if (objtop < (wumpa->pos.y - 0.1f) || (objbot > wumpa->pos.y + 0.1f)) {
+                    continue;
+                }
+                dx = ((wumpa->pos).x - (obj->pos).x) * ((wumpa->pos).x - (obj->pos).x);
+                dz = ((wumpa->pos).z - (obj->pos).z) * ((wumpa->pos).z - (obj->pos).z);
+                if (dx + dz < r2) {
+                    if (destroy != 0) {
+                        key = -1;
+                        AddFiniteShotDebrisEffect(&key, GDeb[130].i, &wumpa->pos, 1);
+                        wumpa->active = 0;
+                    } else {
+                        FlyWumpa(wumpa);
+                    }
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 //MATCH NGC
@@ -1023,6 +1245,43 @@ u16 TurnRot(u16 a0,u16 a1,s32 rate) {
 }
 
 //NGC MATCH
+void ResetCheckpoint(s32 iRAIL,s32 iALONG,float fALONG,struct nuvec_s *pos) {
+  
+  if ((((pos != NULL) && (iRAIL != -1)) && (Rail[iRAIL].type == '\0')) &&
+     ((cp_iRAIL == -1 || (FurtherALONG(iRAIL,iALONG,fALONG,cp_iRAIL,cp_iALONG,cp_fALONG) != 0)))) {
+    cpPOS = *pos;
+    cp_iRAIL = iRAIL;
+    cp_iALONG = iALONG;
+    cp_fALONG = fALONG;
+    if (Game.language == 99) {
+      nCheckLetters = JStrLen(tGAMEOVER[3]);
+    }
+    else {
+      nCheckLetters = strlen(tCHECK[Game.language]);
+    }
+    check_delay = CPLDELAY + CPLTIME * ((s32)nCheckLetters);
+    check_duration = CHECKWAIT + check_delay + ((s32)nCheckLetters - 1) * CPLTIME;
+    check_time = 0.0f;
+    if (Game.language == 99) {
+      nPointLetters = JStrLen(tYES[3]);
+    }
+    else {
+      nPointLetters = strlen(tPOINT[Game.language]);
+    }
+    point_delay = CPLDELAY + CPLTIME * ((s32)nPointLetters);
+    point_time = point_duration = CHECKWAIT + point_delay + ((s32)nPointLetters - 1) * CPLTIME;
+    LivesLost = 0;
+    ClockOff();
+    OpenPreviousCheckpoints(iRAIL,iALONG,fALONG);
+  }
+  else {
+    cp_iALONG = -1;
+    cp_iRAIL = -1;
+  }
+  return;
+}
+
+//NGC MATCH
 s32 AheadOfCheckpoint(s32 iRAIL,s32 iALONG,float fALONG) {
 if ((cp_iRAIL == -1) || (cp_iALONG == -1))
 {
@@ -1085,6 +1344,67 @@ void DefaultTimeTrialNames(s32 all) {
             }
         }
   }
+}
+
+//87% NGC
+void NewLevelTime(s32 t) {
+    s32 i = 0;
+    s32 iVar6 = 0;
+
+    s32 time;
+
+    while (time = Game.level[Level].time[iVar6++].itime,
+            time != 0 && (t > time)) {
+        if (iVar6 > 2) {
+            newleveltime_slot = iVar6;
+            return;
+        }
+    }
+    for (i = 2; i > iVar6; i--) {
+        Game.level[Level].time[i] = Game.level[Level].time[i - 1];
+    }
+    Game.level[Level].time[iVar6].itime = t;
+    strcpy(Game.level[Level].time[iVar6].name, "___");
+    if ((iVar6 < 2) && (Game.level[Level].time[2].itime == 0)) {
+        strcpy(Game.level[Level].time[2].name, PlaceName3[2][Game.language]);
+    }
+    if ((iVar6 < 1) && (Game.level[Level].time[1].itime == 0)) {
+        strcpy(Game.level[Level].time[1].name, PlaceName3[1][Game.language]);
+    }
+    newleveltime_slot = iVar6;
+}
+
+//NGC MATCH
+void InputNewLetter(struct cursor_s *cursor,char *name,s32 *i,s32 count) {
+  char c0;
+  s32 j;
+  
+  c0 = NameInputTable[cursor->y][cursor->x];
+  if (c0 == '<') {
+    if (*i > 0) {
+      (*i)--;
+      name[*i] = '_';
+    }
+    return;
+  }
+  if ((*i == 0) && (name[1] == 'R')) {
+    name[1] = '_';
+    name[2] = '_';
+    name[3] = '_';
+    name[4] = '_';
+  }
+
+  j = count - 1;
+  if (*i >= j) {
+    cursor->y = '\x04';
+  } else{
+      j = *i;
+  }
+     name[j] = c0;
+      if (*i < count) {
+        *i = *i + 1;
+      }
+  return;
 }
 
 
@@ -3277,6 +3597,56 @@ void UpdateKabooms(void) {
   }
 }
 
+//NGC MATCH
+void DrawKabooms(void) {
+    struct kaboom_s* kaboom;
+    u16 yrot;
+    s32 i;
+    s32 j;
+    s32 k;
+    struct nuvec_s s;
+    float f;
+
+    kaboom = Kaboom;
+    for (i = 0; i <= 0x47; i++, kaboom++) {
+        if (kaboom->time < kaboom->duration) {
+            if ((kaboom->type & 0x181) != 0) {
+                k = 0xb;
+            } else if ((kaboom->type & 2) != 0) {
+                k = 0xc;
+            } else if ((kaboom->type & 0x1c) != 0) {
+                k = 0xd;
+            } else if ((kaboom->type & 0x60) != 0) {
+                k = 0xf;
+            } else {
+                continue;
+            }
+            if (ObjTab[k].obj.special != NULL) {
+                if (k == 0xf) {
+                    s.x = s.y = s.z = (kaboom->duration - kaboom->time) / kaboom->duration;
+                    yrot = kaboom->yrot;
+                    f = ((kaboom->radius1 - kaboom->radius0) * (kaboom->time / kaboom->duration) + kaboom->radius0);
+                    for (j = 0; j < 4; j++) {
+                        NuMtxSetScale(&mTEMP, &s);
+                        NuMtxRotateY(&mTEMP, yrot);
+                        mTEMP._30 = NuTrigTable[yrot] * f + (kaboom->pos).x;
+                        mTEMP._31 = (kaboom->pos).y;
+                        mTEMP._32 = NuTrigTable[(yrot + 0x4000) & 0xffff] * f + (kaboom->pos).z;
+                        NuRndrGScnObj((ObjTab[k].obj.scene)->gobjs[(ObjTab[k].obj.special)->instance->objid], &mTEMP);
+                        yrot += 0x4000;
+                    }
+                } else {
+                    s.x = s.y = s.z =
+                        (kaboom->radius1 - kaboom->radius0) * (kaboom->time / kaboom->duration) + kaboom->radius0;
+                    NuMtxSetScale(&mTEMP, &s);
+                    NuMtxTranslate(&mTEMP, &kaboom->pos);
+                    NuRndrGScnObj((ObjTab[k].obj.scene)->gobjs[(ObjTab[k].obj.special)->instance->objid], &mTEMP);
+                }
+            }
+        }
+    }
+}
+
 
 //NGC MATCH
 void CheckFinish(struct obj_s* obj) {
@@ -4167,323 +4537,224 @@ void NextMenuEntry(float *y, s32 *i) {
   return;
 }
 
-void NewMenu(Cursor *cur,s32 menu,s32 y,s32 level)
-{
-  s32 old_menu;
-  s32 lock;
- 
-  cur->wait = '\0';
-  lock = '\0';
-  if (menu == cur->menu) {
-    menu = -1;
-  }
-  if ((menu == cur->new_menu) && (cur->wait_hack != '\0')) goto LAB_80031bb4;
-  if (menu == 0x14) {
-    gameover_hack = 0;
-    goto LAB_80031bb4;
-  }
-  if (menu < 0x15) {
-    if (8 < menu) {
-      if (menu == 0x11) {
-        i_nameinput = 0;
-      }
-      goto LAB_80031bb4;
+//NGC MATCH
+void NewMenu(struct cursor_s* cur, s32 menu, s32 y, s32 level) {
+    s32 old_menu;
+    s32 lock;
+
+    old_menu = cur->menu;
+    cur->wait = 0;
+    lock = 0;
+    
+    if (menu == old_menu) {
+        menu = -1;
     }
-    if (5 < menu) goto LAB_80031bb4;
-    if (menu == -1) {
-      if ((cur->menu == 0x15) || (cur->menu == 0x18)) {
-        cur->wait = '<';
-      }
-      goto LAB_80031bb4;
-    }
-    if (menu != 4) goto LAB_80031bb4;
-LAB_80031b54:
-    y = 4;
-    Game.name[0] = 'S';
-    Game.name[1] = 'A';
-    Game.name[2] = 'R';
-    Game.name[3] = 'C';
-    Game.name[8] = '\0';
-    Game.name[4] = '_';
-    Game.name[5] = '_';
-    Game.name[6] = '_';
-    Game.name[7] = 'H';
-    cur->y = '\x04';
-    i_nameinput = 0;
-  }
-  else {
-    if (menu != 0x19) {
-      if (menu < 0x1a) {
-        if ((menu == 0x15) || (menu != 0x16)) goto LAB_80031bb4;
-      }
-      else if (menu != 0x1d) {
-        if (0x1d < menu) {
-          if (menu == 0x22) {
-            lock = -0x4c;
-          }
-          goto LAB_80031bb4;
+    if ((menu != cur->new_menu) || (cur->wait_hack == 0)) {
+        switch (menu) {
+            case 6:
+            case 7:
+            case 8:
+            case 0x15:
+                break;
+            case -1:
+                if ((old_menu == 0x15) || (old_menu == 0x18)) {
+                    cur->wait = 60;
+                }
+                break;
+            case 4:
+            case 0x1a:
+                y = 4;
+                memcpy(Game.name, "CRASH___", 9);
+                cur->y = '\x04';
+                i_nameinput = 0;
+                break;
+            case 0x11:
+                i_nameinput = 0;
+                break;
+            case 0x16:
+            case 0x1d:
+            case 0x19:
+                InitLoadSaveDeleteScreen(cur, menu);
+                break;
+            case 0x22:
+                lock = 0xb4;
+                break;
+            case 0x14:
+                gameover_hack = 0;
+                break;
         }
-        if (menu != 0x1a) goto LAB_80031bb4;
-        goto LAB_80031b54;
-      }
     }
-    InitLoadSaveDeleteScreen(cur,menu);
-  }
-LAB_80031bb4:
-  old_menu = menu;
-  if (cur->wait == '\0') {
-    ResetTimer(&MenuTimer);
-    cur->new_level = (char)level;
-    cur->new_menu = -1;
-    cur->wait = '\0';
-    cur->button_lock = lock;
-    cur->menu = old_menu;
-    if (old_menu != -1) {
-      GetMenuInfo(cur);
-      cur->x = cur->remember[menu].x;
-      if (cur->remember[menu].x < cur->x_min) {
-        cur->x = cur->x_min;
-      }
-      else if (cur->x_max < cur->remember[menu].x) {
-        cur->x = cur->x_max;
-      }
-      if ((y < cur->y_min) || (cur->y_max < y)) {
-        cur->y = cur->remember[menu].y;
-        if (cur->remember[menu].y < cur->y_min) {
-          cur->y = cur->y_min;
+    if (cur->wait != 0) {
+        cur->new_menu = menu;
+        cur->wait_frames = cur->wait;
+    } else {
+        ResetTimer(&MenuTimer);
+        cur->new_level = (char)level;
+        cur->new_menu = -1;
+        cur->wait = 0;
+        cur->button_lock = lock;
+        cur->menu = menu;
+        
+        if (cur->menu != -1) {
+            GetMenuInfo(cur);
+            
+            cur->x = cur->remember[menu].x;
+            
+            if (cur->x < cur->x_min) {
+                cur->x = cur->x_min;
+            } else if (cur->x > cur->x_max) {
+                cur->x = cur->x_max;
+            }
+            
+            if ((y < cur->y_min) || (y > cur->y_max)) {
+                cur->y = cur->remember[menu].y;
+                if (cur->y < cur->y_min) {
+                    cur->y = cur->y_min;
+                } else if (cur->y > cur->y_max) {
+                    cur->y = cur->y_max;
+                }
+            } else {
+                cur->y = y;
+            }
+            
+            if (((cur->menu == 4) || (cur->menu == 26)) || (cur->menu == 17)) {
+                cur->x = 0;
+            }
+            cur->menu_frame = 0;
+            cur->item_frame = 0;
+            cur->wait_hack = 0;
         }
-        else if ((s32)cur->y_max < cur->remember[menu].y) {
-          cur->y = cur->y_max;
-        }
-      }
-      else {
-        cur->y = (char)y;
-      }
-      lock = cur->menu;
-      if (((lock == '\x04') || (lock == '\x1a')) || (lock == '\x11')) {
-        cur->x = '\0';
-      }
-      cur->wait_hack = '\0';
-      cur->menu_frame = 0;
-      cur->item_frame = 0;
     }
-  }
-  else {
-    cur->wait_frames = cur->wait;
-    cur->new_menu = old_menu;
-  }
-  return;
+    return;
 }
 
-
-void GetMenuInfo(Cursor *cur)
-
-{
-  int err;
-  char cVar1;
-  char menu;
-  
-  cVar1 = '\0';
-  menu = cur->menu;
-  cur->x_min = '\0';
-  cur->y_min = '\0';
-  cur->x_max = '\0';
-  cur->y_max = '\0';
-  if (menu == '\x15') {
-    menu = '\x03';
-    goto LAB_80031a44;
-  }
-  if (menu < '\x16') {
-    if (menu == '\t') {
-      menu = '\x05';
-      goto LAB_80031a44;
-    }
-    if ('\t' < menu) {
-      if (menu != '\x0f') {
-        if ('\x0f' < menu) {
-          if (menu == '\x11') {
-            cur->x_max = '\x06';
-            cur->y_max = '\x04';
-            if (Game.language != 'c') {
-              return;
-            }
-            menu = '\a';
-          }
-          else if ((menu < '\x11') || (menu == '\x12')) {
-            menu = '\x01';
-          }
-          else {
-            if (menu != '\x14') {
-              return;
-            }
-            menu = '\x01';
-          }
-          goto LAB_80031a44;
-        }
-        if (menu == '\v') {
-          menu = '\n';
-          goto LAB_80031a44;
-        }
-        if (menu < '\v') {
-          menu = '\x01';
-          goto LAB_80031a44;
-        }
-        if (menu == '\f') {
-          menu = '\n';
-          goto LAB_80031a44;
-        }
-        if (menu != '\x0e') {
-          return;
-        }
-        menu = '\x05';
-        goto LAB_80031a24;
-      }
-      menu = '\x04';
-      goto LAB_80031a44;
-    }
-    if (menu != '\x04') {
-      if (menu < '\x05') {
-        if (menu == '\x01') {
-LAB_800318e8:
-          err = ParseNintendoErrorCode();
-          if (err == 6) {
-            menu = '\x02';
-          }
-          else {
-            if (err < 7) {
-              if ((err < 4) && (1 < err)) {
-                menu = '\x02';
-                goto LAB_80031a44;
-              }
-            }
-            else if (err == 8) {
-              menu = '\x02';
-              goto LAB_80031a44;
-            }
-            menu = '\x01';
-          }
-          goto LAB_80031a44;
-        }
-        if ('\x01' < menu) {
-          return;
-        }
-        err = LANGUAGEOPTION;
-        if (menu != '\0') {
-          return;
-        }
-      }
-      else {
-        if (menu == '\x06') {
-          cur->y_max = '\x02';
-          if (LANGUAGEOPTION == 0) {
+//NGC MATCH
+void GetMenuInfo(struct cursor_s* cur) {
+    cur->x_min = 0;
+    cur->y_min = 0;
+    cur->x_max = 0;
+    cur->y_max = 0;
+    switch (cur->menu) {
+        case 0:
+            cur->y_max = (LANGUAGEOPTION != 0) ? 3 : 2;
             return;
-          }
-          menu = '\x03';
-          goto LAB_80031a44;
-        }
-        err = TimeTrial;
-        if ('\x05' < menu) {
-          if (menu == '\a') {
-            menu = '\x02';
-          }
-          else {
-            if (menu != '\b') {
-              return;
+        case 47:
+        case 1:
+            switch (ParseNintendoErrorCode()) {
+                case 2:
+                case 3:
+                    cur->y_max = 2;
+                    break;
+                case 6:
+                    cur->y_max = 2;
+                    break;
+                case 8:
+                    cur->y_max = 2;
+                    break;
+                default:
+                    cur->y_max = 1;
+                    break;
             }
-            menu = '\x02';
-          }
-          goto LAB_80031a44;
-        }
-      }
-      cVar1 = '\x02';
-      if (err != 0) {
-        cVar1 = '\x03';
-      }
-LAB_80031a38:
-      cur->y_max = cVar1;
-      return;
-    }
-LAB_800319a8:
-    cur->x_max = '\x06';
-    cur->y_max = '\x05';
-    if (Game.language != 'c') {
-      return;
-    }
-    menu = '\b';
-LAB_80031a44:
-    cur->y_max = menu;
-    return;
-  }
-  if (menu != '\x1f') {
-    if (menu < ' ') {
-      if (menu != '\x1a') {
-        if (menu < '\x1b') {
-          if (menu != '\x17') {
-            if ('\x16' < menu) {
-              if (menu == '\x18') goto LAB_80031a20;
-              if (menu != '\x19') {
-                return;
-              }
-            }
-LAB_80031a00:
-            cVar1 = '\x01';
-            menu = '\x02';
-            goto LAB_80031a14;
-          }
-        }
-        else {
-          if (menu == '\x1c') goto LAB_80031a20;
-          if ('\x1b' < menu) {
-            if (menu == '\x1d') goto LAB_80031a00;
-            if (menu != '\x1e') {
-              return;
-            }
-          }
-        }
-LAB_80031a0c:
-        cVar1 = '\0';
-        menu = '\x01';
-LAB_80031a14:
-        cur->y_max = menu;
-        cur->x_max = cVar1;
-        return;
-      }
-      goto LAB_800319a8;
-    }
-    if (menu == '(') goto LAB_80031a38;
-    if (menu < ')') {
-      if (menu != '!') {
-        if (menu < '!') goto LAB_80031a0c;
-        if (menu != '&') {
-          if (menu != '\'') {
             return;
-          }
-          menu = '\x01';
-          goto LAB_80031a44;
-        }
-      }
+        case 2:
+        case 3:
+            return;
+        case 5:
+            cur->y_max = (TimeTrial != 0) ? 3 : 2;
+            return;
+        case 6:
+            cur->y_max = 2;
+            if (LANGUAGEOPTION != 0) {
+                cur->y_max = 3;
+            }
+            return;
+        case 7:
+            cur->y_max = 2;
+            return;
+        case 8:
+            cur->y_max = 2;
+            return;
+        case 9:
+            cur->y_max = 5;
+            return;
+        case 11:
+            cur->y_max = 0xa;
+            return;
+        case 15:
+            cur->y_max = 4;
+            return;
+        case 10:
+            cur->y_max = 1;
+            return;
+        case 12:
+            cur->y_max = 0xa;
+            return;
+        case 14:
+            cur->x_max = 5;
+            cur->y_max = 5;
+            return;
+        case 20:
+            cur->y_max = 1;
+            return;
+        case 16:
+        case 18:
+            cur->y_max = 1;
+            return;
+        case 4:
+        case 26:
+            cur->x_max = 6;
+            cur->y_max = 5;
+            if (Game.language == 0x63) {
+                cur->y_max = 8;
+            }
+            return;
+        case 17:
+            cur->x_max = 6;
+            cur->y_max = 4;
+            if (Game.language == 0x63) {
+                cur->y_max = 7;
+            }
+            return;
+        case 21:
+            cur->y_max = 3;
+            return;
+        case 22:
+        case 25:
+        case 29:
+            cur->x_max = 1;
+            cur->y_max = 2;
+            return;
+        case 27:
+        case 48:
+        case 32:
+        case 30:
+        case 23:
+            cur->x_max = 0;
+            cur->y_max = 1;
+            return;
+        case 24:
+        case 28:
+        case 31:
+        case 33:
+        case 38:
+        case 49:
+            cur->x_max = 0;
+            cur->y_max = 0;
+            return;
+        case 39:
+            cur->y_max = 1;
+            return;
+        case 40:
+            cur->y_max = 0;
+            return;
+        case 41:
+        case 42:
+        case 43:
+        case 44:
+        case 45:
+            cur->y_max = 0;
+            return;
     }
-    else {
-      if (menu == '/') goto LAB_800318e8;
-      if (menu < '0') {
-        if ('-' < menu) {
-          return;
-        }
-        menu = '\0';
-        goto LAB_80031a44;
-      }
-      if (menu == '0') goto LAB_80031a0c;
-      if (menu != '1') {
-        return;
-      }
-    }
-  }
-LAB_80031a20:
-  menu = '\0';
-LAB_80031a24:
-  cur->y_max = menu;
-  cur->x_max = menu;
-  return;
 }
 
 //NGC MATCH
@@ -5955,6 +6226,89 @@ void BonusTiming (struct creature_s* plr) {
     return;
 }
 
+//NGC MATCH
+void CalculateGamePercentage(struct game_s *game) {
+  s32 hub;
+  s32 i;
+  
+  game->percent = 0;
+  game->crystals = 0;
+  game->relics = 0;
+  game->crate_gems = 0;
+  game->bonus_gems = 0;
+  game->gems = 0;
+  game->gembits = 0;
+  sapphire_relics = gold_relics = platinum_relics = 0;
+  for(i = 0; i < 6; i++) {
+    game->hub[i].crystals = 0;
+  }
+  for(i = 0; i < 0x23; i++) {
+    hub = HubFromLevel(i);
+    if ((LData[i].flags & 2) != 0) {
+         if ((game->level[i].flags & 0x800) != 0) {
+          game->percent++;
+        }
+    } else { 
+            if ((game->level[i].flags & 8) != 0) {
+            game->percent++;
+            game->crystals = game->crystals + 1;
+            game->hub[hub].crystals++;
+          }
+          if ((game->level[i].flags & 7) != 0) {
+            game->percent++;
+            game->relics = game->relics + 1;
+            if ((game->level[i].flags & 4) != 0) {
+              platinum_relics++;
+    
+            }
+            else {
+              if ((game->level[i].flags & 2) != 0) {
+                gold_relics++;
+              }
+              else {
+                sapphire_relics++;
+              }
+            }
+          }
+            if ((game->level[i].flags & 0x10) != 0) {
+            game->percent++;
+            game->crate_gems++;
+            game->gems++;
+          }
+           if ((game->level[i].flags & 0x20) != 0) {
+            game->percent++;
+            game->bonus_gems++;
+            game->gems++;
+          }
+          else if ((game->level[i].flags & 0x40) != 0) {
+              game->percent++;
+              game->gembits |= 1;
+              game->gems++;
+            }
+            else if ((game->level[i].flags & 0x80) != 0) {
+                game->percent++;
+                game->gembits |= 2;
+                game->gems++;
+              }
+              else if ((game->level[i].flags & 0x100) != 0) {
+                    game->percent++;
+                    game->gembits |= 4;
+                    game->gems++;
+                }
+                else if ((game->level[i].flags & 0x200) != 0) {
+                    game->percent++;
+                    game->gembits |= 8;
+                    game->gems++;
+                  }
+                  else if ((game->level[i].flags & 0x400) != 0){
+                    game->percent++;
+                    game->gembits |= 0x10;
+                    game->gems++;
+                  }
+        }
+  }
+}
+
 
 //NGC MATCH
 void MakeTimeI(s32 time,s32 hours,char *txt) {
@@ -6384,6 +6738,91 @@ void DrawParallax(void) {
 }
 
 //NGC MATCH
+void DrawTarget(void) {
+  struct anim_s* anim;
+  struct nuvec_s v;
+  s32 i;
+
+  if (player->target == '\0') {
+      return;
+  }
+
+  if (player->target_wait != '\0') {
+      return;
+  }
+    
+  if ((player->fire_lock == '\0')
+      && (player->obj).dead == '\0' && ((player->obj).finished == '\0') &&
+     (boss_dead == 0 && ((player->fire == '\0' && (0 < plr_target_frame))))) {
+         anim = &(player->obj).anim;
+        if ((VEHICLECONTROL != 1) || (((player->obj).vehicle != 0x44 && ((player->obj).vehicle != 0xb2)))) {
+          if (anim->blend != '\0') {
+            if ((anim->blend_src_action != 0x4e) && (anim->blend_src_action != 0x50)) {
+              return;
+            }
+                if ((anim->blend_dst_action != 0x4e) && (anim->blend_dst_action != 0x50)) {
+                    return;
+                }
+          }
+          else if ((anim->action != 0x4e) && (anim->action != 0x50)) {
+                return;
+          }
+        }
+        NuVecSub(&v,plr_target_pos + 1,&plr_target_sightpos);
+        Draw3DObject(0x94,&plr_target_sightpos,(u16)NuAtan2D(v.y, NuFsqrt(v.x * v.x + v.z * v.z)),
+                        (short)NuAtan2D(v.x,v.z) + 0x8000,0,1.0f,1.0f,
+                     NuVecMag(&v),ObjTab[148].obj.scene,ObjTab[148].obj.special,0);
+        i = 0x82;
+        if (plr_target_found != 0) {
+          i = 0x83;
+        }
+        Draw3DObject(i,plr_target_pos + 1,-(player->obj).target_xrot,
+                 (player->obj).hdg + (player->obj).target_yrot,0,1.0f,1.0f,1.0f,ObjTab[i].obj.scene,ObjTab[i].obj.special,0);
+  }
+      return;
+}
+
+//95% NGC
+void DrawProbeFX(struct obj_s* obj) {
+    s32 ang;
+    struct nuvec_s vec;
+    struct nuvec_s vec1;
+    struct nuvec_s vec2;
+    s32 loop;
+
+    if (Paused == 0) {
+        vec = obj->pos;
+        AddVariableShotDebrisEffect(GDeb[76].i, &vec, 1, -0x8000, 0);
+    }
+    
+    ang = obj->hdg + 3000;
+    for (loop = 0; loop < 3; loop++) {
+        vec = obj->pos;
+        vec2.x = (NuTrigTable[ang & 0xffff] * 0.48f);
+        vec2.y = 0.0f;
+        vec2.z = (NuTrigTable[(ang + 0x4000) & 0xffff] * 0.48f);
+        
+        vec.x += vec2.x;
+        vec.z += vec2.z;
+
+        
+        vec1.x = vec.x + vec2.x;
+        vec1.y = vec.y - 1.8f;
+        vec.y -= 1.0f;
+        vec1.z = vec.z + vec2.z;
+        ang += 0x5555;
+        
+        if (Paused == 0) {
+            NuLgtArcLaser(0, &vec1, &vec, &vec2, 0.1f, 0.1f, 0.01f, 0.3f, 0x80FF7F3F);
+            NuLgtArcLaser(0, &vec1, &vec, &vec2, 0.4f, 0.3f, 0.001f, 0.3f, 0x80800040);
+            AddVariableShotDebrisEffect(GDeb[78].i, &vec1, 1, 0, 0);
+            AddVariableShotDebrisEffect(GDeb[78].i, &vec, 1, -0x8000, 0);
+        }
+    }
+    return;
+}
+
+//NGC MATCH
 s32 RayIntersectSphere(struct nuvec_s *p0,struct nuvec_s *p1,struct nuvec_s *pos,float radius) {
   struct nuvec_s ray;
   struct nuvec_s v;
@@ -6478,6 +6917,72 @@ void GameRayCast(struct nuvec_s *src,struct nuvec_s *dir,float d,struct nuvec_s 
     plr_target_found = 0;
   }
   return;
+}
+
+//NGC MATCH
+s32 WumpaRayCast(struct nuvec_s* p0, struct nuvec_s* p1, float ratio0) {
+    struct wumpa_s* wmp;
+    struct nuvec_s min;
+    struct nuvec_s max;
+    struct nuvec_s ray;
+    struct nuvec_s v;
+    float ratio;
+    float dp_ray;
+    float dp0;
+    float dp;
+    float r;
+    float r2;
+    s32 i;
+
+    ratio = ratio0;
+    
+    min.x = (p0->x < p1->x) ? p0->x : p1->x;
+    min.y = (p0->y < p1->y) ? p0->y : p1->y;
+    min.z = (p0->z < p1->z) ? p0->z : p1->z;
+
+    max.x = (p0->x > p1->x) ? p0->x : p1->x;
+    max.y = (p0->y > p1->y) ? p0->y : p1->y;
+    max.z = (p0->z > p1->z) ? p0->z : p1->z;
+
+    NuVecSub(&ray, p1, p0);
+
+    dp = NuVecDot(&ray, &ray);
+    dp_ray = dp;
+    
+    wmp = Wumpa;
+    
+    r = 0.2f;
+    r2 = r * r;
+    
+    for (i = 0; i < 0x140; i++, wmp++) {
+        if ((wmp->active == 2) && (wmp->in_range != 0)) {
+            if (((wmp->pos.x + r) < min.x) || ((wmp->pos.z + r) < min.z)) {
+                continue;
+            }
+            if (((wmp->pos.x - r) > max.x) || ((wmp->pos.z - r) > max.z)) {
+                continue;
+            }
+            if (((wmp->pos.y + r) < min.y) || ((wmp->pos.y - r) > max.y)) {
+                continue;
+            }
+            NuVecSub(&v, &wmp->pos, p0);
+            dp = NuVecDot(&ray, &v);
+            if ((dp >= 0.0f) && (dp <= dp_ray)) {
+                dp0 = (dp / dp_ray);
+                if (dp0 < ratio) {
+                    v.x = ((p1->x - p0->x) * dp0 + p0->x);
+                    v.y = ((p1->y - p0->y) * dp0 + p0->y);
+                    v.z = ((p1->z - p0->z) * dp0 + p0->z);
+                    NuVecSub(&v, &wmp->pos, &v);
+                    if ((v.x * v.x + v.y * v.y + v.z * v.z) < r2) {
+                        ratio = dp0;
+                    }
+                }
+            }
+        }
+    }
+    temp_ratio = ratio;
+    return ratio < 1.0f;
 }
 
 //NGC MATCH

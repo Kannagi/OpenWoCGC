@@ -190,10 +190,64 @@ struct mfeathers_s
     char pad4; // Offset: 0x8F, DWARF: 0x271298
 };
 
+// Size: 0x4C
+struct wumpa_s
+{
+    struct nuvec_s pos0; // Offset: 0x0, DWARF: 0x26E631
+    struct nuvec_s pos1; // Offset: 0xC, DWARF: 0x26E65A
+    struct nuvec_s pos; // Offset: 0x18, DWARF: 0x26E683
+    struct nuvec_s mom; // Offset: 0x24, DWARF: 0x26E6AB
+    float shadow; // Offset: 0x30, DWARF: 0x26E6D3
+    unsigned short surface_xrot; // Offset: 0x34, DWARF: 0x26E6FC
+    unsigned short surface_zrot; // Offset: 0x36, DWARF: 0x26E72B
+    float time; // Offset: 0x38, DWARF: 0x26E75A
+    float duration; // Offset: 0x3C, DWARF: 0x26E781
+    signed char active; // Offset: 0x40, DWARF: 0x26E7AC
+    signed char iRAIL; // Offset: 0x41, DWARF: 0x26E7D5
+    short iALONG; // Offset: 0x42, DWARF: 0x26E7FD
+    float fALONG; // Offset: 0x44, DWARF: 0x26E826
+    signed char destroy; // Offset: 0x48, DWARF: 0x26E84F
+    signed char fired; // Offset: 0x49, DWARF: 0x26E879
+    signed char in_range; // Offset: 0x4A, DWARF: 0x26E8A1
+    signed char surface_type; // Offset: 0x4B, DWARF: 0x26E8CC
+};
+
+// Size: 0x50
+struct winfo_s
+{
+    struct numtx_s m; // Offset: 0x0, DWARF: 0x26F9E7
+    float scale; // Offset: 0x40, DWARF: 0x26FA0D
+    float dy; // Offset: 0x44, DWARF: 0x26FA35
+    unsigned short angle; // Offset: 0x48, DWARF: 0x26FA5A
+    unsigned short spin; // Offset: 0x4A, DWARF: 0x26FA82
+    char pad1; // Offset: 0x4C, DWARF: 0x26FAA9
+    char pad2; // Offset: 0x4D, DWARF: 0x26FAD0
+    char pad3; // Offset: 0x4E, DWARF: 0x26FAF7
+    char pad4; // Offset: 0x4F, DWARF: 0x26FB1E
+};
+
+// Size: 0x24
+struct newwumpa_s
+{
+    struct nuvec_s world_pos; // Offset: 0x0, DWARF: 0x27004A
+    struct nuvec_s screen_pos; // Offset: 0xC, DWARF: 0x270078
+    float screen_scale; // Offset: 0x18, DWARF: 0x2700A7
+    unsigned char count; // Offset: 0x1C, DWARF: 0x2700D6
+    unsigned char delay; // Offset: 0x1D, DWARF: 0x2700FE
+    signed char transformed; // Offset: 0x1E, DWARF: 0x270126
+    signed char bonus; // Offset: 0x1F, DWARF: 0x270154
+    signed char active; // Offset: 0x20, DWARF: 0x27017C
+    char pad1; // Offset: 0x21, DWARF: 0x2701A5
+    char pad2; // Offset: 0x22, DWARF: 0x2701CC
+    char pad3; // Offset: 0x23, DWARF: 0x2701F3
+};
+
 struct mfeathers_s MaskFeathers[4];
 struct spltab_s SplTab[73];
 struct award_s Award[3];
 struct hdata_s HData[6];
+struct newwumpa_s NewWumpa[32];
+s32 i_newwumpa;
 struct GTimer PauseTimer;
 struct GTimer GameTimer;
 s32 probecol;

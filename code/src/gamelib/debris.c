@@ -1,6 +1,31 @@
 #include "../nu.h"
 
 //NGC MATCH
+void DebrisMalloc(void) {
+  if (debbuffer == NULL) {
+    debbuffer = (char *)malloc_x(0x93400);
+  }
+  return;
+}
+
+//NGC MATCH
+s32 DebAlloc(void) {
+  s32 key;
+  
+  if (freedebkeyptr > 0xff) {
+   return -1;
+  }
+    key = (int)freedebkeys[freedebkeyptr];
+    freedebkeyptr++;
+    debkeydata[key].count = 0;
+    debkeydata[key].debcount = 0;
+    debkeydata[key].reqcount = 0;
+    debkeydata[key].reqdebcount = 0;
+    debkeydata[key].chunks[0] = NULL;
+    return key;
+}
+
+//NGC MATCH
 void DebReAlloc(struct debkeydatatype_s *debkey,s32 newdebcount) {
   s32 newchunksneeded;
   
@@ -30,6 +55,16 @@ void DebrisOrientation(s32 key,short rotz,short roty) {
 }
 
 
+//NGC MATCH
+void AddVariableShotDebrisEffectMtx(s32 type,struct nuvec_s *pos,s32 numdeb,short emitrotz,short emitroty,struct numtx_s *rotmtx) {
+  struct numtx_s tmtx;
+
+  tmtx = numtx_identity;
+  NuMtxRotateZ(&tmtx,emitrotz);
+  NuMtxRotateY(&tmtx,emitroty);
+  AddVariableShotDebrisEffectMtx2(type,pos,numdeb,&tmtx,rotmtx);
+  return;
+}
 
 //NGC MATCH
 s32 LookupDebrisEffect(char *name) {
