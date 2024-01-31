@@ -268,6 +268,100 @@ void LoadWumpa(void) {
 }
 
 //NGC MATCH
+void DrawWumpa(void) {
+    struct winfo_s *info;
+    struct wumpa_s *wumpa;
+    float dx;
+    float dz;
+    float d;
+    float r2;
+    struct numtx_s* m;
+    struct nuvec_s s;
+    struct nuvec_s v;
+    s32 i;
+    s32 j;
+    
+    if (ObjTab[0].obj.special != NULL) {
+        r2 = 45.0f;
+        if ((LDATA->farclip) < 45.0f) {
+            r2 = LDATA->farclip;
+        }
+        r2 *= r2;
+        wumpa = Wumpa;
+        for (i = 0; i < 0x140; i++, wumpa++) {
+            wumpa->in_range = '\0';
+            if ((wumpa->active != '\0') && (TimeTrial == 0 || (wumpa->active == '\x03' && (wumpa->destroy != '\0')))) {
+                dx = (pCam->pos).x - (wumpa->pos).x; 
+                dz = (pCam->pos).z - (wumpa->pos).z;
+                d = dx * dx + dz * dz;
+                if (!(d > r2)) {
+                    wumpa->in_range = '\x01';
+                    info = &WInfo[(i & 7)]; 
+                    if ((((wumpa->shadow != 2000000.0f) && (VEHICLECONTROL != 2)) &&
+                    ((VEHICLECONTROL != 1 || ((player->obj).vehicle != 0x20)))) &&
+                    ((TerSurface[wumpa->surface_type].flags & 1) == 0)) {
+                        v.x = (wumpa->pos1).x;
+                        v.y = wumpa->shadow;
+                        v.z = (wumpa->pos1).z;
+                        if (wumpa->active == '\x03') {
+                            j = 0x7f - (s32)(((wumpa->time * 5.0f) / wumpa->duration) * 127.0f);
+                        }
+                        else if (wumpa->active == '\x01') {
+                            j = (s32)((wumpa->time / 0.75f) * 127.0f);
+                        }
+                        else {
+                            j = 0x7f;
+                        }
+                        if (0 < j) {
+                            NuRndrAddShadow(&v,info->scale * 0.25f,j,(u32)wumpa->surface_xrot,
+                            (u32)info->angle,(u32)wumpa->surface_zrot);
+                        }
+                    }
+                    if (wumpa->active == '\x03') {
+                        s.x = 1.0f - (wumpa->time * 0.5f);
+                        if ((wumpa->fired != '\0') && (wumpa->time < 0.1f)) {
+                            if (wumpa->fired == '\x02') {
+                                s.x = 0.0f;
+                            }
+                            else {
+                                s.x = s.x * (wumpa->time / 0.1f);
+                            }
+                        }
+                    }
+                    else {
+                        s.x = 1.0f;
+                    }
+                    if (s.x > 0.0f) {
+                        if (s.x != 1.0f) {
+                            s.z = s.x;
+                            s.y = s.x;
+                            NuMtxSetScale(&mTEMP,&s);
+                            NuMtxMulR(&mTEMP,&mTEMP,&info->m);
+                            m = &mTEMP;
+                        } else{
+                            m = &info->m;
+                        }
+                        m->_30 = (wumpa->pos).x;
+                        m->_31 = (wumpa->pos).y + info->dy;
+                        m->_32= (wumpa->pos).z;    
+                        NuRndrGScnObj((ObjTab[0].obj.scene)->gobjs[(ObjTab[0].obj.special)->instance->objid],m);
+                        if ((TerSurface[wumpa->surface_type].flags & 4) != 0) {
+                            mTEMP = *m;
+                            mTEMP._01 = -mTEMP._01;
+                            mTEMP._11 = -mTEMP._11;
+                            mTEMP._21 = -mTEMP._21;
+                            mTEMP._31 = wumpa->shadow - (mTEMP._31 - wumpa->shadow);
+                            NuRndrGScnObj(ObjTab[0].obj.scene->gobjs[ObjTab[0].obj.special->instance->objid],&mTEMP);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
+//NGC MATCH
 void AddScreenWumpa(float x,float y,float z,s32 count) {  
   if (count < 1) {
     count = 1;

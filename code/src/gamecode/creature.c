@@ -122,45 +122,47 @@ void ResetPlayer(s32 set) {
     point_time = 0.0f;
 }
 
-//86% NGC
+//PS2 MATCH
 void ResetPlayerMoves(struct creature_s *c) {
-  c->sprint = '\0';
-  c->crawl = '\0';
-  c->crawl_lock = '\x01';
-  c->jump = '\0';
-  c->slam = '\0';
-  c->spin = '\0';
-  c->tiptoe = '\0';
-  c->somersault = '\0';
-  c->land = '\0';
-  c->idle_mode = '\0';
-  c->idle_sigh = '\0';
-  c->idle_wait = IDLEWAIT * 30.0f;
-  (c->obj).transporting = '\0';
-  c->crouch_pos = 0;
-  c->slam_wait = 0;
-  c->spin_wait = 0;
-  c->slide = 0;
-  c->target = '\0';
-  c->fire = '\0';
-  c->tap = '\0';
-  c->freeze = '\0';
-  c->idle_action = 0x22;
-  (c->obj).idle_gametime = 0.0f;
-  c->idle_time = 0.0f;
-  ResetAnimPacket(&(c->obj).anim,0x22);
-  (c->obj).attack = 0;
-  (c->obj).dyrot = 0;
-  (c->obj).frame = 0;
-  (c->obj).boing = '\0';
-  (c->obj).dangle = '\0';
-  (c->obj).old_ground = '\x03';
-  (c->obj).SCALE = 1.0f;
-  (c->obj).submerged = '\0';
-  (c->obj).scale = 1.0f;
-  (c->obj).RADIUS = (c->obj).radius;
-  (c->obj).ground = '\x03';
-  return;
+    c->jump = 0;
+    c->slam = 0;
+    c->spin = 0;
+    c->crawl = 0;
+    c->tiptoe = 0;
+    c->sprint = 0;
+    c->somersault = 0;
+    c->land = 0;
+    c->idle_mode = 0;
+    c->idle_sigh = 0;
+    c->crawl_lock = 1;
+    c->crouch_pos = 0;
+    c->slam_wait = 0;
+    c->spin_wait = 0;
+    c->slide = 0;
+    c->idle_action = 0x22;
+    c->idle_wait = IDLEWAIT * 30.0f;
+    c->obj.idle_gametime = 0.0f;
+    c->idle_time = 0.0f;
+    c->target = 0;
+    c->fire = 0;
+    c->tap = 0;
+    c->freeze = 0;
+    c->obj.transporting = 0;
+    
+    ResetAnimPacket(&c->obj.anim, 0x22);
+    
+    c->obj.frame = 0;
+    c->obj.attack = 0;
+    c->obj.dyrot = 0;
+    c->obj.boing = 0;
+    c->obj.dangle = 0;
+    c->obj.old_ground = 3;
+    c->obj.submerged = 0;
+    c->obj.SCALE = 1.0f;
+    c->obj.scale = 1.0f;
+    c->obj.RADIUS = c->obj.radius;
+    c->obj.ground = 3;
+    return;
 }
 */
 void RemoveCreature(struct creature_s *c) {
@@ -830,150 +832,105 @@ void PlayerStartPos(creature_s *c,nuvec_s *pos)
   return;
 }
 
-
-int AddCreature(int character,int index,int i_aitab)
-
-{
-  char cVar1;
-  float fVar2;
-  uint flags;
-  nuAnimData_s *pnVar3;
-  float fVar4;
-  float fVar5;
-  Moveinfo_s *moveinfo;
-  float fVar6;
-  CharacterModel *model;
-  nuAnimData_s **anmdat;
-  short action;
-  creatcmd_s *CMD;
-  creature_s *creature;
-  nuvec_s pos_c;
-  int adv;
-  uchar livesD;
-  uchar wumpasD;
-
-  if (((((uint)index < 9) && ((uint)character < 0xbf)) &&
-      ((i_aitab == -1 || (character == AIType[(byte)AITab[i_aitab].ai_type].character)))) &&
-     (CRemap[character] != -1)) {
-    creature = Character + index;
-    if (Character[index].used != '\0') {
+//NGC MATCH
+s32 AddCreature(s32 character,s32 index,s32 i_aitab) {
+  struct nuanimdata_s **anmdat;
+  s32 i;
+  struct creature_s *c;
+  struct creatcmd_s *commands;
+  struct nuvec_s startpos;
+  struct cdata_s * cdata;
+  
+  if (((((u32)index < 9) && ((u32)character < 0xbf)) &&
+      ((i_aitab == -1 || (character == AIType[AITab[i_aitab].ai_type].character)))) && (CRemap[character] != -1)) {
+   
+    c = &Character[index];
+    if (c->used != 0) {
       return 0;
     }
-    memset(creature,0,0xce4);
-    adv = AddGameObject(&Character[index].obj,creature);
-    if (adv != 0) {
-      Character[index].obj.pLOCATOR = (numtx_s *)(index * 0xce4 + -0x7fdb32b4);
-      Character[index].used = '\x01';
-      Character[index].on = '\x01';
-      Character[index].off_wait = '\x02';
+    memset(c,0,0xce4);
+    if (AddGameObject(&c->obj,c) == 0) {
+        return 0;
+    }
+      else {
+      c->obj.pLOCATOR = &c->mtxLOCATOR[0][0];
+      c->used = 1;
+      c->on = 1;
+      c->off_wait = 2;
+      cdata = &CData[character];
       if (i_aitab == -1) {
-        PlayerStartPos(creature,&pos_c);
-        CMD = (creatcmd_s *)0x0;
+        commands = NULL;
+        PlayerStartPos(c,&startpos);
       }
       else {
-        CMD = AIType[(byte)AITab[i_aitab].ai_type].cmd;
-        adv = CMD->i;
-        pos_c.x = AITab[i_aitab].pos[adv].x;
-        pos_c.z = AITab[i_aitab].pos[adv].z;
-        pos_c.y = AITab[i_aitab].pos[adv].y;
+        commands = AIType[AITab[i_aitab].ai_type].cmd;
+        startpos = AITab[i_aitab].pos[commands->i];
       }
-      action = (short)character;
-      Character[index].i_aitab = (char)i_aitab;
-      Character[index].cmdtable = CMD;
-      Character[index].cmdcurr = CMD;
-      Character[index].obj.character = action;
-      if (action == 0) {
-        moveinfo = &CrashMoveInfo;
+      c->i_aitab = (char)i_aitab;
+      c->cmdcurr = commands;
+      c->cmdtable = commands;
+      c->obj.character = character;
+      if (c->obj.character == 0) {
+        c->OnFootMoveInfo = &CrashMoveInfo;
       }
-      else if (action == 1) {
-        moveinfo = &CocoMoveInfo;
+      else if (c->obj.character == 1) {
+        c->OnFootMoveInfo = &CocoMoveInfo;
       }
       else {
-        moveinfo = (Moveinfo_s *)&DefaultMoveInfo;
+        c->OnFootMoveInfo = &DefaultMoveInfo;
       }
-      Character[index].OnFootMoveInfo = moveinfo;
-      fVar2 = CData[character].radius;
-      cVar1 = CRemap[character];
-      fVar6 = CData[character].min.x;
-      fVar5 = CData[character].min.z;
-      fVar4 = CData[character].min.y;
-      Character[index].obj.radius = fVar2;
-      Character[index].obj.min.x = fVar6;
-      fVar6 = CData[character].max.x;
-      Character[index].obj.RADIUS = fVar2;
-      Character[index].obj.model = CModel + cVar1;
-      Character[index].obj.min.z = fVar5;
-      Character[index].obj.min.y = fVar4;
-      fVar2 = CData[character].max.z;
-      fVar4 = CData[character].max.y;
-      Character[index].obj.max.x = fVar6;
-      Character[index].obj.max.z = fVar2;
-      Character[index].obj.max.y = fVar4;
-      fVar2 = Character[index].obj.max.y;
-      Character[index].obj.bot = Character[index].obj.min.y;
-      Character[index].obj.top = fVar2;
-      Character[index].obj.startpos.x = pos_c.x;
-      Character[index].obj.startpos.z = pos_c.z;
-      Character[index].obj.startpos.y = pos_c.y;
-      Character[index].obj.oldpos.x = Character[index].obj.startpos.x;
-      Character[index].obj.oldpos.z = pos_c.z;
-      Character[index].obj.oldpos.y = pos_c.y;
-      Character[index].obj.pos.x = Character[index].obj.oldpos.x;
-      Character[index].obj.pos.y = pos_c.y;
-      adv = Adventure;
-      Character[index].obj.pos.z = pos_c.z;
-      Character[index].obj.flags = 2;
-      wumpasD = Game.wumpas;
-      livesD = Game.lives;
-      if ((adv == 0) || (creature != player)) {
-        flags = Character[index].obj.flags;
-        Character[index].obj.vehicle = -1;
-        Character[index].obj.flags = flags | 4;
-        Character[index].pad_type = '\0';
-        Character[index].obj.mask = (mask *)0x0;
-      }
-      else {
-        Character[index].obj.vehicle = LDATA->vehicle;
-        Character[index].obj.flags = 3;
-        plr_lives.draw = (short)livesD;
-        plr_wumpas.draw = (short)wumpasD;
+      c->obj.RADIUS = cdata->radius;
+      c->obj.radius = cdata->radius;
+      c->obj.model = &CModel[CRemap[character]];
+      c->obj.min = cdata->min;
+      c->obj.max = cdata->max;
+      c->obj.bot = c->obj.min.y;
+      c->obj.top = c->obj.max.y;
+      c->obj.startpos = startpos;
+      c->obj.oldpos = c->obj.startpos;
+      c->obj.pos = c->obj.oldpos;
+      c->obj.flags = 2;
+      if ((Adventure != 0) && (c == player)) {
+        c->obj.vehicle = LDATA->vehicle;
+        c->obj.flags = 3;
+        plr_lives.draw = (short)Game.lives;
+        plr_wumpas.draw = (short)Game.wumpas;
         plr_lives.count = plr_lives.draw;
         plr_wumpas.count = plr_wumpas.draw;
-        Character[index].obj.mask = &Mask;
-        Character[index].pad_type = '\x01';
+        c->obj.mask = Mask;
+        c->pad_type = 1;
       }
-      fVar5 = Character[index].obj.pos.x;
-      Character[index].obj.die_duration = 0.5;
-      fVar4 = Character[index].obj.pos.y;
-      fVar2 = Character[index].obj.pos.z;
-      Character[index].ai.oldpos.x = fVar5;
-      Character[index].ai.oldpos.z = fVar2;
-      Character[index].ai.oldpos.y = fVar4;
-      Character[index].obj.anim.action = 0x22;
-      model = Character[index].obj.model;
-      if ((model != (CharacterModel *)0x0) &&
-         (anmdat = model->anmdata, model->anmdata[0x22] == (nuAnimData_s *)0x0)) {
-        adv = 0;
-        pnVar3 = *anmdat;
-        while (pnVar3 == (nuAnimData_s *)0x0) {
-          adv = adv + 1;
-          if (0x75 < adv) goto LAB_80018fa8;
-          anmdat = anmdat + 1;
-          pnVar3 = *anmdat;
-        }
-        if (adv < 0x76) {
-          Character[index].obj.anim.action = (short)adv;
-        }
+      else {
+        c->obj.vehicle = -1;
+        c->obj.flags = c->obj.flags | 4;
+        c->pad_type = 0;
+        c->obj.mask = NULL;
+      }
+      c->obj.die_duration = 0.5f;
+      c->ai.oldpos = c->obj.pos;
+      c->obj.anim.action = 0x22;
+      if (c->obj.model != NULL) {
+          anmdat = c->obj.model->anmdata;
+          if (anmdat[0x22] == NULL ) {
+            for (i = 0; c->obj.model->anmdata[i] == NULL; ) {
+              i++;
+              if (0x75 < i) goto LAB_80018fa8;
+            }
+            if (i < 0x76) {
+              c->obj.anim.action = (short)i;
+            }
+          }
       }
 LAB_80018fa8:
-      action = Character[index].obj.anim.action;
-      Character[index].obj.anim.oldaction = action;
-      Character[index].obj.anim.newaction = action;
-      ResetLights(&Character[index].lights);
-      return 1;
-    }
+      c->obj.anim.newaction = c->obj.anim.action;
+      c->obj.anim.oldaction = c->obj.anim.action;
+      ResetLights(&c->lights);
+      }
   }
-  return 0;
+    else{
+        return 0;
+    }
+  return 1;
 }
 
 //NGC MATCH
@@ -1110,61 +1067,64 @@ LAB_80019374:
   return iVar5;
 }
 
+//NGC MATCH
+void UpdateCharacterIdle(struct creature_s* c, s32 character) {
 
-void UpdateCharacterIdle(creature_s *c,int character)
+    struct CharacterModel* model;
+    float t;
+    s32 i;
 
-{
-  int iVar1;
-  int i;
-  short action;
-  float wait;
-
-  i = (int)CRemap[character];
-  if (i != -1) {
-    if (((c->obj).anim.newaction != 0x22) ||
-       ((c->spin != '\0' &&
-        ((int)c->spin_frame < (int)c->spin_frames - (int)c->OnFootMoveInfo->SPINRESETFRAMES))))
-    goto LAB_80019500;
-    action = c->idle_action;
-    (c->obj).idle_gametime = (c->obj).idle_gametime + 0.01666667;
-    iVar1 = action * 4;
-    wait = 0.5;
-    if (*(int *)(i * 0x7ac + -0x7fdac120 + iVar1) != 0) {
-      wait = *(float *)(*(int *)(i * 0x7ac + -0x7fdabf48 + iVar1) + 8) * 0.5;
+    i = CRemap[character];
+    if (i != -1) {
+        model = &CModel[i];
+        if (((c->obj).anim.newaction == 0x22)
+            && ((c->spin == 0 || ((s32)c->spin_frame >= (s32)c->spin_frames - (s32)c->OnFootMoveInfo->SPINRESETFRAMES))))
+        {
+            (c->obj).idle_gametime = (c->obj).idle_gametime + 0.01666667f;
+            t = 0.5f;
+            if (model->anmdata[c->idle_action] != 0) {
+                t *= model->animlist[c->idle_action]->speed;
+            }
+            c->idle_time += t;
+            switch (c->idle_mode) {
+                case 0:
+                    if ((c->idle_time > c->idle_wait)) {
+                        i = NewCharacterIdle(c, model);
+                        if (i == 0) {
+                            goto StartIdle;
+                        }
+                    }
+                    break;
+                case 1:
+                    if ((c->idle_time > c->idle_wait)) {
+                        if (((LBIT & 0x200000A1) != 0) && ((c->obj).character == 0)) {
+                            i = NewCharacterIdle(c, model);
+                            if (i == 0) {
+                                goto StartIdle;
+                            }
+                        } else {
+                            c->idle_mode = 0;
+                            c->idle_action = 0x22;
+                            c->idle_time = 0.0f;
+                            c->idle_wait = IDLEWAIT * 30.0f;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            (c->obj).anim.newaction = c->idle_action;
+            return;
+        }
     }
-    wait = c->idle_time + wait;
-    c->idle_time = wait;
-    if (c->idle_mode == '\0') {
-      if (wait <= c->idle_wait) goto LAB_800194f4;
-    }
-    else {
-      if ((c->idle_mode != '\x01') || (wait <= c->idle_wait)) goto LAB_800194f4;
-      if (((LBIT._4_4_ & 0x200000a1) == 0) || ((c->obj).character != 0)) {
-        c->idle_mode = '\0';
-        wait = IDLEWAIT * 30.0;
-        c->idle_action = 0x22;
-        c->idle_time = 0.0;
-        c->idle_wait = wait;
-        goto LAB_800194f4;
-      }
-    }
-    i = NewCharacterIdle(c,CModel + i);
-    if (i != 0) {
-LAB_800194f4:
-      (c->obj).anim.newaction = c->idle_action;
-      return;
-    }
-  }
-LAB_80019500:
-  c->idle_sigh = '\0';
-  c->idle_mode = '\0';
-  wait = IDLEWAIT * 30.0;
-  c->idle_action = 0x22;
-  c->idle_wait = wait;
-  c->old_idle_action = -1;
-  c->idle_time = 0.0;
-  (c->obj).idle_gametime = 0.0;
-  return;
+StartIdle:
+    c->idle_mode = 0;
+    c->idle_sigh = 0;
+    c->idle_action = 0x22;
+    c->old_idle_action = -1;
+    (c->obj).idle_gametime = 0.0f;
+    c->idle_time = 0.0f;
+    c->idle_wait = IDLEWAIT * 30.0f;
+    return;
 }
 
 //NGC MATCH
