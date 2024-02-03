@@ -3,6 +3,19 @@
 s32 gamecut; //cut.c
 
 /*
+	//TODO
+	ManageCreatures 79%
+	LoadCharacterModel 95%
+	LoadCharacterModels 92%
+	NewCharacterIdle 92%
+	MovePlayer
+	DrawCharacterModel 96%
+	UpdateAnimPacket 98%
+	DrawCreatures 89%
+	
+*/
+
+/*
 //NGC MATCH
 void ResetPlayer(s32 set) {
     struct creature_s* c;
@@ -165,41 +178,29 @@ void ResetPlayerMoves(struct creature_s *c) {
     return;
 }
 */
+//NGC MATCH
 void RemoveCreature(struct creature_s *c) {
-  //RemoveGameObject(&c->obj);
-  c->used = '\0';
+  RemoveGameObject(&c->obj);
+  c->used = 0;
   return;
 }
 
 /*
+//NGC MATCH
 void CloseCreatures(void) {
-  NUHGOBJ_s *hgobj;
-  int i;
-  creature_s *c;
-  int j;
-
-  i = 0;
-  c = Character;
-  j = 9;
-  do {
-    if ((&Character[0].used)[i] != '\0') {
-      RemoveCreature(c);
-    }
-    c = c + 1;
-    i = i + 0xce4;
-    j = j + -1;
-  } while (j != 0);
-  j = 0;
-  i = 0x31;
-  do {
-    hgobj = *(NUHGOBJ_s **)((int)CModel[0].anmdata + j + -4);
-    if (hgobj != (NUHGOBJ_s *)0x0) {
-      NuHGobjDestroy(hgobj);
-      *(undefined4 *)((int)CModel[0].anmdata + j + -4) = 0;
-    }
-    j = j + 0x7ac;
-    i = i + -1;
-  } while (i != 0);
+  s32 i;
+  
+  for(i = 0; i < 9; i++) {
+        if (Character[i].used != 0) {
+          RemoveCreature(&Character[i]);
+        }
+  }
+  for(i = 0; i < 0x31; i++) {
+        if (CModel[i].hobj != NULL) {
+          NuHGobjDestroy(CModel[i].hobj);
+          CModel[i].hobj = 0;
+        }
+  }
   return;
 }
 
@@ -719,48 +720,31 @@ void LoadCharacterModels(void) {
     MineCartMoveInfo.JUMPFRAMES0   = ModelAnimDuration(0x89,  99, 0.0f, 0.0f) * 60.0f;
     return;
 }
-/*
-void ChangeCharacter(creature_s *c,int character)
 
-{
-  short cht;
-  Moveinfo_s *moveinfo;
-  float y;
-  bool check;
-  float radius;
+//NGC MATCH
+void ChangeCharacter(struct creature_s *c,s32 character) {
 
-  if (((uint)character < 0xbf) && (CRemap[character] != -1)) {
-    cht = (short)character;
-    (c->obj).character = cht;
-    if (cht == 0) {
-      moveinfo = &CrashMoveInfo;
+  struct cdata_s* cdata;
+  
+  if (((u32)character < 0xbf) && (CRemap[character] != -1)) {
+    (c->obj).character = character;
+    cdata = &CData[character];
+    if ((s16)character == 0) {
+      c->OnFootMoveInfo = &CrashMoveInfo;
     }
-    else if (cht == 1) {
-      moveinfo = &CocoMoveInfo;
+    else if ((s16)character == 1) {
+      c->OnFootMoveInfo = &CocoMoveInfo;
     }
     else {
-      moveinfo = (Moveinfo_s *)&DefaultMoveInfo;
+      c->OnFootMoveInfo = &DefaultMoveInfo;
     }
-    c->OnFootMoveInfo = moveinfo;
-    check = c == player;
-    (c->obj).model = CModel + CRemap[character];
-    radius = CData[character].radius;
-    (c->obj).radius = radius;
-    (c->obj).RADIUS = radius;
-    radius = CData[character].min.z;
-    y = CData[character].min.y;
-    (c->obj).min.x = CData[character].min.x;
-    (c->obj).min.z = radius;
-    (c->obj).min.y = y;
-    radius = CData[character].max.z;
-    y = CData[character].max.y;
-    (c->obj).max.x = CData[character].max.x;
-    (c->obj).max.z = radius;
-    (c->obj).max.y = y;
-    radius = (c->obj).max.y;
+    (c->obj).model = &CModel[CRemap[character]];
+    (c->obj).radius = (c->obj).RADIUS = cdata->radius;
+    (c->obj).min = cdata->min;
+    (c->obj).max = cdata->max;
     (c->obj).bot = (c->obj).min.y;
-    (c->obj).top = radius;
-    if (check) {
+    (c->obj).top = (c->obj).max.y;
+    if (c == player) {
       ResetPlayerMoves(c);
     }
     else {
@@ -770,64 +754,42 @@ void ChangeCharacter(creature_s *c,int character)
   return;
 }
 
-void PlayerStartPos(creature_s *c,nuvec_s *pos)
+//NGC MATCH
+void PlayerStartPos(struct creature_s *c,struct nuvec_s *pos) {
 
-{
-  float Cpos_x;
-  float Cpos_y;
-  ushort hdg;
-  int lev;
-  float v000_x;
-  float v000_y;
-
-  lev = Level;
-  hdg = cutang_CRASH;
-  v000_y = v000.y;
-  v000_x = v000.x;
-  Cpos_y = cutpos_CRASH.y;
-  Cpos_x = cutpos_CRASH.x;
   if (Level == 0x25) {
-    if (gamecut_hack == 1) {
-      last_hub = 0;
-      last_level = 0x15;
-      gamecut_hack = 0;
-    }
-    if (GameMode == 1) {
-      pos->z = cutpos_CRASH.z;
-      pos->x = Cpos_x;
-      pos->y = Cpos_y;
-      (c->obj).hdg = hdg;
-      last_hub = -1;
-      last_level = -1;
-      tumble_time = 0.0;
-      tumble_action = -1;
-      tumble_duration = 0.0;
-      return;
-    }
-    if (((last_hub != -1) && (last_level != -1)) && (LData[last_level].hub != -1)) {
-      HubStart(&c->obj,last_hub,last_level,pos);
-      return;
-    }
+        if (gamecut_hack == 1) {
+          gamecut_hack = 0;
+          last_hub = 0;
+          last_level = 0x15;
+        }
+        if (GameMode == 1) {
+          *pos = cutpos_CRASH;
+          (c->obj).hdg = cutang_CRASH;
+          tumble_action = -1;
+          tumble_duration = 0.0f;
+          tumble_time = 0.0f;
+          last_level = -1;
+          last_hub = -1;
+          return;
+        }
+        if (((last_hub != -1) && (last_level != -1)) && (LData[last_level].hub != -1)) {
+          HubStart(&c->obj,last_hub,last_level,pos);
+          return;
+        }
   }
-  if (pos_START == (nuvec_s *)0x0) {
-    pos->z = v000.z;
-    pos->x = v000_x;
-    pos->y = v000_y;
-    return;
-  }
-  Cpos_y = pos_START->x;
-  Cpos_x = pos_START->y;
-  pos->z = pos_START->z;
-  pos->x = Cpos_y;
-  pos->y = Cpos_x;
-  if (lev == 0x25) {
-    (c->obj).hdg = 0x8000;
-    tumble_duration = 0.0;
-    tumble_action = -1;
-    tumble_time = 0.0;
-    last_level = -1;
-    last_hub = -1;
-    return;
+  if (pos_START != NULL) {
+      *pos = *pos_START;
+      if (Level == 0x25) {
+        (c->obj).hdg = 0x8000;
+        tumble_action = -1;
+        tumble_duration = 0.0f;
+        tumble_time = 0.0f;
+        last_level = -1;
+        last_hub = -1;
+      } 
+  } else {
+     *pos = v000;
   }
   return;
 }
@@ -945,126 +907,84 @@ void TerrainFailsafe(struct obj_s *obj) {
   return;
 }
 
-
-int NewCharacterIdle(creature_s *c,CharacterModel *model)
-
-{
-  short sVar1;
-  short sVar2;
-  float fVar3;
-  bool bVar4;
-  int qrnd;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  uint uVar8;
-  undefined4 local_208;
-  undefined4 local_30;
-  uint uStack_2c;
-
-  if (GameMode == 1) {
-LAB_80019374:
-    iVar5 = 0;
-  }
-  else {
-    if (((c->idle_mode == '\0') && (c->idle_sigh == '\0')) &&
-       (c->idle_sigh = '\x01', model->anmdata[0x3d] != (nuAnimData_s *)0x0)) {
-      c->idle_repeat = '\x01';
-      c->idle_action = 0x3d;
-      iVar6 = 0x22;
-    }
-    else {
-      iVar5 = 0;
-      iVar7 = 0;
-      qrnd = 0;
-      iVar6 = 0;
-      do {
-        if ((*(int *)((int)model->anmdata + qrnd) != 0) &&
-           ((*(ushort *)(*(int *)((int)model->animlist + qrnd) + 0xc) & 8) != 0)) {
-          bVar4 = true;
-          if (((c == player) && ((c->obj).character == 0)) &&
-             ((((GameMode == 1 && (iVar7 - 0x25U < 3)) ||
-               ((iVar7 == 0x27 &&
-                (uVar8 = RotDiff(GameCam.hdg_to_player,(c->obj).hdg),
-                (int)(((int)uVar8 >> 0x1f ^ uVar8) - ((int)uVar8 >> 0x1f)) < 0x6000)))) ||
-              ((iVar7 == 0x29 &&
-               (((((GemPath == 1 || (GemPath == 3)) || (Death == 1)) ||
-                 ((Death == 3 || (Bonus == 1)))) || (Bonus == 3)))))))) {
-            bVar4 = false;
-          }
-          if (bVar4) {
-            iVar5 = iVar5 + 1;
-            *(int *)((int)&local_208 + iVar6) = iVar7;
-            iVar6 = iVar6 + 4;
-          }
-        }
-        iVar7 = iVar7 + 1;
-        qrnd = qrnd + 4;
-      } while (iVar7 < 0x76);
-      if (iVar5 < 1) goto LAB_80019374;
-      do {
-        iVar6 = -1;
-        if (iVar5 < 2) {
-          qrnd = 0;
+//92% NGC
+s32 NewCharacterIdle(struct creature_s *c,struct CharacterModel *model) {
+  s32 ok;
+  s32 count;
+  s32 i;
+  s32 sfx;
+  s32 rot;
+  s32 list [118];
+  
+  if (GameMode != 1) {
+        if (((c->idle_mode == 0) && (c->idle_sigh == 0)) && (c->idle_sigh = 1, model->anmdata[0x3d] != NULL)) {
+          c->idle_repeat = 1;
+          c->idle_action = 0x3d;
+          i = 0x22;
         }
         else {
-          qrnd = qrand();
-          qrnd = qrnd / (0xffff / iVar5 + 1);
-        }
-        sVar1 = (c->obj).character;
-        sVar2 = *(short *)((int)&local_208 + qrnd * 4 + 2);
-        c->idle_repeat = '\x01';
-        c->idle_action = sVar2;
-        if (sVar1 == 0) {
-          if (sVar2 == 0x28) {
-            qrnd = qrand();
-            if (qrnd < 0) {
-              qrnd = qrnd + 0x1fff;
-            }
-            iVar6 = 0x10;
-            c->idle_repeat = (char)(qrnd >> 0xd) + '\b';
-          }
-          else if (0x28 < sVar2) {
-            if (sVar2 == 0x29) {
-              qrnd = qrand();
-              if (qrnd < 0) {
-                qrnd = qrnd + 0x3fff;
+              for (count = 0, i = 0; i < 0x76; i++) {
+                if ((model->anmdata[i] != 0) && ((model->animlist[i]->flags & 8) != 0)) {
+                  ok = 1;
+                  if (((c == player) && ((c->obj).character == 0)) && ((((GameMode == 1 && ( (i == 0x25) 
+                      || (i == 0x26) || (i == 0x27))) ||
+                       ((i == 0x27 && (rot=(RotDiff(GameCam->hdg_to_player,(c->obj).hdg)),ABS(rot) < 0x6000)))) || ((i == 0x29 &&
+                       (((((GemPath == 1 || (GemPath == 3)) || (Death == 1)) ||
+                         ((Death == 3 || (Bonus == 1)))) || (Bonus == 3)))))))) {
+                    ok = 0;
+                  }
+                  if (ok) {
+                    count++;
+                    list[count] = ok;
+                  }
+                }
               }
-              c->idle_repeat = (char)(qrnd >> 0xe) + '\x02';
-            }
-            else if (sVar2 == 0x3d) {
-              iVar6 = 0x22;
-            }
-          }
+              if (count < 1) return 0;
+               while ((count < 2) || (c->idle_action == c->old_idle_action)) {
+                sfx = -1;
+                if (count > 2) {
+                  i = qrand() / (0xffff / count + 1);
+                }
+                else {
+                  i = 0;
+                }
+                c->idle_repeat = 1;
+                c->idle_action = list[i];
+                if ((c->obj).character == 0) {
+                    switch(c->idle_action) {
+                            case 0x29:
+                                c->idle_repeat = (char)(qrand() / 0x4000) + 2;
+                            break;
+                            case 0x28:
+                                  c->idle_repeat = (char) (qrand() / 0x2000) + 8;
+                                  sfx = 0x10;
+                            break;
+                            case 0x3d:
+                                sfx = 0x22;
+                            break;
+                            case 0x27:
+                            break;
+                    }
+                }
+              }
         }
-      } while ((iVar5 >= 2) && (c->idle_action == c->old_idle_action));
-    }
-    c->idle_mode = '\x01';
-    c->old_idle_action = c->idle_action;
-    if (('\x01' < c->idle_repeat) && ((model->animlist[c->idle_action]->flags & 1) == 0)) {
-      c->idle_repeat = '\x01';
-    }
-    uStack_2c = (int)c->idle_repeat ^ 0x80000000;
-    c->idle_time = 0.0;
-    fVar3 = (model->anmdata[c->idle_action]->time - 1.0) *
-            (float)((double)CONCAT44(0x43300000,uStack_2c) - 4503601774854144.0);
-    c->idle_wait = fVar3;
-    uVar8 = (uint)model->animlist[c->idle_action]->blend_out_frames;
-    if (uVar8 != 0) {
-      uStack_2c = uVar8 ^ 0x80000000;
-      fVar3 = fVar3 - (float)((double)CONCAT44(0x43300000,uStack_2c) - 4503601774854144.0) * 0.5;
-      c->idle_wait = fVar3;
-      if (fVar3 < 1.0) {
-        c->idle_wait = 1.0;
-      }
-    }
-    local_30 = 0x43300000;
-    if (iVar6 != -1) {
-      GameSfx(iVar6,&(c->obj).pos);
-    }
-    iVar5 = 1;
+        c->idle_mode = 1;
+        c->old_idle_action = c->idle_action;
+        if ((1 < c->idle_repeat) && ((model->animlist[c->idle_action]->flags & 1) == 0)) {
+          c->idle_repeat = 1;
+        }
+        c->idle_time = 0.0f;
+        c->idle_wait = (model->anmdata[c->idle_action]->time - 1.0f) * c->idle_repeat;
+        i = (s32)model->animlist[c->idle_action]->blend_out_frames;
+        if ((i != 0) && (c->idle_wait -= i * 0.5f, c->idle_wait < 1.0f)) {
+          c->idle_wait = 1.0f;
+        }
+        if (i != -1) {
+          GameSfx(sfx,&(c->obj).pos);
+        }
+        return 1;
   }
-  return iVar5;
+  return 0;
 }
 
 //NGC MATCH
@@ -1264,7 +1184,6 @@ void ProcessCreatures(void) {
   return;
 }
 
-*/
 //NGC MATCH
 void EvalModelAnim(struct CharacterModel *model,struct anim_s *anim,struct numtx_s *m,struct numtx_s *tmtx, float ***dwa, struct numtx_s *mLOCATOR) {
     short layertab [2] = {0, 1};
@@ -1519,7 +1438,7 @@ Exit:
     return Drawn;
 }
 
-//94% NGC
+//98% NGC
 void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,float xz_distance) {
   float fVar2; //temp
   float t;
@@ -1530,34 +1449,34 @@ void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,fl
   if (anim == NULL) {
     return;
   }
-  if (anim->blend != '\0') {
+  if (anim->blend != 0) {
         anim->blend_frame++;
-        if (anim->blend_frames == anim->blend_frame) {
-          anim->blend = '\0';
-          anim->action = (s16)anim->blend_dst_action;
+        if (anim->blend_frame == anim->blend_frames) {
+          anim->action = anim->blend_dst_action;
           anim->anim_time = anim->blend_dst_time;
+          anim->blend = 0;
         }
   }
-      else  if (anim->newaction != anim->oldaction) {
+        else if (anim->newaction != anim->oldaction) {
               if ((((anim->oldaction != -1) && (anim->newaction != -1)) && (mod->anmdata[anim->oldaction] != NULL)) && (((mod->anmdata[anim->newaction] != NULL &&
                    (1 < mod->animlist[anim->oldaction]->blend_out_frames)) && (1 < mod->animlist[anim->newaction]->blend_in_frames)))) {
                     anim->blend_dst_action = anim->newaction;
-                    anim->blend = '\x01';
+                    anim->blend = 1;
                     anim->blend_src_action = anim->oldaction;
                     anim->blend_src_time = anim->anim_time;
-                    if ((((mod->animlist[anim->oldaction]->flags & 1) == 0) || ((mod->animlist[anim->newaction]->flags & 1) == 0))
-                       || ((mod->animlist[anim->oldaction]->speed != mod->animlist[anim->newaction]->speed || (mod->anmdata[anim->oldaction]->time == mod->anmdata[anim->newaction]->time)))) {
+                    if ((((mod->animlist[anim->oldaction]->flags & 1) != 0) && ((mod->animlist[anim->newaction]->flags & 1) != 0))
+                       && ((mod->animlist[anim->oldaction]->speed == mod->animlist[anim->newaction]->speed && (mod->anmdata[anim->oldaction]->time == mod->anmdata[anim->newaction]->time)))) {
                       anim->blend_dst_time = anim->anim_time;
                     }
                     else {
                       anim->blend_dst_time = 1.0f;
                     }
-                    if (((mod->character == 0) && (PLAYERCOUNT != 0)) && (player->used != '\0')) {
+                    if (((mod->character == 0) && (PLAYERCOUNT != 0)) && (player->used != 0)) {
                       if (anim->blend_dst_action == 3) {
-                        anim->blend_dst_time = ((float)(player->crouch_pos) * (mod->anmdata[3]->time - 1.0f)) / (float)(player->OnFootMoveInfo->CROUCHINGFRAMES);
+                        anim->blend_dst_time = ((float)(player->crouch_pos) * (mod->anmdata[2]->time - 1.0f)) / (float)(player->OnFootMoveInfo->CROUCHINGFRAMES);
                       }
                       else if (anim->blend_dst_action == 5) {
-                        anim->blend_dst_time = ((float)(player->OnFootMoveInfo->CROUCHINGFRAMES - player->crouch_pos) * (mod->anmdata[5]->time - 1.0f)) / (float)player->OnFootMoveInfo->CROUCHINGFRAMES;
+                        anim->blend_dst_time = ((float)(player->OnFootMoveInfo->CROUCHINGFRAMES - player->crouch_pos) * (mod->anmdata[4]->time - 1.0f)) / (float)player->OnFootMoveInfo->CROUCHINGFRAMES;
                       }
                     }
                     anim->blend_frame = 0;
@@ -1565,18 +1484,16 @@ void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,fl
                     if (mod->animlist[anim->oldaction]->blend_out_frames < anim->blend_frames) {
                       anim->blend_frames = (u16)mod->animlist[anim->oldaction]->blend_out_frames;
                     }
-                    goto LAB_8001fcbc;
+              } else {
+                  anim->action = 0;
+                  anim->anim_time = 1.0f;   
               }
-              anim->action = 0;
-              anim->anim_time = 1.0f;
-        }
-        else {
+        } else {
           anim->action = anim->newaction;
-          anim->blend = '\0';
+          anim->blend = 0;
         }
-LAB_8001fcbc:
-  anim->flags = '\0';
-  if (anim->blend != '\0') {
+  anim->flags = 0;
+  if (anim->blend != 0) {
         if (mod->anmdata[anim->blend_src_action] == NULL) {
           return;
         }
@@ -1587,12 +1504,12 @@ LAB_8001fcbc:
         if ((mod->animlist[anim->blend_src_action]->flags & 0x10) != 0) {
           t *= xz_distance * 10.0f;
         }
-        t = anim->blend_src_time + t;
-        anim->blend_src_time = t;
+        //t += anim->blend_src_time;
+        anim->blend_src_time += t;
         fVar2 = mod->anmdata[anim->blend_src_action]->time;
-        if (t > fVar2) {
+        if (fVar2 > anim->blend_src_time) {
           if ((mod->animlist[anim->blend_src_action]->flags & 1) != 0) {
-            anim->blend_src_time = t - (fVar2 - 1.0f);
+            anim->blend_src_time -= (fVar2 - 1.0f);
           }
           else {
             anim->blend_src_time = fVar2;
@@ -1602,19 +1519,17 @@ LAB_8001fcbc:
         if ((mod->animlist[anim->blend_dst_action]->flags & 0x10) != 0) {
           t *= xz_distance * 10.0f;
         }
-        //t = anim->blend_dst_time + t;
         anim->blend_dst_time = anim->blend_dst_time + t;
         fVar2 = mod->anmdata[anim->blend_dst_action]->time;
-        if (anim->blend_dst_time <= fVar2) {
-          return;
+        if (fVar2 > anim->blend_dst_time) {
+            if ((mod->animlist[anim->blend_dst_action]->flags & 1) != 0) {
+              anim->flags = anim->flags | 2;
+              anim->blend_dst_time = t - (fVar2 - 1.0f);
+              return;
+            }
+            anim->blend_dst_time = fVar2;
+            anim->flags = anim->flags | 1;
         }
-        if ((mod->animlist[anim->blend_dst_action]->flags & 1) != 0) {
-          anim->flags = anim->flags | 2;
-          anim->blend_dst_time = t - (fVar2 - 1.0f);
-          return;
-        }
-        anim->blend_dst_time = fVar2;
-        anim->flags = anim->flags | 1;
   }
   else {
         if (mod->anmdata[anim->action] == NULL) {
@@ -1624,19 +1539,18 @@ LAB_8001fcbc:
         if ((mod->animlist[anim->action]->flags & 0x10) != 0) {
           t *= xz_distance * 10.0f;
         }
-        //t = anim->anim_time + t;
-        anim->anim_time = anim->anim_time + t;
+        anim->anim_time += t;
         fVar2 = mod->anmdata[anim->action]->time;
-        if (t <= fVar2) {
-          return;
+        if (fVar2 > t) {
+            if ((mod->animlist[anim->action]->flags & 1) != 0) {
+              anim->flags = 2;
+              anim->anim_time -= (fVar2 - 1.0f);
+              return;
+            }
+            anim->anim_time = fVar2;
+            anim->flags = 1;
         }
-        if ((mod->animlist[anim->action]->flags & 1) != 0) {
-          anim->flags = '\x02';
-          anim->anim_time -= (fVar2 - 1.0f);
-          return;
-        }
-        anim->anim_time = fVar2;
-        anim->flags = 1;
+
   }
   return;
 }

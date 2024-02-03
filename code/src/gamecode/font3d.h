@@ -40,5 +40,6 @@ typedef struct {
 } FONT3DOBJECT;
 
 volatile FONT3DOBJECT Font3DObjTab[26];
+volatile FONT3DCHARACTER Font3DTab[62];
 
 #endif // !FONT3D_H

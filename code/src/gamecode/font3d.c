@@ -245,141 +245,93 @@ LAB_800277e0:
   return 1;
 }
 
-
-
-void Reset3DFontObjects(void)
-
-{
-  Font3DObjTab *tab;
-  int i;
+//NGC MATCH
+void Reset3DFontObjects(void) {
+  volatile struct objtemp_s *tab;
+  struct CharacterModel* model;
+  s32 i;
+  s32 j;
   
-  i = 0x1a;
   tab = Font3DObjTab;
-  do {
-    tab->anim_time = 1.0;
+  for (i = 0; i < 0x1a; i++, tab++) {
+    tab->anim_time = 1.0f;
     if ((tab->flags & 1) != 0) {
-      if ((tab->i != -1) && ((tab->action & 0x80U) == 0)) {
-        if (tab->action < 'v') {
-          if (CRemap[tab->i] != -1) {
-            if (*(int *)(CRemap[tab->i] * 0x7ac + -0x7fdac120 + tab->action * 4) != 0) {
-              tab->anim_time = 1.0;
-            }
+          if ((tab->i != -1) && ((tab->action & 0x80U) == 0)) {
+                if (tab->action < 'v') {
+                        j = CRemap[tab->i];
+                      if (j != -1) {
+                             model = &CModel[j];
+                            if (model->anmdata[tab->action] != 0) {
+                                tab->anim_time = 1.0f;
+                            }
+                      }
+                }
           }
-        }
-      }
     }
-    tab = tab + 1;
-    i = i + -1;
-  } while (i != 0);
+  }
   return;
 }
 
+//NGC MATCH
+void InitFont3D(struct nugscn_s* gscn) {
+    struct numtl_s* mtl;
+    int i;
 
-
-void InitFont3D(nugscn_s *gscn)		//TODO
-{
-  int find;
-  short *psVar1;
-  uint uVar2;
-  numtl_s *mtl;
-  short sVar3;
-  int i;
-  nuhspecial_s *hspec;
-  char **name;
-  Font3DAccentTab *ptr;
-  char *ascii;
-  Font3DAccentTab *tab;
-  
-  if (Font3DTab[0].ascii != '\0') {
-    i = 0;
-    do {
-      *(undefined4 *)((int)&Font3DTab[0].obj.scene + i) = 0;
-      *(undefined4 *)((int)&Font3DTab[0].obj.special + i) = 0;
-      ascii = &Font3DTab[1].ascii + i;
-      i = i + 0x10;
-    } while (*ascii != '\0');
-  }
-  i = 0x100;
-  psVar1 = Font3DRemap + 0xff;
-  do {
-    *psVar1 = -1;
-    psVar1 = psVar1 + -1;
-    i = i + -1;
-  } while (i != 0);
-  i = 7;
-  tab = Font3DAccentTab;
-  do {
-    (tab->obj).scene = (nugscn_s *)0x0;
-    (tab->obj).special = (nuspecial_s *)0x0;
-    tab = tab + 1;
-    i = i + -1;
-  } while (i != 0);
-  if (gscn != (nugscn_s *)0x0) {
-    sVar3 = 0;
-    if (Font3DTab[0].ascii != '\0') {
-      hspec = &Font3DTab[0].obj;
-      i = 0;
-      do {
-        find = NuSpecialFind(gscn,hspec,*(char **)((int)&Font3DTab[0].name + i));
-        if (find != 0) {
-          Font3DRemap[(byte)(&Font3DTab[0].ascii)[i]] = sVar3;
-        }
-        hspec = hspec + 2;
-        ascii = &Font3DTab[1].ascii + i;
-        sVar3 = sVar3 + 1;
-        i = i + 0x10;
-      } while (*ascii != '\0');
+    for (i = 0; Font3DTab[i].ascii != 0; i++) {
+        Font3DTab[i].obj.scene = NULL;
+        Font3DTab[i].obj.special = NULL;
     }
-    name = &Font3DAccentTab[0].name;
-    tab = Font3DAccentTab;
-    do {
-      ptr = tab + 1;
-      NuSpecialFind(gscn,&tab->obj,*name);
-      name = name + 3;
-      tab = ptr;
-    } while ((int)ptr < -0x7fec95cb);
-    i = 0;
-    if (0 < gscn->nummtl) {
-      find = 0;
-      do {
-        mtl = *(numtl_s **)(find + (int)gscn->mtls);
-        uVar2 = (uint)mtl->special_id;
-        if (uVar2 - 1 < 5) {
-          Font3DMtlTab[-1][uVar2 * 2 + 4] = mtl;
-        }
-        i = i + 1;
-        find = find + 4;
-      } while (i < gscn->nummtl);
+    for (i = 0; i < 256; i++) {
+        Font3DRemap[i] = -1;
     }
-  }
-  font3d_initialised = 1;
-  return;
+    for (i = 0; i < 7; i++) {
+        (Font3DAccentTab[i].obj).scene = NULL;
+        (Font3DAccentTab[i].obj).special = NULL;
+    }
+    if (gscn != NULL) {
+        for (i = 0; Font3DTab[i].ascii != 0; i++) {
+            if (NuSpecialFind(gscn, &Font3DTab[i].obj, Font3DTab[i].name) != 0) {
+                Font3DRemap[(u8)(Font3DTab[i].ascii)] = (s16)i;
+            }
+        }
+        for (i = 0; i <= 6; i++) {
+            NuSpecialFind(gscn, &Font3DAccentTab[i].obj, Font3DAccentTab[i].name);
+        }
+        for (i = 0; i < gscn->nummtl; i++) {
+            mtl = gscn->mtls[i];
+            if (mtl->special_id == 1 || mtl->special_id == 2 || mtl->special_id == 3 || mtl->special_id == 4 || mtl->special_id == 5) {
+                Font3DMtlTab[mtl->special_id - 1][1] = mtl;
+            }
+        }
+    }
+    font3d_initialised = 1;
+    return;
 }
 
 static char j_bc[2][11];
 static char j_bd[2][41];
 
+//NGC MATCH
 s32 CombinationCharacterBD(char c0,char c1) {
     char *p;
     
-    p = (char *)j_bd;
+    p = *j_bd;
 
-    for (p = (char *)j_bd; *p != '\0'; p+= 2) {
-        if ((c0 == (int)*p) && (c1 == (int)p[1])) {
+    for (p = *j_bd; *p != '\0'; p+= 2) {
+        if ((c0 == *p) && (c1 == p[1])) {
             return 1;
         }
     }
     return 0;
 }
 
-
+//NGC MATCH
 s32 CombinationCharacterBC(char c0,char c1) {
     char *p;
     
-    p = (char *)j_bc;
-    for (p = (char *)j_bc; *p != '\0'; p+= 2) {
-            if ((c0 == (int)*p) &&
-               (c1 == (int)p[1])) {
+    p = *j_bc;
+    for (p = *j_bc; *p != '\0'; p+= 2) {
+            if ((c0 == *p) && (c1 == p[1])) {
                 return 1;
             }
     }
@@ -387,334 +339,354 @@ s32 CombinationCharacterBC(char c0,char c1) {
 }
 
 
+//72% NGC
+void Text3D(char* txt, float x, float y, float z, float scalex, float scaley, float scalez, s32 align, s32 colour) {
+    s32 i;
+    s32 j;
+    s32 l;
+    float xpulsescale;
+    float orig_x;
+    float dx;
+    float dy;
+    float w;
+    float f;
+    float x0;
+    float y0;
+    float dx_scale;
+    volatile struct objtemp_s* obj;
+    s32 accent;
+    char c;
+    char c1;
+    s32 rot;
 
-void Text3D(char *txt,float x,float y,float z,float scalex,float scaley,float scalez,int align,
-           int colour)
+    // ------------------------
+    float fVar1;
+    // char c1;
+    //char bVar2;
+    //s32 size_str;
+    s32 iVar3;
+    u16 zrot;
+    //struct nugscn_s* scn;
+    //struct nuspecial_s* tmp1;
+    //s32 iVar4;
+    u32 uVar5;
+    //s32 iVar6;
+    float dVar7;
+    //float dVar71;
+    float dVar8;
+    float dVar9;
+    //float dVar11;
+    float dVar12;
+    float dVar17;
+    float dVar18;
+    float temp_f0;
+    float f28;
+    float f30;
+    // char c;
 
-{
-  float fVar1;
-  char c1;
-  byte bVar2;
-  int size_str;
-  int iVar3;
-  ushort zrot;
-  nugscn_s *scn;
-  nuspecial_s *obj;
-  int iVar4;
-  uint uVar5;
-  int iVar6;
-  double dVar7;
-  double dVar8;
-  double dVar9;
-  double dVar10;
-  double dVar11;
-  double dVar12;
-  double dVar13;
-  double dVar14;
-  double dVar15;
-  double posY__1;
-  double dVar16;
-  double dVar17;
-  double dVar18;
-  byte local_e8 [96];
-  
-  dVar13 = (double)scalez;
-  dVar14 = (double)scaley;
-  dVar15 = (double)scalex;
-  dVar10 = (double)z;
-  posY__1 = (double)y;
-  dVar16 = (double)x;
-  dVar12 = 1.0;
-  if (font3d_initialised == 0) {
-    return;
-  }
-  if (font3d_scene == (nugscn_s *)0x0) {
-    return;
-  }
-  dVar17 = 0.0;
-  font3d_dx = 0.0;
-  font3d_dy = 0.0;
-  if (txt == (char *)0x0) {
-    font3d_xright = x;
-    font3d_xmid = x;
-    font3d_dx = 0.0;
-    font3d_dy = 0.0;
-    font3d_xleft = x;
-    font3d_ybottom = y;
-    font3d_ymid = y;
-    font3d_ytop = y;
-    return;
-  }
-  dVar7 = dVar16;
-  font3d_xright = x;
-  font3d_xmid = x;
-  font3d_xleft = x;
-  font3d_ybottom = y;
-  font3d_ymid = y;
-  font3d_ytop = y;
-  size_str = strlen(txt);
-  if (size_str < 1) {
-    return;
-  }
-  iVar4 = 0;
-  local_e8[0] = *txt;
-  while (local_e8[0] != 0) {
-    if (local_e8[0] == 0x23) {
-      if (txt[iVar4 + 1] != '\0') {
-        iVar4 = iVar4 + 1;
-      }
+
+    orig_x = x;
+    dVar12 = 1.0f;
+    if (font3d_initialised == 0) {
+        return;
     }
-    else if (Game.language == 'c') {
-      c1 = txt[iVar4 + 1];
-      iVar6 = (int)c1;
-      if (iVar6 != 0) {
-        dVar18 = 1.0;
-        if (iVar6 == 0x20) {
-          if ((local_e8[0] == 0x3a) || (local_e8[0] == 0x2e)) {
-            dVar18 = 0.5;
-          }
-        }
-        else if ((((((int)(char)local_e8[0] - 0x38U < 2) || ((int)(char)local_e8[0] - 0x41U < 6))  &&
-                  ((iVar6 - 0x30U < 10 || (iVar6 - 0x41U < 6)))) &&
-                 (dVar18 = (double)FONT3D_JSCALEDX, txt[iVar4 + 2] == 'B')) &&
-                (((txt[iVar4 + 3] == 'D' &&
-                  (iVar6 = CombinationCharacterBD(local_e8[0],c1), iVar6 != 0)) ||
-                 ((txt[iVar4 + 3] == 'C' &&
-                  (iVar6 = CombinationCharacterBC(local_e8[0],c1), iVar6 != 0)))))) {
-          iVar4 = iVar4 + 2;
-        }
-        dVar17 = (double)(float)(dVar17 + dVar18);
-        iVar4 = iVar4 + 1;
-      }
+    if (font3d_scene == NULL) {
+        return;
     }
-    else {
-      if ((local_e8[0] == 0x3a) || (local_e8[0] == 0x2e)) {
-        fVar1 = 0.5;
-      }
-      else {
-        fVar1 = 1.0;
-      }
-      dVar17 = (double)(float)(dVar17 + (double)fVar1);
+
+    font3d_dy = font3d_dx = 0.0f;
+    font3d_xleft = font3d_xmid = font3d_xright = x;
+    font3d_ytop = font3d_ymid = font3d_ybottom = y;
+
+    if (txt == NULL) {
+        return;
     }
-    iVar4 = iVar4 + 1;
-    local_e8[0] = txt[iVar4];
-  }
-  uVar5 = align & 0x14;
-  dVar18 = (double)(float)(dVar15 * 0.1000000014901161);
-  if (uVar5 == 0x10) {
-    dVar8 = dVar18 * dVar17 - (double)(float)(dVar18 * 0.5);
-LAB_80027e40:
-    dVar7 = dVar7 - (double)(float)dVar8;
-  }
-  else {
-    if (uVar5 != 4) {
-      dVar8 = (double)(float)(dVar18 * dVar17) * 0.5 - (double)(float)(dVar18 * 0.5);
-      goto LAB_80027e40;
+    dVar7 = x;
+    
+    l = strlen(txt);
+    if (l < 1) {
+        return;
     }
-    dVar7 = dVar18 * 0.5 + dVar7;
-  }
-  dVar7 = (double)((float)dVar7 - (float)(dVar18 * 0.5));
-  if (((disable_safearea_clamp == 0) && (dVar7 < -0.8100000023841858)) &&
-     (-1.299999952316284 < dVar7)) {
-    dVar15 = (double)(float)(dVar15 * (double)((float)(-0.8100000023841858 - dVar16) /
-                                              (float)(dVar7 - dVar16)));
-    dVar12 = 0.5;
-  }
-  if ((align & 0x20U) != 0) {
-    dVar7 = (double)menu_pulsate;
-    dVar13 = (double)(float)(dVar13 * dVar7);
-    dVar15 = (double)(float)(dVar15 * (double)(float)((double)(float)(dVar7 - 1.0) * dVar12 + 1.0) );
-    dVar14 = (double)(float)(dVar14 * dVar7);
-  }
-  font3d_dx = (float)(dVar15 * 0.1000000014901161);
-  dVar12 = (double)font3d_dx;
-  if (uVar5 == 0x10) {
-    dVar17 = dVar12 * dVar17 - (double)(float)(dVar12 * 0.5);
-  }
-  else {
-    if (uVar5 == 4) {
-      dVar16 = dVar12 * 0.5 + dVar16;
-      goto LAB_80027f20;
-    }
-    dVar17 = (double)(float)(dVar12 * dVar17) * 0.5 - (double)(float)(dVar12 * 0.5);
-  }
-  dVar16 = dVar16 - (double)(float)dVar17;
-LAB_80027f20:
-  dVar17 = (double)(float)dVar16;
-  font3d_dy = (float)(dVar14 * 0.1000000014901161) * FONT3DYMUL;
-  dVar16 = (double)font3d_dy;
-  font3d_xleft = (float)(dVar17 - (double)(float)(dVar12 * 0.5));
-  if ((align & 10U) == 8) {
-    posY__1 = (double)(float)(dVar16 * 0.5 + posY__1);
-  }
-  else if ((align & 10U) == 2) {
-    posY__1 = (double)(float)(posY__1 - (double)(float)(dVar16 * 0.5));
-  }
-  iVar4 = 0;
-  if ((uint)colour < 5) {
-    iVar4 = colour;
-  }
-  iVar6 = 0;
-  nurndr_forced_mtl_table = Font3DMtlTab + iVar4 * 2;
-  if (0 < size_str) {
-    dVar7 = 1.0;
-    dVar18 = 4.0;
-    do {
-      local_e8[0] = *txt;
-      if (Game.language == 'c') {
-        if (((byte *)txt)[1] == 0) break;
-        if ((local_e8[0] == 0x23) || (((byte *)txt)[1] == 0x20)) goto LAB_80028014;
-LAB_80028414:
-        if ((local_e8[0] == 0x3a) || (dVar8 = dVar12, local_e8[0] == 0x2e)) {
-          dVar8 = (double)(float)(dVar12 * 0.5);
-        }
-        dVar17 = (double)(float)(dVar8 * dVar7 + dVar17);
-        if (Game.language == 'c') {
-LAB_8002844c:
-          txt = (char *)((byte *)txt + 1);
-          iVar6 = iVar6 + 1;
-        }
-      }
-      else {
-LAB_80028014:
-        if (((char)local_e8[0] < '\0') && ((local_e8[0] != 0xf8 && (local_e8[0] != 0xfe)))) {
-          if ((char)local_e8[0] < '\0') {
-            iVar4 = RemapAccentedCharacter((char *)local_e8);
-            if (iVar4 == -1) {
-              dVar8 = (double)FONT3DSIZE;
-              DrawPanel3DObject(-1,(float)dVar17,(float)posY__1,(float)dVar10,
-                                (float)(dVar8 * dVar15),(float)(dVar8 * dVar14),
-                                (float)((double)(float)(dVar8 * dVar13) * dVar18),0,0,0,font3d_scen e
-                                ,Font3DTab[Font3DRemap[122]].obj.special,1);
+    
+    f28 = 0.0f;
+    for (i = 0; txt[i] != '\0'; i++) {
+        if (c == '#') {
+            if (txt[i + 1] != '\0') {
+                i++;
             }
-            else {
-              if (Font3DRemap[local_e8[0]] != -1) {
-                dVar8 = (double)FONT3DSIZE;
-                DrawPanel3DObject(-1,(float)dVar17,(float)posY__1,(float)dVar10,
-                                  (float)(dVar8 * dVar15),(float)(dVar8 * dVar14),
-                                  (float)((double)(float)(dVar8 * dVar13) * dVar18),0,0,0,
-                                  font3d_scene,Font3DTab[Font3DRemap[local_e8[0]]].obj.special,1);
-              }
-              dVar8 = (double)FONT3DSIZE;
-              dVar9 = dVar8 * dVar14;
-              iVar3 = -1;
-              obj = Font3DAccentTab[iVar4].obj.special;
-              fVar1 = (float)(dVar8 * dVar13) * 6.0;
-              dVar8 = dVar8 * dVar15;
-              scn = font3d_scene;
-LAB_800283c0:
-              DrawPanel3DObject(iVar3,(float)dVar17,(float)posY__1,(float)dVar10,(float)dVar8,
-                                (float)dVar9,fVar1,0,0,0,scn,obj,1);
-            }
-          }
-          goto LAB_80028414;
-        }
-        iVar4 = (int)(char)local_e8[0];
-        if (iVar4 != 0x23) {
-          if ((iVar4 - 0x61U < 0x1a) && (Font3DRemap[local_e8[0]] == -1)) {
-            if (*(short *)&(&H2OElec[0x13].start)[iVar4].z != -1) {
-              if ((*(byte *)((int)&(&H2OElec[0x13].start)[iVar4].z + 2) & 2) == 0) {
-                if ((*(byte *)((int)&(&H2OElec[0x13].start)[iVar4].z + 2) & 1) != 0) {
-                  DrawPanel3DCharacter
-                            ((int)*(short *)&(&H2OElec[0x13].start)[iVar4].z,(float)dVar17,
-                             (float)posY__1,(float)dVar10,
-                             (float)((double)(&H2OElec[0x13].end)[iVar4].y * dVar15),
-                             (float)((double)(&H2OElec[0x13].end)[iVar4].y * dVar14),
-                             (float)((double)(&H2OElec[0x13].end)[iVar4].y * dVar13),0,0,0,
-                             (int)*(char *)((int)&(&H2OElec[0x13].start)[iVar4].z + 3),
-                             (&H2OElec[0x13].end)[iVar4].x,1);
+        } else if (Game.language == 'c') {
+            c1 = txt[i + 1];
+            if (c1 != 0) {
+                dVar18 = 1.0f;
+                //iVar6 = (s32)c1;
+                if (c1 == ' ') {
+                    if ((c == ':') || (c == '.')) {
+                        dVar18 = 0.5f;
+                    }
+                } else if (((c == '8' || c == '9') || (c >= 'A' && c <= 'F')) && ((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')))
+                {
+                    dVar18 = FONT3D_JSCALEDX;
+                    if (txt[i + 2] == 'B'
+                        && ((txt[i + 3] == 'D' && CombinationCharacterBD(c, c1))
+                            || (txt[i + 3] == 'C' && CombinationCharacterBC(c, c1))))
+                    {
+                        i = i + 2;
+                    }
                 }
-              }
-              else if (ObjTab[*(short *)&(&H2OElec[0x13].start)[iVar4].z].obj.special !=
-                       (nuspecial_s *)0x0) {
-                iVar3 = (int)*(short *)&(&H2OElec[0x13].start)[iVar4].z;
-                dVar8 = (double)(&H2OElec[0x13].end)[iVar4].y * dVar15;
-                dVar9 = (double)(&H2OElec[0x13].end)[iVar4].y * dVar14;
-                fVar1 = (float)((double)(&H2OElec[0x13].end)[iVar4].y * dVar13);
-                obj = ObjTab[*(short *)&(&H2OElec[0x13].start)[iVar4].z].obj.special;
-                scn = ObjTab[*(short *)&(&H2OElec[0x13].start)[iVar4].z].obj.scene;
-                goto LAB_800283c0;
-              }
+                f28 += dVar18;
+                i++;
             }
-          }
-          else {
-            iVar4 = (int)Font3DRemap[local_e8[0]];
-            if (iVar4 == -1) {
-              iVar4 = (int)Font3DRemap[122];
+        } else {
+            if ((c == ':') || (c == '.')) {
+                f28 += 0.5f;
+            } else {
+                f28 += 1.0f;
             }
-            iVar3 = (int)(char)local_e8[0];
-            if (iVar3 != 0x20) {
-              if ((((iVar3 - 0x78U < 2) || (iVar3 == 0x61)) || (iVar3 == 0x62)) ||
-                 ((iVar3 == 0x77 || (iVar3 == 0x6e)))) {
-                fVar1 = 1.0;
-              }
-              else {
-                fVar1 = 4.0;
-              }
-              if ((local_e8[0] == 0x3a) || (dVar8 = dVar17, local_e8[0] == 0x2e)) {
-                dVar8 = (double)(float)(dVar17 - (double)(float)(dVar12 * 0.25));
-              }
-              dVar9 = posY__1;
-              if (local_e8[0] == 0xfe) {
-                dVar8 = (double)(float)(dVar8 - (double)(float)(dVar12 * 0.2000000029802322));
-                dVar9 = (double)(float)(dVar16 * 0.300000011920929 + posY__1);
-              }
-              zrot = 0;
-              if ((iVar6 == 0) &&
-                 (zrot = -(ushort)(local_e8[0] == 0x3f) & 0x8000, local_e8[0] == 0x21)) {
-                zrot = 0x8000;
-              }
-              dVar11 = (double)FONT3DSIZE;
-              DrawPanel3DObject(-1,(float)dVar8,(float)dVar9,(float)dVar10,(float)(dVar11 * dVar15 ),
-                                (float)(dVar11 * dVar14),(float)(dVar11 * dVar13) * fVar1,0,0,zrot ,
-                                font3d_scene,Font3DTab[iVar4].obj.special,1);
-            }
-          }
-          goto LAB_80028414;
+            //f28 += fVar1;
         }
-        bVar2 = ((byte *)txt)[1];
-        if (bVar2 != '\0') {
-          if (bVar2 == 'g') {
-            iVar4 = 4;
-          }
-          else if ((char)bVar2 < 'h') {
-            if (bVar2 == 'b') {
-              iVar4 = 3;
-            }
-            else if (bVar2 == 'c') {
-              iVar4 = 2;
-            }
-            else {
-LAB_800280b0:
-              iVar4 = -1;
-            }
-          }
-          else if (bVar2 == 'o') {
-            iVar4 = 0;
-          }
-          else {
-            if (bVar2 != 'w') goto LAB_800280b0;
-            iVar4 = 1;
-          }
-          if (iVar4 != -1) {
-            nurndr_forced_mtl_table = Font3DMtlTab + iVar4 * 2;
-          }
-          goto LAB_8002844c;
-        }
-      }
-      iVar6 = iVar6 + 1;
-      txt = (char *)((byte *)txt + 1);
-    } while (iVar6 < size_str);
-  }
-  font3d_ybottom = (float)(posY__1 - (double)(float)(dVar16 * 0.5));
-  font3d_ytop = (float)(posY__1 + (double)(float)(dVar16 * 0.5));
-  font3d_xright = (float)(dVar17 - (double)(float)(dVar12 * 0.5));
-  font3d_ymid = (font3d_ytop + font3d_ybottom) * 0.5;
-  font3d_xmid = (font3d_xleft + font3d_xright) * 0.5;
-  nurndr_forced_mtl_table = (numtl_s **)0x0;
-  return;
-}
+        //iVar4++;
+    }
+    uVar5 = align & 0x14;
+    f30 = (scalex * 0.1f);
 
+    switch (align & 0x14) {
+        case 0x10:
+            dVar7 -= (f30 * f28) - (f30 * 0.5f);
+            break;
+        default:
+            if ((align & 0x14) == 4) {
+                dVar7 = f30 * 0.5f + dVar7;
+                break;
+            }
+            dVar7 -= ((f30 * f28) * 0.5f) - (f30 * 0.5f);
+            break;
+    }
+
+    // if (uVar5 == 0x10) {
+    //     // dVar8 = (dVar18 * dVar17) - (dVar18 * 0.5f);
+    //     dVar7 -= (dVar18 * dVar17) - (dVar18 * 0.5f);
+    // }
+
+    // if (uVar5 == 4) {
+    //     dVar7 = dVar18 * 0.5f + dVar7;
+    // }
+    // else {
+    //     // dVar8 = ((dVar18 * dVar17) * 0.5f) - (dVar18 * 0.5f);
+    //     dVar7 -= ((dVar18 * dVar17) * 0.5f) - (dVar18 * 0.5f);
+    // }
+
+    dVar7 -= (f30 * 0.5f);
+    font3d_xleft = dVar7;
+
+    if (((disable_safearea_clamp == 0) && (dVar7 < -0.81f)) && (-1.3f < dVar7)) {
+        scalex = (scalex * ((-0.81f - x) / (dVar7 - x)));
+        dVar12 = 0.5f;
+    }
+    if ((align & 0x20) != 0) {
+        dVar7 = menu_pulsate;
+        scalex = (scalex * ((dVar7 - 1.0f) * dVar12 + 1.0f));
+        scaley = (scaley * dVar7);
+        scalez = (scalez * dVar7);
+    }
+    font3d_dx = (scalex * 0.1f);
+    //dVar12 = font3d_dx;
+    x = dVar18;
+    if (uVar5 == 0x10) {
+        temp_f0 = (font3d_dx * f28) - (font3d_dx * 0.5f);
+    } else {
+        if (uVar5 == 4) {
+            x = font3d_dx * 0.5f + x;
+            goto LAB_80027f20;
+        } else {
+            temp_f0 = (font3d_dx * f28) * 0.5f - (font3d_dx * 0.5f);
+        }
+    } 
+    x = x - temp_f0;
+LAB_80027f20:
+    dVar17 = x;
+    font3d_dy = (scaley * 0.1f) * FONT3DYMUL;
+    x = font3d_dy;
+    font3d_xleft = (dVar17 - (dVar12 * 0.5f));
+    if ((align & 10U) == 8) {
+        y = (x * 0.5f + y);
+    } else if ((align & 10U) == 2) {
+        y = (y - (x * 0.5f));
+    }
+    i = 0;
+    if ((u32)colour < 5) {
+        i = colour;
+    }
+
+    nurndr_forced_mtl_table = Font3DMtlTab[i];
+    // if (0 < l) {
+    dVar7 = 1.0f;
+    dVar18 = 4.0f;
+    for (j = 0; j < l; j++) {
+        c = *txt;
+        c1 = ((char*)txt)[1];
+        if ((Game.language == 'c') && ((c != '\0') && (c != '#') && (c != ' '))) {
+        LAB_80028414:
+            if ((c == ':') || (dVar8 = dVar12, c == '.')) {
+                dVar8 = (dVar12 * 0.5f);
+            }
+            dVar17 = (dVar8 * dVar7 + dVar17);
+            if (Game.language == 'c') {
+            LAB_8002844c:
+                txt = (char*)((char*)txt + 1);
+                j++;
+            }
+        } else {
+        LAB_80028014:
+            if ((c == '\0') || ((c == 0xf8 || (c == 0xfe)))) {
+                if (c == '#') {
+                    c1 = ((char*)txt)[1];
+                    if (c1 != '\0') {
+                        switch (c1) {
+                            case 'o':
+                                i = 0;
+                                break;
+                            case 'w':
+                                i = 1;
+                                break;
+                            case 'c':
+                                i = 2;
+                                break;
+                            case 'b':
+                                i = 3;
+                                break;
+                            case 'g':
+                                i = 4;
+                                break;
+                            default:
+                                i = -1;
+                                break;
+                        }
+                        if (i != -1) {
+                            nurndr_forced_mtl_table = Font3DMtlTab[i * 2];
+                        }
+                    }
+                } else {
+                    i = (s32)c;
+                    if ((c >= 'a' && c <= 'z') && (Font3DRemap[(char)c] == -1)) {
+                        if (*(short*)&(&H2OElec[0x13].start)[i].z != -1) {
+                            if ((*(char*)((s32) & (&H2OElec[0x13].start)[i].z + 2) & 2) == 0) {
+                                if ((*(char*)((s32) & (&H2OElec[0x13].start)[i].z + 2) & 1) != 0) {
+                                    // iVar3 = (s32)*(short *)&(&H2OElec[0x13].start)[i].z;
+                                    // dVar8 = ((&H2OElec[0x13].end)[i].y * scalex);
+                                    // dVar9 = ((&H2OElec[0x13].end)[i].y * scaley);
+                                    // fVar1 = ((&H2OElec[0x13].end)[i].y * scalez);
+                                    // tmp1 = ObjTab[*(short *)&(&H2OElec[0x13].start)[i].z].obj.special;
+                                    // scn = (s32)*(char *)((s32)&(&H2OElec[0x13].end)[i].z);
+                                    // DrawPanel3DObject(iVar3,dVar17,y,z,
+                                    //       dVar8,dVar9,fVar1,0,0,0,scn,tmp1,1);
+                                    DrawPanel3DCharacter(
+                                        (s32) * (short*)&(&H2OElec[0x13].start)[i].z, dVar17, y, z,
+                                        ((&H2OElec[0x13].end)[i].y * scalex),
+                                        ((&H2OElec[0x13].end)[i].y * scaley),
+                                        ((&H2OElec[0x13].end)[i].y * scalez), 0, 0, 0,
+                                        (s32) * (char*)((s32) & (&H2OElec[0x13].end)[i].z),
+                                        (&H2OElec[0x13].end)[i].x, 1
+                                    );
+                                }
+                            } else if (ObjTab[*(short*)&(&H2OElec[0x13].start)[i].z].obj.special != NULL) {
+                                iVar3 = (s32) * (short*)&(&H2OElec[0x13].start)[i].z;
+                                dVar8 = (&H2OElec[0x13].end)[i].y * scalex;
+                                dVar9 = (&H2OElec[0x13].end)[i].y * scaley;
+                                fVar1 = ((&H2OElec[0x13].end)[i].y * scalez);
+                                // goto LAB_800283c0;
+                                DrawPanel3DObject(iVar3, dVar17, y, z, dVar8, dVar9, fVar1, 0, 0, 0, ObjTab[*(short*)&(&H2OElec[0x13].start)[i].z].obj.scene, ObjTab[*(short*)&(&H2OElec[0x13].start)[i].z].obj.special, 1);
+                            }
+                        }
+                    } else {
+                        i = (s32)Font3DRemap[(char)c];
+                        if (i == -1) {
+                            i = (s32)Font3DRemap[122];
+                        }
+                        iVar3 = (s32)c;
+                        if (c != ' ') {
+                            if (c == 'x' || c == 'y' || c == 'a' || c == 'b' || c == 'w' || c == 'n') {
+                                fVar1 = 1.0f;
+                            } else {
+                                fVar1 = 4.0f;
+                            }
+
+                            if ((c == ':') || (c == '.')) {
+                                dVar8 = (dVar17 - (dVar12 * 0.25f));
+                            } else {
+                                dVar8 = dVar17;
+                            }
+
+                            if (c == '\xFE') {
+                                dVar8 -= (dVar12 * 0.2f);
+                                dVar9 = (x * 0.3f + y);
+                            } else {
+                                dVar9 = y;
+                            }
+
+                            zrot = 0;
+                            if (j == 0) {
+                                zrot = (c == '?') ? 0x8000 : 0;
+                                if (c == '!') {
+                                    zrot = 0x8000;
+                                }
+                            }
+                            //dVar11 = FONT3DSIZE;
+                            DrawPanel3DObject(
+                                -1, dVar8, dVar9, z, (FONT3DSIZE * scalex), (FONT3DSIZE * scaley), (FONT3DSIZE * scalez) * fVar1, 0,
+                                0, zrot, font3d_scene, Font3DTab[i].obj.special, 1
+                            );
+                        }
+                    }
+                    goto LAB_80028414;
+                }
+            } else {
+                if (c < '\0') {
+                    //i = RemapAccentedCharacter(&c);
+                    if (RemapAccentedCharacter(&c) != -1) {
+                        if (Font3DRemap[(char)c] != -1) {
+                            dVar8 = FONT3DSIZE;
+                            DrawPanel3DObject(
+                                -1, dVar17, y, z, (dVar8 * scalex), (dVar8 * scaley), ((dVar8 * scalez) * dVar18), 0, 0,
+                                0, font3d_scene, Font3DTab[Font3DRemap[(char)c]].obj.special, 1
+                            );
+                        }
+                        dVar8 = FONT3DSIZE;
+                        dVar9 = dVar8 * scaley;
+                        iVar3 = -1;
+                        fVar1 = (dVar8 * scalez) * 6.0f;
+                        dVar8 = dVar8 * scalex;
+                    LAB_800283c0:
+                        DrawPanel3DObject(iVar3, dVar17, y, z, dVar8, dVar9, fVar1, 0, 0, 0, font3d_scene, Font3DAccentTab[i].obj.special, 1);
+                    } else {
+                        dVar8 = FONT3DSIZE;
+                        DrawPanel3DObject(
+                            -1, dVar17, y, z, (dVar8 * scalex), (dVar8 * scaley), ((dVar8 * scalez) * dVar18), 0, 0, 0,
+                            font3d_scene, Font3DTab[Font3DRemap[122]].obj.special, 1
+                        );
+                    }
+                }
+                // goto LAB_80028414;
+                if ((c == ':') || (c == '.')) {
+                    dVar8 = dVar8 + (dVar12 * 0.5f) * dVar17;
+                } else {
+                    dVar8 = dVar8 + (dVar7 * dVar17);
+                }
+                if (Game.language == 'c') {
+                    txt++;
+                    j++;
+                }
+            }
+        }
+        txt++;
+    }
+    font3d_ybottom = (y - (x * 0.5f));
+    font3d_ytop = (y + (x * 0.5f));
+    font3d_ymid = (font3d_ytop + font3d_ybottom) * 0.5f;
+    font3d_xright = (dVar8 - (dVar12 * 0.5f));
+    font3d_xmid = (font3d_xleft + font3d_xright) * 0.5f;
+    nurndr_forced_mtl_table = NULL;
+    return;
+}
 
 
 void Text3D2(char *txt,float x,float y,float z,float scalex,float scaley,float scalez,int align,
