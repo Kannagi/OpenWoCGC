@@ -18,18 +18,16 @@ struct memexternal_s *memexternal;
 
 #define ROUND_UP(x, align) (((x) + (align)-1) & (-(align)))
 
-void NuMemSetExternal(union variptr_u* ptr, union variptr_u* end)
-{
-	if (ptr != NULL)
-	{
+//MATCH NGC
+void NuMemSetExternal(union variptr_u* ptr, union variptr_u* end) {
+	if (ptr != NULL) {
 		memexternal = &memext; // Is it the reference to it or not?
-		memext.end = ptr;
-		memext.ptr = end;
+		memext.ptr = ptr;
+		memext.end = end;
+        return;
 	}
-	else
-	{
-		memexternal = ptr;
-	}
+	memexternal = ptr;
+    return;
 }
 
 //MATCH NGC

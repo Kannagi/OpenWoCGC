@@ -8,83 +8,73 @@
 
 s32 old_line_pos;
 
-char NuGetChar(struct nufpar_s* fPar)
-{
+//96% NGC
+char NuGetChar(struct nufpar_s* fPar) {
     s32 bufferEndPos = fPar->buffend;
     char ret;
-    if (bufferEndPos < 0)
-    {
+    s32 size;
+    s32 tmp;
+    
+    if (bufferEndPos < 0) {
         bufferEndPos = 0;
     }
-    if (fPar->cpos > fPar->buffend)
-    {
-        if (fPar->size > bufferEndPos + 1)
-        {
-            s32 size = fPar->size - bufferEndPos;
-            if (size > 0x1000)
-            {
+    if (fPar->cpos > fPar->buffend) {
+        if (bufferEndPos + 1 < fPar->size) {
+            size = fPar->size - bufferEndPos;
+            if (size > 0x1000) {
                 size = 0x1000;
             }
-            size = NuFileRead(fPar->handle, fPar->fbuff, size);
-            bufferEndPos = fPar->buffend;
-            fPar->buffend = bufferEndPos + size;
-            fPar->buffstart = bufferEndPos + 1;
-            if (size != 0)
-            {
-                ret = fPar->fbuff[fPar->cpos - fPar->buffstart];
-                fPar->cpos++;
-                return ret;
+            tmp = NuFileRead(fPar->fh, fPar->fbuff, size);
+            fPar->buffstart = fPar->buffend + 1;
+            fPar->buffend = fPar->buffend + tmp;
+            if (tmp == 0) {
+                return 0;
             }
+        } else{
+           return 0;
         }
-        ret = 0;
     }
-    else
-    {
-        ret = fPar->fbuff[fPar->cpos - fPar->buffstart];
-        fPar->cpos++;
-    }
+    ret = fPar->fbuff[fPar->cpos - fPar->buffstart];
+    fPar->cpos++;
     return ret;
 }
 
-s32 NuFParGetWord(struct nufpar_s* fPar)
-{
-    u32 currLinePos = old_line_pos = fPar->line_pos;
-    u32 len = 0;
-    u32 inQuotation = 0;
-    while (fPar->lbuff[currLinePos & 0xFF] != 0)
-    {
-        char currChar = fPar->lbuff[fPar->line_pos];	//currChar = fPar->lbuff[old_line_pos & 0xFF];
-        switch (currChar)
-        {
-        case ' ':
-        case ',':
-        case '\t':
-            if (inQuotation)
-            {
-                (fPar->wbuff + 1)[len & 0xff] = currChar;
-                len++;
+//MATCH NGC
+s32 NuFParGetWord(struct nufpar_s* fPar) {
+    s32 len = 0;
+    s32 inquotes = 0;
+    char chr;
+    
+    old_line_pos = fPar->line_pos;
+    while (fPar->lbuff[(fPar->line_pos) & 0xFF] != 0) {
+        chr = fPar->lbuff[fPar->line_pos];
+        switch (chr) {
+        case 9:
+        case 0x20:
+        case 0x2c:
+            if (inquotes == 0) {
+                if (len != 0) {
+                    (fPar->wbuff)[len & 0xFF] = 0;
+                    return len;
+                }
+              break;
             }
-            else if (len != 0)
-            {
-                (fPar->wbuff + 1)[len & 0xFF] = 0;
-                return len;
-            }
-            break;
-        case '\"':
-            inQuotation = 1 - inQuotation;
-            break;
         default:
-            (fPar->wbuff + 1)[len & 0xff] = currChar;
-            len++;
+                if (chr == 0x22) {
+                    inquotes = 1 - inquotes;
+                    break;
+                } else {
+                    fPar->wbuff[len & 0xFF] = chr;
+                    len++;
+                    break;
+                }
             break;
         }
-        currLinePos = fPar->line_pos + 1;
-        fPar->line_pos = currLinePos;
+        fPar->line_pos++;
     }
-    fPar->wbuff[(len & 0xFF) + 1] = 0;
+    fPar->wbuff[len & 0xFF] = 0;
     return len;
 }
-
 
 s32 NuFParGetInt(struct nufpar_s* fPar)
 {
@@ -205,17 +195,16 @@ s32 NuFParGetLine(struct nufpar_s* fPar) {
     return i;
 }
 
-// Something like this - I cannot fully confirmed this is 100% correct
+// 79% NGC
 s32 NuFParInterpretWord(struct nufpar_s* fPar) {
-    s32 i = 0;
-    if (fPar->comstack[0]->fname != NULL) {
-        do {
-            if (strcasecmp(fPar->comstack[i]->fname, fPar->wbuff + 1) != 0) {
-                fPar->comstack[i]->func(fPar);
+    s32 i;
+    if (fPar->compos >= 0 && fPar->comstack[fPar->compos]->fname != NULL) {
+        for (i = 0;fPar->comstack[fPar->compos]->fname != NULL; i++) {
+            if (strcasecmp((fPar->comstack[fPar->compos]->fname), fPar->wbuff) == 0) {
+                fPar->comstack[fPar->compos][i].func(fPar);
                 return 1;
             }
-            i += 1;
-        } while (fPar->comstack[i]->fname != NULL);
+        }
     }
     return 0;
 }

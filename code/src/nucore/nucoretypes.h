@@ -67,7 +67,7 @@ struct nudathdr_s
 struct nudatfile_s
 {
 	struct nudathdr_s* ndh;
-	int start;
+	s32 start;
 	s32 len;
 	s32 fix;
 	s32 used;

@@ -16,6 +16,34 @@ struct D3DSurface* haze_surf;
 
 extern struct numtl_s* DebMat[8]; //debris.c
 
+
+//MATCH NGC
+void NuHazeCreateDepthTexture(void) {
+  s32 depth_tid;
+  struct nutex_s tex;
+  struct numtl_s* ptr;
+
+  tex.type = NUTEX_RGBA32;
+  depth_tid = NuTexCreateFromSurface(&tex,&depthTexture);
+  ptr = NuMtlCreate(1);
+  depthMtl = ptr;
+  ptr->attrib.cull = 2;
+  ptr->attrib.zmode = 3;
+  ptr->attrib.filter = 0;
+  ptr->attrib.lighting = 2;
+  ptr->attrib.colour = 1;
+  ptr->attrib.alpha = 1;
+  (ptr->diffuse).r = 1.0f;
+  (ptr->diffuse).g = 1.0f;
+  (ptr->diffuse).b = 1.0f;
+  ptr->alpha = 1.0f;
+  ptr->fxid = 0x60;
+  depthMtl->tid = depth_tid;
+  depthMtl->attrib.utc = 1;
+  depthMtl->attrib.vtc = 1;
+  NuMtlUpdate(depthMtl);
+}
+
 //MATCH NGC
 void NuHazeInit(void) {
   s32 x;
@@ -103,55 +131,28 @@ void NuHazeInit(void) {
 }
 
 //MATCH NGC
-void NuLigthSetPolyHazeMat(struct numtl_s *mtl,float *arg1,float *arg2) {
-  NuLightHazePolymtl = mtl;
-  NuLightHazePolyus[0] = *arg1;
-  NuLightHazePolyus[1] = arg1[1];
-  NuLightHazePolyvs[0] = *arg2;
-  NuLightHazePolyvs[1] = arg2[1];
-  return;
-}
-
-//MATCH NGC
-void NuHazeCreateDepthTexture(void) {
-  s32 depth_tid;
-  struct nutex_s tex;
-  struct numtl_s* ptr;
-
-  tex.type = NUTEX_RGBA32;
-  depth_tid = NuTexCreateFromSurface(&tex,&depthTexture);
-  ptr = NuMtlCreate(1);
-  depthMtl = ptr;
-  ptr->attrib.cull = 2;
-  ptr->attrib.zmode = 3;
-  ptr->attrib.filter = 0;
-  ptr->attrib.lighting = 2;
-  ptr->attrib.colour = 1;
-  ptr->attrib.alpha = 1;
-  (ptr->diffuse).r = 1.0f;
-  (ptr->diffuse).g = 1.0f;
-  (ptr->diffuse).b = 1.0f;
-  ptr->alpha = 1.0f;
-  ptr->fxid = 0x60;
-  depthMtl->tid = depth_tid;
-  depthMtl->attrib.utc = 1;
-  depthMtl->attrib.vtc = 1;
-  NuMtlUpdate(depthMtl);
-}
-
-//MATCH NGC
 void NuHazeClose(void) {
     if (haze_surf != NULL) {
         haze_surf = NULL;
     }
 }
 
-//80% NGC
+//MATCH NGC
 void NuHazeSetHazeConstants(void) {
   s32 i;
-
+  
   for (i = 0; i < num_wobbles; i++) {
-      CV_WOBBLETABLE_START[i] = *(struct _GS_VECTOR4*)&wobble_table[i];
+      memcpy(&CV_WOBBLETABLE_START[i], &wobble_table[i], sizeof(struct nuvec4_s));
   }
+  return;
+}
+
+//MATCH NGC
+void NuLigthSetPolyHazeMat(struct numtl_s *mtl,float *arg1,float *arg2) {
+  NuLightHazePolymtl = mtl;
+  NuLightHazePolyus[0] = *arg1;
+  NuLightHazePolyus[1] = arg1[1];
+  NuLightHazePolyvs[0] = *arg2;
+  NuLightHazePolyvs[1] = arg2[1];
   return;
 }

@@ -1,5 +1,35 @@
 #include "gsprim.h"
 
+#define AT_ADDRESS(xyz) __attribute__((address((xyz))))
+
+
+volatile PPCWGPipe GXFIFO AT_ADDRESS(0xCC008000);
+
+static inline void GXPosition3f32( const f32 x,const f32 y,const f32 z)
+{
+	GXFIFO.f32 = x;
+	GXFIFO.f32 = y;
+	GXFIFO.f32 = z;
+}
+
+static inline void GXColor4u8(const u8 r,const u8 g,const u8 b,const u8 a)
+{
+	GXFIFO.u8 = r;
+	GXFIFO.u8 = g;
+	GXFIFO.u8 = b;
+	GXFIFO.u8 = a;
+}
+
+static inline void GXColor1u32(u32 v) {
+    GXFIFO.u32 = v;
+}
+
+static inline void GXTexCoord2f32(f32 s,f32 t)
+{
+	GXFIFO.f32 = s;
+	GXFIFO.f32 = t;
+}
+
 
 /*
 void GS_DrawTriStrip(int nverts,float *vertlist,int stride)
@@ -218,17 +248,11 @@ void GS_DrawIndexedTriList(uint nverts,short *indexlist,float *vertlist,int stri
   return;
 }
 
-
-void TTLLights(void)
-
-{
-  _GXColor GXCol [2];
-
-  GXCol[0] = GXWhite;
-  GXSetChanAmbColor(GX_COLOR0A0,GXCol);
-  GXCol[0] = GXWhite;
-  GXSetChanMatColor(GX_COLOR0A0,GXCol);
-  GXSetChanCtrl(GX_COLOR0A0,'\0',GX_SRC_VTX,GX_SRC_REG,0,GX_DF_NONE,GX_AF_NONE);
+//NGC MATCH
+void TTLLights(void) {
+  GXSetChanAmbColor(GX_COLOR0A0,GXWhite);
+  GXSetChanMatColor(GX_COLOR0A0,GXWhite);
+  GXSetChanCtrl(GX_COLOR0A0,0,GX_SRC_VTX,GX_SRC_REG,0,GX_DF_NONE,GX_AF_NONE);
   GXSetNumChans(1);
   return;
 }
@@ -291,20 +315,17 @@ void GS_DrawTriListTTL(nuvtx_tltc1_s *vtx,int nverts)
   }
   *(undefined *)(unaff_r13 + -0x5ef8) = 0;
   return;
-}
+}*/
 
-void GS_DrawQuadListBeginBlock(int nverts)
-
-{
-  int in_r4;
-
-  if (in_r4 == 0) {
-    TTLLights();
-  }
-  else {
+//NGC MATCH
+void GS_DrawQuadListBeginBlock(int nverts,int arg1) {
+  if (arg1 != 0) {
     GS_SetLightingNone();
   }
-  GXSetChanCtrl(GX_COLOR0A0,'\0',GX_SRC_REG,GX_SRC_VTX,0,GX_DF_NONE,GX_AF_NONE);
+  else {
+    TTLLights();
+  }
+  GXSetChanCtrl(GX_COLOR0A0,0,GX_SRC_REG,GX_SRC_VTX,0,GX_DF_NONE,GX_AF_NONE);
   QBlockverts = nverts;
   if (GS_CurrentVertDesc != 0x81) {
     GS_CurrentVertDesc = 0x81;
@@ -313,18 +334,17 @@ void GS_DrawQuadListBeginBlock(int nverts)
     GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0,GX_DIRECT);
   }
-  GXBegin(GX_QUADS,GX_VTXFMT1,(ushort)nverts);
+  GXBegin(GX_QUADS,GX_VTXFMT1,(u16)nverts);
   return;
 }
 
-
-void GS_DrawQuadListSetVert(nuvec_s *pos,float u,float v)
-
-{
-  _DAT_cc008000 = v;
+//NGC MATCH
+void GS_DrawQuadListSetVert(struct _GS_VECTOR3 *pos,float u,float v) {
+  GXPosition3f32(pos->x,pos->y,pos->z);
+  GXColor1u32(QuadListColour);
+  GXTexCoord2f32(u,v);
   return;
 }
-*/
 
 void GS_DrawQuadListEndBlock(void)
 
@@ -335,8 +355,9 @@ void GS_DrawQuadListEndBlock(void)
 u32 QuadListColour;
 
 //NGC MATCH
-void GS_SetQuadListRGBA(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    QuadListColour = (arg0 << 0x18) | (arg1 << 0x10) | (arg2 << 8) | arg3;
+void GS_SetQuadListRGBA(s32 r,s32 g,s32 b,s32 a) {
+  QuadListColour = r << 0x18 | g << 0x10 | b << 8 | a;
+  return;
 }
 
 /*

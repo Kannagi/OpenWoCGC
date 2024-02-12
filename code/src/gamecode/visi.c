@@ -60,11 +60,31 @@ void ApplyVisiTable(struct nugscn_s *sc,struct nuvec_s *pos) {
   return;
 }
 
+//NGC MATCH
+static s32 VSAddObjs(struct nuinstance_s** op, struct nugscn_s* gsc, struct nugspline_s* sp) {
+    s32 n;
+    s32 m;
+    s32 gcnt;
+    s32 icnt;
+    struct nugobj_s* gobj;
+    struct nuvec_s wpos;
 
-int VSAddObjs(nuinstance_s **op,nugscn_s *gsc,nugspline_s *sp)
-
-{
-
+    for (n = 0, icnt = 0; n < gsc->numinstance; n++) {
+        gobj = gsc->gobjs[gsc->instances[n].objid];
+        gcnt = gobj->ngobjs;
+        for (m = 0; m < gcnt; m++) {
+            NuVecMtxTransform(&wpos, &gobj->bounding_box_center, &gsc->instances[n].mtx);
+            if (PtInsideSpline(&wpos, sp) != 0) {
+                if (op != NULL) {
+                    op[icnt] = &gsc->instances[n];
+                }
+                icnt++;
+                break;
+            }
+            gobj++;
+        }
+    }
+    return icnt;
 }
 
 

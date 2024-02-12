@@ -306,18 +306,20 @@ struct _GS_BUFFER
     unsigned int type; // Offset: 0x4, DWARF: 0xD38891
 };
 
-struct __GS_FrameBufferCopyPause
+// Size: 0x34
+struct _GS_FrameBufferCopy
 {
-    GXTexObj tobj;
-    void * data;
-    s32 top;
-    s32 left;
-    s32 width;
-    s32 height;
+    GXTexObj tobj; // Offset: 0x0
+    void * data; // Offset: 0x20
+    s32 top; // Offset: 0x24
+    s32 left; // Offset: 0x28
+    s32 width; // Offset: 0x2c
+    s32 height; // Offset: 0x30
 };
 
-struct __GS_FrameBufferCopyPause GS_FrameBufferCopyPause;
+struct _GS_FrameBufferCopy GS_FrameBufferCopyPause;
 void* GS_FrameBufferCopydataptr;
 u32 GS_FrameBufferCopySize;
 static struct _GS_TEXTURE* GS_TexList;
 static GXColor GS_BgColour;
+struct _GXColor GS_BgColourBlack;

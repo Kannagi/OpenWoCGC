@@ -269,23 +269,23 @@ void GXInitTexObj(struct _GXTexObj * obj, void* image_ptr, u16 width, u16 height
 {
    return;
    /*
-     int iVar1;
+  int iVar1;
   int iVar2;
-
+  
   memset(obj,0,0x20);
-  obj->mFlags = obj->mFlags & 0xfffffffc | wrap_s;
-  obj->mFlags = obj->mFlags & 0xfffffff3 | wrap_t << 2;
-  obj->mFlags = obj->mFlags & 0xffffffef | 0x10;
+  obj->mode0 = obj->mode0 & 0xfffffffc | wrap_s;
+  obj->mode0 = obj->mode0 & 0xfffffff3 | wrap_t << 2;
+  obj->mode0 = obj->mode0 & 0xffffffef | 0x10;
   if (mipmap == '\0') {
-    obj->mFlags = obj->mFlags & 0xffffff1f | 0x80;
+    obj->mode0 = obj->mode0 & 0xffffff1f | 0x80;
   }
   else {
-    *(byte *)((int)&obj->unk_0x1c + 3) = *(byte *)((int)&obj->unk_0x1c + 3) | 1;
+    obj->flags = obj->flags | 1;
     if (format + 0xfffffff8 < 3) {
-      obj->mFlags = obj->mFlags & 0xffffff1f | 0xa0;
+      obj->mode0 = obj->mode0 & 0xffffff1f | 0xa0;
     }
     else {
-      obj->mFlags = obj->mFlags & 0xffffff1f | 0xc0;
+      obj->mode0 = obj->mode0 & 0xffffff1f | 0xc0;
     }
     if ((height & 0xffff) < (uint)width) {
       iVar1 = countLeadingZeros((uint)width);
@@ -293,79 +293,79 @@ void GXInitTexObj(struct _GXTexObj * obj, void* image_ptr, u16 width, u16 height
     else {
       iVar1 = countLeadingZeros(height & 0xffff);
     }
-    *(uint *)obj->UNK_0x4 =
-         ((int)(@164 * (float)((double)CONCAT44(0x43300000,0x1f - iVar1) - @166)) & 0xffU) << 8 |
-         *(uint *)obj->UNK_0x4 & 0xffff00ff;
+    obj->mode1 = ((int)(@164 * (float)((double)CONCAT44(0x43300000,0x1f - iVar1) - @166)) & 0xffU)
+                 << 8 | obj->mode1 & 0xffff00ff;
   }
-  obj->mFormat = format;
-  obj->mDimensions = obj->mDimensions & 0xfffffc00 | width - 1;
-  obj->mDimensions = obj->mDimensions & 0xfff003ff | ((height & 0xffff) - 1) * 0x400;
-  obj->mDimensions = (format & 0xf) << 0x14 | obj->mDimensions & 0xff0fffff;
-  *(uint *)obj->UNK_0xC = *(uint *)obj->UNK_0xC & 0xffe00000 | (uint)image_ptr >> 5 & 0x1ffffff;
-  switch(format & 0xf) {
-  case GX_TF_I4:
-  case 8:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 1;
-    iVar1 = 3;
-    iVar2 = 3;
-    break;
-  case GX_TF_I8:
-  case GX_TF_IA4:
-  case 9:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
-    iVar1 = 3;
-    iVar2 = 2;
-    break;
-  case GX_TF_IA8:
-  case GX_TF_RGB565:
-  case GX_TF_RGB5A3:
-  case 10:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
+  obj->fmt = format;
+  obj->image0 = obj->image0 & 0xfffffc00 | width - 1;
+  obj->image0 = obj->image0 & 0xfff003ff | ((height & 0xffff) - 1) * 0x400;
+  obj->image0 = (format & 0xf) << 0x14 | obj->image0 & 0xff0fffff;
+  obj->image3 = obj->image3 & 0xffe00000 | (uint)image_ptr >> 5 & 0x1ffffff;
+  if (false) {
+switchD_800fa714_caseD_7:
+    obj->loadFmt = '\x02';
     iVar1 = 2;
     iVar2 = 2;
-    break;
-  case GX_TF_RGBA8:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 3;
-    iVar1 = 2;
-    iVar2 = 2;
-    break;
-  default:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 2;
-    iVar1 = 2;
-    iVar2 = 2;
-    break;
-  case GX_TF_CMPR:
-    *(undefined *)((int)&obj->unk_0x1c + 2) = 0;
-    iVar1 = 3;
-    iVar2 = 3;
   }
-  *(ushort *)&obj->unk_0x1c =
-       (short)((int)((uint)width + (1 << iVar1) + -1) >> iVar1) *
-       (short)((int)((height & 0xffff) + (1 << iVar2) + -1) >> iVar2) & 0x7fff;
-  *(byte *)((int)&obj->unk_0x1c + 3) = *(byte *)((int)&obj->unk_0x1c + 3) | 2;
+  else {
+    switch(format & 0xf) {
+    case GX_TF_I4:
+    case 8:
+      obj->loadFmt = '\x01';
+      iVar1 = 3;
+      iVar2 = 3;
+      break;
+    case GX_TF_I8:
+    case GX_TF_IA4:
+    case 9:
+      obj->loadFmt = '\x02';
+      iVar1 = 3;
+      iVar2 = 2;
+      break;
+    case GX_TF_IA8:
+    case GX_TF_RGB565:
+    case GX_TF_RGB5A3:
+    case 10:
+      obj->loadFmt = '\x02';
+      iVar1 = 2;
+      iVar2 = 2;
+      break;
+    case GX_TF_RGBA8:
+      obj->loadFmt = '\x03';
+      iVar1 = 2;
+      iVar2 = 2;
+      break;
+    default:
+      goto switchD_800fa714_caseD_7;
+    case GX_TF_CMPR:
+      obj->loadFmt = '\0';
+      iVar1 = 3;
+      iVar2 = 3;
+    }
+  }
+  obj->loadCnt = (short)((int)((uint)width + (1 << iVar1) + -1) >> iVar1) *
+                 (short)((int)((height & 0xffff) + (1 << iVar2) + -1) >> iVar2) & 0x7fff;
+  obj->flags = obj->flags | 2;
   return;
    */
 }
 
-
-void GS_ChangeTextureStates(int id)
-
-{
+//MATCH NGC
+void GS_ChangeTextureStates(int id) {
   u32 i;
+  s32 st;
   struct _GS_TEXTURE *texlist;
-
-  i = 0;
+  
+  st = TexStages[id];
+  st--;
   texlist = GS_TexList;
-  if (GS_NumTextures != 0) {
-    do {
-      if (texlist->NUID == TexStages[id] - 1U) {
-        //GXInitTexObjWrapMode(&texlist->Tex,(&GS_TexWrapMode_s)[id],(&GS_TexWrapMode_t)[id]);
-        //GXLoadTexObj(&texlist->Tex,id);
+  for(i = 0; i < GS_NumTextures; i++) {
+      if (texlist->NUID == st) {
+        GXInitTexObjWrapMode(&texlist->Tex,GS_TexWrapMode_s[id],GS_TexWrapMode_t[id]);
+        GXLoadTexObj(&texlist->Tex,id);
         return;
       }
-      i = i + 1;
-      texlist = texlist + 1;
-    } while (i < GS_NumTextures);
+      texlist++;
   }
   return;
 }
@@ -389,73 +389,66 @@ void GS_TexSetWrapModet(int id,enum _GXTexWrapMode mode) {
   return;
 }
 
+//NGC MATCH
+void GS_TexSelect(enum _GXTevStageID stage,s32 NUID) {
+  s32 iVar1;
+  s32 i;
+  struct _GS_TEXTURE *pTex;
 
-void GS_TexSelect(enum _GXTevStageID stage,int NUID)
-
-{
-  int iVar1;
-  u32 uVar2;
-  struct _GS_TEXTURE *GSTex;
-  bool check;
-
-  check = stage == GX_TEVSTAGE0;
-  if (check) {
-    ShadowBodge = stage;
+  if (stage == GX_TEVSTAGE0) {
+    ShadowBodge = 0;
   }
-  if (3 < (int)stage) {
-    //DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/gstex.c",0x21c,"GS_TexSelect1");
+  if (3 < (s32)stage) {
+    DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/gstex.c",0x21c,"GS_TexSelect1");
   }
   TexStages[stage] = NUID;
-  GSTex = GS_TexList;
   if ((NUID == 0) || (NUID == 9999)) {
-    //GXSetNumTevStages('\x01');
-    //GXSetTevOrder(stage,GX_TEXCOORD_NULL,GX_TEXMAP_NULL,GX_COLOR0A0);
-    //GXSetTevOp(stage,GX_PASSCLR);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(stage,GX_TEXCOORD_NULL,GX_TEXMAP_NULL,GX_COLOR0A0);
+    GXSetTevOp(stage,GX_PASSCLR);
   }
   else {
-    /*if (NUID == ShadowMatBodge) {
-      ShadowBodge = GX_TEVSTAGE1;
-    }*/
-    if ((int)maxstage_189 < (int)stage) {
+    if (NUID == ShadowMatBodge) {
+      ShadowBodge = 1;
+    }
+    pTex = GS_TexList;
+    if ((s32)stage > (s32)maxstage_189) {
       maxstage_189 = stage;
     }
-    if (check) {
+    if (stage == GX_TEVSTAGE0) {
       maxstage_189 = stage;
     }
     if (NUID == 0x270e) {
       GS_SetFBCopyTexturePause();
     }
-    /*GXSetNumTexGens((char)maxstage_189 + '\x01');
-    GXSetNumTevStages((char)maxstage_189 + '\x01');
-    GXSetTexCoordGen2(stage,GX_TG_MTX2x4,GX_TG_TEX0,0x3c,'\0',0x7d);
-    GXSetTevOrder(stage,stage,stage,GX_COLOR0A0);*/
+    GXSetNumTexGens((char)maxstage_189 + 1);
+    GXSetNumTevStages((char)maxstage_189 + 1);
+    GXSetTexCoordGen2(stage,GX_TG_MTX2x4,GX_TG_TEX0,0x3c,0,0x7d);
+    GXSetTevOrder(stage,stage,stage,GX_COLOR0A0);
     iVar1 = 0;
-    if (check) {
+    if (stage == GX_TEVSTAGE0) {
       iVar1 = 10;
     }
-    //GXSetTevColorIn(stage,0xf,8,iVar1,0xf);
-    //GXSetTevColorOp(stage,0,0,0,1,0);
+    GXSetTevColorIn(stage,0xf,8,iVar1,0xf);
+    GXSetTevColorOp(stage,0,0,0,1,0);
     iVar1 = 0;
-    if (check) {
+    if (stage == GX_TEVSTAGE0) {
       iVar1 = 5;
     }
-    //GXSetTevColorIn(stage,7,4,iVar1,7);
-    //GXSetTevAlphaOp(stage,0,0,0,1,0);
-    if (1 < NUID - 0x270eU) {
-      uVar2 = 0;
-      if (GS_NumTextures != 0) {
-        do {
-          if (GSTex->NUID == NUID - 1U) {
-            //GXInitTexObjWrapMode(&GSTex->Tex,(&GS_TexWrapMode_s)[stage],(&GS_TexWrapMode_t)[stage] );
-            //GXLoadTexObj(&GSTex->Tex,stage);
+    GXSetTevColorIn(stage,7,4,iVar1,7);
+    GXSetTevAlphaOp(stage,0,0,0,1,0);
+    if (NUID - 0x270eU > 1) {
+    NUID--;
+    for(i = 0; i < GS_NumTextures; i++, pTex++) {
+          if (pTex->NUID == NUID) {
+            GXInitTexObjWrapMode(&pTex->Tex,GS_TexWrapMode_s[stage],GS_TexWrapMode_t[stage]);
+            GXLoadTexObj(&pTex->Tex,stage);
             return;
           }
-          uVar2 = uVar2 + 1;
-          GSTex = GSTex + 1;
-        } while (uVar2 < GS_NumTextures);
-      }
-      //DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/gstex.c",0x281,"GS_TexSelect2");
-      //GXLoadTexObj(&GS_TexList->Tex,stage);
+    }
+      
+      DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/gstex.c",0x281,"GS_TexSelect2");
+      GXLoadTexObj(&GS_TexList->Tex,stage);
     }
   }
   return;

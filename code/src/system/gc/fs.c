@@ -1,139 +1,117 @@
 #include "fs.h"
 
 /*
-void GC_DiskErrorPoll(void)
-
-{
-    long Dstatus;
-    char *Errstr;
-    char *str;
-    int var1;
-    uint var2;
-    uint motor [4];
+//NGC MATCH
+void GC_DiskErrorPoll(void) {
+    s32 var1;
+    u32 var2;
+    u32 motor [4];
 
     var1 = 0;
     memset(motor,0,0x10);
     var2 = 0;
     do {
-        Dstatus = DVDGetDriveStatus();
-        if (Dstatus == 2) {
-LAB_800c6614:
-            if (var2 == 0) {
-LAB_800c661c:
-                Lockupbuffer1[0] = '\0';
-                Lockupbuffer3[0] = '\0';
-                Lockupbuffer2[0] = '\0';
-                if (var1 != 0) {
+        switch(DVDGetDriveStatus()) {
+            case -1:
+                var2 = 5;
+                var1 = 5;
+            break;
+            case 4:
+                var2 = 2;
+                var1 = 2;
+            break;
+            case 5:
+                var2 = 1;
+                var1 = 1;
+            break;
+            case 6:
+                var2 = 3;
+                var1 = 3;
+            break;
+            case 0xb:
+                var2 = 4;
+                var1 = 4;
+            break;
+            case 0:
+            case 2:
+                if (var2 != 0) {
+                    break;
+                }
+            case 1:
+            default:
+                Lockupbuffer1[0] = Lockupbuffer2[0] = Lockupbuffer3[0] = 0;
+            if (var1 != 0) {
+                GS_RenderClearBlack();
+                GS_BeginScene();
+                GS_EndScene();
+                GS_FlipScreen();
+                return;
+            }
+            return;
+        }
+        switch((s32)var2) {
+            case 1:
+                sprintf(Lockupbuffer1,GetDiskErrString(0,0));
+                sprintf(Lockupbuffer2,GetDiskErrString(0,1));
+                sprintf(Lockupbuffer3,GetDiskErrString(0,2));
+                Reseter(0);
+            break;
+            case 2:
+            case 3:
+                sprintf(Lockupbuffer1,GetDiskErrString(1,0));
+                sprintf(Lockupbuffer2,GetDiskErrString(1,1));
+                Reseter(0);
+            break;
+            case 4:
+                sprintf(Lockupbuffer1,GetDiskErrString(2,0));
+                sprintf(Lockupbuffer2,GetDiskErrString(2,1));
+                sprintf(Lockupbuffer3,GetDiskErrString(2,2));
+            break;
+            case 5:
+                sprintf(Lockupbuffer1,GetDiskErrString(3,0));
+                sprintf(Lockupbuffer2,GetDiskErrString(3,1));
+                sprintf(Lockupbuffer3,GetDiskErrString(3,2));
+            default:
+            break;
+        }
+                PADControlAllMotors(motor);
+                PrintError = 1;
+                GS_RenderClearBlack();
+                GS_BeginScene();
+                GS_EndScene();
+                GS_FlipScreen();
+                if (var2 == 5) {
                     GS_RenderClearBlack();
                     GS_BeginScene();
                     GS_EndScene();
                     GS_FlipScreen();
+                    do {
+                            /* WARNING: Do nothing block with infinite loop */
+                    } while( 1 );
                 }
-                return;
-            }
-        }
-        else if (Dstatus < 3) {
-            if (Dstatus == 0) goto LAB_800c6614;
-            if ((0 < Dstatus) || (Dstatus != -1)) goto LAB_800c661c;
-            var2 = 5;
-            var1 = 5;
-        }
-        else if (Dstatus == 5) {
-            var2 = 1;
-            var1 = 1;
-        }
-        else if (Dstatus < 6) {
-            if (Dstatus != 4) goto LAB_800c661c;
-            var2 = 2;
-            var1 = 2;
-        }
-        else if (Dstatus == 6) {
-            var2 = 3;
-            var1 = 3;
-        }
-        else {
-            if (Dstatus != 0xb) goto LAB_800c661c;
-            var2 = 4;
-            var1 = 4;
-        }
-        if (var2 < 4) {
-            if (var2 < 2) {
-                if (var2 != 1) goto LAB_800c67f4;
-                Errstr = GetDiskErrString(0,0);
-                sprintf(Lockupbuffer1,Errstr);
-                Errstr = GetDiskErrString(0,1);
-                sprintf(Lockupbuffer2,Errstr);
-                Errstr = GetDiskErrString(0,2);
-                str = Lockupbuffer3;
-            }
-            else {
-                Errstr = GetDiskErrString(1,0);
-                sprintf(Lockupbuffer1,Errstr);
-                Errstr = GetDiskErrString(1,1);
-                str = Lockupbuffer2;
-            }
-            sprintf(str,Errstr);
-            Reseter();
-        }
-        else if (var2 == 4) {
-            Errstr = GetDiskErrString(2,0);
-            sprintf(Lockupbuffer1,Errstr);
-            Errstr = GetDiskErrString(2,1);
-            sprintf(Lockupbuffer2,Errstr);
-            Errstr = GetDiskErrString(2,2);
-            sprintf(Lockupbuffer3,Errstr);
-        }
-        else if (var2 == 5) {
-            Errstr = GetDiskErrString(3,0);
-            sprintf(Lockupbuffer1,Errstr);
-            Errstr = GetDiskErrString(3,1);
-            sprintf(Lockupbuffer2,Errstr);
-            Errstr = GetDiskErrString(3,2);
-            sprintf(Lockupbuffer3,Errstr);
-        }
-LAB_800c67f4:
-        PADControlAllMotors(motor);
-        PrintError = 1;
-        GS_RenderClearBlack();
-        GS_BeginScene();
-        GS_EndScene();
-        GS_FlipScreen();
-        if (var2 == 5) {
-            GS_RenderClearBlack();
-            GS_BeginScene();
-            GS_EndScene();
-            GS_FlipScreen();
-            do {
-                    /* WARNING: Do nothing block with infinite loop *//*
-            } while( true );
-        }
         PrintError = 0;
-    } while( true );
+    } while( 1 );
 }
 */
 
 
 /*
-//96%
-s32 GCFileOpen(char *fname) {
-    int i;
-
+//97%
+s32 GCFileOpen(char *filename) {
     if (FSStart == 0) {
         memset(&MAHFile,0,0x3c);
         FSStart = 1;
-        //DVDInit();
+        DVDInit();
     }
-    //StreamClear();
-    //GC_DiskErrorPoll();
-    if (DVDOpen(fname,&MAHFile) == 0) {
-        i = 0;
-    }
-    else{
-        fileoffset = 0;
+    StreamClear();
+    GC_DiskErrorPoll();
+    if (DVDOpen(filename,&MAHFile) != 0) {
         filelength = MAHFile.length;
-        i = 1;
+        fileoffset = 0;
+        return 1;
     }
-    return i;
+    
+    return 0;
 }*/
 
 //NGC MATCH
@@ -143,18 +121,18 @@ s32 GCFileSize(s32 fd) {
     return filelength;
 }
 
-//86%
-s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
+//NGC MATCH
+s32 GCFileRead(s32 fd, void* buf, s32 nbyte) {
     s32 bVar1;
     u32 uVar2;
-    s32 temp;
+    s32 aligned;
 
-    //GC_DiskErrorPoll();
+    GC_DiskErrorPoll();
     bVar1 = 0;
     if (nbyte < 0x20) {
-        DisplayErrorAndLockup
-                  ("C:/source/crashwoc/code/system/gc/fs.c",0x7e,
-                   "GCFileRead Attempt to read less than 32 bytes from file");
+        DisplayErrorAndLockup(
+            "C:/source/crashwoc/code/system/gc/fs.c", 0x7e, "GCFileRead Attempt to read less than 32 bytes from file"
+        );
     }
     if (nbyte > filelength) {
         nbyte = filelength + (0x20 - (filelength & 0x1fU) & 0x1f);
@@ -164,42 +142,48 @@ s32 GCFileRead(s32 fd,void *buf,s32 nbyte) {
         nbyte = uVar2 + (0x20 - (uVar2 & 0x1f) & 0x1f);
     }
     if (((s32)buf & 0x1f) != 0) {
-        DisplayErrorAndLockup
-                  ("C:/source/crashwoc/code/system/gc/fs.c",0x8c,"GCFileRead Buf not aligned");
+        DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/fs.c", 0x8c, "GCFileRead Buf not aligned");
     }
     if ((seekoffset & 3) != 0) {
-        DisplayErrorAndLockup
-                  ("C:/source/crashwoc/code/system/gc/fs.c",0x90,
-                   "GCFileRead Seek offset must be multiple of 4");
+        DisplayErrorAndLockup(
+            "C:/source/crashwoc/code/system/gc/fs.c", 0x90, "GCFileRead Seek offset must be multiple of 4"
+        );
     }
     if (seekoffset > filelength) {
-        DisplayErrorAndLockup
-                  ("C:/source/crashwoc/code/system/gc/fs.c",0x94,
-                   "GCFileRead Seek offset outside of file");
+        DisplayErrorAndLockup("C:/source/crashwoc/code/system/gc/fs.c", 0x94, "GCFileRead Seek offset outside of file");
     }
-    temp = nbyte + 0x1fU;
-    //DVDReadAsyncPrio(&MAHFile,buf,temp & 0xffffffe0,seekoffset,NULL,2);
-  /*  do {
+    
+    DVDReadAsyncPrio(&MAHFile, buf, (nbyte + (0x20 - 1)) & ~(0x20 - 1), seekoffset, NULL, 2);
+    while (bVar1 == 0) {
         Reseter(1);
         switch (DVDGetDriveStatus()) {
-        case -1:
-        case 1:
-        case 2:
-        case 5:
-        case 4:
-        case 6:
-            //GC_DiskErrorPoll();
-        break;
-        case 0:
-        case 0xb:
-            bVar1 = 1;
-            break;
+            case -1:
+                GC_DiskErrorPoll();
+                break;
+            case 4:
+                GC_DiskErrorPoll();
+                break;
+            case 5:
+                GC_DiskErrorPoll();
+                break;
+            case 6:
+                GC_DiskErrorPoll();
+                break;
+            case 0xb:
+                GC_DiskErrorPoll();
+                break;
+            case 0:
+                bVar1 = 1;
+                break;
+            case 1:
+            case 2:
+                break;
         }
-    } while (bVar1 == 0);*/
-    return temp & 0xFFFFFFE0;
+    }
+    return (nbyte + (0x20 - 1)) & ~(0x20 - 1);
 }
-/*
 
+/*
 //MATCH GCN
 struct __sFILE * fopen_NGC(const char* _name, const char* _type) {
     char *pcVar1;

@@ -4,13 +4,13 @@ s32 gamecut; //cut.c
 
 /*
 	//TODO
-	ManageCreatures 79%
+	ManageCreatures 88%
 	LoadCharacterModel 95%
 	LoadCharacterModels 92%
 	NewCharacterIdle 92%
 	MovePlayer
 	DrawCharacterModel 96%
-	UpdateAnimPacket 98%
+	UpdateAnimPacket 99%
 	DrawCreatures 89%
 	
 */
@@ -1438,121 +1438,124 @@ Exit:
     return Drawn;
 }
 
-//98% NGC
+//99% NGC //regswap
 void UpdateAnimPacket(struct CharacterModel *mod,struct anim_s *anim,float dt,float xz_distance) {
-  float fVar2; //temp
-  float t;
+    float t;
   
-  if (mod == NULL) {
-    return;
-  }
-  if (anim == NULL) {
-    return;
-  }
-  if (anim->blend != 0) {
+    if (mod == NULL) {
+        return;
+    }
+    if (anim == NULL) {
+        return;
+    }
+    
+    if (anim->blend != 0) {
         anim->blend_frame++;
         if (anim->blend_frame == anim->blend_frames) {
-          anim->action = anim->blend_dst_action;
-          anim->anim_time = anim->blend_dst_time;
-          anim->blend = 0;
+            anim->blend = 0;
+            anim->action = anim->blend_dst_action;
+            anim->anim_time = anim->blend_dst_time;
         }
-  }
-        else if (anim->newaction != anim->oldaction) {
-              if ((((anim->oldaction != -1) && (anim->newaction != -1)) && (mod->anmdata[anim->oldaction] != NULL)) && (((mod->anmdata[anim->newaction] != NULL &&
-                   (1 < mod->animlist[anim->oldaction]->blend_out_frames)) && (1 < mod->animlist[anim->newaction]->blend_in_frames)))) {
-                    anim->blend_dst_action = anim->newaction;
-                    anim->blend = 1;
-                    anim->blend_src_action = anim->oldaction;
-                    anim->blend_src_time = anim->anim_time;
-                    if ((((mod->animlist[anim->oldaction]->flags & 1) != 0) && ((mod->animlist[anim->newaction]->flags & 1) != 0))
-                       && ((mod->animlist[anim->oldaction]->speed == mod->animlist[anim->newaction]->speed && (mod->anmdata[anim->oldaction]->time == mod->anmdata[anim->newaction]->time)))) {
-                      anim->blend_dst_time = anim->anim_time;
-                    }
-                    else {
-                      anim->blend_dst_time = 1.0f;
-                    }
-                    if (((mod->character == 0) && (PLAYERCOUNT != 0)) && (player->used != 0)) {
-                      if (anim->blend_dst_action == 3) {
-                        anim->blend_dst_time = ((float)(player->crouch_pos) * (mod->anmdata[2]->time - 1.0f)) / (float)(player->OnFootMoveInfo->CROUCHINGFRAMES);
-                      }
-                      else if (anim->blend_dst_action == 5) {
-                        anim->blend_dst_time = ((float)(player->OnFootMoveInfo->CROUCHINGFRAMES - player->crouch_pos) * (mod->anmdata[4]->time - 1.0f)) / (float)player->OnFootMoveInfo->CROUCHINGFRAMES;
-                      }
-                    }
-                    anim->blend_frame = 0;
-                    anim->blend_frames = (u16)mod->animlist[anim->newaction]->blend_in_frames;
-                    if (mod->animlist[anim->oldaction]->blend_out_frames < anim->blend_frames) {
-                      anim->blend_frames = (u16)mod->animlist[anim->oldaction]->blend_out_frames;
-                    }
-              } else {
-                  anim->action = 0;
-                  anim->anim_time = 1.0f;   
-              }
+    }
+    else if (anim->newaction != anim->oldaction) {
+        if ((((anim->oldaction != -1) && (anim->newaction != -1)) && (mod->anmdata[anim->oldaction] != NULL)) && (((mod->anmdata[anim->newaction] != NULL &&
+        (1 < mod->animlist[anim->oldaction]->blend_out_frames)) && (1 < mod->animlist[anim->newaction]->blend_in_frames)))) {
+            anim->blend = 1;
+            anim->blend_src_action = anim->oldaction;
+            anim->blend_dst_action = anim->newaction;
+            anim->blend_src_time = anim->anim_time;
+            if ((((mod->animlist[anim->oldaction]->flags & 1) != 0) && ((mod->animlist[anim->newaction]->flags & 1) != 0))
+            && ((mod->animlist[anim->oldaction]->speed == mod->animlist[anim->newaction]->speed && (mod->anmdata[anim->oldaction]->time == mod->anmdata[anim->newaction]->time)))) {
+                anim->blend_dst_time = anim->anim_time;
+            }
+            else {
+                anim->blend_dst_time = 1.0f;
+            }
+            
+            if (((mod->character == 0) && (PLAYERCOUNT != 0)) && (player->used != 0)) {
+                if (anim->blend_dst_action == 3) {
+                    anim->blend_dst_time = ((float)(player->crouch_pos) * (mod->anmdata[2]->time - 1.0f)) / (float)(player->OnFootMoveInfo->CROUCHINGFRAMES);
+                }
+                else if (anim->blend_dst_action == 5) {
+                    anim->blend_dst_time = ((float)(player->OnFootMoveInfo->CROUCHINGFRAMES - player->crouch_pos) * (mod->anmdata[4]->time - 1.0f)) / (float)player->OnFootMoveInfo->CROUCHINGFRAMES;
+                }
+            }
+            anim->blend_frame = 0;
+            anim->blend_frames = (u16)mod->animlist[anim->newaction]->blend_in_frames;
+            if (mod->animlist[anim->oldaction]->blend_out_frames < anim->blend_frames) {
+                anim->blend_frames = (u16)mod->animlist[anim->oldaction]->blend_out_frames;
+            }
         } else {
-          anim->action = anim->newaction;
-          anim->blend = 0;
+            anim->action = anim->newaction;
+            anim->anim_time = 1.0f;   
+            anim->blend = 0;
         }
-  anim->flags = 0;
-  if (anim->blend != 0) {
+    } else {
+        anim->action = anim->newaction;
+        anim->blend = 0;
+    }
+    
+    anim->flags = 0;
+    if (anim->blend != 0) {
         if (mod->anmdata[anim->blend_src_action] == NULL) {
-          return;
+            return;
         }
         if (mod->anmdata[anim->blend_dst_action] == NULL) {
-          return;
+            return;
         }
         t = dt * mod->animlist[anim->blend_src_action]->speed;
         if ((mod->animlist[anim->blend_src_action]->flags & 0x10) != 0) {
-          t *= xz_distance * 10.0f;
+            t *= xz_distance * 10.0f;
         }
-        //t += anim->blend_src_time;
+        
         anim->blend_src_time += t;
-        fVar2 = mod->anmdata[anim->blend_src_action]->time;
-        if (fVar2 > anim->blend_src_time) {
-          if ((mod->animlist[anim->blend_src_action]->flags & 1) != 0) {
-            anim->blend_src_time -= (fVar2 - 1.0f);
-          }
-          else {
-            anim->blend_src_time = fVar2;
-          }
+        if (anim->blend_src_time > mod->anmdata[anim->blend_src_action]->time) {
+            if ((mod->animlist[anim->blend_src_action]->flags & 1) != 0) {
+                anim->blend_src_time -= (mod->anmdata[anim->blend_src_action]->time - 1.0f);
+            }
+            else {
+                anim->blend_src_time = mod->anmdata[anim->blend_src_action]->time;
+            }
         }
         t = dt * mod->animlist[anim->blend_dst_action]->speed;
         if ((mod->animlist[anim->blend_dst_action]->flags & 0x10) != 0) {
-          t *= xz_distance * 10.0f;
+            t *= xz_distance * 10.0f;
         }
-        anim->blend_dst_time = anim->blend_dst_time + t;
-        fVar2 = mod->anmdata[anim->blend_dst_action]->time;
-        if (fVar2 > anim->blend_dst_time) {
+        
+        anim->blend_dst_time += t;
+        
+        if (anim->blend_dst_time > mod->anmdata[anim->blend_dst_action]->time) {
             if ((mod->animlist[anim->blend_dst_action]->flags & 1) != 0) {
-              anim->flags = anim->flags | 2;
-              anim->blend_dst_time = t - (fVar2 - 1.0f);
-              return;
+                anim->blend_dst_time -= (mod->anmdata[anim->blend_dst_action]->time - 1.0f);
+                anim->flags = anim->flags | 2;
+            } else {
+                anim->blend_dst_time = mod->anmdata[anim->blend_dst_action]->time;
+                anim->flags = anim->flags | 1;
             }
-            anim->blend_dst_time = fVar2;
-            anim->flags = anim->flags | 1;
         }
-  }
-  else {
+    }
+    else {
         if (mod->anmdata[anim->action] == NULL) {
-          return;
+            return;
         }
         t = dt * mod->animlist[anim->action]->speed;
         if ((mod->animlist[anim->action]->flags & 0x10) != 0) {
-          t *= xz_distance * 10.0f;
+            t *= xz_distance * 10.0f;
         }
+        
         anim->anim_time += t;
-        fVar2 = mod->anmdata[anim->action]->time;
-        if (fVar2 > t) {
+        if (anim->anim_time > mod->anmdata[anim->action]->time) {
             if ((mod->animlist[anim->action]->flags & 1) != 0) {
-              anim->flags = 2;
-              anim->anim_time -= (fVar2 - 1.0f);
-              return;
+                anim->anim_time -= (mod->anmdata[anim->action]->time - 1.0f);
+                anim->flags = 2;
+            } else {
+                anim->anim_time = mod->anmdata[anim->action]->time;
+                anim->flags = 1;
             }
-            anim->anim_time = fVar2;
-            anim->flags = 1;
         }
-
-  }
-  return;
+        
+    }
+    return;
 }
 
 //89.18% NGC

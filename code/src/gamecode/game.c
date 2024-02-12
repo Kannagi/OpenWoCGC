@@ -14,6 +14,66 @@ GemPathTransporter
 
 */
 
+#define SFX_YES 0x36
+#define SFX_NO 0x3C
+#define LANGUAGE_JAPANESE 0x63
+#define INPUT_HIRAGANA 0
+#define INPUT_KATAKANA 1
+#define INPUT_ALPHABET 2
+
+#define MENU_MAIN_MENU 0
+#define MAIN_MENU_NEW_GAME 0
+#define MAIN_MENU_LOAD_GAME 1
+#define MAIN_MENU_CRASH_BLAST 2
+#define MAIN_MENU_LANGUAGE 3
+
+#define MENU_PAUSE_MENU 5
+#define PAUSE_MENU_RESUME 0
+#define PAUSE_MENU_OPTIONS 1
+#define PAUSE_MENU_ABANDON 2
+#define PAUSE_MENU_RESTART_TRIAL 3
+
+#define MENU_OPTIONS_MENU 6
+#define OPTIONS_MENU_VIBRATION 0
+#define OPTIONS_MENU_SOUND 1
+#define OPTIONS_MENU_LANGUAGE 2
+
+#define MENU_SOUND_MENU 7
+#define SOUND_MENU_SFX 0
+#define SOUND_MENU_MUSIC 1
+
+#define MENU_LANGUAGE_MENU 9
+
+#define MENU_ABANDON_MENU 10
+
+#define MENU_DEBUG_MENU 11
+#define DEBUG_MENU_RESTART_LEVEL 0
+#define DEBUG_MENU_RESET_LEVEL 1
+#define DEBUG_MENU_GOTO_LEVEL 2
+#define DEBUG_MENU_INVINCIBILITY 3
+#define DEBUG_MENU_NEXT_CHECKPOINT 4
+#define DEBUG_MENU_LAST_CHECKPOINT 5
+#define DEBUG_MENU_OPEN_GAME 6
+#define DEBUG_MENU_LIFT_PLAYER 7
+#define DEBUG_MENU_SHOW_COORDS 8
+#define DEBUG_MENU_EXTRA_MOVES 9
+#define DEBUG_MENU_RESET_GAME 10
+
+#define MENU_DEBUG_DRAW_MENU 12
+
+#define MENU_DEBUG_MEMORY_MENU 13
+
+#define MENU_GOTO_LEVEL_MENU 14
+
+#define MENU_DEBUG_MOVIE_MENU 15
+#define MOVIE_LOGOS 0
+#define MOVIE_INTRO1 1
+#define MOVIE_INTRO2 2
+#define MOVIE_OUTRO1 3
+#define MOVIE_OUTRO2 4
+
+#define MENU_CRASH_BLAST_MENU 39
+
 
 //MATCH NGC
 void InitProbe(void) {
@@ -1557,1286 +1617,1152 @@ void InputNewLetter(struct cursor_s *cursor,char *name,s32 *i,s32 count) {
   return;
 }
 
-void ProcMenu(struct cursor_s *cursor,struct nupad_s *pad) {
-  static s32 old_lang;
-  s32 bVar1;
-  char cVar2; //temp
-  char cVar3; //operation
-  s32 bVar4;
-  u32 uVar5;
-  u32 uVar6;
-  u32 uVar7;
-  //char cVar14;
-  //char cVar15;
-  u32 uVar16;
-  u32 uVar17;
-  s32 iVar18;
-  char *txt;
-  s32 bits_db;
-  //s32 uVar21;
-  //float fVar21;
-  s32 bits;
-  s32 iVar22;
-  s32 iVar28;
-  s32 iVar29;
-  s32 test_sfx [4] = {0x25 , 0x19, 0x13, 0x2c};
-  
-  //bits_db = menu_pulsate_ang & 0xffff;
-  menu_pulsate = NuTrigTable[menu_pulsate_ang & 0xffff] * 0.1f + 1.0f;
-  menu_pulsate_ang += menu_pulsate_rate;
-  if (0x10000 < menu_pulsate_ang) {
-    menu_pulsate_ang -= 0x10000;
-  }
-  if ((cursor->wait != '\0') && (cursor->wait--, cursor->wait == '\0')) {
-    cursor->wait_hack = 1;
-    NewMenu(cursor,(s32)cursor->new_menu,-1,-1);
-  }
-  if (ForceRestart == 0) {
-    if (cursor->menu == -1) {
-      return;
-    }
-    if (cursor->wait != '\0') {
-      return;
-    }
-    if (0 < fadeval) {
-      return;
-    }
-    if (Paused - 1U < 0x1d) { //compiler opt.
-      return;
-    }
-    if (cutmovie != -1) {
-         if (cut_on == 0) {
-          return;
-        }
-    }
-     else if (new_mode != -1) {
-        return;
-      }
-    else if (new_level != -1) {
-        return;
-      }
-    if ((cursor->menu == '\x14') && (gameover_hack != 1)) {
-      return;
-    }
-  }
-  iVar28 = -1;
-  if (cursor->button_lock != '\0') {
-    cursor->button_lock--;
-  }
-  if ((pad != NULL) && (cursor->button_lock == '\0')) {
-    //fVar21 = pad->r_dy;
-      bits = pad->rdy;
-    if (((s32)bits & 0xf000) == 0) {
-      bits = (stick_bits | bits);
-    }
-    bits_db = pad->oldpaddata;
-    if ((bits_db & 0xf000) == 0) {
-      bits_db = bits_db | stick_bits_db;
-    }
-  }
-  else {
-    bits_db = 0;
-    bits = 0;
-  }
-  uVar16 = bits_db & 0x840;
-  uVar5 = bits_db & 0x180;
-  uVar6 = bits & 0x8000;
-  uVar7 = bits & 0x2000;
-  if (cursor->item_frame == 0) {
-    uVar16 = 0;
-  }
-  uVar17 = uVar16;
-  if (ForceRestart != 0) {
-    ForceRestart = 0;
-    uVar17 = 1;
-    cursor->menu = '\v';
-  }
-  //cVar14 = cursor->y_max;
-  //cVar15 = cursor->y_min;
-  cVar2 = cursor->y;
-  cVar3 = (cursor->y_max - cursor->y_min) + 1;
-  if (cursor->y < cursor->y_min) {
-    cursor->y = cursor->y_min;
-  }
-  else if (cursor->y > cursor->y_max) {
-    cursor->y = cursor->y_max;
-  }
-  if ((bits_db & 0x4000) != 0) {
-    //cVar14 = cursor->y + 1;
-    cursor->y++;
-    if (cursor->y > cursor->y_max) {
-      cursor->y -= cVar3;
-//LAB_80032034:
-      //cursor->y = cVar14;
-    }
-  }
-  else {
-    if ((bits_db & 0x1000) != 0) {
-      //cVar14 = cursor->y + -1;
-      cursor->y--;
-      if (cursor->y < cursor->y_min) {
-        cursor->y = cursor->y + cVar3;
-        //goto LAB_80032034;
-      }
-    }
-  }
-  cursor->remember[cursor->menu].y = cursor->y;
-  if (cursor->y != cVar2) {
-    iVar28 = 0x18;
-    cursor->item_frame = 0;
-    uVar16 = 0;
-    uVar17 = 0;
-  }
-  //cVar14 = cursor->x_max;
-  //cVar15 = cursor->x_min;
-  cVar2 = cursor->x;
-  cVar3 = (cursor->x_max - cursor->x_min) + 1;
-  if (cursor->x < cursor->x_min) {
-    cursor->x = cursor->x_min;
-  }
-  else if (cursor->x > cursor->x_max) {
-    cursor->x = cursor->x_max;
-  }
-  if (cursor->y < cursor->y_max) {
-    if ((bits_db & 0x2000) != 0) {
-      //cVar14 = cursor->menu;
-      //cVar15 = cursor->x + 1;
-      cursor->x++;
-      if (((cursor->menu == '\x16') || (cursor->menu == '\x19')) || (cursor->menu == '\x1d')) {
-        if (cursor->x > cursor->x_max) {
-          cursor->x = cursor->x_max;
-        }
-      }
-      else if (cursor->x > cursor->x_max) {
-        cursor->x -= cVar3;
-//LAB_800321ac:
-        //cursor->x = cVar15;
-      }
-    }
-    else if ((bits_db & 0x8000) != 0) {
-        //cVar14 = cursor->menu;
-        //cVar15 = cursor->x + -1;
-        cursor->x--;
-        if (((cursor->menu == '\x16') || (cursor->menu == '\x19')) || (cursor->menu == '\x1d')) {
-          if (cursor->x < cursor->x_min) {
-            cursor->x = cursor->x_min;
-          }
-        }
-        else if (cursor->x < cursor->x_min) {
-          cursor->x += cVar3;
-          //goto LAB_800321ac;
-        }
-      }
-  }
-  cursor->remember[cursor->menu].x = cursor->x;
-  if (cursor->x != cVar2) {
-    iVar28 = 0x18;
-    cursor->item_frame = 0;
-    uVar16 = 0;
-    uVar17 = 0;
-  }
-  if ((uVar17 != 0) || (uVar5 != 0)) {
-    cursor->item_frame = 0;
-  }
-  iVar29 = Level;
-  cursor->menu_frame++;
-  cursor->item_frame++;
-  //cursor->item_frame = uVar17;
-  iVar22 = cortex_quit_i;
-  iVar18 = cortex_continue_i;
-  if ((((iVar29 == 0x23) || (cutmovie == 0)) && (cursor->menu == '\0')) && (0x707 < cursor->item_frame)) {
-    new_level = DemoLevel[i_demolevel];
-    Demo = 1;
-    i_demolevel++;
-    if (i_demolevel == 3) {
-      i_demolevel = 0;
-    }
-    InvincibilityCHEAT = 0;
-    if (cutmovie != 0) {
-      return;
-    }
-    Level = new_level;
-    fade_rate = 8;
-    return;
-  }
-  //cVar15 = cursor->y;
-  iVar29 = (s32)cursor->y;
-switch(cursor->menu){
-    case 5:
-        if (uVar17 == 0) break; //goto LAB_800346ac;
-        iVar28 = 0x36;
-        switch(iVar29) {
-            case 0:
-            pause_dir = 2;
-            //goto LAB_800346ac;
-            break;
-            case 1:
-            NewMenu(cursor,6,0,-1);
-            storemenu1();
-            //goto LAB_800346ac;
-            break;
-            case 2:
-              iVar22 = 1;
-              iVar18 = 10;
-              goto LAB_80034684;
-            break;
-            case 3:
-            if ((iVar29 != 3) || (TimeTrial == 0)) break;//goto LAB_800346ac;
-            new_mode = GameMode;
-            ResetCheckpoint(-1,-1,0.0f,NULL);
-            LivesLost = 0;
-            break;
-        }
-           // goto LAB_800346ac;
-    break;
-    case 6:
-          if (uVar17 != 0) {
-            if (iVar29 == 0) {
-              iVar28 = 0x36;
-              Game.vibration = 1 - Game.vibration;
-              break;//goto LAB_800346ac;
-            }
-            if (iVar29 == 1) {
-              storemenu2();
-              iVar28 = 0x36;
-              iVar18 = 7;
-              goto LAB_80034680;
-            }
-            if ((LANGUAGEOPTION != 0) && (iVar29 == 2)) {
-              iVar28 = 0x36;
-              NewMenu(cursor,9,(u32)Game.language,-1);
-              break; //goto LAB_800346ac;
-            }
-            if (iVar29 != cursor->y_max) break; //goto LAB_800346ac;
-            iVar28 = 5;
-            iVar18 = -1;
-            break; //goto LAB_800346a0;
-          }
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          restoremenu1();
-          iVar28 = 0x3c;
-          iVar22 = -1;
-          iVar18 = 5;
-    break;
-    case '\a':
-              if (uVar17 != 0) {
-            if (iVar29 != 2) break; //goto LAB_800346ac;
-            iVar28 = 6;
-            iVar18 = -1;
-            goto LAB_800346a0;
-          }
-          if (uVar5 != 0) {
-          restoremenu2();
-          iVar28 = 0x3c;
-          iVar22 = -1;
-          iVar18 = 6;
-        goto LAB_80034684;
-          } 
-          else {
-              switch(iVar29) {
-                case 0:
-                  iVar18 = qrand();
-                  if (iVar18 < 0x1000) {
-                    gamesfx_volume = (s32)Game.sfx_volume;
-                    iVar18 = qrand();
-                    if (iVar18 < 0) {
-                      iVar18 = iVar18 + 0x3fff;
-                    }
-                    GameSfx(test_sfx[iVar18 >> 0xe],NULL);
-                  }
-                  if ((uVar6 == 0) || (Game.sfx_volume == '\0')) {
-                    if ((uVar7 != 0) && (Game.sfx_volume < 100)) {
-                      Game.sfx_volume = Game.sfx_volume + 1;
-                    }
-                  }
-                  else {
-                    Game.sfx_volume++;
-                  }
-                  break;
-                case 1:
-                      if ((uVar6 == 0) || (Game.music_volume == '\0')) {
-                        if ((uVar7 != 0) && (Game.music_volume < 100)) {
-                          Game.music_volume = Game.music_volume + 1;
-                        }
-                      }
-                      else {
-                        Game.music_volume++;
-                      }
-                  break;
-              }
-              //goto LAB_800346ac;
-          }
+//99% NGC
+void ProcMenu(struct cursor_s * cursor, struct nupad_s * pad) {
+    static s32 old_lang;
+    s32 i; // r29
+    s32 j; // r0
+    s32 old; // r6
+    s32 bits; // r5
+    s32 bits_db; // r4
+    s32 x_count; // r3
+    s32 y_count; // r3
+    s32 sfx; // r25
+    s32 quit; // r28
+    s32 UP; // r24
+    s32 DOWN; // r29
+    s32 LEFT; // r22
+    s32 RIGHT; // r23
+    s32 CROSS; // r26
+    s32 TRIANGLE; // 
+    s32 START; // 
+    s32 FASTLEFT; // r28
+    s32 FASTRIGHT; // r27
+    s32 ANYBUTTON; // 
+    s32 CONTINUE; // r12
+    s32 SELECT; // 
+    s32 BACK; // r30
+    s32 test_sfx[4] = {
+        0x25,
+        0x19,
+        0x13,
+        0x2c
+    }; // 0x8(r1)
+    char * txt; // r29
+    s32 tx; // 
+    s32 nosaves; // r10
 
-    break;
-    case '\t':
-            if (uVar17 != 0) {
-              iVar28 = 0x36;
-              NewLanguage(iVar29);
-              iVar22 = -1;
-              iVar18 = 6;
-              goto LAB_80034684;
+    u32 uVar16;
+    s32 x_cursor_temp;
+    s32 y_cursor_temp;
+    
+    {
+        menu_pulsate = NuTrigTable[menu_pulsate_ang & 0xFFFF] * 0.1f + 1.0f;
+        menu_pulsate_ang += menu_pulsate_rate;
+        if (0x10000 < menu_pulsate_ang) {
+            menu_pulsate_ang -= 0x10000;
+        }
+    
+        if (cursor->wait != 0) {
+            cursor->wait--;
+            if (cursor->wait == 0) {
+                cursor->wait_hack = 1;
+                NewMenu(cursor, cursor->new_menu, -1, -1);
             }
-            if (uVar5 == 0) break; //goto LAB_800346ac;
-            iVar28 = -1;
-            iVar18 = 6;
-        //goto LAB_80034620;
-    NewMenu(cursor,iVar18,iVar28,-1);
-  iVar28 = 0x3c;
-    break;
-    case '\n':
-            if (uVar17 == 0) {
-              if (uVar5 == 0) break; //goto LAB_800346ac;
-              iVar28 = -1;
-              iVar18 = 5;
+        }
+    
+        if (ForceRestart == 0) {
+            if (cursor->menu == -1) {
+                return;
             }
-            else {
-              if (iVar29 == 0) {
+            if (cursor->wait != 0) {
+                return;
+            }
+            if (0 < fadeval) {
+                return;
+            }
+            if (Paused - 1U < 0x1d) {
+                return;
+            }
+            if (cutmovie != -1) {
+                if (cut_on == 0) {
+                    return;
+                }
+            } else if (new_mode != -1) {
+                return;
+            } else if (new_level != -1) {
+                return;
+            }
+            if ((cursor->menu == 0x14) && (gameover_hack != 1)) {
+                return;
+            }
+        }
+    
+        sfx = -1;
+        if (cursor->button_lock != 0) {
+            cursor->button_lock--;
+        }
+    
+        if ((pad != NULL) && (cursor->button_lock == 0)) {
+            bits = pad->paddata;
+            if ((bits & 0xf000) == 0) {
+                bits = (stick_bits | bits);
+            }
+            bits_db = pad->oldpaddata;
+            if ((bits_db & 0xf000) == 0) {
+                bits_db = bits_db | stick_bits_db;
+            }
+        } else {
+            bits_db = 0;
+            bits = 0;
+        }
+    
+        // uVar16 = bits_db & 0x840;
+        uVar16 = CROSS = bits_db & 0x840;
+        DOWN = bits_db & 0x1000;
+        UP = bits_db & 0x4000;
+        CONTINUE = bits_db & 0x1000;
+        RIGHT = bits_db & 0x8000;
+        LEFT = bits_db & 0x2000;
+        TRIANGLE = bits_db & 0x180; // this one is "back" in the PS2 version
+        FASTLEFT = bits & 0x8000;
+        FASTRIGHT = bits & 0x2000;
+        
+        if (cursor->item_frame == 0) {
+            uVar16 = 0;
+            CROSS = 0;
+        }
+        
+        if (ForceRestart != 0) {
+            ForceRestart = 0;
+            CROSS = 1;
+            cursor->menu = 11;
+        }
+        
+        old = cursor->y;
+        y_count = cursor->y_max - cursor->y_min + 1;
+        
+        if (cursor->y < cursor->y_min) {
+            cursor->y = cursor->y_min;
+        } else if (cursor->y > cursor->y_max) {
+            cursor->y = cursor->y_max;
+        }
+    
+        if (UP != 0) {
+            cursor->y++;
+            if (cursor->y > cursor->y_max) {
+                cursor->y -= y_count;
+            }
+        } else if (DOWN != 0) {
+            cursor->y--;
+            if (cursor->y < cursor->y_min) {
+                cursor->y += y_count;
+            }
+        }
+    
+        cursor->remember[cursor->menu].y = cursor->y;
+        if (cursor->y != old) {
+            sfx = 0x18;
+            cursor->item_frame = 0;
+            uVar16 = 0;
+            CROSS = 0;
+        }
+    
+        old = cursor->x;
+        x_count = cursor->x_max - cursor->x_min + 1;
+        
+        if (cursor->x < cursor->x_min) {
+            cursor->x = cursor->x_min;
+        } else if (cursor->x > cursor->x_max) {
+            cursor->x = cursor->x_max;
+        }
+    
+        if (cursor->y < cursor->y_max) {
+            if (LEFT != 0) {
+                cursor->x++;
+                if (((cursor->menu == 0x16) || (cursor->menu == 0x19)) || (cursor->menu == 0x1d)) {
+                    if (cursor->x > cursor->x_max) {
+                        cursor->x = cursor->x_max;
+                    }
+                } else if (cursor->x > cursor->x_max) {
+                    cursor->x -= x_count;
+                }
+            } else if (RIGHT != 0) {
+                cursor->x--;
+                if (((cursor->menu == 0x16) || (cursor->menu == 0x19)) || (cursor->menu == 0x1d)) {
+                    if (cursor->x < cursor->x_min) {
+                        cursor->x = cursor->x_min;
+                    }
+                } else if (cursor->x < cursor->x_min) {
+                    cursor->x += x_count;
+                }
+            }
+        }
+    
+        cursor->remember[cursor->menu].x = cursor->x;
+        if (cursor->x != old) {
+            sfx = 0x18;
+            cursor->item_frame = 0;
+            uVar16 = 0;
+            CROSS = 0;
+        }
+    
+        if ((CROSS != 0) || (TRIANGLE != 0)) {
+            cursor->item_frame = 0;
+        }
+    
+        cursor->menu_frame++;
+        cursor->item_frame++;
+        if ((((Level == 0x23) || (cutmovie == 0)) && (cursor->menu == 0)) && (0x707 < cursor->item_frame)) {
+            new_level = DemoLevel[i_demolevel];
+            Demo = 1;
+            i_demolevel++;
+            if (i_demolevel == 3) {
+                i_demolevel = 0;
+            }
+            InvincibilityCHEAT = 0;
+            if (cutmovie != 0) {
+                return;
+            }
+            Level = new_level;
+            fade_rate = 8;
+            return;
+        }
+        //cVar15 = cursor->y;
+    }
+
+    y_cursor_temp = cursor->y;
+    x_cursor_temp = cursor->x;
+    switch (cursor->menu) {
+        case 8:
+        break;
+        case MENU_PAUSE_MENU:
+            if (CROSS != 0) {
+                sfx = SFX_YES;
+                switch (y_cursor_temp) {
+                case PAUSE_MENU_RESUME:
+                    pause_dir = 2;
+                    break;
+                case PAUSE_MENU_OPTIONS:
+                    NewMenu(cursor, MENU_OPTIONS_MENU, 0, -1);
+                    storemenu1();
+                    break;
+                case PAUSE_MENU_ABANDON:
+                    NewMenu(cursor, MENU_ABANDON_MENU, 1, -1);
+                    break;
+                case PAUSE_MENU_RESTART_TRIAL:
+                    if (TimeTrial != 0) {
+                        new_mode = GameMode;
+                        ResetCheckpoint(-1, -1, 0.0f, NULL);
+                        LivesLost = 0;
+                        ResetBonus();
+                        ResetDeath();
+                        ResetGemPath();
+                    }
+                    break;
+                }
+            }
+            break;
+        case MENU_OPTIONS_MENU:
+            if (CROSS != 0) {
+                if (y_cursor_temp == OPTIONS_MENU_VIBRATION) {
+                    Game.vibration = 1 - Game.vibration;
+                    sfx = SFX_YES;
+                    break;
+                }
+                
+                if (y_cursor_temp == OPTIONS_MENU_SOUND) {
+                    storemenu2();
+                    NewMenu(cursor, MENU_SOUND_MENU, 0, -1);
+                    sfx = SFX_YES;
+                    break;
+                }
+                
+                if ((LANGUAGEOPTION != 0) && (y_cursor_temp == OPTIONS_MENU_LANGUAGE)) {
+                    NewMenu(cursor, MENU_LANGUAGE_MENU, Game.language, -1);
+                    sfx = SFX_YES;
+                    break;
+                }
+    
+                // DONE
+                if (y_cursor_temp == cursor->y_max) {
+                    NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                    sfx = SFX_YES;
+                    break;
+                }
+            } else if (TRIANGLE != 0) {
+                restoremenu1();
+                NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case MENU_SOUND_MENU:
+            if (CROSS != 0) {
+                // DONE
+                if (y_cursor_temp == 2) {
+                    NewMenu(cursor, MENU_OPTIONS_MENU, -1, -1);
+                    sfx = SFX_YES;
+                }
+                break;
+            }
+            else if (TRIANGLE != 0) {
+                restoremenu2();
+                NewMenu(cursor, MENU_OPTIONS_MENU, -1, -1);
+                sfx = SFX_NO;
+                break;
+            }
+    
+            // Sound Options
+            switch (y_cursor_temp) {
+                case SOUND_MENU_SFX:
+                    // Play random SFX
+                    if (qrand() < 0x1000) {
+                        gamesfx_volume = Game.sfx_volume;
+                        GameSfx(test_sfx[qrand() / 0x4000], NULL);
+                    }
+                    if ((FASTLEFT != 0) && (Game.sfx_volume != 0)) {
+                        Game.sfx_volume--;
+                    }
+                    else if ((FASTRIGHT != 0) && (Game.sfx_volume < 100)) {
+                        Game.sfx_volume++;
+                    }
+                    break;
+                case SOUND_MENU_MUSIC:
+                    if ((FASTLEFT != 0) && (Game.music_volume != 0)) {
+                        Game.music_volume--;
+                    } else if ((FASTRIGHT != 0) && (Game.music_volume < 100)) {
+                        Game.music_volume++;
+                    }
+                    break;
+            }
+    
+            break;
+        case MENU_LANGUAGE_MENU:
+            if (CROSS != 0) {
+                NewLanguage(y_cursor_temp);
+                NewMenu(cursor, MENU_OPTIONS_MENU, -1, -1);
+                sfx = SFX_YES;
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_OPTIONS_MENU, -1, -1);
+                sfx = SFX_NO;
+            }
+                
+            break;
+        case MENU_ABANDON_MENU:
+            if (CROSS != 0) {
+                if (y_cursor_temp == 0) {
+                    new_level = (Level == 0x25) ? 0x23 : 0x25;
+                    sfx = SFX_YES;
+                } else {
+                    NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                    sfx = SFX_NO;
+                }
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case MENU_DEBUG_MENU:
+            if (CROSS != 0) {
+                switch (y_cursor_temp) {
+                case DEBUG_MENU_RESTART_LEVEL:
+                    new_mode = GameMode;
+                    ResetCheckpoint(-1, -1, 0.0f, NULL);
+                    LivesLost = 0;
+                    LostLife = 0;
+                    ResetBonus();
+                    ResetDeath();
+                    ResetGemPath();
+                    ResetItems();
+                    break;
+                case DEBUG_MENU_RESET_LEVEL:
+                    ResetCheckpoint(-1, -1, 0.0f, NULL);
+                    LivesLost = 0;
+                    LostLife = 0;
+                    ResetBonus();
+                    bonus_restart = 0;
+                    ResetDeath();
+                    ResetGemPath();
+                    RestoreCrateTypeData();
+                    ResetCrates();
+                    ResetWumpa();
+                    ResetChases();
+                    ResetPlayerEvents();
+                    ResetGates();
+                    ResetRings();
+                    ResetMaskFeathers();
+                    ResetAI();
+                    ResetPlayer(0);
+                    ResetBug();
+                    ResetLevel();
+                    ResetProjectiles();
+                    NewMenu(cursor, -1, -1, -1);
+                    Paused = 0;
+                    pause_dir = 0;
+                    ResumeGame();
+                    edobjResetAnimsToZero();
+                    break;
+                case DEBUG_MENU_GOTO_LEVEL:
+                    NewMenu(cursor, 0xe, -1, -1);
+                    break;
+                case DEBUG_MENU_INVINCIBILITY:
+                    InvincibilityCHEAT = 1 - InvincibilityCHEAT;
+                    ResetAI();
+                    break;
+                case DEBUG_MENU_NEXT_CHECKPOINT:
+                    if (GotoCheckpoint(&(player->obj).pos, 0) != 0) {
+                        new_mode = GameMode;
+                    }
+                    break;
+                case DEBUG_MENU_LAST_CHECKPOINT:
+                    if (GotoCheckpoint(&(player->obj).pos, 1) != 0) {
+                        new_mode = GameMode;
+                    }
+                    break;
+                case DEBUG_MENU_OPEN_GAME:
+                    OpenGame();
+                    NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                    break;
+                case DEBUG_MENU_LIFT_PLAYER:
+                    LIFTPLAYER = 1 - LIFTPLAYER;
+                    break;
+                case DEBUG_MENU_SHOW_COORDS:
+                    ShowPlayerCoordinate = 1 - ShowPlayerCoordinate;
+                    break;
+                case DEBUG_MENU_EXTRA_MOVES:
+                    ExtraMoves = 1 - ExtraMoves;
+                    break;
+                case DEBUG_MENU_RESET_GAME:
+                    NewGame();
+                    ResetBonus();
+                    ResetDeath();
+                    ResetGemPath();
+                    CalculateGamePercentage(&Game);
+                    Hub = HubFromLevel(Level);
+                    NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+                    break;
+                }
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_PAUSE_MENU, -1, -1);
+             }
+            break;
+        case MENU_DEBUG_MOVIE_MENU:
+            if (CROSS != 0) {
+                switch (y_cursor_temp) {
+                case MOVIE_LOGOS:
+                    logos_played = 0;
+                    cutmovie = 0;
+                    break;
+                case MOVIE_INTRO1:
+                    cutmovie = 1;
+                    break;
+                case MOVIE_INTRO2:
+                    cutmovie = 2;
+                    break;
+                case MOVIE_OUTRO1:
+                    cutmovie = 3;
+                    break;
+                case MOVIE_OUTRO2:
+                    cutmovie = 4;
+                    break;
+                }
+                NewMenu(cursor, -1, -1, -1);
                 new_level = 0x25;
-                if (Level == 0x25) {
-                  new_level = 0x23;
-                }
-                goto LAB_800346a8;
-              }
-              iVar28 = -1;
-              iVar18 = 5;
             }
-        //goto LAB_80034620;
-    NewMenu(cursor,iVar18,iVar28,-1);
-  iVar28 = 0x3c;
-    break;
-    case '\v':
-      if (cursor->item_frame == 0) {
-        if (uVar5 == 0) break; //goto LAB_800346ac;
-        //iVar22 = -1;
-        //iVar18 = 5;
-          NewMenu(cursor,5,-1,-1);
-      }
-      else {
-        switch(iVar29){
-            case 0:
-                new_mode = GameMode;
-                ResetCheckpoint(-1,-1,0.0f,NULL);
-                LivesLost = iVar29;
-                LostLife = iVar29;
-                ResetBonus();
-                ResetDeath();
-                ResetGemPath();
-                ResetItems();
-                //goto LAB_800346ac;
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_DEBUG_MENU, -1, -1);
+            }
             break;
-            case 1:
-                ResetCheckpoint(-1,-1,0.0f,NULL);
-                LivesLost = 0;
-                LostLife = 0;
-                ResetBonus();
-                bonus_restart = 0;
-                ResetDeath();
-                ResetGemPath();
-                RestoreCrateTypeData();
-                ResetCrates();
-                ResetWumpa();
-                ResetChases();
-                ResetPlayerEvents();
-                ResetGates();
-                ResetRings();
-                ResetMaskFeathers();
-                ResetAI();
-                ResetPlayer(0);
-                ResetBug();
-                ResetLevel();
-                ResetProjectiles();
-                NewMenu(cursor,-1,-1,-1);
-                Paused = 0;
-                pause_dir = 0;
-                ResumeGame();
-                edobjResetAnimsToZero();
-                //goto LAB_800346ac;
-            break;
-            case 2:          
-                //iVar22 = -1;
-                //iVar18 = 0xe;
-                NewMenu(cursor,0xe,-1,-1);
-            break;
-            case 3:
-              InvincibilityCHEAT = 1 - InvincibilityCHEAT;
-              ResetAI();
-              //goto LAB_800346ac;
-            break;
-            case 4:
-            //uVar21 = 0;
-          //iVar18 = GotoCheckpoint(&(player->obj).pos,0);
-          if (GotoCheckpoint(&(player->obj).pos,0) != 0) {
-            new_mode = GameMode;
-          }
-            break;
-            case 5:
-          //uVar21 = 1;
-          //iVar18 = GotoCheckpoint(&(player->obj).pos,1);
-          if (GotoCheckpoint(&(player->obj).pos,1) != 0) {
-            new_mode = GameMode;
-          }
-          //goto LAB_800346ac;
-            break;
-            case 6:
-            OpenGame();
-            //iVar22 = -1;
-            //iVar18 = 5;
-            NewMenu(cursor,5,-1,-1);
-            break;
-            case 7:
-                LIFTPLAYER = 1 - LIFTPLAYER;
-              //goto LAB_800346ac;
-            break;
-            case 8:
-            ShowPlayerCoordinate = 1 - ShowPlayerCoordinate;
-            //goto LAB_800346ac;
-            break;
-            case 9:
-              ExtraMoves = 1 - ExtraMoves;
-             // goto LAB_800346ac;
-            break;
-            case 10:
-            NewGame();
-            ResetBonus();
-            ResetDeath();
-            ResetGemPath();
-            CalculateGamePercentage(&Game);
-            Hub = HubFromLevel(Level);
-            //iVar22 = -1;
-            //iVar18 = 5;
-            NewMenu(cursor,5,-1,-1);
-            break;
-        } 
-      }
-    break;
-    case '\x0f':
-        if (uVar17 == 0) {
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          iVar22 = -1;
-          iVar18 = 0xb;
-          goto LAB_80034684;
-        }
-        switch(iVar29){
-            case 2:
-                cutmovie = iVar29;
-            break;
-            case 0:
-                logos_played = 0;
-                cutmovie = iVar29;
-            break;
-            case 1:
-                cutmovie = iVar29;
-            break;
-            case 3:
-                cutmovie = iVar29;
-            break;
-            case 4:
-                cutmovie = iVar29;
-            break;
-        }
-        NewMenu(cursor,-1,-1,-1);
-        goto LAB_8003389c;
-    break;
-    case '\f':
-      if (uVar17 != 0) break; //goto LAB_800346ac;
-      if (uVar5 != 0) {
-        iVar22 = -1;
-        iVar18 = 0xb;
-        goto LAB_80034684;
-      }
-            switch(iVar29) {
-                case 0:
-                  if ((uVar6 != 0) && (LDATA->farclip > 0xa)) {
+        case MENU_DEBUG_DRAW_MENU:
+            if (CROSS != 0) { 
+                break;
+            }
+            
+            if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_DEBUG_MENU, -1, -1);
+                break;
+            }
+            
+            switch (y_cursor_temp) {
+            case 0: // DRAW DISTANCE
+                if ((FASTLEFT != 0) && (LDATA->farclip > 0xa)) {
                     LDATA->farclip--;
-                  }
-                  else {
-                    if ((uVar7 != 0) && (LDATA->farclip < 1000)) {
-                      LDATA->farclip++;
-                    }
-                  }
-                  if ((s32)LDATA->fogfar > LDATA->farclip) {
-                    LDATA->fogfar = (float)LDATA->farclip;
-                  }
-                  if ((s32)LDATA->fogfar > LDATA->fognear) {
+                } else if ((FASTRIGHT != 0) && (LDATA->farclip < 1000)) {
+                    LDATA->farclip++;
+                }
+                
+                if ((s32) LDATA->fogfar > LDATA->farclip) {
+                    LDATA->fogfar = LDATA->farclip;
+                }
+                
+                if ((s32) LDATA->fognear > LDATA->fogfar) {
                     LDATA->fognear = LDATA->fogfar;
-                  }
-                  if (pNuCam != NULL) {
-                    pNuCam->farclip = (float)LDATA->farclip;
-                  }
-                  //goto LAB_800346ac;  
-            break;
-                case 1:
-                      if ((uVar6 == 0) || (LDATA->fognear > 1.0f)) {
-                        LDATA->fognear -= 1.0f;
-                        } else {
-                            if ((uVar7 != 0) && ((s32)LDATA->fognear < LDATA->farclip) && ((s32)LDATA->fognear < (s32)LDATA->fogfar))
-                            {
-                              LDATA->fognear += 1.0f;
-                            }
-                      }
-                break;
-                case 2:
-                    if (((uVar6 != 0) && (LDATA->fogfar > 1.0f)) && (LDATA->fogfar > LDATA->fognear )) {
-                      LDATA->fogfar -= 1.0f;
-                    }
-                    else {
-                      if ((uVar7 != 0) && ((s32)LDATA->fogfar < (s32)(u32)LDATA->farclip)) {
-                        LDATA->fogfar += 1.0f;
-                      }
-                    }
-                    //break; //goto LAB_800346ac;
-                break;
-                case 3:
-                      if ((uVar6 != 0) && (LDATA->fogr != '\0')) {
-                        LDATA->fogr--;
-                      }
-                      else {
-                        if ((uVar7 != 0) && (LDATA->fogr < 0xff)) {
-                          LDATA->fogr++;
-                        }
-                      }
-                break;
-                case 4:
-                      if ((uVar6 != 0) && (LDATA->fogg != '\0')) {
-                        LDATA->fogg--;
-                      }
-                      else {
-                        if ((uVar7 != 0) && (LDATA->fogg < 0xff)) {
-                          LDATA->fogg++;
-                        }
-                      }
-                break;
-                case 5:
-                if ((uVar6 != 0) && (LDATA->fogb != '\0')) {
-                  LDATA->fogb--;
                 }
-                else {
-                  if ((uVar7 != 0) && (LDATA->fogb < 0xff)) {
+                if (pNuCam != NULL) {
+                    pNuCam->farclip = (float) LDATA->farclip;
+                }
+                break;
+            case 1: // FOG NEAR
+                if ((FASTLEFT != 0) && (LDATA->fognear > 1.0f)) {
+                    LDATA->fognear -= 1.0f;
+                } 
+                else if ((FASTRIGHT != 0) && ((s32) LDATA->fognear < LDATA->farclip) && (LDATA->fognear < LDATA->fogfar)) {
+                    LDATA->fognear += 1.0f;
+                }
+                break;
+            case 2: // FOG FAR
+                if (((FASTLEFT != 0) && (LDATA->fogfar > 1.0f)) && (LDATA->fogfar > LDATA->fognear)) {
+                    LDATA->fogfar -= 1.0f;
+                } else  if ((FASTRIGHT != 0) && ((s32) LDATA->fogfar < (s32)(u32) LDATA->farclip)) {
+                    LDATA->fogfar += 1.0f;
+                }
+                break;
+            case 3: // FOG RED
+                if ((FASTLEFT != 0) && (LDATA->fogr != 0)) {
+                    LDATA->fogr--;
+                } else if ((FASTRIGHT != 0) && (LDATA->fogr < 0xff)) {
+                    LDATA->fogr++;
+                }
+                break;
+            case 4: // FOG GREEN
+                if ((FASTLEFT != 0) && (LDATA->fogg != 0)) {
+                    LDATA->fogg--;
+                } else if ((FASTRIGHT != 0) && (LDATA->fogg < 0xff)) {
+                    LDATA->fogg++;
+                }
+                break;
+            case 5: // FOG BLUE
+                if ((FASTLEFT != 0) && (LDATA->fogb != 0)) {
+                    LDATA->fogb--;
+                } else if ((FASTRIGHT != 0) && (LDATA->fogb < 0xff)) {
                     LDATA->fogb++;
-                  }
                 }
-                break; //goto LAB_800346ac;
-                case 6:
-                    if ((uVar6 != 0) && (LDATA->foga != '\0')) {
-                      LDATA->foga--;
-                    }
-                    else {
-                      if ((uVar7 != 0) && (LDATA->foga < 0x7f)) {
-                        LDATA->foga++;
-                      }
-                    }
                 break;
-                case 7:
-                    if ((uVar6 != 0) && (LDATA->hazer != '\0')) {
-                      LDATA->hazer--;
-                    }
-                    else {
-                      if ((uVar7 != 0) && (LDATA->hazer < 0xff)) {
-                        LDATA->hazer++;
-                      } 
-                    }
+            case 6: // FOG OPACITY
+                if ((FASTLEFT != 0) && (LDATA->foga != 0)) {
+                    LDATA->foga--;
+                } else if ((FASTRIGHT != 0) && (LDATA->foga < 0x7f)) {
+                    LDATA->foga++;
+                }
                 break;
-                case 8:
-                  if ((uVar6 != 0) && (LDATA->hazeg != '\0')) {
+            case 7: // HAZE RED
+                if ((FASTLEFT != 0) && (LDATA->hazer != 0)) {
+                    LDATA->hazer--;
+                } else if ((FASTRIGHT != 0) && (LDATA->hazer < 0xff)) {
+                    LDATA->hazer++;
+                }
+                break;
+            case 8: // HAZE GREEN
+                if ((FASTLEFT != 0) && (LDATA->hazeg != 0)) {
                     LDATA->hazeg--;
-                  }
-                  else {
-                    if ((uVar7 != 0) && (LDATA->hazeg < 0xff)) {
-                      LDATA->hazeg++;
-                    }
-                  }
+                } else if ((FASTRIGHT != 0) && (LDATA->hazeg < 0xff)) {
+                    LDATA->hazeg++;
+                }
                 break;
-                case 9:
-                      if ((uVar6 != 0) && (LDATA->hazeb != '\0')) {
-                        LDATA->hazeb--;
-                      }
-                      else {
-                        if ((uVar7 != 0) && (LDATA->hazeb < 0xff)) {
-                          LDATA->hazeb++;
-                        }
-                      }
+            case 9: // HAZE BLUE
+                if ((FASTLEFT != 0) && (LDATA->hazeb != 0)) {
+                    LDATA->hazeb--;
+                } else if ((FASTRIGHT != 0) && (LDATA->hazeb < 0xff)) {
+                    LDATA->hazeb++;
+                }
                 break;
-                case 10:
-                  if ((uVar6 != 0) && (LDATA->hazea != '\0')) {
+            case 10: // HAZE WOBBLE
+                if ((FASTLEFT != 0) && (LDATA->hazea != 0)) {
                     LDATA->hazea--;
-                  }
-                  else {
-                    if ((uVar7 != 0) && (LDATA->hazea < 0xff)) {
-                      LDATA->hazea++;
-                    } 
-                  }
+                } else if ((FASTRIGHT != 0) && (LDATA->hazea < 0xff)) {
+                    LDATA->hazea++;
+                }
                 break;
             }
-    break;
-    case '\x0e':
-            if (uVar17 != 0) {
-          iVar18 = (s32)HData[cursor->x].level[iVar29];
-          if (iVar18 != -1) {
-            new_level = iVar18;
-            Hub = HubFromLevel(iVar18);
-          }
-          break; //goto LAB_800346ac;
-        }
-        if (uVar5 == 0) break; //goto LAB_800346ac;
-        iVar22 = -1;
-        iVar18 = 0xb;
-        goto LAB_80034684;
-    break;  
-    case 0: // < '\f'
-      wasloadgame = 0;
-      loadsaveCallEachFrame();
-      if (uVar17 != 0) {
-        switch(iVar29){
-            case 0:
-                  MemCardRetry();
-                  iVar28 = ParseNintendoErrorCode();
-                  if (iVar28 != 0) {
-                  DestMenu = 4;
-                  iVar28 = 1;
-                  SaveMenu = 0;
-    LAB_800330a4:
-                  NewMenu(cursor,iVar28,0,-1);
-                  goto LAB_800330b0;
-                  } else{
-                        NewMenu(cursor,4,0,-1);
-                        goto LAB_800330b0;
-                  }
             break;
-            case 1:
-                wasloadgame = iVar29;
-                MemCardRetry();
-                iVar28 = ParseNintendoErrorCode();
-                if (iVar28 != 0) {
-                  SaveMenu = 0;
-                  DestMenu = 0;
-                  iVar28 = 1;
-                  goto LAB_800330a4;
+        case MENU_DEBUG_MEMORY_MENU:
+            if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_DEBUG_MENU, -1, -1);
+            }
+            break;
+        case MENU_GOTO_LEVEL_MENU:
+            if (CROSS != 0) {
+                // inline?
+                if (HData[x_cursor_temp].level[y_cursor_temp] != -1) {
+                    new_level = HData[x_cursor_temp].level[y_cursor_temp];
+                    Hub = HubFromLevel(HData[x_cursor_temp].level[y_cursor_temp]);
                 }
-                memcpy(Game.name, ",CRASH   ", 9);
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_DEBUG_MENU, -1, -1);
+            }
+            break;
+        case MENU_MAIN_MENU:
+            wasloadgame = 0;
+            loadsaveCallEachFrame();
+            if (CROSS != 0) {
+                switch (y_cursor_temp) {
+                    case MAIN_MENU_NEW_GAME:
+                        MemCardRetry();
+                        if (ParseNintendoErrorCode() != 0) {
+                            DestMenu = 4;
+                            SaveMenu = 0;
+                            NewMenu(cursor, 1, 0, -1);
+                        } else {
+                            NewMenu(cursor, 4, 0, -1);
+                        }
+                        sfx = SFX_YES;
+                        break;
+                    case MAIN_MENU_LOAD_GAME:
+                        wasloadgame = y_cursor_temp;
+                        MemCardRetry();
+                        if (ParseNintendoErrorCode() != 0) {
+                            SaveMenu = 0;
+                            DestMenu = 0;
+                            NewMenu(cursor, 1, 0, -1);
+                            sfx = SFX_YES;
+                            break;
+                        }
+                        
+                        memcpy(Game.name, ",CRASH   ", 9);
+                        new_level = 0x25;
+                        force_menu = 0x15;
+                        if (cutmovie == 0) {
+                            fade_rate = 8;
+                        }
+                        sfx = SFX_YES;
+                        break;
+                    case MAIN_MENU_CRASH_BLAST:
+                        NewMenu(cursor, MENU_CRASH_BLAST_MENU, 0, -1);
+                        sfx = SFX_YES;
+                        break;
+                    case MAIN_MENU_LANGUAGE:
+                        old_lang = Game.language;
+                        Game.language++;
+                        if (5 < Game.language) {
+                            Game.language = 0;
+                        }
+                        break;
+                }
+            } else {
+                if (y_cursor_temp == 3) {
+                    old_lang = Game.language;
+                    if ((LEFT != 0) && ((u32) old_lang < 5)) {
+                        Game.language++;
+                    } else {
+                        if ((RIGHT != 0) && (Game.language != 0)) {
+                            Game.language--;
+                        }
+                    }
+                }
+            }
+            
+            if (Game.language != old_lang) {
+                NewLanguage(Game.language);
+                sfx = SFX_YES;
+                old_lang = Game.language;
+            }
+            break;
+        case 3:
+            if (CROSS != 0) {
+                if (NotEnoughSpace_NewGame != 0) {
+                    NewMenu(cursor, 4, 0, -1);
+                    sfx = SFX_YES;
+                    break;
+                }
                 new_level = 0x25;
                 force_menu = 0x15;
                 if (cutmovie == 0) {
-                  fade_rate = 8;
+                    fade_rate = 8;
                 }
-        LAB_800330b0:
-                iVar28 = 0x36;
-            break;   
-            case 2:
-                  iVar28 = 0x27;
-                  goto LAB_800330a4;
-            break;
-            case 3:
-                  old_lang = (s32)Game.language;
-                  Game.language = (old_lang + 1U);
-                  if (5 < (old_lang + 1U & 0xff)) {
-                    Game.language = '\0';
-                  }
-            break;
-        }
-      } else{
-        if (iVar29 == 3) {
-          old_lang = (s32)Game.language;
-          if (((bits_db /*& 0x2000*/) != 0) && ((u32)old_lang < 5)) {
-            Game.language++;
-          }
-          else {
-            if (((bits_db & 0x8000) != 0) && (Game.language != '\0')) {
-              Game.language--;
-            }
-          }
-        }
-        //goto LAB_80033140;
-      }
-//LAB_80033140:
-      if ((u32)Game.language != old_lang) {
-        NewLanguage((u32)Game.language);
-        iVar28 = 0x36;
-        old_lang = (s32)Game.language;
-      }
-      //goto LAB_800346ac;
-    break;    
-    case 3:
-        if (uVar17 != 0) {
-          if (NotEnoughSpace_NewGame != 0) {
-            iVar28 = 4;
-            goto LAB_8003469c;
-          }
-          new_level = 0x25;
-          force_menu = 0x15;
-          if (cutmovie != 0) {
-              break;
-          } 
-            fade_rate = 8;
-          goto LAB_800346a8;
-        }
-         else {
-            if (uVar5 != 0) {
-              NuSoundKillAllAudio();
-              XbWaitForAllBuffersToStop();
-              XbLaunchDashboardToFreeSpace();
-            }
-            break; //goto LAB_800346ac;
-          }
-    break;
-    case 1:
-        loadsaveCallEachFrame();
-        if (uVar17 != 0) {
-            iVar18 = ParseNintendoErrorCode();
-            iVar28 = 0x36;
-            if (iVar18 == 0) {
-                  if (wasloadgame != 0) {
-                    new_level = 0x25;
-                    force_menu = 0x15;
-                    if (cutmovie == 0) {
-                      fade_rate = 8;
-                    }
-                    break; //goto LAB_800346ac;
-                  }
-                  iVar18 = 4;
-                  goto LAB_80034680;
-            }
-            if (iVar29 == 0) {
-                  memtest_done = iVar29;
-                  MemCardRetry();
-                  iVar28 = ParseNintendoErrorCode();
-                  if (iVar28 == 0) {
-                    if (wasloadgame == 0) {
-                      iVar28 = 4;
-                    }
-                    else {
-                      iVar28 = 0;
-                    }
-        LAB_8003469c:
-                    iVar18 = 0;
-                    goto LAB_800346a0;
-                  }
-            }
-            else {
-                  if (iVar29 == 1) {
-                    if (wasloadgame == 0) {
-                      iVar28 = 4;
-                    }
-                    else {
-                      iVar28 = 0;
-                    }
-                    goto LAB_8003469c;
-                  }
-                  if (iVar29 == 2) {
-                        iVar28 = ParseNintendoErrorCode();
-                      switch(iVar28){
-                          case 6:
-                          Managememcard();
-                          break;
-                          case 8:
-                          SaveMenu = wasloadgame;
-                          if (wasloadgame != 0) {
-                            SaveMenu = 0;
-                          }
-                          NewMenu(cursor,0x30,1,-1);
-                          break;
-                          case 2:
-                          case 3:
-                            iVar28 = 0x20;
-                            iVar18 = 1;
-                            goto LAB_800346a0;
-                          break;
-                      }
-                  }
-            }      
-        }
-        else{
-            if (uVar5 == 0) break; //goto LAB_800346ac;
-            iVar28 = -1;
-            iVar18 = 0;
-          //goto LAB_80034620;
-            NewMenu(cursor,iVar18,iVar28,-1);
-            iVar28 = 0x3c;
-            break;
-        }
-
-        goto LAB_800346a8;
-    break;
-case 0x2f:
-              if (uVar17 != 0) {
-                iVar22 = ParseNintendoErrorCode();
-                iVar18 = SaveMenu;
-                if (iVar22 == 0) goto LAB_80034680;
-                if (iVar29 == 0) {
-                  memtest_done = iVar29;
-                  MemCardRetry();
-                  iVar28 = SaveMenu;
-                  goto LAB_8003469c;
+                sfx = SFX_YES;
+                break;
+            } else {
+                if (TRIANGLE != 0) {
+                    NuSoundKillAllAudio();
+                    XbWaitForAllBuffersToStop();
+                    XbLaunchDashboardToFreeSpace();
                 }
-                if (iVar29 != 1) {
-                  if (iVar29 == 2) {
-                    iVar28 = ParseNintendoErrorCode();
-                    if (iVar28 == 6) {
-                      Managememcard();
+                break;
+            }
+            break;
+        case 1:
+            loadsaveCallEachFrame();
+            if (CROSS != 0) {
+                sfx = SFX_YES;
+                if (ParseNintendoErrorCode() == 0) {
+                    if (wasloadgame != 0) {
+                        new_level = 0x25;
+                        force_menu = 0x15;
+                        if (cutmovie == 0) {
+                            fade_rate = 8;
+                        }
+                        break;
                     }
-                    else if (iVar28 < 7) {
-                      if ((iVar28 < 4) && (1 < iVar28)) {
-                        iVar28 = 0x20;
-                        iVar18 = 1;
-                        goto LAB_800346a0;
-                      }
-                    }
-                    else if (iVar28 == 8) {
-                      SaveMenu = 0x15;
-                      NewMenu(cursor,0x30,1,-1);
-                    }
-                  }
-                  goto LAB_800346a8;
+                    NewMenu(cursor, 4, 0, -1);
+                    sfx = SFX_YES;
+                    break;
                 }
-                iVar28 = 0x15;
-                iVar18 = -1;
-                        //NewMenu(cursor,0x15,-1,-1);
-                goto LAB_800346a0;
-              }
-              if (uVar5 == 0) break; //goto LAB_800346ac;
-              //iVar28 = -1;
-              //iVar18 = BackMenu;
-            NewMenu(cursor,-1,BackMenu,-1);
-break;
-    case 2:
-        switch(memtest_done){
+                
+                if (y_cursor_temp == 0) {
+                    memtest_done = y_cursor_temp;
+                    MemCardRetry();
+                    if (ParseNintendoErrorCode() == 0) {
+                        if (wasloadgame != 0) {
+                            NewMenu(cursor, 0, 0, -1);
+                        } else {
+                            NewMenu(cursor, 4, 0, -1);
+                        }
+                    }
+                } else if (y_cursor_temp == 1) {
+                    if (wasloadgame != 0) {
+                        NewMenu(cursor, 0, 0, -1);
+                    } else {
+                        NewMenu(cursor, 4, 0, -1);
+                    }
+                } else if (y_cursor_temp == 2) {
+                    switch (ParseNintendoErrorCode()) {
+                        case 2:
+                        case 3:
+                            NewMenu(cursor, 0x20, 1, -1);
+                            break;
+                        case 6:
+                            Managememcard();
+                            break;
+                        case 8:
+                            if (wasloadgame != 0) {
+                                SaveMenu = 0;
+                            } else {
+                                SaveMenu = wasloadgame;
+                            }
+                            NewMenu(cursor, 0x30, 1, -1);
+                            break;
+                    }
+                }
+                sfx = SFX_YES;
+                break;
+            } else  if (TRIANGLE != 0) {
+                NewMenu(cursor, 0, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x2F:
+            if (CROSS != 0) {
+                if (ParseNintendoErrorCode() == 0) {
+                    NewMenu(cursor, SaveMenu, 0, -1);
+                    break;
+                }
+                
+                if (y_cursor_temp == 0) {
+                    memtest_done = y_cursor_temp;
+                    MemCardRetry();
+                    NewMenu(cursor, SaveMenu, 0, -1);
+                } else if (y_cursor_temp == 1) {
+                     NewMenu(cursor, 0x15, -1, -1);
+                } else if (y_cursor_temp == 2) {
+                    switch (ParseNintendoErrorCode()) {
+                        case 2:
+                        case 3:
+                            NewMenu(cursor, 0x20, 1, -1);
+                            break;
+                        case 6:
+                            Managememcard();
+                            break;
+                        case 8:
+                            SaveMenu = 0x15;
+                            NewMenu(cursor, 0x30, 1, -1);
+                            break;
+                    }
+                }
+                sfx = SFX_YES;
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, BackMenu, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 2:
+            switch (memtest_done) {
             case 0:
                 loadsaveCallEachFrame();
-            if (saveload_status == 1) {
-                  if (saveload_cardtype == 2) {
-                    memtest_done = 3;
-                  }
-                  else {
-                    memtest_done = saveload_status;
-                  }
-            }
-            break;
+                if (saveload_status == 1) {
+                    if (saveload_cardtype != 2) {
+                        memtest_done = saveload_status;
+                    } else {
+                        memtest_done = 3;
+                    }
+                }
+                break;
             case 1:
             case 2:
                 loadsaveCallEachFrame();
-                if (uVar17 != 0) {
-                  iVar28 = 0x36;
-                  memtest_done = 3;
+                if (CROSS != 0) {
+                    sfx = SFX_YES;
+                    memtest_done = 3;
                 }
-            break;
-            case 3:
-              NewMenu(cursor,-1,-1,-1);
-              if (CutAudio[cutworldix] != -1) {
-                gamesfx_channel = 4;
-                GameSfx(CutAudio[cutworldix],NULL);
-              }
-            break;
-        }  
-    //goto LAB_800346ac;
-    break;
-    case '\x04':
-        if (uVar17 != 0) {
-            iVar28 = 0x36;
-            iVar18 = (s32)cursor->y_max;
-            if (iVar29 == iVar18 - 1) {
-              CleanLetters(Game.name);
-              iVar18 = strcmp(Game.name,"        ");
-              if (iVar18 == 0) {
-                memcpy(Game.name, ",CRASH   ", 9);
-              }
-              new_level = 0x25;
-              if (cutmovie == 0) {
-                next_cut_movie = 1;
-                NewMenu(cursor,-1,-1,-1);
-                fade_rate = 8;
-              }
-              else {
-                cutmovie = 1;
-              }
-              txt = strstr(Game.name,"WOMBAT");
-              if (txt != NULL) {
-                memcpy(Game.name, ",CRASH   ", 9);
-                cheating = 1;
-                OpenGame();
-              }
-              break; //goto LAB_800346ac;
-            }
-            if (iVar29 == iVar18) {
-              iVar18 = 0;
-              iVar22 = -1;
-              goto LAB_80034684;
-            }
-            if (Game.language == 'c') {
-              iVar22 = 2;
-              if ((iVar29 != iVar18 - 2) && (iVar22 = 1, iVar29 != iVar18 - 3)) {
-                    if (iVar29 == iVar18 - 4) {
-                        iVar22 = 0;
-                        input_alphabet = iVar22;
-                        GetMenuInfo(cursor);
-                    } else {
-                          if ((input_alphabet == 2) && ((cursor->y == '\0' || (cursor->y == '\x04')))) break; //goto LAB_800346ac;
-                          goto LAB_80033630;     
-                    }
-              }
-            }
-            else {
-    LAB_80033630:
-              InputNewLetter(cursor,Game.name,&i_nameinput,8);
-            }
-        } else {
-              if (uVar5 == 0) break; //goto LAB_800346ac;
-              iVar28 = 0;
-              iVar18 = -1;
-              goto LAB_800346a0;
-        }
-        //goto LAB_800346ac;
-    break; 
-    case '\x13':
-    if ((cursor->menu != '\x13') || (((bits & 0x840) == 0 && (cut_on != 0)))) break; //goto LAB_800346ac;
-    iVar28 = (s32)cursor->new_level;
-    if (cursor->new_level == -1) {
-      NewMenu(cursor,-1,-1,-1);
-      iVar28 = new_level;
-    }
-    break;
-    case '\x0d':
-        if ((cursor->menu != '\r') || (uVar5 == 0)) break; //goto LAB_800346ac;
-        iVar22 = -1;
-        iVar18 = 0xb;
-        goto LAB_80034684;
-    break;
-    case '#':
-      if (((bits & 0x840) == 0) && !(GameTimer.ftime >= credit_time)) break; //goto LAB_800346ac;
-        goto LAB_8003389c;
-//LAB_8003389c:
-      //new_level = 0x25;
-      //goto LAB_800346ac;
-    break;   
-    case '\x14':
-      if ((TempAnim.newaction == 0x22) && (uVar17 != 0)) {
-        if (iVar29 == 0) {
-          iVar28 = cortex_continue_i + 1;
-          cortex_gameover_i = cortex_continue_i;
-          cortex_continue_i = iVar28;
-          if (iVar28 == 2) {
-            cortex_continue_i = 0;
-          }
-          tempanim_nextaction = (s32)*(short *)(cortex_gameover_tab + iVar18 * 4);
-          if ((CRemap[2] == -1) ||
-             (CModel[CRemap[2]].anmdata[tempanim_nextaction] == NULL)) {
-            Game.lives = '\x04';
-            new_level = 0x25;
-            just_continued = 1;
-          }
-          else {
-            gamesfx_channel = 4;
-            GameSfx((s32)*(short *)(cortex_gameover_tab + iVar18 * 4 + 2),NULL);
-            tempanim_waitaudio = 1;
-          }
-          iVar28 = 0x36;
-          gameover_hack = 2;
-        }
-        else if (iVar29 == 1) {
-          iVar28 = cortex_quit_i + 1;
-          cortex_gameover_i = cortex_quit_i;
-          cortex_quit_i = iVar28;
-          if (iVar28 == 7) {
-            cortex_quit_i = 2;
-          }
-          tempanim_nextaction = (s32)*(short *)(cortex_gameover_tab + iVar22 * 4);
-          if ((CRemap[2] == -1) ||
-             (CModel[CRemap[2]].anmdata[tempanim_nextaction] == NULL)) {
-            new_level = 0x23;
-          }
-          else {
-            gamesfx_channel = 4;
-            GameSfx((s32)*(short *)(cortex_gameover_tab + iVar22 * 4 + 2),NULL);
-            tempanim_waitaudio = 1;
-          }
-          iVar28 = 0x3c;
-          gameover_hack = 2;
-        }
-      }
-      //goto LAB_800346ac;
-    break;
-    case '\x10':
-    case '\x12':
-LAB_80033850:
-          if (uVar17 == 0) break; //goto LAB_800346ac;
-          iVar28 = 0x36;
-          if (iVar29 != 0) {
-            if (iVar29 == 1) goto LAB_8003389c; //goto LAB_800346ac;
-            goto LAB_8003389c;
-          }
-          new_mode = GameMode;
-          ResetCheckpoint(-1,-1,0.0f,NULL);
-          //goto LAB_8003388c;
-            iVar28 = 0x36;
-            ResetBonus();
-            ResetDeath();
-            ResetGemPath();
-            //goto LAB_800346ac;
-    break;  
-/////////////////////////////////
-LAB_8003389c:
-      new_level = 0x25;
-    break;
-///////////////////////////////////
-    case '\x11':
-      if (uVar17 == 0) break; //goto LAB_800346ac;
-      iVar28 = (s32)cursor->y_max;
-      if (iVar29 == iVar28) {
-        iVar28 = newleveltime_slot * 8;
-        //iVar22 = Game.level[Level].time[0].name;
-        txt = Game.level[Level].time[iVar28].name;
-        CleanLetters(txt);
-        iVar18 = strcmp(txt,"   ");
-        if (iVar18 == 0) {
-          txt = (char  )0x20203f00;
-        }
-        if ((new_lev_flags & 7) == 0) {
-          iVar28 = 0x10;
-          goto LAB_8003469c;
-        }
-        new_level = 0x25;
-        goto LAB_800346a8;
-      }
-      if (Game.language == 'c') {
-        iVar18 = 2;
-        if ((iVar29 != iVar28 + -1) && (iVar18 = 1, iVar29 != iVar28 + -2)) {
-          if (iVar29 == iVar28 - 3) {
-          //iVar18 = 0;
-        input_alphabet = 0;
-        GetMenuInfo(cursor);
-        } else {
-            if ((input_alphabet == 2) && ((iVar29 == 0 || (iVar29 == 4)))) goto LAB_800346a8;
-            //goto LAB_80033998;
-              InputNewLetter(cursor,Game.level[Level].time[newleveltime_slot].name, &i_nameinput,3);
-          }
-        }
-      }
-      else {
-//LAB_80033998: //
-        //InputNewLetter(cursor,Game.level[Level].time[newleveltime_slot].name, &i_nameinput,3);
-      }
-      //goto LAB_800346a8;
-        iVar28 = 0x36;
-    break;
-    case '\x1d':
-      loadsaveCallEachFrame();
-      if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-        NewMenu(cursor,0x26,-1,-1);
-        if ((saveload_error == 2) || (saveload_error == 0x10)) {
-          saveload_error = 8;
-        }
-      }
-      UpdateSaveSlots(cursor);
-      if (uVar17 == 0) {
-        if (uVar5 == 0) break; //goto LAB_800346ac;
-        iVar28 = -1;
-        iVar18 = 0x15;
-      }
-      else {
-        if ((s32)cursor->y < (s32)cursor->y_max) {
-          iVar28 = cursor->x * 2 + (s32)cursor->y;
-          game = SaveSlot + iVar28;
-          if (SaveSlot[iVar28].empty == '\0') {
-LAB_800342c4:
-            iVar28 = 2;
-            break; //goto LAB_800346ac;
-          }
-LAB_1:
-          iVar28 = 0x1e;
-          iVar18 = 1;
-          goto LAB_800346a0;
-        }
-        iVar28 = -1;
-        iVar18 = 0x15;
-      }
-    break;
-    case '\x15':
-      bVar4 = 0;
-      loadsaveCallEachFrame();
-      if (uVar17 == 0) {
-        if (uVar5 != 0) {
-LAB_80033a6c:
-          bVar4 = 1;
-        }
-        goto LAB_80033a70;
-      }
-      if (iVar29 == 1) {
-        memcard_loadattempted = 0;
-        UpdateSaveSlots(cursor);
-        iVar18 = 0x19;
-LAB_80033a54:
-        iVar28 = 0x36;
-        NewMenu(cursor,iVar18,-1,-1);
-      }
-      else if (iVar29 < 2) {
-        if (iVar29 == 0) {
-          memcard_loadattempted = iVar29;
-          UpdateSaveSlots(cursor);
-          iVar18 = 0x16;
-          goto LAB_80033a54;
-        }
-      }
-      else {
-        if (iVar29 == 2) {
-          memcard_loadattempted = 0;
-          UpdateSaveSlots(cursor);
-          iVar18 = 0x1d;
-          goto LAB_80033a54;
-        }
-        if (iVar29 == 3) goto LAB_80033a6c;
-      }
-LAB_80033a70:
-      if (bVar4) {
-        NewMenu(cursor,-1,-1,-1);
-        iVar28 = 0x3c;
-        ResetLoadSaveCharacter();
-      }
-      //goto LAB_800346ac;
-          memcpy(Game.name, ",CRASH   ", 9);
-      break;          
-    case '\x21':
-          iVar28 = (s32)cursor->y_max;
-          if (iVar29 == iVar28 + -1) {
-            CleanLetters(Game.name);
-            iVar28 = strcmp(Game.name,"        ");
-            if (iVar28 == 0) {
-                memcpy(Game.name, ",CRASH   ", 9);
-            }
-            iVar28 = 0x19;
-            iVar18 = 2;
-LAB_80033b40:
-            NewMenu(cursor,iVar28,iVar18,-1);
-          }
-          else {
-            if (iVar29 == iVar28) {
-              iVar28 = 0x15;
-              iVar18 = -1;
-              goto LAB_80033b40;
-            }
-            if (Game.language == 'c') {
-              iVar18 = 2;
-              if ((iVar29 != iVar28 - 2) && (iVar18 = 1, iVar29 != iVar28 - 3)) {
-                if (iVar29 != iVar28 - 4) {
-                  if ((input_alphabet != 2) || ((cursor->y != '\0' && (cursor->y != '\x04'))))
-                  goto LAB_80033bc0;
-                  goto LAB_80033bd8;
-                }
-                iVar18 = 0;
-              }
-              input_alphabet = iVar18;
-              GetMenuInfo(cursor);
-            }
-            else {
-LAB_80033bc0:
-              InputNewLetter(cursor,Game.name,&i_nameinput,8);
-            }
-          }
-LAB_80033bd8:
-          iVar28 = 0x36;
-    break;               
-    case '(':
-            if (uVar17 != 0) {
-              iVar28 = 0x29;
-              goto LAB_8003469c;
-            }
-            if (uVar5 == 0) break; //goto LAB_800346ac;
-            iVar18 = 0x27;
-LAB_8003461c:
-            iVar28 = 0;
-            //goto LAB_80034620;
-            NewMenu(cursor,iVar18,iVar28,-1);
-            iVar28 = 0x3c;
-    break;
-    case '&':
-        loadsaveCallEachFrame();
-        UpdateSaveSlots(cursor);
-        if (uVar17 == 0) break; //goto LAB_800346ac;
-        if (saveload_cardchanged != 0) {
-          saveload_cardchanged = 0;
-        }
-        saveload_error = 0;
-        iVar28 = 0x15;
-        iVar18 = -1;
-    break;
-    case '\x16':
-        //if (cursor->menu != '\x16') goto LAB_800346ac;
-        loadsaveCallEachFrame();
-        if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-          NewMenu(cursor,0x26,-1,-1);
-        }
-        UpdateSaveSlots(cursor);
-        if (uVar17 == 0) {
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          iVar28 = -1;
-          iVar18 = 0x15;
-        }
-        else {
-          if ((s32)cursor->y < (s32)cursor->y_max) {
-            iVar28 = cursor->x * 2 + (s32)cursor->y;
-            game = SaveSlot + iVar28;
-            if (SaveSlot[iVar28].empty == '\0') {
-                iVar28 = 2;
                 break;
-                //goto LAB_800342c4;
+            case 3:
+                NewMenu(cursor, -1, -1, -1);
+                if (CutAudio[cutworldix] != -1) {
+                    gamesfx_channel = 4;
+                    GameSfx(CutAudio[cutworldix], NULL);
+                }
+                break;
             }
-            //iVar28 = 0x17;
-            //iVar18 = 1;
-            NewMenu(cursor,0x17,1,-1);
-              break;
-            //goto LAB_800346a0;
-          }
-          //iVar28 = -1;
-          //iVar18 = 0x15;
-            NewMenu(cursor,0x15,-1,-1);
             break;
-        }
-            NewMenu(cursor,iVar18,iVar28,-1);
-            iVar28 = 0x3c;
-        //goto LAB_80034620;
-    break;
-    case '\x17':
-    loadsaveCallEachFrame();
-    if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-      NewMenu(cursor,0x26,-1,-1);
-    }
-    if (cursor->item_frame != 0) {
-      if (cursor->y == 1) {
-        //iVar18 = 0x16;
-        //iVar28 = -1;
-          NewMenu(cursor,0x16,-1, -1);
-          break;
-      } else{
-        Game = *game;
-        iVar28 = 0x36;
-        NewLanguage((u32)Game.language);
-        NewMenu(cursor,0x18,0,-1);
-        memcard_loadresult_delay = 0x28;
-        plr_lives.count = (short)Game.lives;
-        plr_lives.draw = plr_lives.count;
-          break;
-        //goto LAB_800346ac;
-      }
-
-    }
-    else {
-      if (uVar5 == 0) break; //goto LAB_800346ac;
-      iVar18 = 0x16;
-      iVar28 = -1;
-    }
-    //goto LAB_80034620;
-    NewMenu(cursor,iVar18,iVar28,-1);
-    iVar28 = 0x3c;
-    break;
-    case '\x18':
+        case 4: // NEW GAME
+            if (CROSS != 0) {
+                sfx = SFX_YES;
+                if (y_cursor_temp == (cursor->y_max - 1)) {
+                    CleanLetters(Game.name);
+                    if (strcmp(Game.name, "        ") == 0) {
+                        memcpy(Game.name, ",CRASH   ", 9);
+                    }
+                    new_level = 0x25;
+                    if (cutmovie == 0) {
+                        next_cut_movie = 1;
+                        NewMenu(cursor, -1, -1, -1);
+                        fade_rate = 8;
+                    } else {
+                        cutmovie = 1;
+                    }
+                    
+                    if (strstr(Game.name, "WOMBAT") != NULL) {
+                        memcpy(Game.name, ",CRASH   ", 9);
+                        cheating = 1;
+                        OpenGame();
+                    }
+                    break;
+                }
+                if (y_cursor_temp == cursor->y_max) {
+                    NewMenu(cursor, 0, -1, -1);
+                    break;
+                }
+    
+                // inline?
+                if (Game.language == LANGUAGE_JAPANESE) {
+                    if (y_cursor_temp == cursor->y_max - 2) {
+                        input_alphabet = INPUT_ALPHABET;
+                        GetMenuInfo(cursor);
+                        sfx = SFX_YES;
+                        break;
+                    } 
+                    else if (y_cursor_temp == cursor->y_max - 3) {
+                        input_alphabet = INPUT_KATAKANA;
+                        GetMenuInfo(cursor);
+                        sfx = SFX_YES;
+                        break;
+                    }
+                    else if (y_cursor_temp == cursor->y_max - 4) {
+                        input_alphabet = INPUT_HIRAGANA;
+                        GetMenuInfo(cursor);
+                        sfx = SFX_YES;
+                        break;
+                    } else {
+                        if (input_alphabet == 2) {
+                            if ((cursor->y == 0) || (cursor->y == 4)) {
+                                sfx = SFX_YES;
+                                break;
+                            }
+                        }
+                    }
+                }
+                InputNewLetter(cursor, Game.name, &i_nameinput, 8);
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0, -1, -1);
+                sfx = SFX_YES;
+            }
+            break;
+        case 0x13:
+            if (((bits & 0x840) != 0) || (cut_on == 0)) {
+                if (cursor->new_level != -1) {
+                    new_level = cursor->new_level;
+                } else {
+                    NewMenu(cursor, -1, -1, -1);
+                }
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x23:
+            if (((bits & 0x840) != 0) || (GameTimer.ftime >= credit_time)) {
+                new_level = 0x25;
+            }
+            break;
+        case 0x14:
+            if ((TempAnim.newaction == 0x22) && (CROSS != 0)) {
+                switch (y_cursor_temp) {
+                    case 0:
+                        cortex_gameover_i = cortex_continue_i;
+                        cortex_continue_i++;
+                        if (cortex_continue_i == 2) {
+                            cortex_continue_i = 0;
+                        }
+                        tempanim_nextaction = cortex_gameover_tab[cortex_gameover_i][0];
+                        if ((CRemap[2] == -1) || (CModel[CRemap[2]].anmdata[tempanim_nextaction] == NULL)) {
+                            Game.lives = 4;
+                            new_level = 0x25;
+                            just_continued = 1;
+                        } else {
+                            gamesfx_channel = 4;
+                            GameSfx(cortex_gameover_tab[cortex_gameover_i][1], NULL);
+                            tempanim_waitaudio = 1;
+                        }
+                        sfx = SFX_YES;
+                        gameover_hack = 2;
+                        break;
+                    case 1:
+                        cortex_gameover_i = cortex_quit_i;
+                        cortex_quit_i++;
+                        if (cortex_quit_i == 7) {
+                            cortex_quit_i = 2;
+                        }
+                        
+                        tempanim_nextaction = cortex_gameover_tab[cortex_gameover_i][0];
+                        if ((CRemap[2] == -1) || (CModel[CRemap[2]].anmdata[tempanim_nextaction] == NULL)) {
+                            new_level = 0x23;
+                        } else {
+                            gamesfx_channel = 4;
+                            GameSfx(cortex_gameover_tab[cortex_gameover_i][1], NULL);
+                            tempanim_waitaudio = 1;
+                        }
+                        sfx = SFX_NO;
+                        gameover_hack = 2;
+                        break;
+                }
+            }
+            break;
+        case 0x10: // GAMEOVER
+        case 0x12: // GAMEOVER
+            if (CROSS != 0) {
+                sfx = SFX_YES;
+                switch(y_cursor_temp) {
+                    case 0:
+                        new_mode = GameMode;
+                        ResetCheckpoint(-1, -1, 0.0f, NULL);
+                        ResetBonus();
+                        ResetDeath();
+                        ResetGemPath();
+                        break;
+                    case 1:
+                        new_level = 0x25;
+                        break;
+                }
+            }
+            break;
+        case 0x11: // BEST TIME TIME TRIAL
+            if (CROSS != 0) {
+                if (y_cursor_temp == cursor->y_max) {
+                    txt = Game.level[Level].time[newleveltime_slot * 8].name;
+                    CleanLetters(txt);
+                    if (strcmp(txt, "   ") == 0) {
+                        strcpy(txt, "  ?");
+                    }
+                    if ((new_lev_flags & 7) != 0) {
+                        new_level = 0x25;
+                    } else {
+                        NewMenu(cursor, 0x10, 0, -1);
+                    }
+                    goto end_1;
+                    sfx = SFX_YES;
+                    break;
+                }
+    
+                // inline?
+                if (Game.language == LANGUAGE_JAPANESE) {
+                    if (y_cursor_temp == cursor->y_max - 1) {
+                        input_alphabet = INPUT_ALPHABET;
+                        GetMenuInfo(cursor);
+                        goto end_1;
+                    } 
+                    else if (y_cursor_temp == cursor->y_max - 2) {
+                        input_alphabet = INPUT_KATAKANA;
+                        GetMenuInfo(cursor);
+                        goto end_1;
+                    }
+                    else if (y_cursor_temp == cursor->y_max - 3) {
+                        input_alphabet = INPUT_HIRAGANA;
+                        GetMenuInfo(cursor);
+                        goto end_1;
+                    } else {
+                        if (input_alphabet == 2) {
+                            if ((y_cursor_temp == 0) || (y_cursor_temp == 4)) {
+                                goto end_1;
+                            }
+                        }
+                    }
+                }
+                
+                InputNewLetter(cursor, Game.level[Level].time[newleveltime_slot].name, &i_nameinput, 3);
+                end_1:
+                sfx = SFX_YES;
+                break;
+            }
+        case 0x15:
+            quit = 0;
+            loadsaveCallEachFrame();
+            if (CROSS != 0) {
+                switch (y_cursor_temp) {
+                    case 0:
+                        memcard_loadattempted = 0;
+                        UpdateSaveSlots(cursor);
+                        NewMenu(cursor, 0x16, -1, -1);
+                        sfx = SFX_YES;
+                        break;
+                    case 1: 
+                        memcard_loadattempted = 0;
+                        UpdateSaveSlots(cursor);
+                        NewMenu(cursor, 0x19, -1, -1);
+                        sfx = SFX_YES;
+                        break;
+                    case 2:
+                        memcard_loadattempted = 0;
+                        UpdateSaveSlots(cursor);
+                        NewMenu(cursor, 0x1D, -1, -1);
+                        sfx = SFX_YES;
+                        break;
+                    case 3:
+                        quit = 1;
+                        break;
+                }
+            }
+            else if (TRIANGLE != 0) {
+                quit = 1;
+            }
+            
+            if (quit) {
+                NewMenu(cursor, -1, -1, -1);
+                sfx = SFX_NO;
+                ResetLoadSaveCharacter();
+            }
+            break;
+        case 0x1A:
+            loadsaveCallEachFrame();
+            if (saveload_cardchanged != 0) {
+                NewMenu(cursor, 0x26, -1, -1);
+                // sfx = SFX_NO;
+                // break;
+            }
+            
+            if (CROSS != 0) {
+                if (y_cursor_temp == cursor->y_max - 1) {
+                    CleanLetters(Game.name);
+                    if (strcmp(Game.name, "        ") == 0) {
+                        memcpy(Game.name, ",CRASH   ", 9);
+                    }
+                    NewMenu(cursor, 0x19, 2, -1);
+                    goto end_2;
+                    sfx = SFX_YES;
+                    break;
+                }
+                
+                if (y_cursor_temp == cursor->y_max) {
+                    NewMenu(cursor, 0x15, -1, -1);
+                    goto end_2;
+                    sfx = SFX_YES;
+                    break;
+                }
+    
+                // inline?
+                if (Game.language == LANGUAGE_JAPANESE) {
+                    if (y_cursor_temp == cursor->y_max - 2) {
+                        input_alphabet = INPUT_ALPHABET;
+                        GetMenuInfo(cursor);
+                        goto end_2;
+                        sfx = SFX_YES;
+                        return;
+                    } 
+                    else if (y_cursor_temp == cursor->y_max - 3) {
+                        input_alphabet = INPUT_KATAKANA;
+                        GetMenuInfo(cursor);
+                        goto end_2;
+                        sfx = SFX_YES;
+                        return;
+                    }
+                    else if (y_cursor_temp == cursor->y_max - 4) {
+                        input_alphabet = INPUT_HIRAGANA;
+                        GetMenuInfo(cursor);
+                        goto end_2;
+                        sfx = SFX_YES;
+                        return;
+                    } else {
+                        if (input_alphabet == 2) {
+                            if ((cursor->y == 0) || (cursor->y == 4)) {
+                                goto end_2;
+                                sfx = SFX_YES;
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                InputNewLetter(cursor, Game.name, &i_nameinput, 8);
+                end_2:
+                sfx = SFX_YES;
+            } else {
+                if (TRIANGLE != 0) {
+                    NewMenu(cursor, 0x15, -1, -1);
+                    sfx = SFX_NO;
+                }
+            }
+    
+            
+            if (cursor->menu == 0x15) {
+                memcpy(Game.name, ",CRASH   ", 9);
+            }
+                
+            break;
+        case 0x16:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            
+            UpdateSaveSlots(cursor);
+            if (CROSS != 0) {
+                if (cursor->y < cursor->y_max) {
+                    game = &SaveSlot[cursor->x * 2 + cursor->y];
+                    if (game->empty == 0) {
+                        NewMenu(cursor, 0x17, 1, -1);
+                        sfx = SFX_YES;
+                        break;
+                    } else {
+                        sfx = 2;
+                        break;
+                    }
+                }
+                NewMenu(cursor, 0x15, -1, -1);
+                sfx = SFX_NO;
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x15, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x17:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            if (CROSS != 0) {
+                if (cursor->y == 1) {
+                    NewMenu(cursor, 0x16, -1, -1);
+                    sfx = SFX_NO;
+                } else {
+                    Game = * game;
+                    sfx = SFX_YES;
+                    NewLanguage((u32) Game.language);
+                    NewMenu(cursor, 0x18, 0, -1);
+                    memcard_loadresult_delay = 0x28;
+                    plr_lives.count = (short) Game.lives;
+                    plr_lives.draw = plr_lives.count;
+                }
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x16, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x18:
             loadsaveCallEachFrame();
             UpdateSaveSlots(cursor);
             if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-                //iVar22 = 1;
-                //iVar18 = 0x26;
-                NewMenu(cursor,0x26,1,-1);
-                break;
-            }
-            else {
-              if (memcard_loadresult_delay == 0) {
-                NewMenu(cursor,-1,-1,-1);
+                NewMenu(cursor, 0x26, 1, -1);
+            } else if (memcard_loadresult_delay == 0) {
+                NewMenu(cursor, -1, -1, -1);
                 tumble_action = -1;
                 tumble_duration = 0.0f;
                 tumble_time = 0.0f;
@@ -2845,485 +2771,306 @@ LAB_8003461c:
                 Hub = -1;
                 (player->obj).hdg = 0x8000;
                 if (pos_START != NULL) {
-                  (player->obj).pos = *pos_START;
+                    (player->obj).pos = * pos_START;
                 }
-              }
-              break; //goto LAB_800346ac;
             }
-
-    break;
-    case '\x19':
-              loadsaveCallEachFrame();
-              if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-                saveload_error = 4;
-                NewMenu(cursor,0x26,-1,-1);
-              }
-              UpdateSaveSlots(cursor);
-              if (uVar17 != 0) {
-                if (((memcard_formatting != 0) || (memcard_formatme != 0)) ||
-                   (memcard_formatmessage_delay != 0)) break; //goto LAB_800346ac;
-                if ((s32)cursor->y < (s32)cursor->y_max) {
-                  iVar28 = 0x36;
-                  game = SaveSlot + cursor->x * 2 + (s32)cursor->y;
-                  NewMenu(cursor,0x1b,1,-1);
-                  break; //goto LAB_800346ac;
-                }
-                iVar28 = 1;
-                iVar18 = 0x15;
-              }
-              else {
-                if (uVar5 == 0) break; //goto LAB_800346ac;
-                iVar28 = -1;
-                iVar18 = 0x15;
-              }
-              //goto LAB_80034620;
-                NewMenu(cursor,iVar18,iVar28,-1);
-                iVar28 = 0x3c;  
-    break;
-    case '\x1a':
-        loadsaveCallEachFrame();
-        if (saveload_cardchanged != 0) {
-          NewMenu(cursor,0x26,-1,-1);
-        }
-        if (uVar17 == 0) {
-          if (uVar5 != 0) {
-            NewMenu(cursor,0x15,-1,-1);
-            iVar28 = 0x3c;
-          }
-        }
-    break;
-    case '\x1b':
-              loadsaveCallEachFrame();
-              if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+    
+            break;
+        case 0x19:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
                 if ((saveload_error == 2) || (saveload_error == 0x10)) {
-                  saveload_error = 4;
+                    saveload_error = 4;
                 }
-                NewMenu(cursor,0x26,-1,-1);
-              }
-              if (uVar17 != 0) {
+                saveload_error = 4;
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            
+            UpdateSaveSlots(cursor);
+            if (CROSS != 0) {
+                if (((memcard_formatting == 0) && (memcard_formatme == 0)) && (memcard_formatmessage_delay == 0)) {
+                    if (cursor->y < cursor->y_max) {
+                        game = &SaveSlot[cursor->x * 2 + cursor->y];
+                        NewMenu(cursor, 0x1b, 1, -1);
+                        sfx = SFX_YES;
+                    } else {
+                        NewMenu(cursor, 0x15, 1, -1);
+                        sfx = SFX_NO;
+                    }
+                }
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x15, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x1B:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                if ((saveload_error == 2) || (saveload_error == 0x10)) {
+                    saveload_error = 4;
+                }
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            if (CROSS != 0) {
                 if (cursor->y == 1) {
-                //iVar28 = -1;
-                //iVar18 = 0x19;
-                    NewMenu(cursor,0x19,-1,-1);
-                } else{
-                  XbUpdateDateStamp((s32)game);
-                  if (game->empty != '\0') {
-                    memcard_gamesavailable = memcard_gamesavailable + 1;
-                  }
-                  *game = Game;
-                  //iVar28 = 0x36;
-                  memcard_saveneeded = 1;
-                  NewMenu(cursor,0x1c,0,-1);
-                  break; //goto LAB_800346ac;
+                    NewMenu(cursor, 0x19, -1, -1);
+                    sfx = SFX_NO;
+                } else {
+                    XbUpdateDateStamp((s32) game);
+                    if (game->empty != 0) {
+                        memcard_gamesavailable = memcard_gamesavailable + 1;
+                    }
+                    *game = Game;
+                    memcard_saveneeded = 1;
+                    NewMenu(cursor, 0x1c, 0, -1);
+                    sfx = SFX_YES;
                 }
-              }
-              else {
-                if (uVar5 == 0) break; //goto LAB_800346ac;
-                //iVar28 = -1;
-                //iVar18 = 0x19;
-                  NewMenu(cursor,0x19,-1,-1);
-              }
-              //goto LAB_80034620;
-               //NewMenu(cursor,iVar18,iVar28,-1);
-               iVar28 = 0x3c;
-                //goto LAB_80034684;
-    break;
-    case 0x1c:
-    case 0x1f:
-LAB_800340f0:
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x19, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x1c:
+        case 0x1f:
             loadsaveCallEachFrame();
             UpdateSaveSlots(cursor);
             if ((((memcard_saveneeded != 0) || (memcard_savestarted != 0)) ||
-                (memcard_deleteneeded != 0)) ||
-               ((memcard_deletestarted != 0 || (memcard_savemessage_delay != 0)))) {
-              memcard_saveresult_delay = 0x3c;
+                    (memcard_deleteneeded != 0)) ||
+                ((memcard_deletestarted != 0 || (memcard_savemessage_delay != 0)))) {
+                memcard_saveresult_delay = 0x3c;
             }
-            if ((saveload_cardchanged == 0) && (saveload_error == 0)) {
-              if (memcard_saveresult_delay != 0) break; //goto LAB_800346ac;
-              iVar18 = 0x15;
-              iVar22 = 3;
-                //NewMenu(cursor,0x15,3,-1);
-            }
-            else {
-              if (((saveload_error == 2) || (saveload_error == 0x10)) &&
-                 (saveload_error = 8, cursor->menu == '\x1c')) {
-                saveload_error = 4;
-              }
-              iVar18 = 0x26;
-              iVar22 = -1;
-                //NewMenu(cursor,0x26,-1,-1);
-            }
-          goto LAB_80034684;
-    break;
-    case 0x31:
-                iVar18 = SaveMenu;
-                loadsaveCallEachFrame();
-                UpdateSaveSlots(cursor);
-                if (memcard_formatmessage_delay != 0) break; //goto LAB_800346ac;
-                iVar22 = 3;
-                iVar18 = SaveMenu;
-                goto LAB_80034684;  
-    break;
-    case '?':
-          loadsaveCallEachFrame();
-          UpdateSaveSlots(cursor);
-          if (memcard_formatme != 0) {
-            memcard_formatmessage_delay = 0x28;
-            break; //goto LAB_800346ac;
-          }
-          if (memcard_formatmessage_delay != 0) break; //goto LAB_800346ac;
-          iVar22 = 3;
-          iVar18 = SaveMenu;
-          goto LAB_80034684;
-    break;
-    case 0x1e:
-        loadsaveCallEachFrame();
-        if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
-          if ((saveload_error == 2) || (saveload_error == 0x10)) {
-            saveload_error = 8;
-          }
-          NewMenu(cursor,0x26,-1,-1);
-        }
-        if (uVar17 != 0) {
-              if (cursor->y == 1) {
-                  //iVar28 = -1;
-                 // iVar18 = 0x1d;
-                  NewMenu(cursor,0x1d,-1,-1);
-              } else{
-                bVar1 = 1;
-                game->empty = 1;
-                for (iVar28 = 0; iVar28 < 3; iVar28++) {
-                  if (SaveSlot[iVar28].empty == '\0') {
-                    bVar1 = 0;
-                  }
-                }
-                memcard_gamesavailable = memcard_gamesavailable + -1;
-                if (bVar1) {
-                  memcard_deleteneeded = 1;
-                }
-                else {
-                  memcard_saveneeded = 1;
-                }
-                iVar28 = 0x1f;
-                goto LAB_8003469c;
-              }
-        }
-            else {
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          iVar28 = -1;
-          iVar18 = 0x1d; 
-            }
-    //break;
-    //case 0x2e:
-        if (uVar17 == 0) {
-        if (uVar5 == 0) break; //goto LAB_800346ac;
-        iVar28 = -1;
-        }
-    break;
-    case 0x30: //FIX
-                if (iVar29 != 1) {
-                  iVar28 = 0x36;
-                  memcard_formatmessage_delay = 0x28;
-                  MemCardDelete();
-                  memtest_done = 0;
-                  iVar18 = 0x31;
-                  goto LAB_80034680;
-                }
-                iVar28 = -1;
-        
-    break;
-    case 0x20:
-        if (uVar17 == 0) {
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          iVar28 = -1;
-        }
-        else {
-          if (iVar29 != 1) {
-            memcard_formatme = 1;
-            iVar28 = 0x21;
-            goto LAB_8003469c;
-          }
-          iVar28 = -1;
-        }
-    break;
     
-    default:
-LAB_800346a0:
-      NewMenu(cursor,iVar28,iVar18,-1);
-LAB_800346a8:
-      iVar28 = 0x36;
-      //goto LAB_800346ac;
-    break;
-    case '\"':
-            if ((cursor->menu != '\"') || (uVar16 == 0)) break; //goto LAB_800346ac;
-            if ((Level == 0x16) || (Level == 0x18)) {
-              boss_dead = 2;
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                if ((saveload_error == 2) || (saveload_error == 0x10)) {
+                    saveload_error = (cursor->menu == 0x1c) ? 4 : 8;
+                }
+                NewMenu(cursor, 0x26, -1, -1);
+            } else {
+                if (memcard_saveresult_delay == 0) {
+                    NewMenu(cursor, 0x15, 3, -1);
+                }
             }
-            iVar28 = -1;
-            iVar18 = -1;
-            goto LAB_800346a0;
-    break;   
-    case '$':
-          if (uVar16 != 0) {
-            iVar28 = 0x36;
-            NuSoundStopStream(4);
-            NewMenu(cursor,-1,-1,-1);
-          }
-          else {
-            if (((player->obj).mask != NULL) && ((((((player->obj).mask->anim).flags & 1) != 0 ||
-                 ((((player->obj).mask->sfx != -1 && ((player->obj).mask->hold == '\0')) && (NuSoundKeyStatus(4) != 1)))) ||
-                ((0x707 < cursor->item_frame || (2 < ((player->obj).mask)->active)))))) {
-              NewMenu(cursor,-1,-1,-1);
+            break;
+        case 0x21:
+            loadsaveCallEachFrame();
+            UpdateSaveSlots(cursor);
+            if (memcard_formatme != 0) {
+                memcard_formatmessage_delay = 0x28;
             }
-          }
-          if (cursor->menu != '$') {
-            advice_wait = 0x1e;
-          }
-          //goto LAB_800346ac;
-    break; 
-    case '\'':
-        if (uVar17 != 0) {
-          if (iVar29 != 0) {
-          if (iVar29 != 1) break; //goto LAB_800346ac;
-          iVar28 = 0;
-          iVar18 = -1;
-          }
-            iVar18 = 0x28;
-            goto LAB_8003461c;
-        }
-        else {
-          if (uVar5 == 0) break; //goto LAB_800346ac;
-          iVar28 = 0;
-          iVar18 = -1;
-        }
-    break;       
-    case '*':
-        iVar18 = GBA_Download();
-        if (iVar18 == 0) break; //goto LAB_800346ac;
-        iVar18 = 0x2b;
-LAB_80034680:
-        iVar22 = 0;
-        goto LAB_80034684;
-    break;    
-    case ')':
-          GBA_DownloadStart();
-          iVar18 = 0x2a;
-          goto LAB_80034680;
-    break;
-    case 0x2b:
-            iVar18 = GBA_DownloadEnd();
-            if (iVar18 == -1) {
-              iVar18 = 0x2d;
+            else if (memcard_formatmessage_delay == 0) {
+                NewMenu(cursor, SaveMenu, 3, -1);
             }
-            else {
-              if (iVar18 != 0) break; //goto LAB_800346ac;
-              iVar18 = 0x2c;
+            break;
+        case 0x31:
+            loadsaveCallEachFrame();
+            UpdateSaveSlots(cursor);
+            if (memcard_formatmessage_delay == 0) {
+                NewMenu(cursor, SaveMenu, 3, -1);
             }
-        iVar22 = 0;     //goto LAB_80034680;
-LAB_80034684:
-      NewMenu(cursor,iVar18,iVar22,-1);
-      //goto LAB_800346ac;
-    break;
-    case 0x2d:
-    case 0x2c:
-        if (uVar17 == 0) break; //goto LAB_800346ac;
-        iVar28 = 0x27;
-        //goto LAB_8003469c;
-        iVar18 = 0;
-        NewMenu(cursor,iVar28,iVar18,-1);
-        iVar28 = 0x36;   
-    break;
+            break;
+        case 0x1D:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                if ((saveload_error == 2) || (saveload_error == 0x10)) {
+                    saveload_error = 8;
+                }
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            
+            UpdateSaveSlots(cursor);
+            if (CROSS != 0) {
+                if ((s32) cursor->y < (s32) cursor->y_max) {
+                    game = &SaveSlot[cursor->x * 2 + cursor->y];
+                    if (game->empty == 0) {
+                        NewMenu(cursor, 0x1e, 1, -1);
+                        sfx = SFX_YES;
+                    } else {
+                        sfx = 2;
+                    }
+                } else {
+                    NewMenu(cursor, 0x15, -1, -1);
+                    sfx = SFX_NO;
+                }
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x15, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x1e:
+            loadsaveCallEachFrame();
+            if ((saveload_cardchanged != 0) || (saveload_error != 0)) {
+                if ((saveload_error == 2) || (saveload_error == 0x10)) {
+                    saveload_error = 8;
+                }
+                NewMenu(cursor, 0x26, -1, -1);
+            }
+            if (CROSS != 0) {
+                if (cursor->y == 1) {
+                    NewMenu(cursor, 0x1D, -1, -1);
+                    sfx = SFX_NO;
+                } else {
+                    nosaves = 1;
+                    game->empty = 1;
+                    for (sfx = 0; sfx < 3; sfx++) {
+                        if (SaveSlot[sfx].empty == 0) {
+                            nosaves = 0;
+                        }
+                    }
+                    
+                    memcard_gamesavailable = memcard_gamesavailable + -1;
+                    if (nosaves) {
+                        memcard_deleteneeded = 1;
+                    } else {
+                        memcard_saveneeded = 1;
+                    }
+                    
+                    NewMenu(cursor, 0x1F, 0, -1);
+                    sfx = SFX_YES;
+                }
+            } else if (TRIANGLE != 0) {
+                NewMenu(cursor, 0x1D, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x30:
+            if (CROSS != 0) {
+                if (y_cursor_temp == 1) {
+                    NewMenu(cursor, SaveMenu, -1, -1);
+                    sfx = SFX_NO;
+                    break;
+                } else {
+                    memcard_formatmessage_delay = 0x28;
+                    MemCardDelete();
+                    memtest_done = 0;
+                    NewMenu(cursor, 0x31, 0, -1);
+                    sfx = SFX_YES;
+                    break;
+                }
+            }
+            if (TRIANGLE != 0){
+                NewMenu(cursor, SaveMenu, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x20:
+            if (CROSS != 0) {
+                if (y_cursor_temp == 1) {
+                    NewMenu(cursor, SaveMenu, -1, -1);
+                    sfx = SFX_NO;
+                } else {
+                    memcard_formatme = 1;
+                    NewMenu(cursor, 0x21, 0, -1);
+                    sfx = SFX_YES;
+                }
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, SaveMenu, -1, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x26:
+            loadsaveCallEachFrame();
+            UpdateSaveSlots(cursor);
+            if (CROSS != 0) {
+                if (saveload_cardchanged != 0) {
+                    saveload_cardchanged = 0;
+                }
+                saveload_error = 0;
+                NewMenu(cursor, 0x15, -1, -1);
+                sfx = SFX_YES;
+            }
+            break;
+        case 0x22:
+            if (uVar16 != 0) {
+                if ((Level == 0x16) || (Level == 0x18)) {
+                    boss_dead = 2;
+                }
+                NewMenu(cursor, -1, -1, -1);
+                sfx = SFX_YES;
+            }
+            break;
+        case 0x24:
+            if (uVar16 != 0) {
+                sfx = SFX_YES;
+                NuSoundStopStream(4);
+                NewMenu(cursor, -1, -1, -1);
+            } else {
+                if (((player->obj).mask != NULL) && ((((((player->obj).mask->anim).flags & 1) != 0 ||
+                            ((((player->obj).mask->sfx != -1 && ((player->obj).mask->hold == 0)) && (NuSoundKeyStatus(4) != 1)))) ||
+                        ((0x707 < cursor->item_frame || (2 < ((player->obj).mask)->active)))))) {
+                    NewMenu(cursor, -1, -1, -1);
+                }
+            }
+            if (cursor->menu != '$') {
+                advice_wait = 0x1e;
+            }
+            break;
+        case MENU_CRASH_BLAST_MENU:
+            if (CROSS != 0) {
+                switch (y_cursor_temp) {
+                    case 0:
+                        NewMenu(cursor, 0x28, 0, -1);
+                        sfx = SFX_NO;
+                        break;
+                    case 1:
+                        NewMenu(cursor, 0, -1, -1);
+                        sfx = SFX_YES;
+                        break;
+                }
+            } else  if (TRIANGLE != 0) {
+                NewMenu(cursor, 0, -1, -1);
+                sfx = SFX_YES;
+            }
+            break;
+        case 0x28: // CRASH BLAST
+            if (CROSS != 0) {
+                NewMenu(cursor, 0x29, 0, -1);
+                sfx = SFX_YES;
+            }
+            else if (TRIANGLE != 0) {
+                NewMenu(cursor, MENU_CRASH_BLAST_MENU, 0, -1);
+                sfx = SFX_NO;
+            }
+            break;
+        case 0x29:
+            GBA_DownloadStart();
+            NewMenu(cursor, 0x2A, 0, -1);
+            break;
+        case 0x2A:
+            if (GBA_Download() != 0) {
+                NewMenu(cursor, 0x2B, 0, -1);
+            }
+            break;
+        case 0x2b:
+            switch (GBA_DownloadEnd()) {
+                case 0:
+                    NewMenu(cursor, 0x2C, 0, -1);
+                    break;
+                case -1:
+                    NewMenu(cursor, 0x2D, 0, -1);
+                    break;
+            }
+            break;
+        case 0x2c:
+            if (CROSS != 0) {
+                NewMenu(cursor, MENU_CRASH_BLAST_MENU, 0, -1);
+                sfx = SFX_YES;
+            }
+            break;
+        case 0x2d:
+            if (CROSS != 0) {
+                NewMenu(cursor, MENU_CRASH_BLAST_MENU, 0, -1);
+                sfx = SFX_YES;
+            }
+            break;
+    }
+    if (sfx != -1) {
+        GameSfx(sfx, NULL);
+    }
+    return;
 }
-/*  if (cursor->menu == '\x17') {
 
-  }
-  if (cursor->menu < '\x18') {
-    if (cursor->menu == '\v') {
-
-    }
-    if (cursor->menu < '\f') {
-      if (cursor->menu == '\x05') {
-
-      }
-      if ('\x05' < cursor->menu) {
-        if (cursor->menu == '\b') goto LAB_800346ac;
-        if ('\b' < cursor->menu) {
-          if (cursor->menu == '\t') {
-
-          }
-          else {
-            if (cursor->menu != '\n') goto LAB_800346ac;
-
-          }
-          goto LAB_80034620;
-        }
-        if (cursor->menu == '\x06') {
-
-        }
-        else {
-          if (cursor->menu != '\a') goto LAB_800346ac;
-
-        }
-        goto LAB_80034684;
-      }
-      if (cursor->menu == '\x02') {
-
-      }
-      if ('\x02' < cursor->menu) {
-        if (cursor->menu == '\x03') {
-
-        }
-        if (cursor->menu != '\x04') goto LAB_800346ac;
-
-      }
-      if (cursor->menu != '\0') {
-        if (cursor->menu != 1) goto LAB_800346ac;
-
-      }
-
-    }
-    if (cursor->menu == '\x11') {
-
-    }
-    if (cursor->menu < '\x12') {
-      if (cursor->menu == '\x0e') {
-
-      }
-      if ('\x0e' < cursor->menu) {
-        if (cursor->menu != '\x0f') {
-          if (cursor->menu != '\x10') goto LAB_800346ac;
-
-        }
-
-      }
-      if (cursor->menu != '\f') {
-
-      }
-
-    }
-    if (cursor->menu == '\x14') {
-
-    }
-    if ('\x14' < cursor->menu) {
-      if (cursor->menu != '\x15') {
-
-      }
-
-    }
-    if (cursor->menu == '\x12') goto LAB_80033850;
-
-  }
-  else {
-    if (cursor->menu == '#') {
-
-    }
-    
-    if ('#' < cursor->menu) {
-      if (cursor->menu == '*') {
-
-      }
-      if ('*' < cursor->menu) {
-        if (cursor->menu != '-') {
-          if ('-' < cursor->menu) {
-            if (cursor->menu == '0') {
-
-              }
-              else {
-
-              }
-            }
-            else {
-              if ('0' < cursor->menu) {
-                if (cursor->menu != '1') goto LAB_800346ac;
-
-              }
-              if (cursor->menu != '/') goto LAB_800346ac;
-
-            }
-            goto LAB_80034620;
-          }
-          if (cursor->menu == '+') {
-
-          }
-          if (cursor->menu != ',') goto LAB_800346ac;
-        }
-
-      }
-      if (cursor->menu == '\'') {
-
-      }
-      else {
-       if ('\'' < cursor->menu) {
-          if (cursor->menu == '(') {
-
-          }
-          if (cursor->menu != ')') goto LAB_800346ac;
-
-        }
-       if (cursor->menu == '$') {
-
-        }
-        if (cursor->menu != '&') goto LAB_800346ac;
-
-      }
-
-    }
-    if (cursor->menu == '\x1d') {
-
-    }
-    else {
-      if (cursor->menu < '\x1e') {
-        if (cursor->menu != '\x1a') {
-          if (cursor->menu < '\x1b') {
-            if (cursor->menu != '\x18') {
-              if (cursor->menu != '\x19') goto LAB_800346ac;
-
-            }
-
-          }
-          else {
-            if (cursor->menu == '\x1b') {
-
-            }
-            if (cursor->menu != '\x1c') goto LAB_800346ac;
-
-          }
-        }
-
-        }
-        else {
-
-        }
-        if (cursor->menu == '\x15') {
-
-        }
-        goto LAB_800346ac;
-      }
-      if (cursor->menu == ' ') {
-
-      }
-      else {
-        if (' ' < cursor->menu) {
-          if (cursor->menu != '!') {
-          }
-
-        }
-        if (cursor->menu != '\x1e') {
-          if (cursor->menu != '\x1f') goto LAB_800346ac;
-          goto LAB_800340f0;
-        }
-
-      }*/
-//LAB_80034620:
-
-    //iVar28 = new_level;
-  //new_level = iVar28;
-//LAB_800346ac:
-  if (iVar28 != -1) {
-    GameSfx(iVar28,NULL);
-  }
-  return;
-}
 
 //PS2 match
 s32 StartHGobjAnim(struct nuhspecial_s *obj)
