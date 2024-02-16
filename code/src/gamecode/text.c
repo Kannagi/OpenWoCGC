@@ -11,27 +11,20 @@ char* tSPEEDSHOESTEXT[6][7];
 char* tSUPERBELLYFLOP[6];
 char* tSUPERBELLYFLOPTEXT[6][7]; 
 
-
-int JStrLen(char *txt)	//Check
-
-{
-  int ret;
-  int count;
-  char p;
+//NGC MATCH
+s32 JStrLen(char *txt) {
+  s32 count;
   
   count = 0;
-  p = *txt;
-  while ((p != '\0' && (txt[1] != '\0'))) {
-    if ((txt[2] == 'B') &&
-       (((txt[3] == 'D' && (ret = CombinationCharacterBD(p,txt[1]), ret != 0)) ||
-        ((txt[3] == 'C' && (ret = CombinationCharacterBC(*txt,txt[1]), ret != 0)))))) {
+  while ((*txt != 0 && (txt[1] != 0))) {
+    if ((txt[2] == 'B') && (((txt[3] == 'D' && (CombinationCharacterBD(*txt,txt[1]) != 0)) ||
+        ((txt[3] == 'C' && (CombinationCharacterBC(*txt,txt[1]) != 0)))))) {
       txt = txt + 4;
     }
     else {
       txt = txt + 2;
     }
-    p = *txt;
-    count = count + 1;
+    count++;
   }
   return count;
 }
@@ -49,19 +42,19 @@ void AddSpacesIntoText(char *txt,uint bits)
     if (*txt != '\0') {
       i = j;
       do {
-        buf.159[i] = txt[cnt];
+        buf_159[i] = txt[cnt];
         j = i + 1;
         if ((((bits & 1) != 0) || ((((bits & 2) != 0 && ('/' < txt[cnt])) && (txt[cnt] < ':')))) | |
            (((bits & 4) != 0 && (txt[cnt] == '-')))) {
-          buf.159[i + 1] = ' ';
+          buf_159[i + 1] = ' ';
           j = i + 2;
         }
         cnt = cnt + 1;
         i = j;
       } while (txt[cnt] != '\0');
     }
-    buf.159[j] = '\0';
-    strcpy(txt,buf.159);
+    buf_159[j] = '\0';
+    strcpy(txt,buf_159);
   }
   return;
 }

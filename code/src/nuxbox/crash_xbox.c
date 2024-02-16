@@ -83,10 +83,10 @@ void DrawMask(struct mask_s *mask) {
             mS = mask->mS;
             EvalModelAnim(model,&mask->anim,&mM,tmtx,&dwa,NULL);
             if ((USELIGHTS != 0) && (LIGHTMASK != 0)) {
-            //    SetLights(&(mask->lights).pDir1st->Colour, &(mask->lights).pDir1st->Direction,
-              //            &(mask->lights).pDir2nd->Colour,&(mask->lights).pDir2nd->Direction,
-              //            &(mask->lights).pDir3rd->Colour,
-              //            &(mask->lights).pDir3rd->Direction,&(mask->lights).AmbCol);
+                SetLights(&(mask->lights).pDir1st->Colour, &(mask->lights).pDir1st->Direction,
+                          &(mask->lights).pDir2nd->Colour,&(mask->lights).pDir2nd->Direction,
+                          &(mask->lights).pDir3rd->Colour,
+                          &(mask->lights).pDir3rd->Direction,&(mask->lights).AmbCol);
             }
             NuHGobjRndrMtxDwa(model->hobj,&mM,1,NULL,tmtx,dwa);
             if (mask->shadow != 2000000.0f) {
@@ -135,53 +135,43 @@ void * makenuvec4(float x,float y,float z,float w)
 
 s32 CausticTextures[32];
 
-void LoadWaterCausticTextures(void)
-{
-  void *mem;
-  struct nutex_s *tex;
+//NGC MATCH
+void LoadWaterCausticTextures(void) {
   s32 i;
-  s32 *causticTx;
-  s32 n;
   char bmpname [24];
-
-  mem = malloc_x(0x1000);
+  struct nutex_s *tex;
+  char *gerbils;
+  
+  gerbils = (char *) malloc_x(0x1000);
   tex = (struct nutex_s *)malloc_x(0x1c);
+  tex->width = 0x40;
   tex->height = 0x40;
+  tex->bits = gerbils;
   tex->decal = 0;
   tex->mmcnt = 1;
-  causticTx = CausticTextures;
   tex->pal = NULL;
   tex->type = NUTEX_RGB24;
-  tex->width = 0x40;
-  tex->bits = mem;
+    
   iss3cmp = 0x80c;
-  i = 0;
-  do {
-    n = i + 1;
+  for (i = 0; i < 32; i++) {
     sprintf(bmpname,"gfx\\caust%d.s3",i);
-    NuFileLoadBuffer(bmpname,mem,0x80c);
-    i = NuTexCreate(tex);
-    *causticTx = i;
-    causticTx = causticTx + 1;
-    i = n;
-  } while (n < 0x20);
+    NuFileLoadBuffer(bmpname,gerbils,0x80c);
+    CausticTextures[i] = NuTexCreate(tex);
+  }
   iss3cmp = 0;
+    
   free_x(tex);
-  free_x(mem);
+  free_x(gerbils);
   return;
 }
 
-void RemoveWaterCausticTextures(void)
-{
-  int tid;
-  int *i;
+//NGC MATCH
+void RemoveWaterCausticTextures(void) {
+  s32 i;
 
-  i = CausticTextures;
-  do {
-    tid = *i;
-    i = i + 1;
-    NuTexDestroy(tid);
-  } while ((int)i < sizeof(CausticTextures));
+  for (i = 0; i < 32; i++) {
+    NuTexDestroy(CausticTextures[i]);
+  }
   return;
 }
 

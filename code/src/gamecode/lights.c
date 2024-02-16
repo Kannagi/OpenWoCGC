@@ -105,14 +105,28 @@ void LoadLights(void) {
   return;
 }
 
-void UpdateGlobals(Nearest_Light_s *nl)
-
-{
-
-
+//NGC MATCH
+void UpdateGlobals(struct Nearest_Light_s *nl) {
+  s32 found_amb;
+  s32 found_dir;
+  s32 i;
+  
+  found_dir = 0;
+  nl->glbambindex = -1;
+  (nl->glbdirectional).Index = -1;
+  found_amb = 0;
+    for(i = 0; ((i < LIGHTCOUNT) && ((!found_amb || (!found_dir)))); i++) {
+      if ((Lights[i].type == 0) && (Lights[i].globalflag == 4)) {
+        nl->glbambindex = i;
+        found_amb = 1;
+      }
+      if ((Lights[i].type == 1 || Lights[i].type == 2) && (Lights[i].globalflag == 4)) {
+        (nl->glbdirectional).Index = i;
+        found_dir = 1;
+      }
+    }
+  return;
 }
-
-
 
 void ResetLights(Nearest_Light_s *nl)
 
@@ -156,28 +170,25 @@ void ScaleColour(nucolour3_s* colour, unsigned char r, unsigned char g, unsigned
 
 }
 
-
-void SortLights(Nearest_Light_s *nearLgt)
-
-{
-  pdir_s *tptr;
+//96%
+void SortLights(struct Nearest_Light_s *nearLgt) {
+  struct pdir_s *tptr;
   
   tptr = nearLgt->pDir1st;
-  if (nearLgt->pDir2nd->Distance < tptr->Distance) {
+  if (nearLgt->pDir2nd->Distance > tptr->Distance) {
     nearLgt->pDir1st = nearLgt->pDir2nd;
     nearLgt->pDir2nd = tptr;
   }
   tptr = nearLgt->pDir2nd;
-  if (nearLgt->pDir3rd->Distance < tptr->Distance) {
+  if (nearLgt->pDir3rd->Distance > tptr->Distance) {
     nearLgt->pDir2nd = nearLgt->pDir3rd;
     nearLgt->pDir3rd = tptr;
   }
   tptr = nearLgt->pDir2nd;
-  if (nearLgt->pDir1st->Distance <= tptr->Distance) {
-    return;
+  if (tptr->Distance > nearLgt->pDir1st->Distance) {
+      nearLgt->pDir2nd = nearLgt->pDir1st;
+      nearLgt->pDir1st = tptr;
   }
-  nearLgt->pDir2nd = nearLgt->pDir1st;
-  nearLgt->pDir1st = tptr;
   return;
 }
 

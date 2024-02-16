@@ -1,32 +1,27 @@
-int PtInsideSpline(nuvec_s *wpos,nugspline_s *sp)
+//NGC MATCH
+static s32 PtInsideSpline(struct nuvec_s *wpos,struct nugspline_s *sp) {
+  struct nuvec_s *curr;
+  struct nuvec_s *prev;
+  struct nuvec_s *pts;
+  struct nuvec_s ipnt;
+  s32 n;
+  s32 icnt;
+  s32 len;
+  struct nuplane_s p;
 
-{
-  int iVar1;
-  nuvec_s *s;
-  uint n;
-  int icnt;
-  nuvec_s *e;
-  nuvec_s ipnt;
-  nuplane_s p;
+  pts = (struct nuvec_s *)sp->pts;
+  prev = &pts[sp->len - 1];
+  curr = pts;
   
-  n = 0;
-  p.d = -(wpos->x * 0.0 + wpos->y * 0.0 + wpos->z);
-  p.c = 1.0;
-  icnt = 0;
-  p.a = 0.0;
-  p.b = 0.0;
-  s = (nuvec_s *)sp->pts + sp->len + -1;
-  e = (nuvec_s *)sp->pts;
-  if (0 < sp->len) {
-    do {
-      iVar1 = NuPlnLine(&p,s,e,&ipnt);
-      if ((iVar1 != 0) && (wpos->x <= ipnt.x)) {
-        n = n + 1;
+  p.a = 0.0f;
+  p.b = 0.0f;
+  p.c = 1.0f;
+  p.d = -((wpos->x * 0.0f) + (wpos->y * 0.0f) + wpos->z);
+  for (icnt = 0, n = 0; icnt < sp->len; icnt++, curr++) {
+      if ((NuPlnLine(&p,prev,curr,&ipnt) != 0) && (ipnt.x >= wpos->x)) {
+        n++;
       }
-      icnt = icnt + 1;
-      s = e;
-      e = e + 1;
-    } while (icnt < sp->len);
+      prev = curr;
   }
   return n & 1;
 }
@@ -87,21 +82,51 @@ static s32 VSAddObjs(struct nuinstance_s** op, struct nugscn_s* gsc, struct nugs
     return icnt;
 }
 
-
-void BuildVisiTable(nugscn_s *gsc)
-
-{
-
+//NGC MATCH
+void BuildVisiTable(struct nugscn_s *gsc) {
+  s32 n;
+  s32 ocnt;
+  char *ptr;
+  struct visidat_s *vd;
+  
+  vscnt = 0;
+  for (n = 0, ocnt = 0; n < gsc->numsplines; n++) {
+      if (strstr(gsc->splines[n].name,"vis") != NULL) {
+        vscnt++;
+        ocnt += VSAddObjs(NULL,gsc,&gsc->splines[n]);
+      }
+  }
+    
+  vsdata = NULL;
+  if (ocnt != 0) {
+      vsdata = (struct visidat_s *)NuMemAlloc(vscnt * 0xc + ocnt * 4);
+        if (vsdata != NULL) {
+            vd = vsdata;
+            vscnt = 0;
+            for (n = 0; n < gsc->numsplines; n++) {
+                if (strstr(gsc->splines[n].name,"vis") != NULL) {
+                  visidat[vscnt] = vd;
+                  vscnt++;
+                  ocnt = VSAddObjs(vd->i,gsc,&gsc->splines[n]);
+                  vd->sp = &gsc->splines[n];
+                  vd->numinstances = ocnt;
+                  ptr = (ocnt * 4);
+                  ptr += 0xc;
+                  (char*)vd +=  (s32)ptr;
+                }
+            }
+            
+       }
+  }
+  return;
 }
 
-
-void ReleaseVisiTable(void)
-
-{
-  if (vsdata != NULL) {
-    NuMemFree(vsdata);
-  }
-  vsdata = NULL;
-  vscnt = 0;
-  return;
+//NGC MATCH
+void ReleaseVisiTable(void) {
+    if (vsdata != NULL) {
+        NuMemFree(vsdata);
+    }
+    vsdata = NULL;
+    vscnt = 0;
+    return;
 }

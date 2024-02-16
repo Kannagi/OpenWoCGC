@@ -1,248 +1,138 @@
-int RemapAccentedCharacter(char *c)
+//82% NGC
+s32 RemapAccentedCharacter(char* arg0) {
+    s32 accent;
 
-{
-  char accent;
-  
-  accent = *c;
-  if (accent == -0x4a) {
-LAB_8002782c:
-    accent = 'A';
-    goto LAB_80027830;
-  }
-  if (accent < -0x49) {
-    if (accent == -0x70) {
-LAB_8002785c:
-      accent = 'E';
-LAB_80027860:
-      *c = accent;
-      return 4;
-    }
-    if (accent < -0x6f) {
-      if (accent == -0x79) {
-LAB_800277cc:
-        *c = 'C';
-        return 0;
-      }
-      if (accent < -0x78) {
-        if (accent == -0x7e) goto LAB_8002785c;
-        if (accent < -0x7d) {
-          if (accent == -0x80) goto LAB_800277cc;
-          if (accent != -0x7f) {
+    switch (*arg0) {
+        default:
             return -1;
-          }
-          goto LAB_800277dc;
-        }
-        if (accent != -0x7c) {
-          if (-0x7d < accent) {
-            if (accent != -0x7b) {
-              return -1;
-            }
-            goto LAB_80027894;
-          }
-          goto LAB_8002782c;
-        }
-      }
-      else {
-        if (accent == -0x75) {
-LAB_800277fc:
-          accent = 'I';
-          goto LAB_800277e0;
-        }
-        if (accent < -0x74) {
-          if (accent == -0x77) {
-LAB_800277f4:
+        case -0x1F:
+            *arg0 = '\0';
+            return 6;
+        case -0x79:
+        case -0x80:
+            *arg0 = 'C';
+            return 0;
+        
+        case -0x24:
+        case -0x66:
+        case -0x7F:
+            accent = 'U';
+            *arg0 = accent;
+            return 1;
+        case -0x3c:
+        case -0x72:
+        case -0x7C:
+            accent = 'A';
+            *arg0 = accent;
+            return 1;
+        case -0x77:
             accent = 'E';
-            goto LAB_800277e0;
-          }
-          if (accent < -0x76) goto LAB_8002783c;
-          goto LAB_800278a4;
-        }
-        if (accent == -0x73) goto LAB_800278ac;
-        if (accent < -0x73) goto LAB_80027844;
-        if (accent != -0x72) {
-          return -1;
-        }
-      }
-LAB_800277ec:
-      accent = 'A';
-      goto LAB_800277e0;
-    }
-    if (accent != -0x66) {
-      if (-0x66 < accent) {
-        if (accent == -0x5d) goto LAB_8002787c;
-        if (accent < -0x5c) {
-          if (accent == -0x5f) {
-LAB_80027884:
+            *arg0 = accent;
+            return 1;
+        
+        case -0x28:
+        case -0x75:
             accent = 'I';
-            goto LAB_80027860;
-          }
-          if (-0x5f < accent) goto LAB_80027874;
-          if (accent != -0x60) {
-            return -1;
-          }
-        }
-        else {
-          if (accent < -0x5a) {
-LAB_8002780c:
-            accent = 'N';
-LAB_80027810:
-            *c = accent;
+            *arg0 = accent;
+            return 1;
+        case -0x67:
+        case -0x6C:
+            accent = 0x4F;
+            *arg0 = accent;
+            return 1;
+        
+        case -0x2F:
+            accent = 0x4E;
+            *arg0 = accent;
             return 2;
-          }
-          if (accent != -0x4b) {
-            return -1;
-          }
-        }
-LAB_8002786c:
-        accent = 'A';
-        goto LAB_80027860;
-      }
-      if (accent != -0x6b) {
-        if (accent < -0x6a) {
-          if (accent == -0x6d) goto LAB_8002784c;
-          if (accent != -0x6c) {
-            return -1;
-          }
-        }
-        else {
-          if (accent == -0x69) {
-LAB_800278bc:
-            *c = 'U';
+        case -0x6D:
+            accent = 0x4F;
+            *arg0 = accent;
+            return 2;
+
+        case -0x74:
+            accent = 'I';
+            *arg0 = accent;
+            return 3;
+        case -0x4a:
+        case -0x7D:
+            accent = 'A';
+            *arg0 = accent;
+            return 3;
+        case -0x70:
+        case -0x7E:
+            accent = 'E';
+            *arg0 = accent;
+            return 4;
+        case -0x2E:
+        case -0x36:
+        // case -0x78:
+            accent = 'E';
+            *arg0 = accent;
+            return 3;
+
+        case -0x16:
+        case -0x6A:
+            accent = 'U';
+            *arg0 = accent;
+            return 3;
+        
+        case -0x3F:
+        case -0x4B:
+        case -0x60:
+            accent = 'A';
+            *arg0 = accent;
+            return 4;
+        case -0x20:
+        case -0x5E:
+            accent = 0x4F;
+            *arg0 = accent;
+            return 4;
+        case -0x17:
+        case -0x5D:
+            accent = 'U';
+            *arg0 = accent;
+            return 4;
+
+        case -0x2A:
+        case -0x5F:
+        case -0x29:
+            accent = 'I';
+            *arg0 = accent;
+            return 4;
+        case -0x14:
+            accent = 0x59;
+            *arg0 = accent;
+            return 4;
+        
+        case -0x49:
+        case -0x40:
+        case -0x7B:
+            accent = 'A';
+            *arg0 = accent;
             return 5;
-          }
-          if (accent < -0x69) goto LAB_80027854;
-          if (accent != -0x67) {
-            return -1;
-          }
-        }
-        accent = 'O';
-        goto LAB_800277e0;
-      }
-LAB_800278b4:
-      accent = 'O';
-      goto LAB_80027898;
+        case -0x38:
+        case -0x2C:
+        case -0x76:
+            accent = 'E';
+            *arg0 = accent;
+            return 5;
+        case -0x22:
+        case -0x73:
+            accent = 'I';
+            *arg0 = accent;
+            return 5;
+        case -0x6B:
+        case -0x1D:
+            accent = 0x4F;
+            *arg0 = accent;
+            return 5;
+        case -0x69:
+        case -0x15:
+            accent = 'U';
+            *arg0 = accent;
+            return 5;
     }
-  }
-  else {
-    if (accent == -0x29) {
-LAB_80027844:
-      accent = 'I';
-      goto LAB_80027830;
-    }
-    if (accent < -0x28) {
-      if (accent == -0x38) {
-LAB_800278a4:
-        accent = 'E';
-LAB_80027898:
-        *c = accent;
-        return 5;
-      }
-      if (accent < -0x37) {
-        if (accent != -0x3f) {
-          if (accent < -0x3e) {
-            if ((accent != -0x49) && (accent != -0x40)) {
-              return -1;
-            }
-LAB_80027894:
-            accent = 'A';
-            goto LAB_80027898;
-          }
-          if (accent != -0x3c) {
-            if ((accent < -0x3c) || (accent < -0x3a)) {
-              return -1;
-            }
-            accent = 'A';
-            goto LAB_80027810;
-          }
-          goto LAB_800277ec;
-        }
-        goto LAB_8002786c;
-      }
-      if (accent != -0x2e) {
-        if (-0x2e < accent) {
-          if (accent != -0x2c) {
-            if (accent < -0x2c) goto LAB_800277f4;
-            if (accent != -0x2a) {
-              return -1;
-            }
-            goto LAB_80027884;
-          }
-          goto LAB_800278a4;
-        }
-        if (accent != -0x36) {
-          if (-0x37 < accent) {
-            if (accent != -0x2f) {
-              return -1;
-            }
-            goto LAB_8002780c;
-          }
-          goto LAB_8002785c;
-        }
-      }
-LAB_8002783c:
-      accent = 'E';
-LAB_80027830:
-      *c = accent;
-      return 3;
-    }
-    if (accent == -0x1d) goto LAB_800278b4;
-    if (-0x1d < accent) {
-      if (accent == -0x16) {
-LAB_80027854:
-        accent = 'U';
-        goto LAB_80027830;
-      }
-      if (-0x16 < accent) {
-        if (accent == -0x15) goto LAB_800278bc;
-        if (-0x13 < accent) {
-          return -1;
-        }
-        accent = 'Y';
-        goto LAB_80027860;
-      }
-      if (accent < -0x1a) {
-        accent = 'O';
-        goto LAB_80027810;
-      }
-      if (accent != -0x17) {
-        return -1;
-      }
-LAB_8002787c:
-      accent = 'U';
-      goto LAB_80027860;
-    }
-    if (accent == -0x22) {
-LAB_800278ac:
-      accent = 'I';
-      goto LAB_80027898;
-    }
-    if (-0x22 < accent) {
-      if (accent == -0x1f) {
-        *c = '\0';
-        return 6;
-      }
-      if (accent < -0x1e) {
-        if (accent != -0x20) {
-          return -1;
-        }
-LAB_80027874:
-        accent = 'O';
-        goto LAB_80027860;
-      }
-LAB_8002784c:
-      accent = 'O';
-      goto LAB_80027830;
-    }
-    if (accent == -0x28) goto LAB_800277fc;
-    if (accent != -0x24) {
-      return -1;
-    }
-  }
-LAB_800277dc:
-  accent = 'U';
-LAB_800277e0:
-  *c = accent;
-  return 1;
 }
 
 //NGC MATCH

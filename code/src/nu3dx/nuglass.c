@@ -24,41 +24,39 @@ s32 GetGlassSpecularTexId(void) {
     return spectid;
 }
 
-//WIP
+//MATCH NGC
 void InitOverrideMtl(void) {
-  int pad;
+  s32 pad;
 
   pad = 0;
   glass_mtl = NuMtlCreate(1);
   glass_mtl->tid = NudxFw_GetBackBufferCopyTID();
   glass_mtl->special_id = '\x01';
-  glass_mtl->fxid = '\x03';
-    glass_mtl->attrib.zmode = 3;
-    glass_mtl->attrib.alpha = 3;
-    glass_mtl->attrib.atst = 1;
-    glass_mtl->attrib.utc = 1;
-    glass_mtl->attrib.colour = 3;
-    glass_mtl->attrib.vtc = 1;
-  //glass_mtl->attrib = (struct numtlattrib_s *)((uint)&glass_mtl->attrib & 0x3c30c7ff | 0x1408800);
-  glass_mtl->diffuse.r = 0.9f;
+//0x3c30c7ff | 0x1408800
+  glass_mtl->attrib.utc = 1;
+  glass_mtl->attrib.vtc = 1;
+  glass_mtl->diffuse.r = 0.9f;  
   glass_mtl->diffuse.g = 0.9f;
   glass_mtl->diffuse.b = 0.9f;
-  glass_mtl->fx1.f32 = 1.0f;
-  glass_mtl->power = 1.0f;
+  glass_mtl->attrib.alpha = 0; 
+  glass_mtl->attrib.atst = 1;
+  glass_mtl->attrib.lighting = 0;
+  glass_mtl->attrib.zmode = 0;
+  glass_mtl->attrib.colour = 1;
   glass_mtl->alpha = 1.0f;
+  glass_mtl->power = 1.0f;
+  glass_mtl->fxid = 3;
+  glass_mtl->fx1.f32 = 1.0f;
 
   NuMtlUpdate(glass_mtl);
   glass_mtl->next = NULL;
   glass_mtl_blendskin = NuMtlCreate(1);
-
-   *glass_mtl_blendskin = *glass_mtl;
-
-
+  *glass_mtl_blendskin = *glass_mtl;
+    
   ((struct nusysmtl_s *)glass_mtl_blendskin)->hShader = 0x11;
   NuMtlUpdate(glass_mtl_blendskin);
-  glass_mtl_blendskin2 = NuMtlCreate(1);
-
-    *glass_mtl_blendskin2 = *glass_mtl;
+  glass_mtl_blendskin2 = NuMtlCreate(1);  
+  *glass_mtl_blendskin2 = *glass_mtl;
   pad = 8;
   ((struct nusysmtl_s *)glass_mtl_blendskin2)->hShader = 0x12;
   NuMtlUpdate(glass_mtl_blendskin2);
