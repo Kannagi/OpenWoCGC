@@ -1,6 +1,34 @@
 #include "../nu.h"
 
 //NGC MATCH
+s32 SolveQuadratic(float a, float b, float c, float* t1, float* t2) {
+    float x;
+
+    if (a == 0.0f) {
+        if (b == 0.0f) {
+            return 0;
+        }
+        *t1 = *t2 = -c / b;
+        return 1;
+    }
+    
+    x = (b * b);
+    if ((a * 4.0f) * c > x) {
+        return 0;
+    }
+    
+    if ((a * 4.0f) * c == x) {
+        *t1 = *t2 = (-b) / (a + a);
+        return 1;
+    } else {
+        x = NuFsqrt(x - (a * 4.0f) * c);
+        *t1 = (-b - x) / (a + a);
+        *t2 = (-b + x) / (a + a);
+        return 1;
+    }
+}
+
+//NGC MATCH
 void DebrisMalloc(void) {
   if (debbuffer == NULL) {
     debbuffer = (char *)malloc_x(0x93400);

@@ -5,11 +5,20 @@
 
 volatile PPCWGPipe GXFIFO AT_ADDRESS(0xCC008000);
 
-static inline void GXPosition3f32( const f32 x,const f32 y,const f32 z)
+
+
+static inline void GXPosition3f32(const f32 x, const f32 y, const f32 z)
 {
-	GXFIFO.f32 = x;
-	GXFIFO.f32 = y;
-	GXFIFO.f32 = z;
+    GXFIFO.f32 = x;
+    GXFIFO.f32 = y;
+    GXFIFO.f32 = z;
+}
+
+static inline void GXNormal3f32(const f32 nx, const f32 ny, const f32 nz)
+{
+    GXFIFO.f32 = nx;
+    GXFIFO.f32 = ny;
+    GXFIFO.f32 = nz;
 }
 
 static inline void GXColor4u8(const u8 r,const u8 g,const u8 b,const u8 a)
@@ -20,16 +29,26 @@ static inline void GXColor4u8(const u8 r,const u8 g,const u8 b,const u8 a)
 	GXFIFO.u8 = a;
 }
 
-static inline void GXColor1u32(u32 v) {
-    GXFIFO.u32 = v;
-}
-
-static inline void GXTexCoord2f32(f32 s,f32 t)
+static inline void GXTexCoord2f32(const f32 s, const f32 t)
 {
-	GXFIFO.f32 = s;
-	GXFIFO.f32 = t;
+    GXFIFO.f32 = s;
+    GXFIFO.f32 = t;
 }
 
+static inline void GXNormal1x16(const u16 index)
+{
+    GXFIFO.u16 = index;
+}
+
+static inline void GXTexCoord1x16(const u16 index)
+{
+    GXFIFO.u16 = index;
+}
+
+static inline void GXColor1u32(const u32 clr)
+{
+    GXFIFO.u32 = clr;
+}
 
 /*
 void GS_DrawTriStrip(int nverts,float *vertlist,int stride)
@@ -360,30 +379,12 @@ void GS_SetQuadListRGBA(s32 r,s32 g,s32 b,s32 a) {
   return;
 }
 
-/*
-void GS_DrawTriListTSkin(undefined4 param_1,int param_2,int param_3,int param_4)		//TODO
-
-{
-  short *psVar1;
-  int iVar2;
-
+//NGC MATCH
+void GS_DrawTriListTSkin(struct _GS_VERTEXNORM *vertlist,s32 nverts,struct _GS_VERTEXSKIN *srcverts,short *pIndexData) {
+  s32 i;
+  
   DBTimerStart(0x1a);
-  if (GS_EnableLightingFlag == 0) {
-    if (GS_CurrentVertDesc != 0x80) {
-      GS_CurrentVertDesc = 0x80;
-      GXClearVtxDesc();
-      GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
-      GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
-    }
-    GXBegin(GX_TRIANGLES,GX_VTXFMT7,(ushort)param_2);
-    if (0 < param_2) {
-      do {
-        _DAT_cc008000 = ShadowColour;
-        param_2 = param_2 + -1;
-      } while (param_2 != 0);
-    }
-  }
-  else {
+  if (GS_EnableLightingFlag != 0) {
     if (GS_CurrentVertDesc != 0x82) {
       GS_CurrentVertDesc = 0x82;
       GXClearVtxDesc();
@@ -392,21 +393,34 @@ void GS_DrawTriListTSkin(undefined4 param_1,int param_2,int param_3,int param_4)
       GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
       GXSetVtxDesc(GX_VA_TEX0,GX_DIRECT);
     }
-    GXBegin(GX_TRIANGLES,GX_VTXFMT2,(ushort)param_2);
-    if (0 < param_2) {
-      iVar2 = 0;
-      do {
-        psVar1 = (short *)(iVar2 + param_4);
-        iVar2 = iVar2 + 2;
-        _DAT_cc008000 = *(undefined4 *)(*psVar1 * 0x38 + param_3 + 0x34);
-        param_2 = param_2 + -1;
-      } while (param_2 != 0);
+//  GXSetArray(10,&srcverts->nx,0x38);
+//  GXSetArray(0xd,&srcverts->u,0x38);
+    GXBegin(GX_TRIANGLES,GX_VTXFMT2,(u16)nverts);
+      for (i = 0; i < nverts; i++) {
+      GXPosition3f32(vertlist->x,vertlist->y,vertlist->z);
+      GXNormal3f32(srcverts[pIndexData[i]].nx,srcverts[pIndexData[i]].ny,srcverts[pIndexData[i]].nz);
+      GXColor1u32(srcverts[pIndexData[i]].diffuse);
+      GXTexCoord2f32(srcverts[pIndexData[i]].u, srcverts[pIndexData[i]].v);
+      vertlist++;
+      }
+  }
+  else {
+    if (GS_CurrentVertDesc != 0x80) {
+      GS_CurrentVertDesc = 0x80;
+      GXClearVtxDesc();
+      GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
+      GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
     }
+    GXBegin(GX_TRIANGLES,GX_VTXFMT7,(u16)nverts);
+      for (i = 0; i < nverts; i++) {
+          GXPosition3f32(vertlist->x,vertlist->y,vertlist->z);
+          GXColor1u32(ShadowColour);
+          vertlist++;
+      }
   }
   DBTimerEnd(0x1a);
   return;
 }
-*/
 
 
 
@@ -475,5 +489,4 @@ void C_MTXOrtho(Mtx44 m, f32 t, f32 b, f32 l, f32 r, f32 n, f32 f)
     m[3][2] = 0.0F;
     m[3][3] = 1.0F;
 }
-
 */

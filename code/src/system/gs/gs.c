@@ -165,11 +165,12 @@ void GS_SetOrthMatrix(void) {
   return;
 }
 
-//84% NGC
+//NGC MATCH
 void GS_DrawFade(int fadecol) {
-  struct _GXColor uStack_20;
+  u8 fadebytes[4];
+    u8* ptr = fadebytes;
 
-  uStack_20 = *(struct _GXColor*)fadecol;
+  *(s32*)fadebytes = fadecol;
   GS_SetOrthMatrix();
   GS_SetZCompare(0,0,GX_ALWAYS);
   GS_SetBlendSrc(1,0,3);
@@ -185,18 +186,13 @@ void GS_DrawFade(int fadecol) {
   GXSetNumTevStages(1);
   GXBegin(GX_QUADS,GX_VTXFMT7,4);
   GXPosition3f32(0.0f,480.0f,0.0f);
-  /*uStack_20.r = (u8)((uint)fadecol >> 0x18);
-  uStack_20.a = (u8)fadecol;
-  uStack_20.b = (u8)((uint)fadecol >> 8);
-  uStack_20.g = (u8)((uint)fadecol >> 0x10);*/
-  GXColor4u8(uStack_20.a,uStack_20.b,uStack_20.g,uStack_20.r);
+  GXColor4u8(ptr[3],ptr[2],ptr[1],ptr[0]); 
   GXPosition3f32(0.0f,0.0f,0.0f);
-  GXColor4u8(uStack_20.a,uStack_20.b,uStack_20.g,uStack_20.r);
+  GXColor4u8(ptr[3],ptr[2],ptr[1],ptr[0]);
   GXPosition3f32(640.0f,0.0f,0.0f);
-  GXColor4u8(uStack_20.a,uStack_20.b,uStack_20.g,uStack_20.r);
+  GXColor4u8(ptr[3],ptr[2],ptr[1],ptr[0]);
   GXPosition3f32(640.0f,480.0f,0.0f);
-  GXColor4u8(uStack_20.a,uStack_20.b,uStack_20.g,uStack_20.r);
-  //_DAT_cc008000 = fadecol & 0xff000000;
+  GXColor4u8(ptr[3],ptr[2],ptr[1],ptr[0]);
   return;
 }
 
@@ -263,23 +259,29 @@ void GS_GetViewport(struct _GS_VIEWPORT* pViewport) {
   return;
 }
 
-//61% NGC
+//77% NGC
 void GS_SetupFog(s32 type,float startz,float endz,u32 colour) {
-  struct _GXColor local_8;
+    volatile union { struct _GXColor c; u32 u; } dumb;
+    struct _GXColor local_8;
+    u32 unused;
+    float var1, var2;
 
+    dumb.u = colour;
       local_8.a = colour >> 0x18;
       local_8.r = (colour >> 0x10);
       local_8.g = (colour >> 0x8);
       local_8.b = (colour);
-  
+    
+  var1 = 0.3f;
+    var2 = 1000.0f;
  /* local_8 = *(struct _GXColor *)
             ((colour & 0xff) << 8 |
             (colour >> 8 & 0xff) << 0x10 | (colour >> 0x10) << 0x18 | colour >> 0x18);*/
-  if ((type & ~0xFF) == 0) {
+  if (type == 0) {
       GXSetFog(GX_FOG_NONE,0.0f,0.0f,0.0f,0.0f,local_8);
       return;
   }
-  GXSetFog(GX_FOG_LIN,startz,endz,0.3f,1000.0f,local_8);
+  GXSetFog(GX_FOG_LIN,startz,endz,var1,var2,local_8);
   return;
 }
 
