@@ -51,64 +51,67 @@ static inline void GXColor1u32(const u32 clr)
 }
 
 /*
-void GS_DrawTriStrip(int nverts,float *vertlist,int stride)
+//76% NGC
+void GS_DrawTriStrip(u32 nverts, u8* vert_list, s32 stride) {
+    s16 fourth_stride;
+    s16 temp_vert;
+    short i;
 
-{
-    bool bVar1;
-    int iVar2;
-    uint uVar3;
-    
     if (stride == 0x1c) {
         if (GS_CurrentVertDesc != 0x81) {
             GS_CurrentVertDesc = 0x81;
             GXClearVtxDesc();
-            GXSetVtxDesc(GX_VA_POS,GX_DIRECT);
-            GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
-            GXSetVtxDesc(GX_VA_TEX0,GX_DIRECT);
+            GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+            GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+            GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
         }
-    }
-    else if (GS_CurrentVertDesc != 0x83) {
+    } else if (GS_CurrentVertDesc != 0x83) {
         GS_CurrentVertDesc = 0x83;
         GXClearVtxDesc();
-        GXSetVtxDesc(GX_VA_POS,GX_INDEX16);
-        GXSetVtxDesc(GX_VA_NRM,GX_INDEX16);
-        GXSetVtxDesc(GX_VA_CLR0,GX_DIRECT);
-        GXSetVtxDesc(GX_VA_TEX0,GX_INDEX16);
+        GXSetVtxDesc(GX_VA_POS, GX_INDEX16);
+        GXSetVtxDesc(GX_VA_NRM, GX_INDEX16);
+        GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+        GXSetVtxDesc(GX_VA_TEX0, GX_INDEX16);
     }
-    uVar3 = stride & 0xff;
-    GXSetArray(GX_VA_POS,(int)vertlist,uVar3);
-    bVar1 = stride != 0x1c;
-    if (bVar1) {
-        GXSetArray(GX_VA_NRM,(int)(vertlist + 3),uVar3);
+    
+    GXSetArray(GX_VA_POS, vert_list, stride);
+    if (stride != 0x1c) {
+        GXSetArray(GX_VA_NRM, vert_list + 0xC, stride);
     }
-    iVar2 = stride >> 2;
-    GXSetArray(GX_VA_TEX0,(int)(vertlist + iVar2 + -2),uVar3);
-    if (bVar1) {
-        GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT2,(ushort)nverts);
+    fourth_stride = stride >> 2;
+    GXSetArray(GX_VA_TEX0, (vert_list + ((fourth_stride * 4) - 8)), stride); 
+    if (stride == 0x1c) {
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, nverts);
+    } else {
+        GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT2, nverts);
     }
-    else {
-        GXBegin(GX_TRIANGLESTRIP,GX_VTXFMT1,(ushort)nverts);
-    }
-    uVar3 = 0;
-    if (nverts != 0) {
-        do {
-            if (bVar1) {
-                DAT_cc008000_2 = SUB42(vertlist[uVar3 * iVar2 + iVar2 + -3],0);
-                if ((IsStencil == 0) && (ShadowBodge == GX_TEVSTAGE0)) goto joined_r0x800ca7d8;
-LAB_800ca7d0:
-                DAT_cc008000_2 = (undefined2)ShadowColour;
-            }
-            else {
-                DAT_cc008000_2 = SUB42(vertlist[uVar3 * 7 + 4],0);
-                if ((IsStencil != 0) || (ShadowBodge != GX_TEVSTAGE0)) goto LAB_800ca7d0;
-joined_r0x800ca7d8:
+
+    for (i = 0; i < nverts; i++) {
+        GXPosition1x16(i);
+        GXNormal1x16(i);
+        if (stride != 0x1c) {
+            // vert_list is a structure, probably of size 7*4 bytes
+            temp_vert = *((((i * 7) + 7) * 4) + vert_list - 0xc);
+            GXTexCoord1x16(i);
+            if ((IsStencil == 0) && (ShadowBodge == GX_TEVSTAGE0)) { // goto joined_r0x800ca7d8;
                 if (GS_MaterialSourceEmissive == 0) {
-                    DAT_cc008000_2 = SUB42(GS_CurrentMaterialEmissivergba,0);
-                }
+                    GXColor1u32((u32)ShadowColour);
+                }else
+                    GXNormal1x16(temp_vert);
             }
-            _DAT_cc008000 = CONCAT22((short)uVar3,DAT_cc008000_2);
-            uVar3 = (uint)(short)((short)uVar3 + 1);
-        } while (uVar3 < (uint)nverts);
+            GXColor1u32(GS_CurrentMaterialEmissivergba);
+        } else {
+            temp_vert = *((((i * fourth_stride) + fourth_stride) * 4) + vert_list - 0xc);
+            if ((IsStencil != 0) || (ShadowBodge != GX_TEVSTAGE0)) {
+                GXColor1u32(ShadowColour);
+            } else {
+            //joined_r0x800ca7d8:
+                if (GS_MaterialSourceEmissive != 0) {
+                    GXColor1u32((u32)GS_CurrentMaterialEmissivergba);
+                }else
+                GXColor1u16(temp_vert);
+            }
+        }
     }
     return;
 }

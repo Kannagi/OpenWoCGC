@@ -59,12 +59,62 @@ void AddSpacesIntoText(char *txt,uint bits)
   return;
 }
 
-char * GetStringIdx(int param_1,int param_2)
+char* tCORRUPTDATA[6][2];
+char* tCORRUPTED[6][2];
+char* tDAMAGED[6][2];
+char* tINSUFFICIENTSPACE[6][3];
+char* tNOCARD[6];
+char* tNOTCOMPAT[6][2];
+char* tOTHERMARKET[6][4];
+char* tWRONGDEV[6][2];
 
-{
+//NGC MATCH
+char* GetStringIdx(s32 errcode, s32 arg1) {
 
-		//TODO
-
+    switch (errcode) {
+    case 1:
+        if (arg1 > 0) {
+            return 0;
+        }
+        return tNOCARD[arg1 + Game.language];
+    case 2:
+        if (arg1 <= 1) {
+            return tCORRUPTED[Game.language][arg1];
+        }
+        return 0;
+    case 3:
+        if (arg1 <= 3) {
+            return tOTHERMARKET[Game.language][arg1];
+        }
+        return 0;
+    case 4:
+        if (arg1 <= 1) {
+            return tDAMAGED[Game.language][arg1];
+        }
+        return 0;
+    case 5:
+        if (arg1 <= 1) {
+            return tWRONGDEV[Game.language][arg1];
+        }
+        return 0;
+    case 6:
+        if (arg1 <= 2) {
+            return tINSUFFICIENTSPACE[Game.language][arg1];
+        }
+        return 0;
+    case 7:
+        if (arg1 <= 1) {
+            return tNOTCOMPAT[Game.language][arg1];
+        } 
+        return 0;
+    case 8:
+        if (arg1 <= 1) {
+            return tCORRUPTDATA[Game.language][arg1];
+        }
+        return 0;
+    default:
+        return 0;
+    }
 }
 
 //NGC MATCH
