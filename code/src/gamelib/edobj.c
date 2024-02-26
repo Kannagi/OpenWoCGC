@@ -44,3 +44,8 @@ void edobjRenderObjects(struct nugscn_s *scn) {
         }
     }
 }
+
+//NGC MATCH
+u32 reverse_endian_32(u32 arg0) {
+    return (arg0 >> 0x18U) | ((arg0 >> 8U) & 0xFF00) | ((arg0 << 8) & 0xFF0000) | (arg0 << 0x18);
+}

@@ -182,10 +182,10 @@ extern struct _GS_VECTOR3 XFLightPos;
 */
 
 
-//78% NGC
+//81% NGC
 void GS_Set3Lights(struct _GS_VECTOR4 *LIGHT1_POS,struct _GS_VECTOR4 *LIGHT2_POS,struct _GS_VECTOR4 *LIGHT3_POS,
-                  struct _GS_VECTOR4 *LIGHT1_COLOR,struct _GS_VECTOR4 *LIGHT2_COLOR,
-                    struct _GS_VECTOR4 *LIGHT3_COLOR, struct _GS_VECTOR4 *AMB_COLOR) {
+                  struct _D3DCOLORVALUE *LIGHT1_COLOR,struct _D3DCOLORVALUE *LIGHT2_COLOR,
+                    struct _D3DCOLORVALUE *LIGHT3_COLOR, struct _D3DCOLORVALUE *AMB_COLOR) {
     struct _GXColor col;
     struct _GXColor ambient;
     //struct _GXColor mat_color;
@@ -194,15 +194,12 @@ void GS_Set3Lights(struct _GS_VECTOR4 *LIGHT1_POS,struct _GS_VECTOR4 *LIGHT2_POS
         GS_SetLightingNone();
     }
     else {
-        col.r = ((s32)AMB_COLOR->x & 0x33333300);
-        col.g = ((s32)AMB_COLOR->y & 0x33333300);
-        col.b = ((s32)AMB_COLOR->z & 0x33333300);
-        col.a = ((s32)AMB_COLOR->w & 0x33333300);
-        GXSetChanAmbColor(GX_COLOR0A0,&col);
+        *(u32*)&ambient = ((u32)AMB_COLOR & 0xff | 0x33333300);
+        GXSetChanAmbColor(GX_COLOR0A0,&ambient);
+          col.a = (s32)(GS_CurrentMaterial.Diffuse.a * 255.0f);
           col.r = (s32)(GS_CurrentMaterial.Diffuse.r * 255.0f);
           col.g = (s32)(GS_CurrentMaterial.Diffuse.g * 255.0f);
           col.b = (s32)(GS_CurrentMaterial.Diffuse.b * 255.0f);
-          col.a = (s32)(GS_CurrentMaterial.Diffuse.a * 255.0f);
     /*    col = (struct _GXColor)
               (((int)(GS_CurrentMaterial.Diffuse.b * 255.0f) & 0xffU) << 8 |
               ((int)(GS_CurrentMaterial.Diffuse.g * 255.0f) & 0xffU) << 0x10 |
@@ -226,31 +223,31 @@ void GS_Set3Lights(struct _GS_VECTOR4 *LIGHT1_POS,struct _GS_VECTOR4 *LIGHT2_POS
          //     (((int)(LIGHT1_COLOR->z * 255.0f) & 0xffU) << 8 |
         //      ((int)(LIGHT1_COLOR->y * 255.0f) & 0xffU) << 0x10 |
           //    (int)(LIGHT1_COLOR->x * 255.0f) << 0x18 | (int)(LIGHT1_COLOR->w * 255.0f) & 0xffU);
-          col.r = (s32)(LIGHT1_COLOR->w * 255.0f);
-          col.g = (s32)(LIGHT1_COLOR->x * 255.0f);
-          col.b = (s32)(LIGHT1_COLOR->y * 255.0f);
-          col.a = (s32)(LIGHT1_COLOR->z * 255.0f);
+          col.a = (s32)(LIGHT1_COLOR->a * 255.0f);
+          col.r = (s32)(LIGHT1_COLOR->r * 255.0f);
+          col.g = (s32)(LIGHT1_COLOR->g * 255.0f);
+          col.b = (s32)(LIGHT1_COLOR->b * 255.0f);
         GXInitLightColor(&GSLights[0],&col);
         GXLoadLightObjImm(&GSLights[0],GX_LIGHT0);
         GS_XFormLightVec(&XFLightPos,LIGHT2_POS,&GS_CurMat);
         GXInitLightPos(&GSLights[1],XFLightPos.x,XFLightPos.y,XFLightPos.z);
-          col.r = (s32)(LIGHT2_COLOR->w * 255.0f);
-          col.g = (s32)(LIGHT2_COLOR->x * 255.0f);
-          col.b = (s32)(LIGHT2_COLOR->y * 255.0f);
-          col.a = (s32)(LIGHT2_COLOR->z * 255.0f);
+          col.a = (s32)(LIGHT2_COLOR->a * 255.0f);
+          col.r = (s32)(LIGHT2_COLOR->r * 255.0f);
+          col.g = (s32)(LIGHT2_COLOR->g * 255.0f);
+          col.b = (s32)(LIGHT2_COLOR->b * 255.0f);
         //col = (struct _GXColor)
          //     (((int)((double)LIGHT2_COLOR->z * 255.0f) & 0xffU) << 8 |
          //     ((int)((double)LIGHT2_COLOR->y * 255.0f) & 0xffU) << 0x10 |
          //     (int)((double)LIGHT2_COLOR->x * 255.0f) << 0x18 |
           //    (int)((double)LIGHT2_COLOR->w * 255.0f) & 0xffU);
-        GXInitLightColor(&GSLights[1],&col);
+        GXInitLightColor(&GSLights[0],&col);
         GXLoadLightObjImm(&GSLights[1],GX_LIGHT1);
         GS_XFormLightVec(&XFLightPos,LIGHT3_POS,&GS_CurMat);
         GXInitLightPos(&GSLights[2],XFLightPos.x,XFLightPos.y,XFLightPos.z);
-          col.r = (s32)(LIGHT3_COLOR->w * 255.0f);
-          col.g = (s32)(LIGHT3_COLOR->x * 255.0f);
-          col.b = (s32)(LIGHT3_COLOR->y * 255.0f);
-          col.a = (s32)(LIGHT3_COLOR->z * 255.0f);
+          col.a = (s32)(LIGHT3_COLOR->a * 255.0f);
+          col.r = (s32)(LIGHT3_COLOR->r * 255.0f);
+          col.g = (s32)(LIGHT3_COLOR->g * 255.0f);
+          col.b = (s32)(LIGHT3_COLOR->b * 255.0f);
         //col = (struct _GXColor)
          //     (((int)((double)LIGHT3_COLOR->z * 255.0f) & 0xffU) << 8 |
           //    ((int)((double)LIGHT3_COLOR->y * 255.0f) & 0xffU) << 0x10 |

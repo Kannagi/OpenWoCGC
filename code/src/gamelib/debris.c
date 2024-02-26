@@ -129,6 +129,21 @@ LAB_80080cb0:
 }
 
 //NGC MATCH
+void AddChunkControlToStack(struct debris_chunk_control_s *chunk,struct debris_chunk_control_s **stack) {
+  struct debris_chunk_control_s *pdVar1;
+    struct debris_chunk_control_s** current;
+  
+  for (current = stack; *current != NULL;) {
+      pdVar1 = *current;
+      stack = &pdVar1->next;
+      current = &pdVar1->next;
+  }
+  *current = chunk;
+  chunk->next = NULL;
+  return;
+}
+
+//NGC MATCH
 void DebFreeInstantly(s32 *key) {
   s32 i;
   s32 j;
